@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // Core system setup
-            RoleAndPermissionSeeder::class,
+            // RoleAndPermissionSeeder::class,
             UserSeeder::class,
 
             // Academic setup
