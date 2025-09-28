@@ -23,11 +23,11 @@ class UserSeeder extends Seeder
             'role' => 'super_admin',
             'status' => 'active',
             'is_active' => true,
-            'department' => 'administration',
-            'bio' => 'System super administrator with full access to all platform features.',
+            //'department' => 'administration',
+            // //'bio' => 'System super administrator with full access to all platform features.',
             'email_verified_at' => now(),
         ]);
-        $superAdmin->assignRole('super_admin');
+        // $superAdmin->assignRole('super_admin');
 
         // Create Admin PFE
         $adminPfe = User::create([
@@ -39,12 +39,12 @@ class UserSeeder extends Seeder
             'role' => 'admin_pfe',
             'status' => 'active',
             'is_active' => true,
-            'department' => 'administration',
+            //'department' => 'administration',
             'phone' => '+213 555 123 456',
-            'bio' => 'PFE platform administrator responsible for system management and coordination.',
+            //'bio' => 'PFE platform administrator responsible for system management and coordination.',
             'email_verified_at' => now(),
         ]);
-        $adminPfe->assignRole('admin_pfe');
+        // $adminPfe->assignRole('admin_pfe');
 
         // Create Chef Master - Computer Science
         $chefMasterCS = User::create([
@@ -56,12 +56,12 @@ class UserSeeder extends Seeder
             'role' => 'chef_master',
             'status' => 'active',
             'is_active' => true,
-            'department' => 'informatique',
+            //'department' => 'informatique',
             'phone' => '+213 555 234 567',
-            'bio' => 'Head of Computer Science department, responsible for validating CS projects.',
+            //'bio' => 'Head of Computer Science department, responsible for validating CS projects.',
             'email_verified_at' => now(),
         ]);
-        $chefMasterCS->assignRole('chef_master');
+        // $chefMasterCS->assignRole('chef_master');
 
         // Create Chef Master - Electronics
         $chefMasterElec = User::create([
@@ -73,12 +73,12 @@ class UserSeeder extends Seeder
             'role' => 'chef_master',
             'status' => 'active',
             'is_active' => true,
-            'department' => 'electronique',
+            //'department' => 'electronique',
             'phone' => '+213 555 345 678',
-            'bio' => 'Head of Electronics department, specializing in embedded systems and IoT.',
+            //'bio' => 'Head of Electronics department, specializing in embedded systems and IoT.',
             'email_verified_at' => now(),
         ]);
-        $chefMasterElec->assignRole('chef_master');
+        // $chefMasterElec->assignRole('chef_master');
 
         // Create Teachers
         $this->createTeachers();
@@ -96,8 +96,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Mansouri',
                 'name' => 'Dr. Said Mansouri',
                 'email' => 'said.mansouri@pfe.edu',
-                'department' => 'informatique',
-                'bio' => 'Professor of Software Engineering and Web Development. Expert in Laravel, React, and modern web technologies.',
+                //'department' => 'informatique',
+                //'bio' => 'Professor of Software Engineering and Web Development. Expert in Laravel, React, and modern web technologies.',
                 'specialization' => 'Web Development, Software Engineering'
             ],
             [
@@ -105,8 +105,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Hadji',
                 'name' => 'Dr. Amina Hadji',
                 'email' => 'amina.hadji@pfe.edu',
-                'department' => 'informatique',
-                'bio' => 'Associate Professor specializing in Artificial Intelligence and Machine Learning.',
+                //'department' => 'informatique',
+                //'bio' => 'Associate Professor specializing in Artificial Intelligence and Machine Learning.',
                 'specialization' => 'AI/ML, Data Science'
             ],
             [
@@ -114,8 +114,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Bencherif',
                 'name' => 'Pr. Karim Bencherif',
                 'email' => 'karim.bencherif@pfe.edu',
-                'department' => 'informatique',
-                'bio' => 'Professor of Computer Networks and Cybersecurity.',
+                //'department' => 'informatique',
+                //'bio' => 'Professor of Computer Networks and Cybersecurity.',
                 'specialization' => 'Networks, Cybersecurity'
             ],
             [
@@ -123,8 +123,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Bensalem',
                 'name' => 'Dr. Leila Bensalem',
                 'email' => 'leila.bensalem@pfe.edu',
-                'department' => 'informatique',
-                'bio' => 'Assistant Professor in Database Systems and Big Data.',
+                //'department' => 'informatique',
+                //'bio' => 'Assistant Professor in Database Systems and Big Data.',
                 'specialization' => 'Databases, Big Data'
             ],
 
@@ -134,8 +134,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Chellali',
                 'name' => 'Dr. Omar Chellali',
                 'email' => 'omar.chellali@pfe.edu',
-                'department' => 'electronique',
-                'bio' => 'Professor of Digital Electronics and FPGA Design.',
+                //'department' => 'electronique',
+                //'bio' => 'Professor of Digital Electronics and FPGA Design.',
                 'specialization' => 'Digital Electronics, FPGA'
             ],
             [
@@ -143,8 +143,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Brahimi',
                 'name' => 'Dr. Nadia Brahimi',
                 'email' => 'nadia.brahimi@pfe.edu',
-                'department' => 'electronique',
-                'bio' => 'Associate Professor specializing in Embedded Systems and IoT.',
+                //'department' => 'electronique',
+                //'bio' => 'Associate Professor specializing in Embedded Systems and IoT.',
                 'specialization' => 'Embedded Systems, IoT'
             ],
 
@@ -154,8 +154,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Mimouni',
                 'name' => 'Dr. Youcef Mimouni',
                 'email' => 'youcef.mimouni@pfe.edu',
-                'department' => 'mecanique',
-                'bio' => 'Professor of Mechanical Design and CAD/CAM systems.',
+                //'department' => 'mecanique',
+                //'bio' => 'Professor of Mechanical Design and CAD/CAM systems.',
                 'specialization' => 'Mechanical Design, CAD/CAM'
             ],
             [
@@ -163,8 +163,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Boudjemaa',
                 'name' => 'Dr. Samira Boudjemaa',
                 'email' => 'samira.boudjemaa@pfe.edu',
-                'department' => 'mecanique',
-                'bio' => 'Associate Professor in Renewable Energy and Sustainable Engineering.',
+                //'department' => 'mecanique',
+                //'bio' => 'Associate Professor in Renewable Energy and Sustainable Engineering.',
                 'specialization' => 'Renewable Energy, Sustainability'
             ],
         ];
@@ -179,12 +179,12 @@ class UserSeeder extends Seeder
                 'role' => 'teacher',
                 'status' => 'active',
                 'is_active' => true,
-                'department' => $teacherData['department'],
+                //'department' => $teacherData[//'department'],
                 'phone' => '+213 555 ' . rand(100, 999) . ' ' . rand(100, 999),
-                'bio' => $teacherData['bio'],
+                //'bio' => $teacherData[//'bio'],
                 'email_verified_at' => now(),
             ]);
-            $teacher->assignRole('teacher');
+            // $teacher->assignRole('teacher');
         }
     }
 
@@ -197,14 +197,14 @@ class UserSeeder extends Seeder
                 'last_name' => 'Zerrouki',
                 'email' => 'yassine.zerrouki@student.pfe.edu',
                 'student_id' => 'CS2024001',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
             [
                 'first_name' => 'Meriem',
                 'last_name' => 'Belounis',
                 'email' => 'meriem.belounis@student.pfe.edu',
                 'student_id' => 'CS2024002',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
 
             // Computer Science Students - Team 2
@@ -213,14 +213,14 @@ class UserSeeder extends Seeder
                 'last_name' => 'Lakhdari',
                 'email' => 'abderrahim.lakhdari@student.pfe.edu',
                 'student_id' => 'CS2024003',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
             [
                 'first_name' => 'Nesrine',
                 'last_name' => 'Boumediene',
                 'email' => 'nesrine.boumediene@student.pfe.edu',
                 'student_id' => 'CS2024004',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
 
             // Computer Science Students - Team 3
@@ -229,21 +229,21 @@ class UserSeeder extends Seeder
                 'last_name' => 'Meziane',
                 'email' => 'khaled.meziane@student.pfe.edu',
                 'student_id' => 'CS2024005',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
             [
                 'first_name' => 'Soumia',
                 'last_name' => 'Ghazi',
                 'email' => 'soumia.ghazi@student.pfe.edu',
                 'student_id' => 'CS2024006',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
             [
                 'first_name' => 'Bilal',
                 'last_name' => 'Hamdani',
                 'email' => 'bilal.hamdani@student.pfe.edu',
                 'student_id' => 'CS2024007',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
 
             // Electronics Students
@@ -252,21 +252,21 @@ class UserSeeder extends Seeder
                 'last_name' => 'Benchikh',
                 'email' => 'amine.benchikh@student.pfe.edu',
                 'student_id' => 'EL2024001',
-                'department' => 'electronique',
+                //'department' => 'electronique',
             ],
             [
                 'first_name' => 'Yasmine',
                 'last_name' => 'Charef',
                 'email' => 'yasmine.charef@student.pfe.edu',
                 'student_id' => 'EL2024002',
-                'department' => 'electronique',
+                //'department' => 'electronique',
             ],
             [
                 'first_name' => 'Reda',
                 'last_name' => 'Boutebba',
                 'email' => 'reda.boutebba@student.pfe.edu',
                 'student_id' => 'EL2024003',
-                'department' => 'electronique',
+                //'department' => 'electronique',
             ],
 
             // Mechanical Engineering Students
@@ -275,14 +275,14 @@ class UserSeeder extends Seeder
                 'last_name' => 'Guerriche',
                 'email' => 'hamza.guerriche@student.pfe.edu',
                 'student_id' => 'ME2024001',
-                'department' => 'mecanique',
+                //'department' => 'mecanique',
             ],
             [
                 'first_name' => 'Aicha',
                 'last_name' => 'Mammeri',
                 'email' => 'aicha.mammeri@student.pfe.edu',
                 'student_id' => 'ME2024002',
-                'department' => 'mecanique',
+                //'department' => 'mecanique',
             ],
 
             // Additional individual students
@@ -291,14 +291,14 @@ class UserSeeder extends Seeder
                 'last_name' => 'Zouaoui',
                 'email' => 'rania.zouaoui@student.pfe.edu',
                 'student_id' => 'CS2024008',
-                'department' => 'informatique',
+                //'department' => 'informatique',
             ],
             [
                 'first_name' => 'Farouk',
                 'last_name' => 'Benhabib',
                 'email' => 'farouk.benhabib@student.pfe.edu',
                 'student_id' => 'EL2024004',
-                'department' => 'electronique',
+                //'department' => 'electronique',
             ],
         ];
 
@@ -313,12 +313,12 @@ class UserSeeder extends Seeder
                 'status' => 'active',
                 'is_active' => true,
                 'student_id' => $studentData['student_id'],
-                'department' => $studentData['department'],
+                //'department' => $studentData[//'department'],
                 'phone' => '+213 555 ' . rand(100, 999) . ' ' . rand(100, 999),
-                'bio' => 'Final year student in ' . ucfirst($studentData['department']) . ' department.',
+                //'bio' => 'Final year student in ' . ucfirst($studentData[//'department']) . ' department.',
                 'email_verified_at' => now(),
             ]);
-            $student->assignRole('student');
+            // $student->assignRole('student');
         }
     }
 }

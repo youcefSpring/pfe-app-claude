@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('student_id', 20)->unique()->nullable();
             $table->enum('department', ['informatique', 'mathematiques', 'physique']);
             $table->string('avatar_path')->nullable();
+            $table->string('role')->nullable();
+            $table->string('status')->nullable();
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();

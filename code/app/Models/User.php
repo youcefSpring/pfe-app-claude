@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -33,6 +34,20 @@ class User extends Authenticatable
         'profile_picture',
         'contact_info',
         'cv_file_path',
+        // Student import fields
+        'academic_year',
+        'specialization',
+        'date_of_birth',
+        'address',
+        'emergency_contact',
+        'previous_education',
+        'skills',
+        'interests',
+        'must_change_password',
+        'imported_at',
+        'imported_by',
+        'updated_via_import',
+        'last_import_update'
     ];
 
     /**
@@ -57,6 +72,13 @@ class User extends Authenticatable
             'password' => 'hashed',
             'contact_info' => 'array',
             'is_active' => 'boolean',
+            'skills' => 'array',
+            'interests' => 'array',
+            'must_change_password' => 'boolean',
+            'imported_at' => 'datetime',
+            'updated_via_import' => 'boolean',
+            'last_import_update' => 'datetime',
+            'date_of_birth' => 'date'
         ];
     }
 

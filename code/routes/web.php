@@ -273,7 +273,20 @@ Route::middleware(['auth'])->prefix('pfe')->name('pfe.')->group(function () {
         Route::get('/{defense}/grades', [\App\Http\Controllers\Web\DefenseController::class, 'showGrades'])->name('grades');
         Route::post('/{defense}/grades', [\App\Http\Controllers\Web\DefenseController::class, 'submitGrades'])->name('submit-grades');
 
-        // Defense scheduling
+        // Enhanced Defense scheduling
+        Route::prefix('scheduling')->middleware('role:admin_pfe|chef_master')->name('scheduling.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'index'])->name('index');
+            Route::get('/auto', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'showAutoScheduling'])->name('auto');
+            Route::post('/auto/execute', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'executeAutoScheduling'])->name('auto.execute');
+            Route::get('/results', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'showResults'])->name('results');
+            Route::get('/manual', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'showManualScheduling'])->name('manual');
+            Route::get('/calendar', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'showCalendar'])->name('calendar');
+            Route::post('/check-availability', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'checkAvailability'])->name('check-availability');
+            Route::post('/bulk-operations', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'bulkOperations'])->name('bulk-operations');
+            Route::get('/export', [\App\Http\Controllers\Web\DefenseSchedulingController::class, 'exportSchedule'])->name('export');
+        });
+
+        // Legacy defense scheduling (backward compatibility)
         Route::get('/schedule', [\App\Http\Controllers\Web\DefenseController::class, 'schedule'])
             ->middleware('role:admin_pfe')
             ->name('schedule');
@@ -311,17 +324,41 @@ Route::middleware(['auth'])->prefix('pfe')->name('pfe.')->group(function () {
         // Rooms management
         Route::resource('rooms', \App\Http\Controllers\Web\RoomController::class);
 
-        // Conflict resolution
-        Route::get('/conflicts', [\App\Http\Controllers\Web\AdminController::class, 'conflicts'])->name('conflicts');
-        Route::post('/conflicts/{conflict}/resolve', [\App\Http\Controllers\Web\AdminController::class, 'resolveConflict'])
-            ->middleware('role:chef_master')
-            ->name('resolve-conflict');
+        // Enhanced Conflict resolution
+        Route::prefix('conflicts')->name('conflicts.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\ConflictController::class, 'index'])->name('index');
+            Route::get('/{subject}', [\App\Http\Controllers\Web\ConflictController::class, 'show'])->name('show');
+            Route::post('/{subject}/resolve', [\App\Http\Controllers\Web\ConflictController::class, 'resolve'])
+                ->middleware('role:chef_master')
+                ->name('resolve');
+            Route::post('/bulk-resolve', [\App\Http\Controllers\Web\ConflictController::class, 'bulkResolve'])
+                ->middleware('role:chef_master')
+                ->name('bulk-resolve');
+            Route::post('/auto-resolve', [\App\Http\Controllers\Web\ConflictController::class, 'autoResolve'])
+                ->middleware('role:chef_master')
+                ->name('auto-resolve');
+        });
 
-        // Project assignments
-        Route::get('/assignments', [\App\Http\Controllers\Web\AdminController::class, 'assignments'])->name('assignments');
-        Route::post('/assign-projects', [\App\Http\Controllers\Web\AdminController::class, 'assignProjects'])
-            ->middleware('role:chef_master')
-            ->name('assign-projects');
+        // Enhanced Project assignments
+        Route::prefix('assignments')->name('assignments.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'index'])->name('index');
+            Route::get('/auto', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'showAutoAssignment'])->name('auto');
+            Route::post('/auto/execute', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'executeAutoAssignment'])
+                ->middleware('role:chef_master')
+                ->name('auto.execute');
+            Route::get('/results', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'showResults'])->name('results');
+            Route::get('/manual', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'showManualAssignment'])->name('manual');
+            Route::post('/manual/execute', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'executeManualAssignment'])
+                ->middleware('role:chef_master')
+                ->name('manual.execute');
+            Route::get('/external', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'showExternalProjects'])->name('external');
+            Route::post('/external/approve', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'approveExternalProject'])
+                ->middleware('role:chef_master')
+                ->name('external.approve');
+            Route::post('/balance-workload', [\App\Http\Controllers\Web\ProjectAssignmentController::class, 'balanceSupervisorWorkload'])
+                ->middleware('role:chef_master')
+                ->name('balance-workload');
+        });
 
         // System settings
         Route::get('/settings', [\App\Http\Controllers\Web\AdminController::class, 'settings'])
@@ -330,6 +367,151 @@ Route::middleware(['auth'])->prefix('pfe')->name('pfe.')->group(function () {
         Route::put('/settings', [\App\Http\Controllers\Web\AdminController::class, 'updateSettings'])
             ->middleware('role:admin_pfe')
             ->name('update-settings');
+
+        // Enhanced Student Import Management
+        Route::prefix('students')->name('students.')->group(function () {
+            Route::prefix('import')->name('import.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Web\StudentImportController::class, 'index'])->name('index');
+                Route::get('/template', [\App\Http\Controllers\Web\StudentImportController::class, 'downloadTemplate'])->name('template');
+                Route::post('/preview', [\App\Http\Controllers\Web\StudentImportController::class, 'preview'])->name('preview');
+                Route::post('/import', [\App\Http\Controllers\Web\StudentImportController::class, 'import'])->name('execute');
+                Route::get('/results/{importId}', [\App\Http\Controllers\Web\StudentImportController::class, 'showResults'])->name('results');
+                Route::get('/errors/{importId}/export', [\App\Http\Controllers\Web\StudentImportController::class, 'exportErrors'])->name('export-errors');
+                Route::post('/validate-structure', [\App\Http\Controllers\Web\StudentImportController::class, 'validateStructure'])->name('validate-structure');
+                Route::post('/bulk-operations', [\App\Http\Controllers\Web\StudentImportController::class, 'bulkOperations'])->name('bulk-operations');
+            });
+        });
+    });
+
+    // =====================================================================
+    // TEACHER SPECIFIC ROUTES
+    // =====================================================================
+
+    Route::prefix('teacher')->middleware('role:teacher')->name('teacher.')->group(function () {
+
+        // Teacher Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Web\TeacherDashboardController::class, 'index'])->name('dashboard');
+
+        // Enhanced Subject Management for Teachers
+        Route::prefix('subjects')->name('subjects.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'store'])->name('store');
+            Route::get('/{subject}', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'show'])->name('show');
+            Route::get('/{subject}/edit', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'edit'])->name('edit');
+            Route::put('/{subject}', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'update'])->name('update');
+            Route::post('/{subject}/submit', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'submitForValidation'])->name('submit');
+            Route::post('/{subject}/clone', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'clone'])->name('clone');
+            Route::post('/{subject}/archive', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'archive'])->name('archive');
+            Route::get('/{subject}/interest', [\App\Http\Controllers\Web\TeacherSubjectController::class, 'trackInterest'])->name('interest');
+        });
+
+        // Project Supervision
+        Route::prefix('supervision')->name('supervision.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'index'])->name('index');
+            Route::get('/projects/{project}', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'showProject'])->name('project');
+            Route::get('/projects/{project}/communication', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'showCommunication'])->name('communication');
+            Route::post('/projects/{project}/message', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'sendMessage'])->name('send-message');
+            Route::post('/projects/{project}/meeting', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'scheduleMeeting'])->name('schedule-meeting');
+            Route::post('/projects/{project}/feedback', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'provideFeedback'])->name('provide-feedback');
+            Route::post('/projects/{project}/milestone', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'updateMilestone'])->name('update-milestone');
+            Route::get('/reports', [\App\Http\Controllers\Web\TeacherSupervisionController::class, 'generateSupervisionReport'])->name('reports');
+        });
+
+        // Deliverable Reviews
+        Route::prefix('deliverables')->name('deliverables.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'index'])->name('index');
+            Route::get('/{deliverable}', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'show'])->name('show');
+            Route::post('/{deliverable}/review', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'submitReview'])->name('submit-review');
+            Route::get('/{deliverable}/download', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'download'])->name('download');
+            Route::post('/bulk-review', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'bulkReview'])->name('bulk-review');
+            Route::get('/analytics', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'analytics'])->name('analytics');
+            Route::get('/export/report', [\App\Http\Controllers\Web\DeliverableReviewController::class, 'exportReport'])->name('export-report');
+        });
+
+        // Defense Management for Teachers
+        Route::prefix('defenses')->name('defenses.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'index'])->name('index');
+            Route::get('/{defense}/evaluation', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'showEvaluation'])->name('evaluation');
+            Route::post('/{defense}/evaluation', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'submitEvaluation'])->name('submit-evaluation');
+            Route::get('/{defense}/preparation', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'showPreparation'])->name('preparation');
+            Route::post('/{defense}/attendance', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'markAttendance'])->name('mark-attendance');
+            Route::post('/{defense}/final-decision', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'submitFinalDecision'])->name('final-decision');
+            Route::get('/calendar', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'calendar'])->name('calendar');
+            Route::get('/export', [\App\Http\Controllers\Web\TeacherDefenseController::class, 'exportSchedule'])->name('export');
+        });
+    });
+
+    // =====================================================================
+    // STUDENT SPECIFIC ROUTES
+    // =====================================================================
+
+    Route::prefix('student')->middleware('role:student')->name('student.')->group(function () {
+
+        // Student Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Web\StudentDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/year-overview', [\App\Http\Controllers\Web\StudentDashboardController::class, 'yearOverview'])->name('year-overview');
+        Route::get('/team-hub', [\App\Http\Controllers\Web\StudentDashboardController::class, 'teamHub'])->name('team-hub');
+        Route::get('/project-progress', [\App\Http\Controllers\Web\StudentDashboardController::class, 'projectProgress'])->name('project-progress');
+        Route::get('/defense-preparation', [\App\Http\Controllers\Web\StudentDashboardController::class, 'defensePreparation'])->name('defense-preparation');
+        Route::get('/profile', [\App\Http\Controllers\Web\StudentDashboardController::class, 'profile'])->name('profile');
+
+        // Enhanced Team Management for Students
+        Route::prefix('teams')->name('teams.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\StudentTeamController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Web\StudentTeamController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Web\StudentTeamController::class, 'store'])->name('store');
+            Route::get('/browse', [\App\Http\Controllers\Web\StudentTeamController::class, 'browse'])->name('browse');
+            Route::get('/{team}', [\App\Http\Controllers\Web\StudentTeamController::class, 'show'])->name('show');
+            Route::get('/{team}/edit', [\App\Http\Controllers\Web\StudentTeamController::class, 'edit'])->name('edit');
+            Route::put('/{team}', [\App\Http\Controllers\Web\StudentTeamController::class, 'update'])->name('update');
+            Route::post('/{team}/join', [\App\Http\Controllers\Web\StudentTeamController::class, 'joinTeam'])->name('join');
+            Route::delete('/{team}/leave', [\App\Http\Controllers\Web\StudentTeamController::class, 'leaveTeam'])->name('leave');
+            Route::post('/{team}/invite', [\App\Http\Controllers\Web\StudentTeamController::class, 'sendInvitation'])->name('invite');
+            Route::post('/invitations/{invitation}/respond', [\App\Http\Controllers\Web\StudentTeamController::class, 'respondToInvitation'])->name('respond-invitation');
+            Route::get('/my/team', [\App\Http\Controllers\Web\StudentTeamController::class, 'myTeam'])->name('my-team');
+        });
+
+        // Enhanced Subject Selection for Students
+        Route::prefix('subjects')->name('subjects.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\StudentSubjectController::class, 'index'])->name('index');
+            Route::get('/browse', [\App\Http\Controllers\Web\StudentSubjectController::class, 'browse'])->name('browse');
+            Route::get('/{subject}', [\App\Http\Controllers\Web\StudentSubjectController::class, 'show'])->name('show');
+            Route::get('/preferences/set', [\App\Http\Controllers\Web\StudentSubjectController::class, 'showPreferences'])->name('preferences');
+            Route::post('/preferences', [\App\Http\Controllers\Web\StudentSubjectController::class, 'setPreferences'])->name('set-preferences');
+            Route::get('/competition/analysis', [\App\Http\Controllers\Web\StudentSubjectController::class, 'competitionAnalysis'])->name('competition-analysis');
+            Route::post('/{subject}/favorite', [\App\Http\Controllers\Web\StudentSubjectController::class, 'toggleFavorite'])->name('toggle-favorite');
+            Route::post('/external-proposal', [\App\Http\Controllers\Web\StudentSubjectController::class, 'proposeExternalSubject'])->name('propose-external');
+        });
+
+        // Enhanced Project Management for Students
+        Route::prefix('projects')->name('projects.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\StudentProjectController::class, 'index'])->name('index');
+            Route::get('/{project}', [\App\Http\Controllers\Web\StudentProjectController::class, 'show'])->name('show');
+            Route::get('/{project}/progress', [\App\Http\Controllers\Web\StudentProjectController::class, 'showProgress'])->name('progress');
+            Route::get('/{project}/deliverables', [\App\Http\Controllers\Web\StudentProjectController::class, 'deliverables'])->name('deliverables');
+            Route::post('/{project}/deliverables', [\App\Http\Controllers\Web\StudentProjectController::class, 'uploadDeliverable'])->name('upload-deliverable');
+            Route::get('/deliverables/{deliverable}/edit', [\App\Http\Controllers\Web\StudentProjectController::class, 'editDeliverable'])->name('edit-deliverable');
+            Route::put('/deliverables/{deliverable}', [\App\Http\Controllers\Web\StudentProjectController::class, 'updateDeliverable'])->name('update-deliverable');
+            Route::get('/{project}/timeline', [\App\Http\Controllers\Web\StudentProjectController::class, 'timeline'])->name('timeline');
+            Route::post('/{project}/milestone', [\App\Http\Controllers\Web\StudentProjectController::class, 'updateMilestone'])->name('update-milestone');
+            Route::get('/{project}/communication', [\App\Http\Controllers\Web\StudentProjectController::class, 'communication'])->name('communication');
+            Route::post('/{project}/message', [\App\Http\Controllers\Web\StudentProjectController::class, 'sendMessage'])->name('send-message');
+            Route::get('/my/project', [\App\Http\Controllers\Web\StudentProjectController::class, 'myProject'])->name('my-project');
+        });
+
+        // Enhanced Defense Management for Students
+        Route::prefix('defense')->name('defense.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Web\StudentDefenseController::class, 'index'])->name('index');
+            Route::get('/{project}/preparation', [\App\Http\Controllers\Web\StudentDefenseController::class, 'preparation'])->name('preparation');
+            Route::post('/{project}/preparation', [\App\Http\Controllers\Web\StudentDefenseController::class, 'updatePreparation'])->name('update-preparation');
+            Route::post('/{project}/presentation', [\App\Http\Controllers\Web\StudentDefenseController::class, 'uploadPresentation'])->name('upload-presentation');
+            Route::post('/{project}/demo', [\App\Http\Controllers\Web\StudentDefenseController::class, 'uploadDemo'])->name('upload-demo');
+            Route::post('/{project}/practice', [\App\Http\Controllers\Web\StudentDefenseController::class, 'schedule练习'])->name('schedule-practice');
+            Route::get('/{project}/assessment', [\App\Http\Controllers\Web\StudentDefenseController::class, 'readinessAssessment'])->name('assessment');
+            Route::post('/{project}/readiness', [\App\Http\Controllers\Web\StudentDefenseController::class, 'submitReadiness'])->name('submit-readiness');
+            Route::get('/show/{defense}', [\App\Http\Controllers\Web\StudentDefenseController::class, 'viewDefense'])->name('show');
+        });
     });
 
     // =====================================================================
