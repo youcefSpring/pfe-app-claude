@@ -33,7 +33,13 @@
 
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        @include('layouts.partials.admin-sidebar')
+        @if(auth()->user()->hasRole('student'))
+            @include('layouts.partials.student-sidebar')
+        @elseif(auth()->user()->hasRole('teacher'))
+            @include('layouts.partials.teacher-sidebar')
+        @else
+            @include('layouts.partials.admin-sidebar')
+        @endif
     </aside>
 
     <!-- Content Wrapper. Contains page content -->

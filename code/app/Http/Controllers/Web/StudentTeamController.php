@@ -591,4 +591,153 @@ class StudentTeamController extends Controller
             'recommended_size' => config('pfe.recommended_team_size', 3)
         ];
     }
+
+    /**
+     * Show current student's team details
+     */
+    public function myTeam(): View
+    {
+        $student = auth()->user();
+        $team = $this->getCurrentTeam($student);
+
+        if (!$team) {
+            return view('pfe.student.teams.my-team', [
+                'team' => null
+            ]);
+        }
+
+        // Get team leader
+        $teamLeader = $team->members()->where('role', 'leader')->first()?->user;
+
+        // Calculate team progress
+        $teamProgress = $this->calculateTeamProgress($team);
+
+        // Get completed and pending tasks
+        $completedTasks = $this->getCompletedTasks($team);
+        $pendingTasks = $this->getPendingTasks($team);
+
+        // Get recent team activities
+        $recentActivities = $this->getTeamActivities($team);
+
+        // Check permissions
+        $canInvite = $this->canInviteMembers($student, $team);
+        $isLeader = $team->leader_id === $student->id;
+
+        return view('pfe.student.teams.my-team', [
+            'team' => $team,
+            'teamLeader' => $teamLeader,
+            'teamProgress' => $teamProgress,
+            'completedTasks' => $completedTasks,
+            'pendingTasks' => $pendingTasks,
+            'recentActivities' => $recentActivities,
+            'canInvite' => $canInvite,
+            'isLeader' => $isLeader,
+            'maxMembers' => config('pfe.max_team_size', 3)
+        ]);
+    }
+
+    /**
+     * Calculate team progress percentage
+     */
+    private function calculateTeamProgress($team): int
+    {
+        $totalSteps = 5; // Team formation, member recruitment, subject selection, project assignment, etc.
+        $completedSteps = 1; // Team exists
+
+        if ($team->members->count() >= config('pfe.min_team_size', 2)) {
+            $completedSteps++;
+        }
+
+        if ($team->status === 'validated') {
+            $completedSteps++;
+        }
+
+        if ($team->project) {
+            $completedSteps += 2;
+        }
+
+        return intval(($completedSteps / $totalSteps) * 100);
+    }
+
+    /**
+     * Get completed tasks for team
+     */
+    private function getCompletedTasks($team): int
+    {
+        $completed = 0;
+
+        if ($team->members->count() >= config('pfe.min_team_size', 2)) {
+            $completed++;
+        }
+
+        if ($team->status === 'validated') {
+            $completed++;
+        }
+
+        if ($team->project) {
+            $completed++;
+        }
+
+        return $completed;
+    }
+
+    /**
+     * Get pending tasks for team
+     */
+    private function getPendingTasks($team): int
+    {
+        $pending = 0;
+
+        if ($team->members->count() < config('pfe.max_team_size', 3)) {
+            $pending++;
+        }
+
+        if ($team->status !== 'validated') {
+            $pending++;
+        }
+
+        if (!$team->project) {
+            $pending++;
+        }
+
+        return $pending;
+    }
+
+    /**
+     * Get recent team activities
+     */
+    private function getTeamActivities($team): array
+    {
+        $activities = [];
+
+        // Recent member joins
+        $recentMembers = $team->members()->where('created_at', '>=', now()->subWeek())->with('user')->get();
+
+        foreach ($recentMembers as $member) {
+            $activities[] = [
+                'member' => $member->user->first_name . ' ' . $member->user->last_name,
+                'action' => 'joined the team',
+                'date' => $member->created_at->diffForHumans(),
+                'icon' => 'fa-user-plus',
+                'color' => 'success'
+            ];
+        }
+
+        // Sort by most recent
+        usort($activities, function($a, $b) {
+            return strtotime($b['date']) - strtotime($a['date']);
+        });
+
+        return array_slice($activities, 0, 5);
+    }
+
+    /**
+     * Check if student can invite members
+     */
+    private function canInviteMembers($student, $team): bool
+    {
+        return $team->leader_id === $student->id &&
+               $team->members->count() < config('pfe.max_team_size', 3) &&
+               in_array($team->status, ['forming', 'formed']);
+    }
 }

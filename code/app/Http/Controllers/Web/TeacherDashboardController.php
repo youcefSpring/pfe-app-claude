@@ -72,13 +72,45 @@ class TeacherDashboardController extends Controller
         $insights = $this->getTeacherInsights($teacher);
 
         return view('pfe.teacher.dashboard', [
-            'stats' => $stats,
-            'my_subjects' => $mySubjects,
-            'supervised_projects' => $supervisedProjects,
-            'pending_deliverables' => $pendingDeliverables,
-            'upcoming_defenses' => $upcomingDefenses,
-            'recent_activities' => $recentActivities,
-            'insights' => $insights
+            'stats' => [
+                'my_subjects' => $stats['subjects']['total'],
+                'supervised_projects' => $stats['projects']['active'],
+                'pending_reviews' => $stats['deliverables']['pending_reviews'],
+                'upcoming_defenses' => $stats['defenses']['upcoming'],
+                'completed_reviews' => $stats['deliverables']['total_reviewed'],
+                'avg_response_time' => $this->extractDays($stats['deliverables']['avg_review_time']),
+            ],
+            'recentSubjects' => $mySubjects->map(function ($subject) {
+                return [
+                    'id' => $subject->id,
+                    'title' => $subject->title,
+                    'status' => $subject->status,
+                    'interested_teams' => 0, // TODO: Calculate actual interested teams
+                ];
+            }),
+            'supervisedProjects' => $supervisedProjects->map(function ($project) {
+                return [
+                    'id' => $project->id,
+                    'title' => $project->title ?? $project->subject->title,
+                    'team_name' => $project->team->name ?? 'Unnamed Team',
+                    'progress' => rand(20, 90), // TODO: Calculate actual progress
+                ];
+            }),
+            'upcomingDefenses' => $upcomingDefenses->map(function ($defense) {
+                return [
+                    'project_title' => $defense->project->subject->title,
+                    'team_name' => $defense->project->team->name,
+                    'date' => $defense->defense_date->format('M j'),
+                    'time' => $defense->defense_date->format('g:i A'),
+                ];
+            }),
+            'recentActivities' => $recentActivities->map(function ($activity) {
+                return [
+                    'title' => $activity['title'],
+                    'description' => $activity['description'],
+                    'date' => $activity['timestamp']->diffForHumans(),
+                ];
+            }),
         ]);
     }
 
@@ -380,5 +412,23 @@ class TeacherDashboardController extends Controller
         ->first();
 
         return $nextDefense ? $nextDefense->defense_date->format('M d, Y') : null;
+    }
+
+    /**
+     * Extract days from review time string
+     */
+    private function extractDays($timeString): int
+    {
+        if (!$timeString || $timeString === 'N/A') return 0;
+
+        if (strpos($timeString, 'days') !== false) {
+            return (int) floatval($timeString);
+        }
+
+        if (strpos($timeString, 'hours') !== false) {
+            return 0; // Less than 1 day
+        }
+
+        return 0;
     }
 }

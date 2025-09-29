@@ -55,15 +55,21 @@ class StudentDashboardController extends Controller
         // Progress indicators
         $progressIndicators = $this->getProgressIndicators($team, $project);
 
-        return view('pfe.student.dashboard.index', [
+        return view('pfe.student.dashboard', [
             'student' => $student,
             'team' => $team,
             'project' => $project,
             'stats' => $stats,
-            'recent_activities' => $recentActivities,
-            'upcoming_deadlines' => $upcomingDeadlines,
-            'quick_actions' => $quickActions,
-            'progress_indicators' => $progressIndicators
+            'recentActivities' => $recentActivities,
+            'upcomingDeadlines' => $upcomingDeadlines,
+            'quickActions' => $quickActions,
+            'progressIndicators' => $progressIndicators,
+            'teamStatus' => $team ? ucfirst($team->status) : 'No Team',
+            'projectStatus' => $project ? ucfirst($project->status) : 'No Project',
+            'defenseDate' => $project?->defense?->scheduled_at?->format('M j, Y'),
+            'projectProgress' => $stats['completion_percentage'],
+            'milestones' => $this->getMilestones($project),
+            'todos' => $this->getTodos($student, $project)
         ]);
     }
 
@@ -493,6 +499,58 @@ class StudentDashboardController extends Controller
         if ($daysRemaining <= 3) return 'high';
         if ($daysRemaining <= 7) return 'medium';
         return 'normal';
+    }
+
+    /**
+     * Get project milestones
+     */
+    private function getMilestones($project): array
+    {
+        if (!$project) return [];
+
+        return [
+            ['title' => 'Project Planning', 'completed' => true],
+            ['title' => 'Literature Review', 'completed' => true],
+            ['title' => 'Design Phase', 'completed' => false],
+            ['title' => 'Implementation', 'completed' => false],
+            ['title' => 'Testing', 'completed' => false],
+            ['title' => 'Documentation', 'completed' => false]
+        ];
+    }
+
+    /**
+     * Get student todos
+     */
+    private function getTodos($student, $project): array
+    {
+        $todos = [];
+
+        if (!$project) {
+            return [
+                ['task' => 'Create or join a team', 'priority' => 'high', 'completed' => false],
+                ['task' => 'Browse available subjects', 'priority' => 'medium', 'completed' => false]
+            ];
+        }
+
+        // Get pending deliverables
+        $pendingDeliverables = $project->deliverables()
+            ->whereIn('status', ['pending', 'revision_requested'])
+            ->limit(3)
+            ->get();
+
+        foreach ($pendingDeliverables as $deliverable) {
+            $todos[] = [
+                'task' => 'Submit ' . $deliverable->title,
+                'priority' => 'high',
+                'completed' => false
+            ];
+        }
+
+        if (empty($todos)) {
+            $todos[] = ['task' => 'All tasks completed!', 'priority' => 'low', 'completed' => true];
+        }
+
+        return $todos;
     }
 
     // Additional helper methods (placeholder implementations)
