@@ -161,12 +161,9 @@ class RoomSeeder extends Seeder
             Room::create([
                 'name' => $roomData['name'],
                 'capacity' => $roomData['capacity'],
-                'type' => $roomData['type'],
                 'location' => $roomData['location'],
                 'equipment' => $roomData['equipment'],
-                'description' => $roomData['description'],
                 'is_available' => $roomData['is_available'],
-                'unavailable_reason' => $roomData['unavailable_reason'] ?? null,
             ]);
         }
     }

@@ -61,4 +61,9 @@ class PfeProject extends Model
     {
         return $this->hasOne(Defense::class, 'project_id');
     }
+
+    public function milestones(): HasMany
+    {
+        return $this->hasMany(ProjectMilestone::class, 'project_id');
+    }
 }

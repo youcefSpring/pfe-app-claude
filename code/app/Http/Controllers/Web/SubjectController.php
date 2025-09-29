@@ -167,7 +167,7 @@ class SubjectController extends Controller
     /**
      * Validate a subject
      */
-    public function validate(ValidateSubjectRequest $request, Subject $subject): RedirectResponse
+    public function validateSubject(ValidateSubjectRequest $request, Subject $subject): RedirectResponse
     {
         $this->subjectService->validateSubject(
             $subject,

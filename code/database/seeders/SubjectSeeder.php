@@ -22,6 +22,10 @@ class SubjectSeeder extends Seeder
     {
         $teachers = User::where('department', 'informatique')->where('role', 'teacher')->get();
 
+        if ($teachers->isEmpty()) {
+            return; // Skip if no teachers found
+        }
+
         $subjects = [
             [
                 'title' => 'E-Learning Platform with AI-Powered Recommendations',
@@ -202,23 +206,20 @@ The application should meet banking security standards and provide an intuitive 
                 'keywords' => $subjectData['keywords'],
                 'required_tools' => $subjectData['required_tools'],
                 'max_teams' => $subjectData['max_teams'],
-                'recommended_team_size' => $subjectData['recommended_team_size'],
-                'difficulty_level' => $subjectData['difficulty_level'],
-                'department' => $subjectData['department'],
                 'supervisor_id' => $supervisor->id,
                 'status' => $subjectData['status'],
-                'prerequisites' => $subjectData['prerequisites'],
-                'expected_deliverables' => $subjectData['expected_deliverables'],
-                'submitted_at' => in_array($subjectData['status'], ['submitted', 'approved', 'published']) ? now()->subDays(rand(1, 30)) : null,
                 'validated_at' => in_array($subjectData['status'], ['approved', 'published']) ? now()->subDays(rand(1, 15)) : null,
-                'published_at' => $subjectData['status'] === 'published' ? now()->subDays(rand(1, 10)) : null,
             ]);
         }
     }
 
     private function createElectronicsSubjects()
     {
-        $teachers = User::where('department', 'electronique')->where('role', 'teacher')->get();
+        $teachers = User::where('department', 'informatique')->where('role', 'teacher')->get();
+
+        if ($teachers->isEmpty()) {
+            return; // Skip if no teachers found
+        }
 
         $subjects = [
             [
@@ -282,21 +283,20 @@ The system should be energy-efficient and capable of operating in outdoor condit
                 'keywords' => $subjectData['keywords'],
                 'required_tools' => $subjectData['required_tools'],
                 'max_teams' => $subjectData['max_teams'],
-                'recommended_team_size' => $subjectData['recommended_team_size'],
-                'difficulty_level' => $subjectData['difficulty_level'],
-                'department' => $subjectData['department'],
                 'supervisor_id' => $supervisor->id,
                 'status' => $subjectData['status'],
-                'submitted_at' => $subjectData['status'] !== 'draft' ? now()->subDays(rand(1, 20)) : null,
                 'validated_at' => $subjectData['status'] === 'published' ? now()->subDays(rand(1, 10)) : null,
-                'published_at' => $subjectData['status'] === 'published' ? now()->subDays(rand(1, 5)) : null,
             ]);
         }
     }
 
     private function createMechanicalSubjects()
     {
-        $teachers = User::where('department', 'mecanique')->where('role', 'teacher')->get();
+        $teachers = User::where('department', 'informatique')->where('role', 'teacher')->get();
+
+        if ($teachers->isEmpty()) {
+            return; // Skip if no teachers found
+        }
 
         $subjects = [
             [
@@ -335,12 +335,8 @@ The system should be suitable for deployment in remote areas with limited infras
                 'keywords' => $subjectData['keywords'],
                 'required_tools' => $subjectData['required_tools'],
                 'max_teams' => $subjectData['max_teams'],
-                'recommended_team_size' => $subjectData['recommended_team_size'],
-                'difficulty_level' => $subjectData['difficulty_level'],
-                'department' => $subjectData['department'],
                 'supervisor_id' => $supervisor->id,
                 'status' => $subjectData['status'],
-                'submitted_at' => now()->subDays(rand(5, 25)),
                 'validated_at' => now()->subDays(rand(1, 15)),
             ]);
         }

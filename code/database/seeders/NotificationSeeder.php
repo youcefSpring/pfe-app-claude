@@ -22,6 +22,8 @@ class NotificationSeeder extends Seeder
             // Subject published notification
             PfeNotification::create([
                 'user_id' => $student->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $student->id,
                 'type' => 'subject_published',
                 'title' => 'Nouveaux sujets disponibles',
                 'message' => 'De nouveaux sujets de PFE ont été publiés et sont maintenant disponibles pour sélection.',
@@ -30,13 +32,15 @@ class NotificationSeeder extends Seeder
                     'icon' => 'book',
                     'color' => 'blue'
                 ],
-                'is_read' => false,
+                'read_at' => null,
                 'created_at' => now()->subHours(2),
             ]);
 
             // Team validation notification
             PfeNotification::create([
                 'user_id' => $student->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $student->id,
                 'type' => 'team_validated',
                 'title' => 'Équipe validée',
                 'message' => 'Félicitations ! Votre équipe a été validée par l\'administration.',
@@ -45,7 +49,7 @@ class NotificationSeeder extends Seeder
                     'icon' => 'check-circle',
                     'color' => 'green'
                 ],
-                'is_read' => rand(0, 1) == 1,
+                'read_at' => rand(0, 1) == 1 ? now()->subHours(rand(1, 12)) : null,
                 'created_at' => now()->subDays(3),
             ]);
 
@@ -53,6 +57,8 @@ class NotificationSeeder extends Seeder
             if (rand(0, 1)) {
                 PfeNotification::create([
                     'user_id' => $student->id,
+                    'notifiable_type' => 'App\\Models\\User',
+                    'notifiable_id' => $student->id,
                     'type' => 'defense_scheduled',
                     'title' => 'Soutenance programmée',
                     'message' => 'Votre soutenance de PFE a été programmée. Consultez les détails.',
@@ -63,7 +69,7 @@ class NotificationSeeder extends Seeder
                         'defense_date' => now()->addDays(15)->format('Y-m-d'),
                         'defense_time' => '10:30'
                     ],
-                    'is_read' => false,
+                    'read_at' => null,
                     'created_at' => now()->subDays(1),
                 ]);
             }
@@ -74,6 +80,8 @@ class NotificationSeeder extends Seeder
             // Subject validation required
             PfeNotification::create([
                 'user_id' => $teacher->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $teacher->id,
                 'type' => 'deliverable_submitted',
                 'title' => 'Nouveau livrable à évaluer',
                 'message' => 'Un nouveau livrable a été soumis par votre équipe encadrée et nécessite votre évaluation.',
@@ -82,13 +90,15 @@ class NotificationSeeder extends Seeder
                     'icon' => 'file-text',
                     'color' => 'orange'
                 ],
-                'is_read' => false,
+                'read_at' => null,
                 'created_at' => now()->subHours(6),
             ]);
 
             // Defense jury assignment
             PfeNotification::create([
                 'user_id' => $teacher->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $teacher->id,
                 'type' => 'jury_assignment',
                 'title' => 'Affectation jury de soutenance',
                 'message' => 'Vous avez été désigné(e) comme membre du jury pour une soutenance de PFE.',
@@ -97,7 +107,7 @@ class NotificationSeeder extends Seeder
                     'icon' => 'users',
                     'color' => 'indigo'
                 ],
-                'is_read' => rand(0, 1) == 1,
+                'read_at' => rand(0, 1) == 1 ? now()->subHours(rand(1, 12)) : null,
                 'created_at' => now()->subDays(2),
             ]);
         }
@@ -107,6 +117,8 @@ class NotificationSeeder extends Seeder
             // System notification
             PfeNotification::create([
                 'user_id' => $admin->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $admin->id,
                 'type' => 'subject_submitted',
                 'title' => 'Sujet soumis pour validation',
                 'message' => 'Un nouveau sujet de PFE a été soumis et attend votre validation.',
@@ -115,13 +127,15 @@ class NotificationSeeder extends Seeder
                     'icon' => 'clipboard-check',
                     'color' => 'yellow'
                 ],
-                'is_read' => false,
+                'read_at' => null,
                 'created_at' => now()->subHours(12),
             ]);
 
             // Conflict resolution needed
             PfeNotification::create([
                 'user_id' => $admin->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $admin->id,
                 'type' => 'conflict_resolution',
                 'title' => 'Conflit d\'attribution détecté',
                 'message' => 'Un conflit d\'attribution de sujet nécessite votre intervention pour résolution.',
@@ -130,13 +144,15 @@ class NotificationSeeder extends Seeder
                     'icon' => 'exclamation-triangle',
                     'color' => 'red'
                 ],
-                'is_read' => false,
+                'read_at' => null,
                 'created_at' => now()->subDays(1),
             ]);
 
             // System maintenance
             PfeNotification::create([
                 'user_id' => $admin->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $admin->id,
                 'type' => 'system_maintenance',
                 'title' => 'Maintenance système programmée',
                 'message' => 'Une maintenance système est programmée ce weekend. Préparez les communications nécessaires.',
@@ -145,7 +161,7 @@ class NotificationSeeder extends Seeder
                     'icon' => 'cog',
                     'color' => 'gray'
                 ],
-                'is_read' => rand(0, 1) == 1,
+                'read_at' => rand(0, 1) == 1 ? now()->subHours(rand(1, 12)) : null,
                 'created_at' => now()->subDays(5),
             ]);
         }
@@ -155,6 +171,8 @@ class NotificationSeeder extends Seeder
         foreach ($allUsers->random(10) as $user) {
             PfeNotification::create([
                 'user_id' => $user->id,
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $user->id,
                 'type' => 'announcement',
                 'title' => 'Nouvelle année académique 2024-2025',
                 'message' => 'Bienvenue dans la nouvelle année académique ! Consultez le calendrier des échéances importantes.',
@@ -164,7 +182,7 @@ class NotificationSeeder extends Seeder
                     'color' => 'blue',
                     'priority' => 'high'
                 ],
-                'is_read' => rand(0, 1) == 1,
+                'read_at' => rand(0, 1) == 1 ? now()->subHours(rand(1, 12)) : null,
                 'created_at' => now()->subWeeks(2),
             ]);
         }

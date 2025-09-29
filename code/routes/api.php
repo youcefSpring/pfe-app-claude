@@ -62,7 +62,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
         // Subject workflow actions
         Route::post('{subject}/submit', [SubjectController::class, 'submit'])->name('submit');
-        Route::post('{subject}/validate', [SubjectController::class, 'validate'])
+        Route::post('{subject}/validate', [SubjectController::class, 'validateSubject'])
             ->middleware('role:chef_master')
             ->name('validate');
         Route::post('{subject}/publish', [SubjectController::class, 'publish'])
@@ -94,7 +94,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         Route::get('{team}/preferences', [TeamController::class, 'getPreferences'])->name('get-preferences');
 
         // Team validation
-        Route::post('{team}/validate', [TeamController::class, 'validate'])
+        Route::post('{team}/validate', [TeamController::class, 'validateTeam'])
             ->middleware('role:chef_master')
             ->name('validate');
     });

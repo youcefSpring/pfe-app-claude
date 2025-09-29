@@ -22,10 +22,10 @@ class DashboardController extends Controller
         $user = $request->user();
         $stats = $this->reportingService->generateDashboardStats($user);
 
-        return view('dashboard.index', [
+        return view('pfe.dashboard.index', [
             'user' => $user,
             'stats' => $stats,
-            'role' => $user->getRoleNames()->first()
+            'role' => $user->role
         ]);
     }
 
@@ -37,7 +37,7 @@ class DashboardController extends Controller
         $user = $request->user();
         $stats = $this->reportingService->generateDashboardStats($user);
 
-        return view('dashboard.student', [
+        return view('pfe.dashboard.student', [
             'user' => $user,
             'stats' => $stats
         ]);
@@ -51,7 +51,7 @@ class DashboardController extends Controller
         $user = $request->user();
         $stats = $this->reportingService->generateDashboardStats($user);
 
-        return view('dashboard.teacher', [
+        return view('pfe.dashboard.teacher', [
             'user' => $user,
             'stats' => $stats
         ]);
@@ -65,7 +65,7 @@ class DashboardController extends Controller
         $user = $request->user();
         $stats = $this->reportingService->generateDashboardStats($user);
 
-        return view('dashboard.admin', [
+        return view('pfe.dashboard.admin', [
             'user' => $user,
             'stats' => $stats
         ]);

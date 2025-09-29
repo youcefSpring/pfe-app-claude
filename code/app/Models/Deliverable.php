@@ -26,12 +26,27 @@ class Deliverable extends Model
         'review_comments',
         'submitted_at',
         'reviewed_at',
+        'milestone_id',
+        'sprint_number',
+        'version_number',
+        'deadline',
+        'priority',
+        'acceptance_criteria',
+        'feedback_summary',
+        'revision_requested',
+        'approved_at',
     ];
 
     protected $casts = [
         'is_final_report' => 'boolean',
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
+        'deadline' => 'datetime',
+        'approved_at' => 'datetime',
+        'revision_requested' => 'boolean',
+        'acceptance_criteria' => 'array',
+        'feedback_summary' => 'array',
+        'version_number' => 'decimal:1'
     ];
 
     public function project(): BelongsTo
@@ -47,5 +62,41 @@ class Deliverable extends Model
     public function reviewedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function milestone(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMilestone::class, 'milestone_id');
+    }
+
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('deadline', '<', now())
+                    ->where('status', '!=', 'approved');
+    }
+
+    public function scopeBySprint($query, int $sprintNumber)
+    {
+        return $query->where('sprint_number', $sprintNumber);
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->deadline && $this->deadline->isPast() && $this->status !== 'approved';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
+    }
+
+    public function needsRevision(): bool
+    {
+        return $this->revision_requested || $this->status === 'needs_revision';
     }
 }

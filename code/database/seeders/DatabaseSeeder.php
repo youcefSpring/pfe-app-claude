@@ -33,14 +33,14 @@ class DatabaseSeeder extends Seeder
 
             // Notifications and activities
             NotificationSeeder::class,
-            ActivitySeeder::class,
+            // ActivitySeeder::class, // Disabled - missing Activity model
 
-            // Sample content for public site
-            CourseSeeder::class,
-            PublicProjectSeeder::class,
-            PublicationSeeder::class,
-            BlogPostSeeder::class,
-            TagSeeder::class,
+            // Sample content for public site (disabled for now)
+            // CourseSeeder::class,
+            // PublicProjectSeeder::class,
+            // PublicationSeeder::class,
+            // BlogPostSeeder::class,
+            // TagSeeder::class,
         ]);
     }
 }

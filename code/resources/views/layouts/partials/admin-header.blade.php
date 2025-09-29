@@ -1,153 +1,131 @@
-<div class="flex items-center justify-between px-6 py-4">
-    <!-- Page Title -->
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">
-            @yield('page-title', __('Dashboard'))
-        </h1>
-        @hasSection('breadcrumbs')
-        <nav class="text-sm text-gray-500 mt-1">
-            @yield('breadcrumbs')
-        </nav>
-        @endif
-    </div>
+<!-- Left navbar links -->
+<ul class="navbar-nav">
+    <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+        <a href="{{ route('admin.dashboard') }}" class="nav-link">Home</a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+        <a href="{{ route('pfe.dashboard') }}" class="nav-link">PFE Platform</a>
+    </li>
+</ul>
 
-    <!-- Header Actions -->
-    <div class="flex items-center space-x-4">
-        <!-- Notifications -->
-        <div class="relative">
-            <button type="button"
-                    class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700"
-                    onclick="toggleNotifications()">
-                <i class="fas fa-bell text-lg"></i>
-                @if(auth()->user()->unreadNotifications->count() > 0)
-                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                    {{ auth()->user()->unreadNotifications->count() }}
-                </span>
-                @endif
-            </button>
-
-            <!-- Notifications Dropdown -->
-            <div id="notifications-dropdown"
-                 class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                <div class="py-1">
-                    <div class="px-4 py-2 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-medium text-gray-900">{{ __('Notifications') }}</h3>
-                            @if(auth()->user()->unreadNotifications->count() > 0)
-                            <a href="{{ route('pfe.notifications.read-all') }}"
-                               class="text-xs text-indigo-600 hover:text-indigo-500"
-                               onclick="event.preventDefault(); document.getElementById('mark-all-read-form').submit();">
-                                {{ __('Mark all as read') }}
-                            </a>
-                            <form id="mark-all-read-form" action="{{ route('pfe.notifications.read-all') }}" method="POST" class="hidden">
-                                @csrf
-                            </form>
-                            @endif
-                        </div>
+<!-- Right navbar links -->
+<ul class="navbar-nav ml-auto">
+    <!-- Navbar Search -->
+    <li class="nav-item">
+        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+            <i class="fas fa-search"></i>
+        </a>
+        <div class="navbar-search-block">
+            <form class="form-inline" action="{{ route('pfe.search') }}" method="GET">
+                <div class="input-group input-group-sm">
+                    <input class="form-control form-control-navbar" type="search" name="q" placeholder="Search" aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-navbar" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="btn btn-navbar" type="button" data-widget="navbar-search">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="max-h-64 overflow-y-auto">
-                        @forelse(auth()->user()->notifications->take(5) as $notification)
-                        <div class="px-4 py-3 hover:bg-gray-50 {{ $notification->read_at ? '' : 'bg-blue-50' }}">
-                            <p class="text-sm text-gray-900">{{ $notification->data['message'] ?? $notification->type }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
-                        </div>
-                        @empty
-                        <div class="px-4 py-3 text-sm text-gray-500 text-center">
-                            {{ __('No notifications') }}
-                        </div>
-                        @endforelse
-                    </div>
-                    @if(auth()->user()->notifications->count() > 0)
-                    <div class="border-t border-gray-200 px-4 py-2">
-                        <a href="{{ route('pfe.notifications.index') }}"
-                           class="block text-sm text-indigo-600 hover:text-indigo-500 text-center">
-                            {{ __('View all notifications') }}
-                        </a>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Search -->
-        <div class="relative">
-            <form action="{{ route('pfe.search') }}" method="GET" class="relative">
-                <input type="text"
-                       name="q"
-                       value="{{ request('q') }}"
-                       placeholder="{{ __('Search...') }}"
-                       class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
                 </div>
             </form>
         </div>
+    </li>
 
-        <!-- User Menu -->
-        <div class="relative">
-            <button type="button"
-                    class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onclick="toggleUserMenu()">
-                <img class="h-8 w-8 rounded-full"
-                     src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
-                     alt="{{ auth()->user()->name }}">
-                <span class="ml-2 text-gray-700 font-medium">{{ auth()->user()->name }}</span>
-                <i class="ml-1 fas fa-chevron-down text-gray-500"></i>
-            </button>
-
-            <!-- User Dropdown -->
-            <div id="user-menu-dropdown"
-                 class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                <div class="py-1">
-                    <a href="{{ route('pfe.profile.show') }}"
-                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <i class="fas fa-user-circle mr-2"></i>
-                        {{ __('Profile') }}
-                    </a>
-                    <a href="{{ route('pfe.profile.edit') }}"
-                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <i class="fas fa-cog mr-2"></i>
-                        {{ __('Settings') }}
-                    </a>
-                    <div class="border-t border-gray-100"></div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            <i class="fas fa-sign-out-alt mr-2"></i>
-                            {{ __('Logout') }}
-                        </button>
-                    </form>
+    <!-- Messages Dropdown Menu -->
+    <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+            <i class="far fa-comments"></i>
+            <span class="badge badge-danger navbar-badge">3</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <a href="#" class="dropdown-item">
+                <!-- Message Start -->
+                <div class="media">
+                    <img src="https://ui-avatars.com/api/?name=Admin" alt="User Avatar" class="img-size-50 mr-3 img-circle">
+                    <div class="media-body">
+                        <h3 class="dropdown-item-title">
+                            Admin User
+                            <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
+                        </h3>
+                        <p class="text-sm">System message...</p>
+                        <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+                    </div>
                 </div>
-            </div>
+                <!-- Message End -->
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
         </div>
-    </div>
-</div>
+    </li>
 
-@push('scripts')
-<script>
-function toggleNotifications() {
-    const dropdown = document.getElementById('notifications-dropdown');
-    dropdown.classList.toggle('hidden');
-}
+    <!-- Notifications Dropdown Menu -->
+    <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+            <i class="far fa-bell"></i>
+            @if(auth()->user()->unreadNotifications->count() > 0)
+            <span class="badge badge-warning navbar-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
+            @endif
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <span class="dropdown-item dropdown-header">{{ auth()->user()->unreadNotifications->count() }} Notifications</span>
+            <div class="dropdown-divider"></div>
+            @forelse(auth()->user()->notifications->take(5) as $notification)
+            <a href="#" class="dropdown-item">
+                <i class="fas fa-envelope mr-2"></i> {{ Str::limit($notification->data['message'] ?? $notification->type, 50) }}
+                <span class="float-right text-muted text-sm">{{ $notification->created_at->diffForHumans() }}</span>
+            </a>
+            <div class="dropdown-divider"></div>
+            @empty
+            <span class="dropdown-item">No notifications</span>
+            @endforelse
+            <a href="{{ route('pfe.notifications.index') }}" class="dropdown-item dropdown-footer">See All Notifications</a>
+        </div>
+    </li>
 
-function toggleUserMenu() {
-    const dropdown = document.getElementById('user-menu-dropdown');
-    dropdown.classList.toggle('hidden');
-}
+    <!-- User Dropdown Menu -->
+    <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+            <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->first_name . ' ' . auth()->user()->last_name) }}"
+                 alt="User Avatar" class="img-size-32 img-circle">
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <div class="dropdown-header">
+                <strong>{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</strong><br>
+                <small class="text-muted">{{ auth()->user()->role }}</small>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="{{ route('pfe.profile.show') }}" class="dropdown-item">
+                <i class="fas fa-user mr-2"></i> Profile
+            </a>
+            <a href="{{ route('pfe.profile.edit') }}" class="dropdown-item">
+                <i class="fas fa-cogs mr-2"></i> Settings
+            </a>
+            <div class="dropdown-divider"></div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </form>
+        </div>
+    </li>
 
-// Close dropdowns when clicking outside
-document.addEventListener('click', function(event) {
-    const notificationsDropdown = document.getElementById('notifications-dropdown');
-    const userMenuDropdown = document.getElementById('user-menu-dropdown');
+    <!-- Fullscreen -->
+    <li class="nav-item">
+        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+            <i class="fas fa-expand-arrows-alt"></i>
+        </a>
+    </li>
 
-    if (!event.target.closest('[onclick="toggleNotifications()"]') && !notificationsDropdown.contains(event.target)) {
-        notificationsDropdown.classList.add('hidden');
-    }
+    <!-- Control Sidebar -->
+    <li class="nav-item">
+        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+            <i class="fas fa-th-large"></i>
+        </a>
+    </li>
+</ul>
 
-    if (!event.target.closest('[onclick="toggleUserMenu()"]') && !userMenuDropdown.contains(event.target)) {
-        userMenuDropdown.classList.add('hidden');
-    }
-});
-</script>
-@endpush

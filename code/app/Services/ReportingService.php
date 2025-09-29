@@ -158,7 +158,7 @@ class ReportingService
 
     public function generateSupervisorWorkloadReport(): array
     {
-        $supervisors = User::role('teacher')
+        $supervisors = User::where('role', 'teacher')
             ->withCount(['supervisedSubjects', 'supervisedPfeProjects', 'supervisedDefenses'])
             ->get();
 
@@ -291,8 +291,8 @@ class ReportingService
             'pending_validations' => Subject::where('status', 'submitted')
                 ->whereHas('supervisor', fn($q) => $q->where('department', $department))
                 ->count(),
-            'teachers_count' => User::role('teacher')->where('department', $department)->count(),
-            'students_count' => User::role('student')->where('department', $department)->count(),
+            'teachers_count' => User::where('role', 'teacher')->where('department', $department)->count(),
+            'students_count' => User::where('role', 'student')->where('department', $department)->count(),
             'active_projects' => PfeProject::whereHas('supervisor', fn($q) => $q->where('department', $department))
                 ->whereNotIn('status', ['completed'])
                 ->count(),

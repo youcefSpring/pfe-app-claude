@@ -132,7 +132,7 @@ class SubjectController extends Controller
     /**
      * Validate a subject (approve/reject/request correction)
      */
-    public function validate(ValidateSubjectRequest $request, Subject $subject): JsonResponse
+    public function validateSubject(ValidateSubjectRequest $request, Subject $subject): JsonResponse
     {
         $validatedSubject = $this->subjectService->validateSubject(
             $subject,

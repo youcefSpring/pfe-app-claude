@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\BlogPost;
-use App\Models\Project;
+// Temporarily disabled - tables not created yet
+// use App\Models\BlogPost;
+// use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,16 +20,18 @@ class HomeController extends Controller
         // Get the main teacher/owner user
         $teacher = User::where('role', 'teacher')->first();
 
-        // Get featured projects
-        $featuredProjects = Project::featured()
-            ->with('tags')
+        // Temporarily use PFE data instead of blog/project data
+        $pfeProjectModel = \App\Models\PfeProject::class;
+        $subjectModel = \App\Models\Subject::class;
+
+        // Get featured PFE projects instead of public projects
+        $featuredProjects = $pfeProjectModel::where('status', 'in_progress')
             ->latest()
             ->limit(3)
             ->get();
 
-        // Get latest blog posts
-        $latestPosts = BlogPost::published()
-            ->with('user')
+        // Get latest published subjects instead of blog posts
+        $latestPosts = $subjectModel::where('status', 'published')
             ->latest()
             ->limit(3)
             ->get();

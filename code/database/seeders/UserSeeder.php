@@ -23,8 +23,8 @@ class UserSeeder extends Seeder
             'role' => 'super_admin',
             'status' => 'active',
             'is_active' => true,
-            //'department' => 'administration',
-            // //'bio' => 'System super administrator with full access to all platform features.',
+            'department' => 'informatique',
+            'bio' => 'System super administrator with full access to all platform features.',
             'email_verified_at' => now(),
         ]);
         // $superAdmin->assignRole('super_admin');
@@ -39,9 +39,9 @@ class UserSeeder extends Seeder
             'role' => 'admin_pfe',
             'status' => 'active',
             'is_active' => true,
-            //'department' => 'administration',
-            'phone' => '+213 555 123 456',
-            //'bio' => 'PFE platform administrator responsible for system management and coordination.',
+            'department' => 'informatique',
+            'phone' => '+213555123456',
+            'bio' => 'PFE platform administrator responsible for system management and coordination.',
             'email_verified_at' => now(),
         ]);
         // $adminPfe->assignRole('admin_pfe');
@@ -56,9 +56,9 @@ class UserSeeder extends Seeder
             'role' => 'chef_master',
             'status' => 'active',
             'is_active' => true,
-            //'department' => 'informatique',
-            'phone' => '+213 555 234 567',
-            //'bio' => 'Head of Computer Science department, responsible for validating CS projects.',
+            'department' => 'informatique',
+            'phone' => '+213555234567',
+            'bio' => 'Head of Computer Science department, responsible for validating CS projects.',
             'email_verified_at' => now(),
         ]);
         // $chefMasterCS->assignRole('chef_master');
@@ -73,9 +73,9 @@ class UserSeeder extends Seeder
             'role' => 'chef_master',
             'status' => 'active',
             'is_active' => true,
-            //'department' => 'electronique',
-            'phone' => '+213 555 345 678',
-            //'bio' => 'Head of Electronics department, specializing in embedded systems and IoT.',
+            'department' => 'informatique',
+            'phone' => '+213555345678',
+            'bio' => 'Head of Electronics department, specializing in embedded systems and IoT.',
             'email_verified_at' => now(),
         ]);
         // $chefMasterElec->assignRole('chef_master');
@@ -96,8 +96,8 @@ class UserSeeder extends Seeder
                 'last_name' => 'Mansouri',
                 'name' => 'Dr. Said Mansouri',
                 'email' => 'said.mansouri@pfe.edu',
-                //'department' => 'informatique',
-                //'bio' => 'Professor of Software Engineering and Web Development. Expert in Laravel, React, and modern web technologies.',
+                'department' => 'informatique',
+                'bio' => 'Professor of Software Engineering and Web Development. Expert in Laravel, React, and modern web technologies.',
                 'specialization' => 'Web Development, Software Engineering'
             ],
             [
@@ -179,12 +179,12 @@ class UserSeeder extends Seeder
                 'role' => 'teacher',
                 'status' => 'active',
                 'is_active' => true,
-                //'department' => $teacherData[//'department'],
-                'phone' => '+213 555 ' . rand(100, 999) . ' ' . rand(100, 999),
-                //'bio' => $teacherData[//'bio'],
+                'department' => $teacherData['department'] ?? 'informatique',
+                'phone' => '+2135' . rand(10000000, 99999999),
+                'bio' => $teacherData['bio'] ?? 'Professor in ' . ($teacherData['specialization'] ?? 'Computer Science'),
+                'specialization' => $teacherData['specialization'] ?? null,
                 'email_verified_at' => now(),
             ]);
-            // $teacher->assignRole('teacher');
         }
     }
 
@@ -313,12 +313,13 @@ class UserSeeder extends Seeder
                 'status' => 'active',
                 'is_active' => true,
                 'student_id' => $studentData['student_id'],
-                //'department' => $studentData[//'department'],
-                'phone' => '+213 555 ' . rand(100, 999) . ' ' . rand(100, 999),
-                //'bio' => 'Final year student in ' . ucfirst($studentData[//'department']) . ' department.',
+                'department' => $studentData['department'] ?? 'informatique',
+                'phone' => '+2135' . rand(10000000, 99999999),
+                'bio' => 'Final year student in ' . ucfirst($studentData['department'] ?? 'informatique') . ' department.',
+                'academic_year' => '2024',
+                'specialization' => $studentData['specialization'] ?? 'Computer Science',
                 'email_verified_at' => now(),
             ]);
-            // $student->assignRole('student');
         }
     }
 }

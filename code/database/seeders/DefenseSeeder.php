@@ -20,8 +20,8 @@ class DefenseSeeder extends Seeder
         $teachers = User::where('role', 'teacher')->get();
         $chefMasters = User::where('role', 'chef_master')->get();
 
-        // Create some scheduled defenses for projects that are advanced enough
-        $advancedProjects = $projects->where('progress_percentage', '>', 30);
+        // Create some scheduled defenses for projects
+        $advancedProjects = $projects->take(3);
 
         foreach ($advancedProjects->take(3) as $index => $project) {
             $defenseDate = now()->addDays(rand(7, 45));
@@ -38,13 +38,13 @@ class DefenseSeeder extends Seeder
                 'room_id' => $rooms->random()->id,
                 'defense_date' => $defenseDate,
                 'start_time' => $startTime,
+                'end_time' => '11:00:00',
                 'duration' => 60, // 60 minutes
                 'status' => 'scheduled',
                 'jury_president_id' => $president->id,
                 'jury_examiner_id' => $examiner->id,
                 'jury_supervisor_id' => $supervisor->id,
-                'defense_type' => 'final',
-                'instructions' => 'Présentation de 20 minutes suivie de 40 minutes de questions et délibération.',
+                'notes' => 'Présentation de 20 minutes suivie de 40 minutes de questions et délibération.',
                 'scheduled_at' => now()->subDays(rand(1, 10)),
             ]);
         }
@@ -60,19 +60,18 @@ class DefenseSeeder extends Seeder
                 'room_id' => $rooms->where('name', 'Amphithéâtre A')->first()->id,
                 'defense_date' => now()->subMonths(2),
                 'start_time' => '10:00:00',
+                'end_time' => '11:00:00',
                 'duration' => 60,
                 'status' => 'completed',
                 'jury_president_id' => $president->id,
                 'jury_examiner_id' => $examiner->id,
                 'jury_supervisor_id' => $completedProject->supervisor_id,
-                'defense_type' => 'final',
                 'final_grade' => 16.5,
                 'grade_president' => 17.0,
                 'grade_examiner' => 16.0,
                 'grade_supervisor' => 17.0,
                 'observations' => 'Excellent travail technique avec une présentation claire et professionnelle. Le projet répond parfaitement aux objectifs fixés. Quelques améliorations mineures suggérées pour la documentation.',
-                'deliberation_notes' => 'Jury unanime sur la qualité du travail. Félicitations pour l\'innovation et la rigueur technique.',
-                'defense_minutes' => 'Soutenance excellente avec démonstration convaincante du système développé.',
+                'notes' => 'Jury unanime sur la qualité du travail. Félicitations pour l\'innovation et la rigueur technique. Soutenance excellente avec démonstration convaincante du système développé.',
                 'scheduled_at' => now()->subMonths(3),
                 'completed_at' => now()->subMonths(2),
             ]);
@@ -89,13 +88,13 @@ class DefenseSeeder extends Seeder
                 'room_id' => $rooms->random()->id,
                 'defense_date' => now()->addDays(5),
                 'start_time' => '14:00:00',
+                'end_time' => '15:00:00',
                 'duration' => 60,
-                'status' => 'needs_rescheduling',
+                'status' => 'rescheduled',
                 'jury_president_id' => $president->id,
                 'jury_examiner_id' => $examiner->id,
                 'jury_supervisor_id' => $projectToReschedule->supervisor_id,
-                'defense_type' => 'final',
-                'rescheduling_reason' => 'Conflit d\'horaire avec le président du jury',
+                'notes' => 'Conflit d\'horaire avec le président du jury - defense rescheduled',
                 'scheduled_at' => now()->subDays(3),
             ]);
         }

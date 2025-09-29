@@ -172,7 +172,7 @@ Route::middleware(['auth'])->prefix('pfe')->name('pfe.')->group(function () {
         Route::get('/{subject}/validate', [\App\Http\Controllers\Web\SubjectController::class, 'showValidation'])
             ->middleware('role:chef_master')
             ->name('validation');
-        Route::post('/{subject}/validate', [\App\Http\Controllers\Web\SubjectController::class, 'validate'])
+        Route::post('/{subject}/validate', [\App\Http\Controllers\Web\SubjectController::class, 'validateSubject'])
             ->middleware('role:chef_master')
             ->name('validate');
         Route::post('/{subject}/publish', [\App\Http\Controllers\Web\SubjectController::class, 'publish'])
@@ -210,7 +210,7 @@ Route::middleware(['auth'])->prefix('pfe')->name('pfe.')->group(function () {
         Route::post('/{team}/preferences', [\App\Http\Controllers\Web\TeamController::class, 'setPreferences'])->name('set-preferences');
 
         // Team validation
-        Route::post('/{team}/validate', [\App\Http\Controllers\Web\TeamController::class, 'validate'])
+        Route::post('/{team}/validate', [\App\Http\Controllers\Web\TeamController::class, 'validateTeam'])
             ->middleware('role:chef_master')
             ->name('validate');
 

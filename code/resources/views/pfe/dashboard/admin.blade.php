@@ -1,356 +1,382 @@
 @extends('layouts.admin')
 
-@section('title', __('Administration Dashboard'))
-@section('page-title', __('Administration Dashboard'))
+@section('title', 'Admin Dashboard - PFE Platform')
+@section('page-title', 'Admin Dashboard')
 
-@section('breadcrumbs')
-<span class="text-gray-500">{{ __('Home') }} / {{ __('Admin Dashboard') }}</span>
+@section('breadcrumb')
+<li class="breadcrumb-item active">Dashboard</li>
 @endsection
 
-@section('content')
-<div class="container mx-auto px-6 py-8">
-    <!-- System Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Subjects -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">{{ __('Total Subjects') }}</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['total_subjects'] ?? 0 }}</p>
-                </div>
-                <div class="bg-blue-100 p-3 rounded-full">
-                    <i class="fas fa-book text-blue-600 text-xl"></i>
-                </div>
+@section('content'>
+<!-- Small boxes (Stat box) -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ $stats['total_subjects'] ?? 0 }}</h3>
+                <p>Total Subjects</p>
             </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-green-600 text-sm font-medium">
-                    {{ $stats['approved_subjects'] ?? 0 }} {{ __('approved') }}
-                </span>
-                <span class="text-yellow-600 text-sm font-medium">
-                    {{ $stats['pending_subjects'] ?? 0 }} {{ __('pending') }}
-                </span>
+            <div class="icon">
+                <i class="fas fa-book"></i>
             </div>
-        </div>
-
-        <!-- Active Teams -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">{{ __('Active Teams') }}</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['total_teams'] ?? 0 }}</p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-full">
-                    <i class="fas fa-users text-green-600 text-xl"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-green-600 text-sm font-medium">
-                    {{ $stats['validated_teams'] ?? 0 }} {{ __('validated') }}
-                </span>
-                <span class="text-gray-600 text-sm font-medium">
-                    {{ $stats['avg_team_size'] ?? 0 }} {{ __('avg size') }}
-                </span>
-            </div>
-        </div>
-
-        <!-- Running Projects -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">{{ __('Running Projects') }}</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['active_projects'] ?? 0 }}</p>
-                </div>
-                <div class="bg-yellow-100 p-3 rounded-full">
-                    <i class="fas fa-project-diagram text-yellow-600 text-xl"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-yellow-600 text-sm font-medium">
-                    {{ $stats['avg_progress'] ?? 0 }}% {{ __('avg progress') }}
-                </span>
-                <span class="text-green-600 text-sm font-medium">
-                    {{ $stats['completed_projects'] ?? 0 }} {{ __('completed') }}
-                </span>
-            </div>
-        </div>
-
-        <!-- Defenses Scheduled -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">{{ __('Defenses Scheduled') }}</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $stats['scheduled_defenses'] ?? 0 }}</p>
-                </div>
-                <div class="bg-purple-100 p-3 rounded-full">
-                    <i class="fas fa-graduation-cap text-purple-600 text-xl"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-purple-600 text-sm font-medium">
-                    {{ $stats['upcoming_defenses'] ?? 0 }} {{ __('this month') }}
-                </span>
-                <span class="text-green-600 text-sm font-medium">
-                    {{ $stats['completed_defenses'] ?? 0 }} {{ __('completed') }}
-                </span>
-            </div>
+            <a href="{{ route('pfe.subjects.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <!-- Pending Actions -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Pending Actions') }}</h3>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ $stats['total_teams'] ?? 0 }}</h3>
+                <p>Active Teams</p>
             </div>
-            <div class="p-6">
-                <div class="space-y-4">
-                    @if(isset($pendingActions))
-                    @foreach($pendingActions as $action)
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-{{ $action['color'] }}-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-{{ $action['icon'] }} text-{{ $action['color'] }}-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ $action['title'] }}</p>
-                                <p class="text-xs text-gray-500">{{ $action['description'] }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $action['color'] }}-100 text-{{ $action['color'] }}-800">
-                                {{ $action['count'] }}
-                            </span>
-                            <a href="{{ $action['url'] }}"
-                               class="text-indigo-600 text-sm hover:text-indigo-500">
-                                {{ __('View') }} →
-                            </a>
-                        </div>
-                    </div>
-                    @endforeach
-                    @else
-                    <!-- Default pending actions -->
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-clock text-yellow-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ __('Subject Validations') }}</p>
-                                <p class="text-xs text-gray-500">{{ __('Subjects waiting for approval') }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                {{ $stats['pending_subjects'] ?? 0 }}
-                            </span>
-                            <a href="{{ route('pfe.subjects.index') }}?status=pending"
-                               class="text-indigo-600 text-sm hover:text-indigo-500">
-                                {{ __('View') }} →
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-red-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ __('Team Conflicts') }}</p>
-                                <p class="text-xs text-gray-500">{{ __('Subject assignment conflicts to resolve') }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                {{ $stats['conflicts'] ?? 0 }}
-                            </span>
-                            <a href="{{ route('pfe.admin.conflicts') }}"
-                               class="text-indigo-600 text-sm hover:text-indigo-500">
-                                {{ __('Resolve') }} →
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-calendar text-blue-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ __('Defense Scheduling') }}</p>
-                                <p class="text-xs text-gray-500">{{ __('Projects ready for defense scheduling') }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {{ $stats['ready_for_defense'] ?? 0 }}
-                            </span>
-                            <a href="{{ route('pfe.defenses.schedule') }}"
-                               class="text-indigo-600 text-sm hover:text-indigo-500">
-                                {{ __('Schedule') }} →
-                            </a>
-                        </div>
-                    </div>
-                    @endif
-                </div>
+            <div class="icon">
+                <i class="fas fa-users"></i>
             </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Recent System Activity') }}</h3>
-            </div>
-            <div class="p-6">
-                @if(isset($recentActivities) && $recentActivities->count() > 0)
-                <div class="space-y-4">
-                    @foreach($recentActivities->take(6) as $activity)
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-{{ $activity->icon ?? 'info' }} text-indigo-600 text-sm"></i>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">{{ $activity->description }}</p>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <p class="text-xs text-gray-500">{{ $activity->created_at->diffForHumans() }}</p>
-                                <span class="text-xs text-gray-400">•</span>
-                                <p class="text-xs text-gray-500">{{ $activity->user->name ?? 'System' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-                @else
-                <div class="text-center py-8">
-                    <i class="fas fa-history text-gray-400 text-4xl mb-4"></i>
-                    <p class="text-gray-500">{{ __('No recent activities') }}</p>
-                </div>
-                @endif
-            </div>
+            <a href="{{ route('pfe.teams.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-
-    <!-- Statistics Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <!-- Project Progress Chart -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Project Progress Overview') }}</h3>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ $stats['total_projects'] ?? 0 }}</h3>
+                <p>Active Projects</p>
             </div>
-            <div class="p-6">
-                <canvas id="projectProgressChart" width="400" height="300"></canvas>
+            <div class="icon">
+                <i class="fas fa-project-diagram"></i>
             </div>
-        </div>
-
-        <!-- Defense Timeline -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Defense Schedule') }}</h3>
-            </div>
-            <div class="p-6">
-                <canvas id="defenseTimelineChart" width="400" height="300"></canvas>
-            </div>
+            <a href="{{ route('pfe.projects.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-
-    <!-- System Health -->
-    @hasrole('admin_pfe')
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">{{ __('System Health & Resources') }}</h3>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- Database -->
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-database text-green-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-sm font-medium text-gray-900">{{ __('Database') }}</h4>
-                    <p class="text-xs text-green-600 mt-1">{{ __('Connected') }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['db_size'] ?? '2.3 GB' }}</p>
-                </div>
-
-                <!-- Storage -->
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-hdd text-blue-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-sm font-medium text-gray-900">{{ __('Storage') }}</h4>
-                    <p class="text-xs text-blue-600 mt-1">{{ $stats['storage_used'] ?? '75%' }} {{ __('used') }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['storage_size'] ?? '45 GB' }} {{ __('total') }}</p>
-                </div>
-
-                <!-- Users Online -->
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-users text-yellow-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-sm font-medium text-gray-900">{{ __('Active Users') }}</h4>
-                    <p class="text-xs text-yellow-600 mt-1">{{ $stats['online_users'] ?? 24 }} {{ __('online') }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['total_users'] ?? 456 }} {{ __('total') }}</p>
-                </div>
-
-                <!-- System Load -->
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-server text-purple-600 text-2xl"></i>
-                    </div>
-                    <h4 class="text-sm font-medium text-gray-900">{{ __('System Load') }}</h4>
-                    <p class="text-xs text-purple-600 mt-1">{{ $stats['cpu_usage'] ?? '45%' }} {{ __('CPU') }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['memory_usage'] ?? '68%' }} {{ __('Memory') }}</p>
-                </div>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>{{ $stats['upcoming_defenses'] ?? 0 }}</h3>
+                <p>Upcoming Defenses</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <a href="{{ route('pfe.defenses.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-    @endhasrole
+    <!-- ./col -->
 </div>
+<!-- /.row -->
+
+<!-- Main row -->
+<div class="row">
+    <!-- Left col -->
+    <section class="col-lg-7 connectedSortable">
+        <!-- Custom tabs (Charts with tabs)-->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    PFE Progress Overview
+                </h3>
+                <div class="card-tools">
+                    <ul class="nav nav-pills ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Area</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#sales-chart" data-toggle="tab">Donut</a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- /.card-header -->
+            <div class="card-body">
+                <div class="tab-content p-0">
+                    <!-- Morris chart - Sales -->
+                    <div class="chart tab-pane active" id="revenue-chart" style="position: relative; height: 300px;">
+                        <canvas id="progressChart" height="300" style="height: 300px;"></canvas>
+                    </div>
+                    <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
+                        <canvas id="statusChart" height="300" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div><!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+        <!-- TO DO List -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ion ion-clipboard mr-1"></i>
+                    Pending Actions
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <ul class="todo-list" data-widget="todo-list">
+                    @if(isset($pendingActions))
+                        @foreach($pendingActions as $action)
+                        <li>
+                            <span class="handle">
+                                <i class="fas fa-ellipsis-v"></i>
+                                <i class="fas fa-ellipsis-v"></i>
+                            </span>
+                            <span class="text">{{ $action['title'] }}</span>
+                            <small class="badge badge-{{ $action['color'] ?? 'warning' }}">{{ $action['count'] ?? 0 }}</small>
+                            <div class="tools">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                        </li>
+                        @endforeach
+                    @else
+                        <li>
+                            <span class="handle">
+                                <i class="fas fa-ellipsis-v"></i>
+                                <i class="fas fa-ellipsis-v"></i>
+                            </span>
+                            <span class="text">Subject Validations Pending</span>
+                            <small class="badge badge-warning">{{ $stats['pending_validations'] ?? 0 }}</small>
+                            <div class="tools">
+                                <a href="{{ route('pfe.subjects.index') }}?status=pending"><i class="fas fa-eye"></i></a>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="handle">
+                                <i class="fas fa-ellipsis-v"></i>
+                                <i class="fas fa-ellipsis-v"></i>
+                            </span>
+                            <span class="text">Teams Without Projects</span>
+                            <small class="badge badge-danger">{{ $stats['teams_without_projects'] ?? 0 }}</small>
+                            <div class="tools">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="handle">
+                                <i class="fas fa-ellipsis-v"></i>
+                                <i class="fas fa-ellipsis-v"></i>
+                            </span>
+                            <span class="text">Overdue Deliverables</span>
+                            <small class="badge badge-info">{{ $stats['overdue_deliverables'] ?? 0 }}</small>
+                            <div class="tools">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                        </li>
+                    @endif
+                </ul>
+            <!-- /.card-body -->
+            <div class="card-footer clearfix">
+                <a href="{{ route('pfe.admin.dashboard') }}" class="btn btn-primary float-right"><i class="fas fa-tasks"></i> View All Tasks</a>
+            </div>
+        </div>
+        <!-- /.card -->
+    </section>
+    <!-- /.Left col -->
+
+    <!-- Right col (fixed) -->
+    <section class="col-lg-5 connectedSortable">
+        <!-- Calendar -->
+        <div class="card bg-gradient-success">
+            <div class="card-header border-0">
+                <h3 class="card-title">
+                    <i class="far fa-calendar-alt"></i>
+                    Defense Calendar
+                </h3>
+                <!-- tools card -->
+                <div class="card-tools">
+                    <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /. tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body pt-0">
+                <!-- The calendar -->
+                <div id="calendar" style="width: 100%">
+                    <div class="text-center p-4">
+                        <i class="fas fa-calendar-alt fa-3x text-white mb-3"></i>
+                        <p class="text-white">{{ $stats['upcoming_defenses'] ?? 0 }} upcoming defenses this month</p>
+                        <a href="{{ route('pfe.defenses.index') }}" class="btn btn-light btn-sm">View Schedule</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+        <!-- solid sales graph -->
+        <div class="card bg-gradient-info">
+            <div class="card-header border-0">
+                <h3 class="card-title">
+                    <i class="fas fa-th mr-1"></i>
+                    Subject Status Distribution
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-info btn-sm" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer bg-transparent">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <span class="text-white display-4 font-weight-bold">{{ $stats['subjects_approved'] ?? 0 }}</span>
+                        <div class="text-white">Approved</div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-4 text-center">
+                        <span class="text-white display-4 font-weight-bold">{{ $stats['subjects_pending'] ?? 0 }}</span>
+                        <div class="text-white">Pending</div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-4 text-center">
+                        <span class="text-white display-4 font-weight-bold">{{ $stats['subjects_published'] ?? 0 }}</span>
+                        <div class="text-white">Published</div>
+                    </div>
+                    <!-- ./col -->
+                </div>
+                <!-- /.row -->
+            </div>
+        </div>
+        <!-- /.card -->
+
+        <!-- Map card -->
+        <div class="card bg-gradient-primary">
+            <div class="card-header border-0">
+                <h3 class="card-title">
+                    <i class="fas fa-users mr-1"></i>
+                    Team Statistics
+                </h3>
+                <!-- card tools -->
+                <div class="card-tools">
+                    <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="description-block border-right">
+                            <span class="description-percentage text-warning"><i class="fas fa-check"></i></span>
+                            <h5 class="description-header">{{ $stats['teams_complete'] ?? 0 }}</h5>
+                            <span class="description-text">COMPLETE TEAMS</span>
+                        </div>
+                        <!-- /.description-block -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-6">
+                        <div class="description-block">
+                            <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> {{ $stats['team_growth'] ?? 20 }}%</span>
+                            <h5 class="description-header">{{ $stats['teams_forming'] ?? 0 }}</h5>
+                            <span class="description-text">FORMING</span>
+                        </div>
+                        <!-- /.description-block -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </section>
+    <!-- right col -->
+</div>
+<!-- /.row (main row) -->
+
 @endsection
 
 @push('scripts')
 <script>
-// Project Progress Chart
-const progressCtx = document.getElementById('projectProgressChart').getContext('2d');
-const progressChart = new Chart(progressCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['{{ __("Completed") }}', '{{ __("In Progress") }}', '{{ __("Not Started") }}'],
-        datasets: [{
-            data: [{{ $stats['completed_projects'] ?? 0 }}, {{ $stats['active_projects'] ?? 0 }}, {{ $stats['pending_projects'] ?? 0 }}],
-            backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
-});
-
-// Defense Timeline Chart
-const defenseCtx = document.getElementById('defenseTimelineChart').getContext('2d');
-const defenseChart = new Chart(defenseCtx, {
-    type: 'line',
-    data: {
-        labels: @json($stats['defense_timeline_labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']),
-        datasets: [{
-            label: '{{ __("Scheduled Defenses") }}',
-            data: @json($stats['defense_timeline_data'] ?? [5, 8, 12, 15, 20, 18]),
-            borderColor: '#8B5CF6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true
+$(document).ready(function() {
+    // Progress Chart
+    var progressCtx = document.getElementById('progressChart').getContext('2d');
+    var progressChart = new Chart(progressCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            datasets: [{
+                label: 'Projects Progress',
+                data: [12, 19, 3, 5, 2, 3, 9],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
         }
-    }
+    });
+
+    // Status Chart
+    var statusCtx = document.getElementById('statusChart').getContext('2d');
+    var statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Draft', 'Submitted', 'Approved', 'Published'],
+            datasets: [{
+                data: [{{ $stats['subjects_draft'] ?? 0 }}, {{ $stats['subjects_submitted'] ?? 0 }}, {{ $stats['subjects_approved'] ?? 0 }}, {{ $stats['subjects_published'] ?? 0 }}],
+                backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Line Chart
+    var lineCtx = document.getElementById('line-chart').getContext('2d');
+    var lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            datasets: [{
+                label: 'Subject Submissions',
+                backgroundColor: 'rgba(60,141,188,0.9)',
+                borderColor: 'rgba(60,141,188,0.8)',
+                pointRadius: false,
+                pointColor: '#3b8bba',
+                pointStrokeColor: 'rgba(60,141,188,1)',
+                pointHighlightFill: '#fff',
+                pointHighlightStroke: 'rgba(60,141,188,1)',
+                data: [28, 48, 40, 19, 86, 27, 90]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                display: false
+            },
+            scales: {
+                x: {
+                    display: false
+                },
+                y: {
+                    display: false
+                }
+            }
+        }
+    });
 });
 </script>
 @endpush

@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\BlogPost;
-use App\Models\ContactMessage;
-use App\Models\Course;
-use App\Models\Project;
-use App\Models\Publication;
+// Blog functionality disabled - tables not created yet
+// use App\Models\BlogPost;
+// use App\Models\ContactMessage;
+// use App\Models\Course;
+// use App\Models\Project;
+// use App\Models\Publication;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,36 +28,42 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        // Basic statistics
+        // Import PFE models at method level to avoid class-level dependencies
+        $pfeProjectModel = \App\Models\PfeProject::class;
+        $subjectModel = \App\Models\Subject::class;
+        $teamModel = \App\Models\Team::class;
+        $userModel = \App\Models\User::class;
+
+        // Basic PFE statistics
         $stats = [
-            'courses' => Course::count(),
-            'projects' => Project::count(),
-            'publications' => Publication::count(),
-            'blog_posts' => BlogPost::count(),
-            'contact_messages' => ContactMessage::count(),
-            'unread_messages' => ContactMessage::unread()->count(),
+            'total_users' => $userModel::count(),
+            'students' => $userModel::where('role', 'student')->count(),
+            'teachers' => $userModel::where('role', 'teacher')->count(),
+            'subjects' => $subjectModel::count(),
+            'teams' => $teamModel::count(),
+            'projects' => $pfeProjectModel::count(),
         ];
 
-        // Recent activities
-        $recentCourses = Course::latest()->limit(5)->get();
-        $recentProjects = Project::latest()->limit(5)->get();
-        $recentPosts = BlogPost::latest()->limit(5)->get();
-        $recentMessages = ContactMessage::latest()->limit(5)->get();
+        // Recent activities (using existing PFE data)
+        $recentUsers = $userModel::latest()->limit(5)->get();
+        $recentSubjects = $subjectModel::latest()->limit(5)->get();
+        $recentTeams = $teamModel::latest()->limit(5)->get();
+        $recentProjects = $pfeProjectModel::latest()->limit(5)->get();
 
         // Content status breakdown
         $contentStatus = [
-            'published_posts' => BlogPost::published()->count(),
-            'draft_posts' => BlogPost::draft()->count(),
-            'featured_projects' => Project::featured()->count(),
-            'active_courses' => Course::active()->count(),
+            'published_subjects' => $subjectModel::where('status', 'published')->count(),
+            'pending_subjects' => $subjectModel::where('status', 'submitted')->count(),
+            'validated_teams' => $teamModel::where('status', 'validated')->count(),
+            'active_projects' => $pfeProjectModel::where('status', 'in_progress')->count(),
         ];
 
         return view('admin.dashboard', compact(
             'stats',
-            'recentCourses',
+            'recentUsers',
+            'recentSubjects',
+            'recentTeams',
             'recentProjects',
-            'recentPosts',
-            'recentMessages',
             'contentStatus'
         ));
     }

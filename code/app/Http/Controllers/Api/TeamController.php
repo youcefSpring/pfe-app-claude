@@ -190,7 +190,7 @@ class TeamController extends Controller
     /**
      * Validate a team
      */
-    public function validate(Team $team): JsonResponse
+    public function validateTeam(Team $team): JsonResponse
     {
         $this->authorize('validate', $team);
 

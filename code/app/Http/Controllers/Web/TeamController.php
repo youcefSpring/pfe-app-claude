@@ -215,7 +215,7 @@ class TeamController extends Controller
     /**
      * Validate a team
      */
-    public function validate(Team $team): RedirectResponse
+    public function validateTeam(Team $team): RedirectResponse
     {
         $this->authorize('validate', $team);
 
