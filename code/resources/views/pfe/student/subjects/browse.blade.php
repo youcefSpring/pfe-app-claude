@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+@extends('layouts.pfe')
 
 @section('title', 'Browse Subjects - PFE Platform')
-@section('page-title', 'Browse Available Subjects')
+@section('contentheader', 'Browse Available Subjects')
 
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="{{ route('pfe.student.dashboard') }}">Dashboard</a></li>

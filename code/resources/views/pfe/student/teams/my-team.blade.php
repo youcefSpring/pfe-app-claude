@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+@extends('layouts.pfe')
 
 @section('title', 'My Team - PFE Platform')
-@section('page-title', 'My Team')
+@section('contentheader', 'My Team')
 
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="{{ route('pfe.student.dashboard') }}">Dashboard</a></li>

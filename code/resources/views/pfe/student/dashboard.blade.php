@@ -1,286 +1,239 @@
-@extends('layouts.admin')
+@extends('layouts.pfe')
 
 @section('title', 'Student Dashboard - PFE Platform')
-@section('page-title', 'Student Dashboard')
+@section('contentheader', 'Student Dashboard')
 
 @section('breadcrumb')
+<li class="breadcrumb-item"><a href="{{ route('pfe.student.dashboard') }}">Home</a></li>
 <li class="breadcrumb-item active">Dashboard</li>
 @endsection
 
 @section('content')
-<!-- Info boxes -->
+<!-- Statistics Cards -->
 <div class="row">
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-users"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Team Status</span>
-                <span class="info-box-number">
-                    {{ $teamStatus ?? 'Not in Team' }}
-                </span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3>{{ $teamStatus ?? 'No Team' }}</h3>
+                <p>Team Status</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <a href="{{ route('pfe.student.teams.my-team') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
-            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-project-diagram"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Project Status</span>
-                <span class="info-box-number">{{ $projectStatus ?? 'Not Assigned' }}</span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ $projectStatus ?? 'No Project' }}</h3>
+                <p>Project Status</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-project-diagram"></i>
+            </div>
+            <a href="{{ route('pfe.student.projects.my-project') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
-            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-file-alt"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Deliverables</span>
-                <span class="info-box-number">
-                    {{ $stats['completed_deliverables'] ?? 0 }}/{{ $stats['total_deliverables'] ?? 0 }}
-                </span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ $stats['completed_deliverables'] ?? 0 }}/{{ $stats['total_deliverables'] ?? 0 }}</h3>
+                <p>Deliverables</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
-            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-graduation-cap"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Defense Date</span>
-                <span class="info-box-number">{{ $defenseDate ?? 'Not Scheduled' }}</span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ $defenseDate ? 'Scheduled' : 'TBD' }}</h3>
+                <p>Defense Date</p>
             </div>
+            <div class="icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <a href="{{ route('pfe.student.defense.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
 </div>
 
-<!-- Main row -->
-<div class="row">
-    <!-- Left col -->
-    <section class="col-lg-8 connectedSortable">
-
-        <!-- Team Information -->
+<!-- My Team Status -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-users mr-2"></i>
+            My Team Status
+        </h3>
+        <a class="btn btn-primary float-right" href="{{ route('pfe.student.teams.my-team') }}">
+            <i class="fas fa-eye"></i>
+            View Team Details
+        </a>
+    </div>
+    <div class="card-body">
         @if($team ?? null)
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-users mr-1"></i>
-                    My Team
-                </h3>
-                <div class="card-tools">
-                    <a href="{{ route('pfe.student.teams.my-team') }}" class="btn btn-tool">
-                        <i class="fas fa-external-link-alt"></i>
-                    </a>
-                </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Team Name</th>
+                            <th>Members</th>
+                            <th>Status</th>
+                            <th>Project</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ $team->name ?? 'My Team' }}</td>
+                            <td><span class="badge badge-info">{{ $team->members->count() ?? 0 }}/3</span></td>
+                            <td>
+                                <span class="badge badge-{{ $team->status === 'validated' ? 'success' : 'warning' }}">
+                                    {{ ucfirst($team->status ?? 'forming') }}
+                                </span>
+                            </td>
+                            <td>{{ $team->project->title ?? 'Not Assigned' }}</td>
+                            <td>
+                                <div class="progress progress-sm">
+                                    <div class="progress-bar bg-primary" style="width: {{ $projectProgress ?? 0 }}%"></div>
+                                </div>
+                                <small>{{ $projectProgress ?? 0 }}% Complete</small>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Team Name:</strong> {{ $team->name }}<br>
-                        <strong>Members:</strong> {{ $team->members->count() }}/{{ $team->max_members ?? 3 }}<br>
-                        <strong>Status:</strong>
-                        <span class="badge badge-{{ $team->status === 'complete' ? 'success' : 'warning' }}">
-                            {{ ucfirst($team->status) }}
-                        </span>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Project:</strong> {{ $team->project->title ?? 'Not Assigned' }}<br>
-                        <strong>Supervisor:</strong> {{ $team->project->supervisor->full_name ?? 'TBD' }}
-                    </div>
-                </div>
-            </div>
-        </div>
         @else
-        <div class="card bg-warning">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                    No Team Yet
-                </h3>
-            </div>
-            <div class="card-body">
-                <p>You are not currently part of any team. You need to either create a team or join an existing one.</p>
-                <div class="btn-group" role="group">
+            <div class="alert alert-warning text-center my-4">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                You are not part of any team yet. Create or join a team to get started.
+                <div class="mt-3">
                     <a href="{{ route('pfe.student.teams.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Create Team
                     </a>
-                    <a href="{{ route('pfe.student.teams.browse') }}" class="btn btn-secondary">
+                    <a href="{{ route('pfe.student.teams.browse') }}" class="btn btn-outline-primary">
                         <i class="fas fa-search"></i> Browse Teams
                     </a>
                 </div>
             </div>
-        </div>
         @endif
+    </div>
+</div>
 
-        <!-- Project Progress -->
-        @if($project ?? null)
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-tasks mr-1"></i>
-                    Project Progress
-                </h3>
-                <div class="card-tools">
-                    <a href="{{ route('pfe.student.projects.my-project') }}" class="btn btn-tool">
-                        <i class="fas fa-external-link-alt"></i>
-                    </a>
-                </div>
+<!-- My Tasks -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-tasks mr-2"></i>
+            My Tasks
+        </h3>
+        <a class="btn btn-warning float-right" href="#">
+            <i class="fas fa-plus"></i>
+            Add Task
+        </a>
+    </div>
+    <div class="card-body">
+        @if(isset($todos) && count($todos) > 0)
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($todos as $todo)
+                            <tr>
+                                <td>{{ $todo['task'] }}</td>
+                                <td>
+                                    @if($todo['priority'] === 'high')
+                                        <span class="badge badge-danger">High</span>
+                                    @elseif($todo['priority'] === 'medium')
+                                        <span class="badge badge-warning">Medium</span>
+                                    @else
+                                        <span class="badge badge-info">Low</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($todo['completed'])
+                                        <span class="badge badge-success">Completed</span>
+                                    @else
+                                        <span class="badge badge-warning">Pending</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(!$todo['completed'])
+                                        <a href="#" title="Mark Complete">
+                                            <i class="fa fa-check text-success"></i>
+                                        </a>
+                                    @endif
+                                    <a href="#" title="Edit" class="ml-2">
+                                        <i class="fa fa-edit text-primary"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <div class="progress-group">
-                    <span class="float-right"><b>{{ $projectProgress ?? 0 }}%</b></span>
-                    <span>Overall Progress</span>
-                    <div class="progress progress-sm">
-                        <div class="progress-bar bg-primary" style="width: {{ $projectProgress ?? 0 }}%"></div>
-                    </div>
-                </div>
-
-                @if($milestones ?? [])
-                    @foreach($milestones as $milestone)
-                    <div class="progress-group">
-                        <span class="float-right"><b>{{ $milestone['completed'] ? '100' : '0' }}%</b></span>
-                        <span>{{ $milestone['title'] }}</span>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-{{ $milestone['completed'] ? 'success' : 'secondary' }}"
-                                 style="width: {{ $milestone['completed'] ? '100' : '0' }}%"></div>
-                        </div>
-                    </div>
-                    @endforeach
-                @endif
+        @else
+            <div class="alert alert-info text-center my-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                No tasks found. All caught up!
             </div>
-        </div>
         @endif
+    </div>
+</div>
 
-        <!-- Recent Activities -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-clock mr-1"></i>
-                    Recent Activities
-                </h3>
+<!-- Recent Activities -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-clock mr-2"></i>
+            Recent Activities
+        </h3>
+        <a class="btn btn-info float-right" href="#">
+            <i class="fas fa-history"></i>
+            View All
+        </a>
+    </div>
+    <div class="card-body">
+        @if(isset($recentActivities) && count($recentActivities) > 0)
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentActivities as $activity)
+                            <tr>
+                                <td>{{ $activity['title'] ?? 'Activity' }}</td>
+                                <td>{{ $activity['description'] ?? 'No description' }}</td>
+                                <td>
+                                    <small class="text-muted">{{ $activity['date'] ?? 'Recently' }}</small>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    @forelse($recentActivities ?? [] as $activity)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>{{ $activity['title'] }}</strong><br>
-                            <small class="text-muted">{{ $activity['description'] }}</small>
-                        </div>
-                        <small class="text-muted">{{ $activity['date'] }}</small>
-                    </li>
-                    @empty
-                    <li class="list-group-item">No recent activities</li>
-                    @endforelse
-                </ul>
+        @else
+            <div class="alert alert-info text-center my-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                No recent activities to display.
             </div>
-        </div>
-
-    </section>
-
-    <!-- Right col -->
-    <section class="col-lg-4">
-
-        <!-- Calendar -->
-        <div class="card bg-gradient-success">
-            <div class="card-header border-0">
-                <h3 class="card-title">
-                    <i class="far fa-calendar-alt"></i>
-                    Important Dates
-                </h3>
-            </div>
-            <div class="card-body pt-0">
-                <div class="text-center p-4">
-                    @if($defenseDate ?? null)
-                        <i class="fas fa-graduation-cap fa-3x text-white mb-3"></i>
-                        <h4 class="text-white">Defense Scheduled</h4>
-                        <p class="text-white">{{ $defenseDate }}</p>
-                    @else
-                        <i class="fas fa-calendar-alt fa-3x text-white mb-3"></i>
-                        <h4 class="text-white">Defense Not Scheduled</h4>
-                        <p class="text-white">Complete your project to schedule defense</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- To-Do List -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-list mr-1"></i>
-                    My Tasks
-                </h3>
-            </div>
-            <div class="card-body">
-                <ul class="todo-list" data-widget="todo-list">
-                    @forelse($todos ?? [] as $todo)
-                    <li class="{{ $todo['completed'] ? 'done' : '' }}">
-                        <span class="text">{{ $todo['task'] }}</span>
-                        <small class="badge badge-{{ $todo['priority'] === 'high' ? 'danger' : ($todo['priority'] === 'medium' ? 'warning' : 'info') }}">
-                            {{ $todo['priority'] }}
-                        </small>
-                        <div class="tools">
-                            @if(!$todo['completed'])
-                                <i class="fas fa-check"></i>
-                            @endif
-                        </div>
-                    </li>
-                    @empty
-                    <li>No pending tasks</li>
-                    @endforelse
-                </ul>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-bolt mr-1"></i>
-                    Quick Actions
-                </h3>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    @if(!($team ?? null))
-                        <a href="{{ route('pfe.student.teams.create') }}" class="btn btn-primary btn-sm mb-2">
-                            <i class="fas fa-plus"></i> Create Team
-                        </a>
-                        <a href="{{ route('pfe.student.teams.browse') }}" class="btn btn-outline-primary btn-sm mb-2">
-                            <i class="fas fa-search"></i> Join Team
-                        </a>
-                    @endif
-
-                    @if($team ?? null && !($project ?? null))
-                        <a href="{{ route('pfe.student.subjects.browse') }}" class="btn btn-success btn-sm mb-2">
-                            <i class="fas fa-book"></i> Browse Subjects
-                        </a>
-                        <a href="{{ route('pfe.student.subjects.preferences') }}" class="btn btn-outline-success btn-sm mb-2">
-                            <i class="fas fa-heart"></i> Set Preferences
-                        </a>
-                    @endif
-
-                    @if($project ?? null)
-                        <a href="{{ route('pfe.student.projects.deliverables', ['project' => $project->id]) }}" class="btn btn-warning btn-sm mb-2">
-                            <i class="fas fa-upload"></i> Upload Deliverable
-                        </a>
-                        <a href="{{ route('pfe.student.projects.communication', ['project' => $project->id]) }}" class="btn btn-outline-warning btn-sm mb-2">
-                            <i class="fas fa-comments"></i> Contact Supervisor
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-    </section>
+        @endif
+    </div>
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    // Initialize AdminLTE components
-    $('.todo-list').todoList();
-});
-</script>
-@endpush

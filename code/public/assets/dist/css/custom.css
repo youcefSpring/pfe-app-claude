@@ -1,0 +1,240 @@
+*{
+    direction: rtl !important;
+}
+.layout-fixed .main-sidebar {
+    right: 0;
+}
+.brand-image {
+    float: right;
+}
+.content-wrapper, .main-footer, .main-header {
+    margin-left: 0px;
+    margin-right: 250px;
+}
+.mr-auto-navbav{
+    margin-right: auto!important;
+}
+.navbar-expand .navbar-nav .nav-link {
+    padding-right: 1rem;
+    padding-left: 1rem;
+}
+
+[class*=icheck-]>input:first-child:checked+input[type=hidden]+label::after,
+[class*=icheck-]>input:first-child:checked+label::after {
+    right: 15px;
+    left: auto;
+}
+.nav-sidebar .nav-link>.right,
+.nav-sidebar .nav-link>p>.right {
+    left: 1rem;
+    right: auto;
+}
+.nav-sidebar .nav-link>.right:nth-child(2),
+.nav-sidebar .nav-link>p>.right:nth-child(2) {
+    left: 2.2rem;
+    right: auto;
+}
+.small-box .icon>i {
+    left: 15px;
+    right: auto;
+}
+@media (min-width: 992px){
+    .sidebar-mini.sidebar-collapse .content-wrapper, .sidebar-mini.sidebar-collapse .main-footer, .sidebar-mini.sidebar-collapse .main-header {
+        margin-right: 4.6rem!important;
+    }
+    .sidebar-mini.sidebar-collapse .content-wrapper, .sidebar-mini.sidebar-collapse .main-footer, .sidebar-mini.sidebar-collapse .main-header {
+        margin-right: 4.6rem!important;
+        margin-left: 0!important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .main-sidebar, .main-sidebar::before {
+        box-shadow: none !important;
+        margin-right: -250px;
+    }
+
+    .content-wrapper, .content-wrapper::before, .main-footer, .main-footer::before, .main-header, .main-header::before {
+        margin-right: 0;
+    }
+
+    .sidebar-open .main-sidebar, .sidebar-open .main-sidebar::before {
+        margin-right: 0;
+    }
+}
+/* Main Navbar RTL Styles */
+.main-header {
+    direction: rtl;
+}
+
+.navbar-nav {
+    flex-direction: row;
+}
+
+/* Left navbar links - RTL adjustment */
+.navbar-nav > li.nav-item {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+/* Right navbar links - RTL adjustment */
+.navbar-nav.ml-auto {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* Dropdown menu RTL adjustments */
+.dropdown-menu {
+    text-align: right;
+    left: auto !important;
+    right: 0 !important;
+}
+
+.dropdown-menu-right {
+    left: 0 !important;
+    right: auto !important;
+}
+
+/* Badge positioning RTL */
+.navbar-badge {
+    margin-left: 0;
+    margin-right: 0.25rem;
+}
+
+/* Media object RTL adjustments */
+.media {
+    flex-direction: row-reverse;
+}
+
+.media .img-size-50.mr-3 {
+    margin-right: 0 !important;
+    margin-left: 1rem !important;
+}
+
+/* Float adjustments for RTL */
+.float-right {
+    float: left !important;
+}
+
+.float-left {
+    float: right !important;
+}
+
+/* Text alignment */
+.text-right {
+    text-align: left !important;
+}
+
+.text-left {
+    text-align: right !important;
+}
+
+/* Dropdown item arrow RTL */
+.dropdown-item {
+    text-align: right;
+}
+
+/* Fullscreen button adjustment */
+.nav-link[data-widget="fullscreen"] {
+    margin-left: 0;
+    margin-right: 0.5rem;
+}
+
+/* Language dropdown RTL */
+.nav-link.dropdown-toggle::after {
+    margin-left: 0;
+    margin-right: 0.255em;
+}
+
+/* Notification and message counters */
+.badge {
+    left: auto;
+    right: 5px;
+}
+
+/* RTL specific spacing */
+.mr-1, .mr-2, .mr-3, .mr-4, .mr-5 {
+    margin-right: 0 !important;
+    margin-left: 0.25rem !important;
+}
+
+/* Adjust dropdown dividers */
+.dropdown-divider {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Content Header RTL Styles */
+.content-header {
+    direction: rtl;
+}
+
+.content-header .breadcrumb {
+    float: left !important;
+}
+
+.content-header .col-sm-6:first-child {
+    text-align: right;
+}
+
+.content-header .col-sm-6:last-child {
+    text-align: left;
+}
+
+.content-header .breadcrumb-item + .breadcrumb-item::before {
+    float: right;
+    padding-left: 0.5rem;
+    padding-right: 0;
+    content: var(--bs-breadcrumb-divider, "/");
+}
+
+
+/* Breadcrumb RTL adjustments */
+.breadcrumb {
+    padding-right: 0;
+    padding-left: 1rem;
+}
+
+.breadcrumb-item {
+    float: right;
+}
+
+/* Page title alignment */
+.m-12 {
+    margin: 12px 0 !important;
+    text-align: right;
+}
+
+/* Container fluid adjustments */
+.container-fluid {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Row adjustments for RTL */
+.row {
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+/* Column padding RTL */
+[class*="col-"] {
+    padding-right: 15px;
+    padding-left: 15px;
+}
