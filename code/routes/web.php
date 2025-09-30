@@ -7,6 +7,9 @@ use App\Http\Controllers\Web\TeamController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\DefenseController;
 use App\Http\Controllers\Web\AdminController;
+use App\Http\Controllers\Web\GradeController;
+use App\Http\Controllers\Web\SubjectPreferenceController;
+use App\Http\Controllers\Web\AllocationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -321,6 +324,69 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [AuthController::class, 'notifications'])->name('index');
         Route::post('/{notification}/read', [AuthController::class, 'markNotificationRead'])->name('mark-read');
         Route::post('/mark-all-read', [AuthController::class, 'markAllNotificationsRead'])->name('mark-all-read');
+    });
+
+    // =====================================================================
+    // GRADES MANAGEMENT ROUTES
+    // =====================================================================
+
+    Route::prefix('grades')->name('grades.')->group(function () {
+        // Students can manage their grades
+        Route::middleware('role:student')->group(function () {
+            Route::get('/', [GradeController::class, 'index'])->name('index');
+            Route::get('/create', [GradeController::class, 'create'])->name('create');
+            Route::post('/', [GradeController::class, 'store'])->name('store');
+            Route::get('/{grade}/edit', [GradeController::class, 'edit'])->name('edit');
+            Route::put('/{grade}', [GradeController::class, 'update'])->name('update');
+            Route::post('/{grade}/submit', [GradeController::class, 'submitForVerification'])->name('submit');
+            Route::delete('/{grade}', [GradeController::class, 'destroy'])->name('destroy');
+        });
+
+        // Admins and department heads can verify grades
+        Route::middleware('role:admin,department_head')->group(function () {
+            Route::get('/pending', [GradeController::class, 'pendingVerification'])->name('pending');
+            Route::post('/{grade}/verify', [GradeController::class, 'verify'])->name('verify');
+            Route::post('/{grade}/reject', [GradeController::class, 'reject'])->name('reject');
+            Route::post('/batch-verify', [GradeController::class, 'batchVerify'])->name('batch-verify');
+        });
+
+        Route::get('/{grade}', [GradeController::class, 'show'])->name('show');
+    });
+
+    // =====================================================================
+    // SUBJECT PREFERENCES ROUTES
+    // =====================================================================
+
+    Route::prefix('preferences')->name('preferences.')->middleware('role:student')->group(function () {
+        Route::get('/', [SubjectPreferenceController::class, 'index'])->name('index');
+        Route::get('/create', [SubjectPreferenceController::class, 'create'])->name('create');
+        Route::post('/', [SubjectPreferenceController::class, 'store'])->name('store');
+        Route::put('/', [SubjectPreferenceController::class, 'update'])->name('update');
+        Route::delete('/', [SubjectPreferenceController::class, 'destroy'])->name('destroy');
+        Route::post('/submit', [SubjectPreferenceController::class, 'submit'])->name('submit');
+    });
+
+    // =====================================================================
+    // ALLOCATION MANAGEMENT ROUTES
+    // =====================================================================
+
+    Route::prefix('allocations')->name('allocations.')->group(function () {
+        // Students can view their allocation
+        Route::middleware('role:student')->group(function () {
+            Route::get('/my-allocation', [AllocationController::class, 'myAllocation'])->name('my-allocation');
+        });
+
+        // Admins and department heads can manage allocations
+        Route::middleware('role:admin,department_head')->group(function () {
+            Route::get('/', [AllocationController::class, 'index'])->name('index');
+            Route::get('/deadlines', [AllocationController::class, 'deadlines'])->name('deadlines');
+            Route::post('/deadlines', [AllocationController::class, 'storeDeadline'])->name('deadlines.store');
+            Route::put('/deadlines/{deadline}', [AllocationController::class, 'updateDeadline'])->name('deadlines.update');
+            Route::post('/run-allocation', [AllocationController::class, 'runAllocation'])->name('run-allocation');
+            Route::get('/results', [AllocationController::class, 'results'])->name('results');
+            Route::post('/{allocation}/confirm', [AllocationController::class, 'confirm'])->name('confirm');
+            Route::post('/{allocation}/reject', [AllocationController::class, 'reject'])->name('reject');
+        });
     });
 });
 

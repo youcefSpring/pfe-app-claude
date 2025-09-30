@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -139,6 +140,30 @@ class User extends Authenticatable
             })
             ->with('team')
             ->first()?->team;
+    }
+
+    /**
+     * Get the subject preferences for this student.
+     */
+    public function subjectPreferences(): HasMany
+    {
+        return $this->hasMany(SubjectPreference::class, 'student_id');
+    }
+
+    /**
+     * Get the grades for this student.
+     */
+    public function grades(): HasMany
+    {
+        return $this->hasMany(StudentGrade::class, 'student_id');
+    }
+
+    /**
+     * Get the subject allocation for this student.
+     */
+    public function subjectAllocation()
+    {
+        return $this->hasOne(SubjectAllocation::class, 'student_id');
     }
 
     // Relationships for Department Heads

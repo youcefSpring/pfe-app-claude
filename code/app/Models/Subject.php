@@ -104,6 +104,22 @@ class Subject extends Model
         return $this->hasMany(SubjectConflict::class);
     }
 
+    /**
+     * Get the student preferences for this subject.
+     */
+    public function preferences(): HasMany
+    {
+        return $this->hasMany(SubjectPreference::class);
+    }
+
+    /**
+     * Get the allocations for this subject.
+     */
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(SubjectAllocation::class);
+    }
+
     // Scopes
     /**
      * Scope to get validated subjects.

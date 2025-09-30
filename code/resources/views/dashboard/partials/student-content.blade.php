@@ -105,6 +105,147 @@
     </div>
 </div>
 
+<!-- Academic Performance -->
+<div class="col-md-4 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="bi bi-graph-up me-2"></i>Academic Performance
+            </h6>
+        </div>
+        <div class="card-body">
+            @php
+                $verifiedGrades = auth()->user()->grades()->verified()->count();
+                $totalGrades = auth()->user()->grades()->count();
+                $pendingGrades = auth()->user()->grades()->pendingVerification()->count();
+                $gradeController = app(\App\Http\Controllers\Web\GradeController::class);
+                $currentAverage = $gradeController->calculateAverage(auth()->user());
+            @endphp
+            <div class="row text-center">
+                <div class="col-4">
+                    <h4 class="text-success mb-1">{{ $verifiedGrades }}</h4>
+                    <small class="text-muted">Verified</small>
+                </div>
+                <div class="col-4">
+                    <h4 class="text-warning mb-1">{{ $pendingGrades }}</h4>
+                    <small class="text-muted">Pending</small>
+                </div>
+                <div class="col-4">
+                    <h4 class="text-primary mb-1">{{ number_format($currentAverage, 2) }}</h4>
+                    <small class="text-muted">Average</small>
+                </div>
+            </div>
+            @if($totalGrades == 0)
+                <div class="text-center mt-3">
+                    <a href="{{ route('grades.create') }}" class="btn btn-primary btn-sm">Add Grades</a>
+                </div>
+            @else
+                <div class="text-center mt-3">
+                    <a href="{{ route('grades.index') }}" class="btn btn-outline-primary btn-sm">Manage Grades</a>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Subject Preferences & Allocation -->
+<div class="col-md-6 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="bi bi-list-check me-2"></i>Subject Preferences
+            </h6>
+        </div>
+        <div class="card-body">
+            @php
+                $preferences = auth()->user()->subjectPreferences()->count();
+                $currentDeadline = \App\Models\AllocationDeadline::active()->first();
+                $allocation = auth()->user()->subjectAllocation;
+            @endphp
+
+            @if($allocation)
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                        <i class="bi bi-check-circle text-success"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Subject Allocated</h6>
+                        <small class="text-muted">{{ $allocation->subject->title }}</small>
+                        <br>
+                        <small class="text-info">{{ $allocation->getPreferenceLabel() }} - {{ ucfirst($allocation->status) }}</small>
+                    </div>
+                </div>
+            @elseif($currentDeadline && $currentDeadline->deadline->isFuture())
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                        <i class="bi bi-clock text-warning"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Preferences Open</h6>
+                        <small class="text-muted">{{ $preferences }} preferences selected</small>
+                        <br>
+                        <small class="text-warning">Deadline: {{ $currentDeadline->deadline->format('M d, Y H:i') }}</small>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ route('preferences.index') }}" class="btn btn-primary btn-sm me-2">Manage Preferences</a>
+                    @if($preferences == 0)
+                        <a href="{{ route('preferences.create') }}" class="btn btn-outline-primary btn-sm">Add Preferences</a>
+                    @endif
+                </div>
+            @else
+                <div class="d-flex align-items-center">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle p-2 me-3">
+                        <i class="bi bi-hourglass text-secondary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Waiting for Allocation</h6>
+                        <small class="text-muted">{{ $preferences }} preferences submitted</small>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Allocation Status -->
+<div class="col-md-6 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="bi bi-calendar-event me-2"></i>Allocation Timeline
+            </h6>
+        </div>
+        <div class="card-body">
+            @if($currentDeadline)
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">{{ $currentDeadline->title }}</h6>
+                            <small class="text-muted">{{ $currentDeadline->description }}</small>
+                            <br>
+                            @if($currentDeadline->deadline->isFuture())
+                                <span class="badge bg-warning">{{ $currentDeadline->deadline->diffForHumans() }}</span>
+                            @else
+                                <span class="badge bg-info">Deadline passed</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ route('allocations.my-allocation') }}" class="btn btn-outline-info btn-sm">View My Allocation</a>
+                </div>
+            @else
+                <div class="text-center">
+                    <i class="bi bi-calendar-x text-muted" style="font-size: 2rem;"></i>
+                    <p class="text-muted mt-2">No active allocation period</p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
 <!-- Recent Activity -->
 <div class="col-12 mb-4">
     <div class="card">

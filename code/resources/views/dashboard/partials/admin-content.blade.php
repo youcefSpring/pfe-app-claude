@@ -162,35 +162,76 @@
     </div>
 </div>
 
-<!-- Rooms Management Card -->
+<!-- Grade Verification Card -->
 <div class="col-md-3 mb-4">
-    <div class="card border-info">
-        <div class="card-header bg-info text-white">
+    <div class="card border-warning">
+        <div class="card-header bg-warning text-white">
             <h6 class="card-title mb-0">
-                <i class="bi bi-building me-2"></i>Rooms
+                <i class="bi bi-clipboard-check me-2"></i>Grade Verification
             </h6>
         </div>
         <div class="card-body">
             @php
-                $totalRooms = \App\Models\Room::count();
-                $availableRooms = \App\Models\Room::where('is_available', true)->count();
-                $roomsInUse = \App\Models\Room::has('defenses')->count();
+                $pendingGrades = \App\Models\StudentGrade::where('status', 'pending_verification')->count();
+                $verifiedGrades = \App\Models\StudentGrade::where('status', 'verified')->count();
+                $totalGrades = \App\Models\StudentGrade::count();
             @endphp
             <div class="row text-center">
                 <div class="col-12 mb-2">
-                    <h3 class="text-info mb-1">{{ $totalRooms }}</h3>
-                    <small class="text-muted">Total Rooms</small>
+                    <h3 class="text-warning mb-1">{{ $pendingGrades }}</h3>
+                    <small class="text-muted">Pending Verification</small>
                 </div>
                 <div class="col-6">
-                    <h5 class="text-success mb-1">{{ $availableRooms }}</h5>
-                    <small class="text-muted">Available</small>
+                    <h5 class="text-success mb-1">{{ $verifiedGrades }}</h5>
+                    <small class="text-muted">Verified</small>
                 </div>
                 <div class="col-6">
-                    <h5 class="text-warning mb-1">{{ $roomsInUse }}</h5>
-                    <small class="text-muted">In Use</small>
+                    <h5 class="text-info mb-1">{{ $totalGrades }}</h5>
+                    <small class="text-muted">Total</small>
                 </div>
             </div>
-            <a href="{{ route('admin.rooms') }}" class="btn btn-info btn-sm w-100 mt-3">Manage Rooms</a>
+            <a href="{{ route('grades.pending') }}" class="btn btn-warning btn-sm w-100 mt-3">Review Grades</a>
+        </div>
+    </div>
+</div>
+
+<!-- Allocation Management Card -->
+<div class="col-md-3 mb-4">
+    <div class="card border-info">
+        <div class="card-header bg-info text-white">
+            <h6 class="card-title mb-0">
+                <i class="bi bi-calendar-event me-2"></i>Subject Allocation
+            </h6>
+        </div>
+        <div class="card-body">
+            @php
+                $activeDeadline = \App\Models\AllocationDeadline::where('status', 'active')->first();
+                $totalAllocations = \App\Models\SubjectAllocation::count();
+                $confirmedAllocations = \App\Models\SubjectAllocation::where('status', 'confirmed')->count();
+            @endphp
+            <div class="row text-center">
+                <div class="col-12 mb-2">
+                    @if($activeDeadline)
+                        <h3 class="text-info mb-1">{{ $activeDeadline->deadline->diffForHumans() }}</h3>
+                        <small class="text-muted">Next Deadline</small>
+                    @else
+                        <h3 class="text-muted mb-1">-</h3>
+                        <small class="text-muted">No Active Deadline</small>
+                    @endif
+                </div>
+                <div class="col-6">
+                    <h5 class="text-success mb-1">{{ $confirmedAllocations }}</h5>
+                    <small class="text-muted">Confirmed</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-warning mb-1">{{ $totalAllocations - $confirmedAllocations }}</h5>
+                    <small class="text-muted">Pending</small>
+                </div>
+            </div>
+            <div class="d-grid gap-2 mt-3">
+                <a href="{{ route('allocations.deadlines') }}" class="btn btn-info btn-sm">Manage Deadlines</a>
+                <a href="{{ route('allocations.results') }}" class="btn btn-outline-info btn-sm">View Results</a>
+            </div>
         </div>
     </div>
 </div>

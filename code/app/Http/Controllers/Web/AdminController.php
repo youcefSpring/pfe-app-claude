@@ -303,6 +303,7 @@ class AdminController extends Controller
             'academic_year' => 'required|string|max:20',
             'semester' => 'nullable|string|max:10',
             'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
         ]);
 
         try {
@@ -339,7 +340,7 @@ class AdminController extends Controller
             'academic_year' => 'required|string|max:20',
             'semester' => 'nullable|string|max:10',
             'description' => 'nullable|string|max:500',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
         ]);
 
         try {
