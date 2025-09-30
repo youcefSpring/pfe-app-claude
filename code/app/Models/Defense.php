@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Defense extends Model
 {
@@ -14,41 +16,25 @@ class Defense extends Model
         'project_id',
         'room_id',
         'defense_date',
-        'start_time',
-        'end_time',
+        'defense_time',
         'duration',
-        'jury_president_id',
-        'jury_examiner_id',
-        'jury_supervisor_id',
         'status',
         'notes',
         'final_grade',
-        'grade_president',
-        'grade_examiner',
-        'grade_supervisor',
-        'observations',
-        'pv_generated',
-        'pv_file_path',
-        'scheduled_at',
-        'completed_at',
     ];
 
-    protected $casts = [
-        'defense_date' => 'date',
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
-        'final_grade' => 'decimal:2',
-        'grade_president' => 'decimal:2',
-        'grade_examiner' => 'decimal:2',
-        'grade_supervisor' => 'decimal:2',
-        'pv_generated' => 'boolean',
-        'scheduled_at' => 'datetime',
-        'completed_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'defense_date' => 'date',
+            'defense_time' => 'datetime:H:i',
+            'final_grade' => 'decimal:2',
+        ];
+    }
 
     public function project(): BelongsTo
     {
-        return $this->belongsTo(PfeProject::class, 'project_id');
+        return $this->belongsTo(Project::class);
     }
 
     public function room(): BelongsTo
@@ -56,18 +42,48 @@ class Defense extends Model
         return $this->belongsTo(Room::class);
     }
 
-    public function juryPresident(): BelongsTo
+    public function jury(): HasMany
     {
-        return $this->belongsTo(User::class, 'jury_president_id');
+        return $this->hasMany(DefenseJury::class);
     }
 
-    public function juryExaminer(): BelongsTo
+    public function report(): HasOne
     {
-        return $this->belongsTo(User::class, 'jury_examiner_id');
+        return $this->hasOne(DefenseReport::class);
     }
 
-    public function jurySupervisor(): BelongsTo
+    public function scopeScheduled($query)
     {
-        return $this->belongsTo(User::class, 'jury_supervisor_id');
+        return $query->where('status', 'scheduled');
+    }
+
+    public function scopeUpcoming($query)
+    {
+        return $query->where('defense_date', '>=', now()->toDateString())
+            ->where('status', 'scheduled');
+    }
+
+    public function complete(float $finalGrade, string $notes = null): bool
+    {
+        $this->update([
+            'status' => 'completed',
+            'final_grade' => $finalGrade,
+            'notes' => $notes,
+        ]);
+
+        // Mark project as defended
+        $this->project->markAsDefended();
+
+        return true;
+    }
+
+    public function getJuryByRole(string $role): ?DefenseJury
+    {
+        return $this->jury()->where('role', $role)->first();
+    }
+
+    public function hasJuryMember(User $teacher): bool
+    {
+        return $this->jury()->where('teacher_id', $teacher->id)->exists();
     }
 }

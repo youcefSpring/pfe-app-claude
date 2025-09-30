@@ -12,25 +12,35 @@ class RoleMiddleware
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!auth()->check()) {
-            return redirect()->route('login');
+        if (!$request->user()) {
+            return $this->unauthorized($request);
         }
 
-        $user = auth()->user();
-        $userRole = $user->role;
+        $userRole = $request->user()->role;
 
-        // Check if user has any of the required roles
-        foreach ($roles as $role) {
-            if ($userRole === $role) {
-                return $next($request);
-            }
+        if (!in_array($userRole, $roles)) {
+            return $this->unauthorized($request);
         }
 
-        // If no role matches, deny access
-        abort(403, 'Access denied. Insufficient permissions.');
+        return $next($request);
+    }
+
+    /**
+     * Handle unauthorized access.
+     */
+    private function unauthorized(Request $request): Response
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access. Insufficient permissions.',
+                'error' => 'INSUFFICIENT_PERMISSIONS'
+            ], 403);
+        }
+
+        abort(403, 'Unauthorized access');
     }
 }

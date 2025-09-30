@@ -4,169 +4,219 @@ namespace App\Services;
 
 use App\Models\Subject;
 use App\Models\User;
-use App\Models\PfeNotification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use App\Models\Team;
+use Illuminate\Database\Eloquent\Collection;
 
 class SubjectService
 {
-    public function createSubject(array $data, User $supervisor): Subject
+    /**
+     * Create a new subject with validation.
+     */
+    public function createSubject(array $data, User $teacher): Subject
     {
+        // Validate that user is a teacher
+        if (!$teacher->isTeacher()) {
+            throw new \Exception('Only teachers can create subjects');
+        }
+
+        // Validate required fields
         $this->validateSubjectData($data);
 
-        return DB::transaction(function () use ($data, $supervisor) {
-            $subject = Subject::create(array_merge($data, [
-                'supervisor_id' => $supervisor->id,
-                'status' => 'draft'
-            ]));
-
-            $this->notifySubjectCreated($subject);
-
-            return $subject;
-        });
-    }
-
-    public function submitSubject(Subject $subject): Subject
-    {
-        if ($subject->status !== 'draft' && $subject->status !== 'needs_correction') {
-            throw ValidationException::withMessages([
-                'status' => 'Subject can only be submitted from draft or needs_correction status'
-            ]);
-        }
-
-        $subject->update(['status' => 'submitted']);
-
-        $this->notifySubjectSubmitted($subject);
-
-        return $subject;
-    }
-
-    public function validateSubject(Subject $subject, User $validator, string $action, ?string $notes = null): Subject
-    {
-        if ($subject->status !== 'submitted') {
-            throw ValidationException::withMessages([
-                'status' => 'Only submitted subjects can be validated'
-            ]);
-        }
-
-        $allowedActions = ['approved', 'rejected', 'needs_correction'];
-        if (!in_array($action, $allowedActions)) {
-            throw ValidationException::withMessages([
-                'action' => 'Invalid validation action'
-            ]);
-        }
-
-        return DB::transaction(function () use ($subject, $validator, $action, $notes) {
-            $subject->update([
-                'status' => $action,
-                'validated_by' => $validator->id,
-                'validated_at' => now(),
-                'validation_notes' => $notes
-            ]);
-
-            $this->notifySubjectValidated($subject, $action);
-
-            return $subject;
-        });
-    }
-
-    public function publishSubject(Subject $subject): Subject
-    {
-        if ($subject->status !== 'approved') {
-            throw ValidationException::withMessages([
-                'status' => 'Only approved subjects can be published'
-            ]);
-        }
-
-        $subject->update(['status' => 'published']);
-
-        $this->notifySubjectPublished($subject);
-
-        return $subject;
-    }
-
-    public function getAvailableSubjects(): \Illuminate\Database\Eloquent\Collection
-    {
-        return Subject::where('status', 'published')
-            ->whereDoesntHave('projects')
-            ->with(['supervisor'])
-            ->get();
-    }
-
-    private function validateSubjectData(array $data): void
-    {
-        if (!isset($data['keywords']) || count($data['keywords']) < 3) {
-            throw ValidationException::withMessages([
-                'keywords' => 'Subject must have at least 3 keywords'
-            ]);
-        }
-
-        if (!isset($data['description']) || strlen($data['description']) < 100) {
-            throw ValidationException::withMessages([
-                'description' => 'Description must be at least 100 characters'
-            ]);
-        }
-    }
-
-    private function notifySubjectCreated(Subject $subject): void
-    {
-        PfeNotification::create([
-            'user_id' => $subject->supervisor_id,
-            'type' => 'subject_created',
-            'title' => 'Subject Created',
-            'message' => "Your subject '{$subject->title}' has been created successfully.",
-            'data' => ['subject_id' => $subject->id]
+        return Subject::create([
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'keywords' => $data['keywords'],
+            'tools' => $data['tools'],
+            'plan' => $data['plan'],
+            'teacher_id' => $teacher->id,
+            'status' => 'draft',
         ]);
     }
 
-    private function notifySubjectSubmitted(Subject $subject): void
+    /**
+     * Submit subject for validation.
+     */
+    public function submitForValidation(Subject $subject): bool
     {
-        // Notify department head
-        $departmentHeads = User::role('chef_master')
-            ->where('department', $subject->supervisor->department)
-            ->get();
+        if ($subject->status !== 'draft') {
+            throw new \Exception('Only draft subjects can be submitted for validation');
+        }
 
-        foreach ($departmentHeads as $head) {
-            PfeNotification::create([
-                'user_id' => $head->id,
-                'type' => 'subject_submitted',
-                'title' => 'New Subject for Validation',
-                'message' => "Subject '{$subject->title}' by {$subject->supervisor->first_name} {$subject->supervisor->last_name} needs validation.",
-                'data' => ['subject_id' => $subject->id]
-            ]);
+        $subject->update(['status' => 'pending_validation']);
+
+        // TODO: Send notification to department head
+
+        return true;
+    }
+
+    /**
+     * Validate a subject (approve/reject/request corrections).
+     */
+    public function validateSubject(Subject $subject, User $validator, string $action, string $feedback = null): bool
+    {
+        // Check validator permissions
+        if (!$validator->isDepartmentHead() && !$validator->isAdmin()) {
+            throw new \Exception('Only department heads and admins can validate subjects');
+        }
+
+        if ($subject->status !== 'pending_validation') {
+            throw new \Exception('Subject is not in pending validation status');
+        }
+
+        switch ($action) {
+            case 'approve':
+                return $subject->validate($validator, $feedback);
+
+            case 'reject':
+                return $subject->reject($validator, $feedback);
+
+            case 'request_corrections':
+                return $subject->requestCorrections($validator, $feedback);
+
+            default:
+                throw new \Exception('Invalid validation action');
         }
     }
 
-    private function notifySubjectValidated(Subject $subject, string $action): void
+    /**
+     * Get subjects for validation by department.
+     */
+    public function getSubjectsForValidation(string $department = null): Collection
     {
-        $messages = [
-            'approved' => 'Your subject has been approved',
-            'rejected' => 'Your subject has been rejected',
-            'needs_correction' => 'Your subject needs corrections'
+        $query = Subject::pendingValidation()
+            ->with('teacher');
+
+        if ($department) {
+            $query->whereHas('teacher', function ($q) use ($department) {
+                $q->where('department', $department);
+            });
+        }
+
+        return $query->orderBy('created_at', 'asc')->get();
+    }
+
+    /**
+     * Get available subjects for team selection.
+     */
+    public function getAvailableSubjects(): Collection
+    {
+        return Subject::available()
+            ->with('teacher')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Search subjects by keywords.
+     */
+    public function searchSubjects(string $query, array $filters = []): Collection
+    {
+        $subjects = Subject::validated()
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%")
+                  ->orWhere('keywords', 'like', "%{$query}%")
+                  ->orWhere('tools', 'like', "%{$query}%");
+            });
+
+        // Apply filters
+        if (isset($filters['teacher_id'])) {
+            $subjects->where('teacher_id', $filters['teacher_id']);
+        }
+
+        if (isset($filters['department'])) {
+            $subjects->whereHas('teacher', function ($q) use ($filters) {
+                $q->where('department', $filters['department']);
+            });
+        }
+
+        return $subjects->with('teacher')->get();
+    }
+
+    /**
+     * Check if subject can be selected by team.
+     */
+    public function canBeSelectedByTeam(Subject $subject, Team $team): bool
+    {
+        // Subject must be validated
+        if (!$subject->canBeSelected()) {
+            return false;
+        }
+
+        // Team must be complete
+        if (!$team->canSelectSubject()) {
+            return false;
+        }
+
+        // Check if team already has a subject
+        if ($team->subject_id) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get subjects by teacher.
+     */
+    public function getSubjectsByTeacher(User $teacher): Collection
+    {
+        if (!$teacher->isTeacher()) {
+            throw new \Exception('User is not a teacher');
+        }
+
+        return Subject::byTeacher($teacher->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get subject statistics for dashboard.
+     */
+    public function getSubjectStatistics(User $user = null): array
+    {
+        $stats = [
+            'total' => Subject::count(),
+            'pending_validation' => Subject::pendingValidation()->count(),
+            'validated' => Subject::validated()->count(),
+            'assigned' => Subject::validated()->whereHas('teams', function ($q) {
+                $q->where('status', 'assigned');
+            })->count(),
         ];
 
-        PfeNotification::create([
-            'user_id' => $subject->supervisor_id,
-            'type' => "subject_{$action}",
-            'title' => 'Subject Validation Update',
-            'message' => $messages[$action] . ": {$subject->title}",
-            'data' => ['subject_id' => $subject->id]
-        ]);
+        if ($user && $user->isTeacher()) {
+            $stats['my_subjects'] = Subject::byTeacher($user->id)->count();
+            $stats['my_pending'] = Subject::byTeacher($user->id)->pendingValidation()->count();
+        }
+
+        return $stats;
     }
 
-    private function notifySubjectPublished(Subject $subject): void
+    /**
+     * Validate subject data.
+     */
+    private function validateSubjectData(array $data): void
     {
-        // Notify all students
-        $students = User::role('student')->get();
+        $required = ['title', 'description', 'keywords', 'tools', 'plan'];
 
-        foreach ($students as $student) {
-            PfeNotification::create([
-                'user_id' => $student->id,
-                'type' => 'subject_published',
-                'title' => 'New Subject Available',
-                'message' => "New PFE subject available: {$subject->title}",
-                'data' => ['subject_id' => $subject->id]
-            ]);
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                throw new \Exception("Field {$field} is required");
+            }
+        }
+
+        // Validate minimum lengths
+        if (strlen($data['description']) < 50) {
+            throw new \Exception('Description must be at least 50 characters');
+        }
+
+        if (strlen($data['plan']) < 100) {
+            throw new \Exception('Plan must be at least 100 characters');
+        }
+
+        // Check title uniqueness
+        if (Subject::where('title', $data['title'])->exists()) {
+            throw new \Exception('Subject title must be unique');
         }
     }
 }

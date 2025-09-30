@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,35 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // Core system setup
-            // RoleAndPermissionSeeder::class,
-            UserSeeder::class,
-
-            // Academic setup
-            RoomSeeder::class,
-            SubjectSeeder::class,
-
-            // Team and project setup
-            TeamSeeder::class,
-            TeamSubjectPreferenceSeeder::class,
-            ProjectSeeder::class,
-
-            // Deliverables and progress
-            DeliverableSeeder::class,
-
-            // Defense system
-            DefenseSeeder::class,
-
-            // Notifications and activities
-            NotificationSeeder::class,
-            // ActivitySeeder::class, // Disabled - missing Activity model
-
-            // Sample content for public site (disabled for now)
-            // CourseSeeder::class,
-            // PublicProjectSeeder::class,
-            // PublicationSeeder::class,
-            // BlogPostSeeder::class,
-            // TagSeeder::class,
+            ProfileDataSeeder::class,
         ]);
     }
 }

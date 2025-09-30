@@ -3,280 +3,280 @@
 namespace App\Services;
 
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\User;
-use App\Models\PfeNotification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use App\Models\Subject;
+use App\Models\TeamMember;
+use Illuminate\Database\Eloquent\Collection;
 
 class TeamService
 {
-    public function createTeam(array $data, User $leader): Team
+    /**
+     * Create a new team.
+     */
+    public function createTeam(array $data, User $creator): Team
     {
-        $this->validateTeamCreation($data, $leader);
-
-        return DB::transaction(function () use ($data, $leader) {
-            $team = Team::create([
-                'name' => $data['name'],
-                'leader_id' => $leader->id,
-                'size' => count($data['members']) + 1, // +1 for leader
-                'status' => 'forming'
-            ]);
-
-            // Add leader as team member
-            TeamMember::create([
-                'team_id' => $team->id,
-                'user_id' => $leader->id,
-                'role' => 'leader'
-            ]);
-
-            // Add other members
-            foreach ($data['members'] as $memberId) {
-                TeamMember::create([
-                    'team_id' => $team->id,
-                    'user_id' => $memberId,
-                    'role' => 'member'
-                ]);
-
-                $this->notifyTeamInvitation($team, $memberId);
-            }
-
-            // Check if team is complete
-            if ($team->size >= 2) {
-                $team->update([
-                    'status' => 'complete',
-                    'formation_completed_at' => now()
-                ]);
-            }
-
-            return $team;
-        });
-    }
-
-    public function addMember(Team $team, int $userId): Team
-    {
-        $this->validateMemberAddition($team, $userId);
-
-        return DB::transaction(function () use ($team, $userId) {
-            TeamMember::create([
-                'team_id' => $team->id,
-                'user_id' => $userId,
-                'role' => 'member'
-            ]);
-
-            $team->increment('size');
-
-            // Check if team becomes complete
-            if ($team->size >= 2 && $team->status === 'forming') {
-                $team->update([
-                    'status' => 'complete',
-                    'formation_completed_at' => now()
-                ]);
-            }
-
-            $this->notifyTeamInvitation($team, $userId);
-
-            return $team->fresh();
-        });
-    }
-
-    public function removeMember(Team $team, int $userId): Team
-    {
-        $this->validateMemberRemoval($team, $userId);
-
-        return DB::transaction(function () use ($team, $userId) {
-            TeamMember::where('team_id', $team->id)
-                ->where('user_id', $userId)
-                ->delete();
-
-            $team->decrement('size');
-
-            // Check if team becomes incomplete
-            if ($team->size < 2 && $team->status === 'complete') {
-                $team->update([
-                    'status' => 'forming',
-                    'formation_completed_at' => null
-                ]);
-            }
-
-            return $team->fresh();
-        });
-    }
-
-    public function validateTeam(Team $team): Team
-    {
-        if ($team->status !== 'complete') {
-            throw ValidationException::withMessages([
-                'status' => 'Only complete teams can be validated'
-            ]);
+        // Validate that user is a student
+        if (!$creator->isStudent()) {
+            throw new \Exception('Only students can create teams');
         }
 
-        $this->checkTeamConstraints($team);
+        // Check if student is already in a team
+        if ($this->studentHasActiveTeam($creator)) {
+            throw new \Exception('Student is already in an active team');
+        }
 
-        $team->update(['status' => 'validated']);
+        // Validate team name uniqueness
+        if (Team::where('name', $data['name'])->exists()) {
+            throw new \Exception('Team name must be unique');
+        }
 
-        $this->notifyTeamValidated($team);
+        // Create team
+        $team = Team::create([
+            'name' => $data['name'],
+            'status' => 'forming',
+        ]);
+
+        // Add creator as team leader
+        $team->addMember($creator, 'leader');
 
         return $team;
     }
 
-    public function assignTeamToProject(Team $team, int $projectId): Team
+    /**
+     * Add member to team.
+     */
+    public function addMemberToTeam(Team $team, User $student, string $role = 'member'): bool
     {
-        if ($team->status !== 'validated') {
-            throw ValidationException::withMessages([
-                'status' => 'Only validated teams can be assigned to projects'
-            ]);
+        // Validate student role
+        if (!$student->isStudent()) {
+            throw new \Exception('Only students can join teams');
         }
 
-        $team->update(['status' => 'assigned']);
+        // Check team status
+        if (!in_array($team->status, ['forming', 'complete'])) {
+            throw new \Exception('Cannot add members to this team at current status');
+        }
 
-        $this->notifyTeamAssigned($team, $projectId);
+        // Check team size limits
+        $teamSizes = $this->getTeamSizeConfig($student->grade);
+        if ($team->members()->count() >= $teamSizes['max']) {
+            throw new \Exception("Team cannot exceed {$teamSizes['max']} members");
+        }
 
-        return $team;
+        // Check if student is already in a team
+        if ($this->studentHasActiveTeam($student)) {
+            throw new \Exception('Student is already in an active team');
+        }
+
+        // Validate same level (license/master)
+        $existingGrades = $team->members()
+            ->join('users', 'team_members.student_id', '=', 'users.id')
+            ->pluck('grade')
+            ->unique();
+
+        if ($existingGrades->isNotEmpty() && !$existingGrades->contains($student->grade)) {
+            throw new \Exception('All team members must be from the same academic level');
+        }
+
+        return $team->addMember($student, $role);
     }
 
-    public function getAvailableTeams(): \Illuminate\Database\Eloquent\Collection
+    /**
+     * Remove member from team.
+     */
+    public function removeMemberFromTeam(Team $team, User $student): bool
     {
-        return Team::where('status', 'validated')
-            ->whereDoesntHave('project')
-            ->with(['leader', 'members.user'])
+        // Check if team has already selected a subject
+        if ($team->subject_id) {
+            throw new \Exception('Cannot remove members after subject selection');
+        }
+
+        // Remove member
+        $result = $team->removeMember($student);
+
+        // If team becomes empty, delete it
+        if ($team->members()->count() === 0) {
+            $team->delete();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Select subject for team.
+     */
+    public function selectSubject(Team $team, Subject $subject): bool
+    {
+        // Validate team can select subject
+        if (!$team->canSelectSubject()) {
+            throw new \Exception('Team cannot select a subject at this time');
+        }
+
+        // Validate subject availability
+        if (!$subject->canBeSelected()) {
+            throw new \Exception('Subject is not available for selection');
+        }
+
+        // Select subject
+        $result = $team->selectSubject($subject);
+
+        // Check for conflicts
+        $conflict = $subject->createConflictIfNeeded($team);
+
+        if ($conflict) {
+            // TODO: Send notification about conflict
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get teams for a specific student.
+     */
+    public function getStudentTeams(User $student): Collection
+    {
+        if (!$student->isStudent()) {
+            throw new \Exception('User is not a student');
+        }
+
+        return Team::whereHas('members', function ($q) use ($student) {
+            $q->where('student_id', $student->id);
+        })->with('members.student', 'subject')->get();
+    }
+
+    /**
+     * Get available students for team invitation.
+     */
+    public function getAvailableStudents(Team $team): Collection
+    {
+        // Get grade of existing team members
+        $grades = $team->members()
+            ->join('users', 'team_members.student_id', '=', 'users.id')
+            ->pluck('grade')
+            ->unique();
+
+        $query = User::where('role', 'student')
+            ->whereDoesntHave('teamMemberships', function ($q) {
+                $q->whereHas('team', function ($teamQuery) {
+                    $teamQuery->whereIn('status', ['forming', 'complete', 'subject_selected', 'assigned', 'active']);
+                });
+            });
+
+        // Filter by same grade if team has members
+        if ($grades->isNotEmpty()) {
+            $query->whereIn('grade', $grades->toArray());
+        }
+
+        return $query->orderBy('name')->get();
+    }
+
+    /**
+     * Get team statistics for dashboard.
+     */
+    public function getTeamStatistics(): array
+    {
+        return [
+            'total' => Team::count(),
+            'forming' => Team::forming()->count(),
+            'complete' => Team::complete()->count(),
+            'with_subject' => Team::withSubject()->count(),
+            'assigned' => Team::where('status', 'assigned')->count(),
+        ];
+    }
+
+    /**
+     * Get teams by status.
+     */
+    public function getTeamsByStatus(string $status): Collection
+    {
+        return Team::where('status', $status)
+            ->with('members.student', 'subject', 'supervisor')
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 
-    private function validateTeamCreation(array $data, User $leader): void
+    /**
+     * Assign supervisor to team.
+     */
+    public function assignSupervisor(Team $team, User $supervisor): bool
     {
-        // Check if leader is already in a team
-        if (TeamMember::where('user_id', $leader->id)->exists()) {
-            throw ValidationException::withMessages([
-                'leader' => 'User is already a member of another team'
-            ]);
+        if (!$supervisor->isTeacher() && !$supervisor->isExternalSupervisor()) {
+            throw new \Exception('Supervisor must be a teacher or external supervisor');
         }
 
-        // Check team size
-        $totalSize = count($data['members']) + 1; // +1 for leader
-        if ($totalSize < 2 || $totalSize > 4) {
-            throw ValidationException::withMessages([
-                'size' => 'Team size must be between 2 and 4 members'
-            ]);
+        // Check supervisor workload
+        if ($supervisor->isTeacher() && !$supervisor->canSuperviseMoreProjects()) {
+            throw new \Exception('Supervisor has reached maximum project capacity');
         }
 
-        // Check if any member is already in a team
-        $existingMembers = TeamMember::whereIn('user_id', $data['members'])->pluck('user_id');
-        if ($existingMembers->isNotEmpty()) {
-            throw ValidationException::withMessages([
-                'members' => 'Some users are already members of other teams'
-            ]);
-        }
+        $team->update(['supervisor_id' => $supervisor->id]);
 
-        // Check if team name is unique
-        if (Team::where('name', $data['name'])->exists()) {
-            throw ValidationException::withMessages([
-                'name' => 'Team name must be unique'
-            ]);
-        }
+        return true;
     }
 
-    private function validateMemberAddition(Team $team, int $userId): void
+    /**
+     * Check if student has an active team.
+     */
+    public function studentHasActiveTeam(User $student): bool
     {
-        if ($team->size >= 4) {
-            throw ValidationException::withMessages([
-                'size' => 'Team cannot have more than 4 members'
-            ]);
-        }
-
-        if (TeamMember::where('user_id', $userId)->exists()) {
-            throw ValidationException::withMessages([
-                'member' => 'User is already a member of a team'
-            ]);
-        }
-
-        if ($team->status === 'assigned') {
-            throw ValidationException::withMessages([
-                'status' => 'Cannot modify assigned teams'
-            ]);
-        }
+        return TeamMember::whereHas('team', function ($q) {
+            $q->whereIn('status', ['forming', 'complete', 'subject_selected', 'assigned', 'active']);
+        })->where('student_id', $student->id)->exists();
     }
 
-    private function validateMemberRemoval(Team $team, int $userId): void
+    /**
+     * Get team size configuration based on academic level.
+     */
+    public function getTeamSizeConfig(string $grade): array
     {
-        if ($team->size <= 2) {
-            throw ValidationException::withMessages([
-                'size' => 'Team must have at least 2 members'
-            ]);
-        }
-
-        if ($team->leader_id === $userId) {
-            throw ValidationException::withMessages([
-                'leader' => 'Cannot remove team leader'
-            ]);
-        }
-
-        if ($team->status === 'assigned') {
-            throw ValidationException::withMessages([
-                'status' => 'Cannot modify assigned teams'
-            ]);
-        }
+        return match ($grade) {
+            'master' => ['min' => 1, 'max' => 2],
+            'phd' => ['min' => 1, 'max' => 1],
+            default => ['min' => 2, 'max' => 3], // licence
+        };
     }
 
-    private function checkTeamConstraints(Team $team): void
+    /**
+     * Validate team completeness.
+     */
+    public function validateTeamCompleteness(Team $team): array
     {
-        // Check all members are students
-        $members = $team->members()->with('user')->get();
-        foreach ($members as $member) {
-            if (!$member->user->hasRole('student')) {
-                throw ValidationException::withMessages([
-                    'members' => 'All team members must be students'
-                ]);
-            }
+        $issues = [];
+        $memberCount = $team->members()->count();
+
+        // Get first member's grade to determine size requirements
+        $firstMember = $team->members()->with('student')->first();
+        if (!$firstMember) {
+            $issues[] = 'Team has no members';
+            return $issues;
         }
 
-        // Check same department constraint (if applicable)
-        $departments = $members->pluck('user.department')->unique();
-        if ($departments->count() > 1) {
-            throw ValidationException::withMessages([
-                'department' => 'All team members must be from the same department'
-            ]);
+        $sizeConfig = $this->getTeamSizeConfig($firstMember->student->grade);
+
+        // Check size
+        if ($memberCount < $sizeConfig['min']) {
+            $issues[] = "Team needs at least {$sizeConfig['min']} members";
         }
-    }
 
-    private function notifyTeamInvitation(Team $team, int $userId): void
-    {
-        PfeNotification::create([
-            'user_id' => $userId,
-            'type' => 'team_invitation',
-            'title' => 'Team Invitation',
-            'message' => "You have been invited to join team '{$team->name}'",
-            'data' => ['team_id' => $team->id]
-        ]);
-    }
-
-    private function notifyTeamValidated(Team $team): void
-    {
-        $members = $team->members()->pluck('user_id');
-
-        foreach ($members as $userId) {
-            PfeNotification::create([
-                'user_id' => $userId,
-                'type' => 'team_validated',
-                'title' => 'Team Validated',
-                'message' => "Your team '{$team->name}' has been validated",
-                'data' => ['team_id' => $team->id]
-            ]);
+        if ($memberCount > $sizeConfig['max']) {
+            $issues[] = "Team cannot exceed {$sizeConfig['max']} members";
         }
-    }
 
-    private function notifyTeamAssigned(Team $team, int $projectId): void
-    {
-        $members = $team->members()->pluck('user_id');
-
-        foreach ($members as $userId) {
-            PfeNotification::create([
-                'user_id' => $userId,
-                'type' => 'team_assigned',
-                'title' => 'Project Assigned',
-                'message' => "Your team '{$team->name}' has been assigned to a project",
-                'data' => ['team_id' => $team->id, 'project_id' => $projectId]
-            ]);
+        // Check leadership
+        if (!$team->members()->where('role', 'leader')->exists()) {
+            $issues[] = 'Team needs a leader';
         }
+
+        // Check same academic level
+        $grades = $team->members()
+            ->join('users', 'team_members.student_id', '=', 'users.id')
+            ->pluck('grade')
+            ->unique();
+
+        if ($grades->count() > 1) {
+            $issues[] = 'All team members must be from the same academic level';
+        }
+
+        return $issues;
     }
 }

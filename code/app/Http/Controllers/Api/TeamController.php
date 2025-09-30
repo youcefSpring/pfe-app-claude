@@ -3,239 +3,266 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PFE\CreateTeamRequest;
-use App\Http\Requests\PFE\UpdateTeamRequest;
-use App\Http\Requests\PFE\TeamPreferenceRequest;
+use App\Http\Requests\CreateTeamRequest;
+use App\Http\Requests\AddTeamMemberRequest;
+use App\Http\Requests\SelectSubjectRequest;
 use App\Models\Team;
-use App\Models\User;
 use App\Services\TeamService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class TeamController extends Controller
 {
-    public function __construct(private TeamService $teamService)
+    protected TeamService $teamService;
+
+    public function __construct(TeamService $teamService)
     {
-        $this->middleware('auth:sanctum');
+        $this->teamService = $teamService;
     }
 
     /**
-     * Display a listing of teams
+     * Display a listing of teams.
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Team::with(['leader:id,first_name,last_name,department', 'members.user:id,first_name,last_name']);
+        $user = $request->user();
+        $filters = $request->only(['status', 'grade', 'search']);
+        $perPage = $request->get('per_page', 15);
 
-        // Apply filters
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->has('department')) {
-            $query->whereHas('leader', function ($q) use ($request) {
-                $q->where('department', $request->department);
-            });
-        }
-
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        $teams = $query->paginate($request->get('per_page', 15));
+        $teams = $this->teamService->getTeamsForUser($user, $filters, $perPage);
 
         return response()->json([
-            'data' => $teams->items(),
-            'meta' => [
-                'current_page' => $teams->currentPage(),
-                'total' => $teams->total(),
-                'per_page' => $teams->perPage(),
-                'last_page' => $teams->lastPage()
-            ]
+            'success' => true,
+            'data' => $teams,
         ]);
     }
 
     /**
-     * Store a newly created team
+     * Store a newly created team.
      */
     public function store(CreateTeamRequest $request): JsonResponse
     {
-        $team = $this->teamService->createTeam(
-            $request->validated(),
-            $request->user()
-        );
+        try {
+            $team = $this->teamService->createTeam(
+                $request->validated(),
+                $request->user()
+            );
 
-        return response()->json([
-            'team' => $team->load(['leader:id,first_name,last_name', 'members.user:id,first_name,last_name']),
-            'message' => 'Team created successfully'
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'Team created successfully',
+                'data' => $team->load('members.student'),
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create team',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Display the specified team
+     * Display the specified team.
      */
     public function show(Team $team): JsonResponse
     {
-        $this->authorize('view', $team);
-
         $team->load([
-            'leader:id,first_name,last_name,department',
-            'members.user:id,first_name,last_name,student_id',
-            'subjectPreferences.subject:id,title,supervisor_id',
-            'project.subject:id,title'
+            'members.student',
+            'subject.teacher',
+            'project.supervisor',
+            'externalProject'
         ]);
 
         return response()->json([
-            'team' => $team,
-            'members' => $team->members,
-            'preferences' => $team->subjectPreferences,
-            'project' => $team->project
+            'success' => true,
+            'data' => $team,
         ]);
     }
 
     /**
-     * Update the specified team
+     * Update the specified team.
      */
-    public function update(UpdateTeamRequest $request, Team $team): JsonResponse
+    public function update(Request $request, Team $team): JsonResponse
     {
-        $action = $request->get('action', 'update_info');
+        try {
+            $this->authorize('update', $team);
 
-        switch ($action) {
-            case 'add_member':
-                $updatedTeam = $this->teamService->addMember($team, $request->user_id);
-                $message = 'Member added successfully';
-                break;
+            $team->update($request->only(['name', 'description']));
 
-            case 'remove_member':
-                $updatedTeam = $this->teamService->removeMember($team, $request->user_id);
-                $message = 'Member removed successfully';
-                break;
-
-            default:
-                $team->update($request->only(['name']));
-                $updatedTeam = $team;
-                $message = 'Team updated successfully';
-        }
-
-        return response()->json([
-            'team' => $updatedTeam->load(['leader:id,first_name,last_name', 'members.user:id,first_name,last_name']),
-            'message' => $message
-        ]);
-    }
-
-    /**
-     * Add a member to the team
-     */
-    public function addMember(Request $request, Team $team): JsonResponse
-    {
-        $request->validate([
-            'user_id' => 'required|integer|exists:users,id'
-        ]);
-
-        $this->authorize('manage', $team);
-
-        $updatedTeam = $this->teamService->addMember($team, $request->user_id);
-
-        $member = User::find($request->user_id);
-
-        return response()->json([
-            'member' => [
-                'id' => $member->id,
-                'first_name' => $member->first_name,
-                'last_name' => $member->last_name,
-                'student_id' => $member->student_id
-            ],
-            'team' => $updatedTeam,
-            'message' => 'Member added successfully'
-        ], 201);
-    }
-
-    /**
-     * Remove a member from the team
-     */
-    public function removeMember(Team $team, User $user): JsonResponse
-    {
-        $this->authorize('manage', $team);
-
-        $updatedTeam = $this->teamService->removeMember($team, $user->id);
-
-        return response()->json([
-            'team' => $updatedTeam,
-            'message' => 'Member removed successfully'
-        ]);
-    }
-
-    /**
-     * Set team subject preferences
-     */
-    public function setPreferences(TeamPreferenceRequest $request, Team $team): JsonResponse
-    {
-        // Clear existing preferences
-        $team->subjectPreferences()->delete();
-
-        // Add new preferences
-        $preferences = [];
-        foreach ($request->preferences as $preference) {
-            $preferences[] = $team->subjectPreferences()->create([
-                'subject_id' => $preference['subject_id'],
-                'preference_order' => $preference['preference_order']
+            return response()->json([
+                'success' => true,
+                'message' => 'Team updated successfully',
+                'data' => $team->fresh()->load('members.student'),
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update team',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'preferences' => $preferences,
-            'message' => 'Preferences saved successfully'
-        ]);
     }
 
     /**
-     * Validate a team
+     * Remove the specified team.
      */
-    public function validateTeam(Team $team): JsonResponse
+    public function destroy(Team $team): JsonResponse
     {
-        $this->authorize('validate', $team);
+        try {
+            $this->authorize('delete', $team);
 
-        $validatedTeam = $this->teamService->validateTeam($team);
+            $this->teamService->deleteTeam($team);
 
-        return response()->json([
-            'team' => $validatedTeam,
-            'message' => 'Team validated successfully'
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Team deleted successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete team',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Get user's team
+     * Add a member to the team.
      */
-    public function myTeam(Request $request): JsonResponse
+    public function addMember(AddTeamMemberRequest $request, Team $team): JsonResponse
+    {
+        try {
+            $member = \App\Models\User::findOrFail($request->input('student_id'));
+
+            $this->teamService->addMemberToTeam(
+                $team,
+                $member,
+                $request->input('role', 'member')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Member added successfully',
+                'data' => $team->fresh()->load('members.student'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add member',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove a member from the team.
+     */
+    public function removeMember(Team $team, $memberId): JsonResponse
+    {
+        try {
+            $member = \App\Models\User::findOrFail($memberId);
+
+            $this->teamService->removeMemberFromTeam($team, $member);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Member removed successfully',
+                'data' => $team->fresh()->load('members.student'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove member',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Select a subject for the team.
+     */
+    public function selectSubject(SelectSubjectRequest $request, Team $team): JsonResponse
+    {
+        try {
+            $subject = \App\Models\Subject::findOrFail($request->input('subject_id'));
+
+            $result = $this->teamService->selectSubject(
+                $team,
+                $subject,
+                $request->input('motivation')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subject selection processed',
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to select subject',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get team invitations for current user.
+     */
+    public function invitations(Request $request): JsonResponse
     {
         $user = $request->user();
-        $teamMembership = $user->teamMemberships()->with([
-            'team.leader:id,first_name,last_name',
-            'team.members.user:id,first_name,last_name,student_id',
-            'team.project.subject:id,title'
-        ])->first();
-
-        if (!$teamMembership) {
-            return response()->json([
-                'team' => null,
-                'message' => 'You are not a member of any team'
-            ]);
-        }
+        $invitations = $this->teamService->getPendingInvitations($user);
 
         return response()->json([
-            'team' => $teamMembership->team,
-            'role' => $teamMembership->role
+            'success' => true,
+            'data' => $invitations,
         ]);
     }
 
     /**
-     * Get available teams for assignment
+     * Accept team invitation.
      */
-    public function available(): JsonResponse
+    public function acceptInvitation(Team $team): JsonResponse
     {
-        $teams = $this->teamService->getAvailableTeams();
+        try {
+            $user = request()->user();
+            $this->teamService->acceptInvitation($team, $user);
 
-        return response()->json([
-            'teams' => $teams
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitation accepted successfully',
+                'data' => $team->fresh()->load('members.student'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to accept invitation',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Decline team invitation.
+     */
+    public function declineInvitation(Team $team): JsonResponse
+    {
+        try {
+            $user = request()->user();
+            $this->teamService->declineInvitation($team, $user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitation declined',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to decline invitation',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

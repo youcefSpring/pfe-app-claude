@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Project extends Model
 {
@@ -18,16 +18,15 @@ class Project extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
-        'title',
-        'slug',
-        'description',
-        'images',
-        'live_demo_url',
-        'source_code_url',
-        'technologies_used',
-        'date_completed',
+        'team_id',
+        'subject_id',
+        'external_project_id',
+        'supervisor_id',
+        'co_supervisor_id',
+        'type',
         'status',
+        'started_at',
+        'submitted_at',
     ];
 
     /**
@@ -38,69 +37,128 @@ class Project extends Model
     protected function casts(): array
     {
         return [
-            'images' => 'array',
-            'date_completed' => 'date',
+            'started_at' => 'datetime',
+            'submitted_at' => 'datetime',
         ];
     }
 
+    // Relationships
     /**
-     * Get the user that owns the project.
+     * Get the team working on this project.
      */
-    public function user(): BelongsTo
+    public function team(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Team::class);
     }
 
     /**
-     * Get all of the tags for the project.
+     * Get the subject for internal projects.
      */
-    public function tags(): MorphToMany
+    public function subject(): BelongsTo
     {
-        return $this->morphToMany(Tag::class, 'taggable');
+        return $this->belongsTo(Subject::class);
     }
 
     /**
-     * Boot the model.
+     * Get the external project details.
      */
-    protected static function boot()
+    public function externalProject(): BelongsTo
     {
-        parent::boot();
-
-        static::creating(function ($project) {
-            if (empty($project->slug)) {
-                $project->slug = Str::slug($project->title);
-            }
-        });
-
-        static::updating(function ($project) {
-            if ($project->isDirty('title')) {
-                $project->slug = Str::slug($project->title);
-            }
-        });
+        return $this->belongsTo(ExternalProject::class);
     }
 
     /**
-     * Scope a query to only include active projects.
+     * Get the main supervisor.
+     */
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    /**
+     * Get the co-supervisor for external projects.
+     */
+    public function coSupervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'co_supervisor_id');
+    }
+
+    /**
+     * Get the submissions for this project.
+     */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
+    }
+
+    /**
+     * Get the defense for this project.
+     */
+    public function defense(): HasOne
+    {
+        return $this->hasOne(Defense::class);
+    }
+
+    // Scopes
+    /**
+     * Scope to get internal projects.
+     */
+    public function scopeInternal($query)
+    {
+        return $query->where('type', 'internal');
+    }
+
+    /**
+     * Scope to get external projects.
+     */
+    public function scopeExternal($query)
+    {
+        return $query->where('type', 'external');
+    }
+
+    /**
+     * Scope to get active projects.
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->whereIn('status', ['assigned', 'in_progress']);
     }
 
     /**
-     * Scope a query to only include featured projects.
+     * Scope to get projects by supervisor.
      */
-    public function scopeFeatured($query)
+    public function scopeBySupervisor($query, $supervisorId)
     {
-        return $query->where('status', 'featured');
+        return $query->where('supervisor_id', $supervisorId);
     }
 
     /**
-     * Scope a query to only include archived projects.
+     * Scope to get projects ready for defense.
      */
-    public function scopeArchived($query)
+    public function scopeReadyForDefense($query)
     {
-        return $query->where('status', 'archived');
+        return $query->where('status', 'submitted')
+            ->whereHas('submissions', function ($query) {
+                $query->where('type', 'final_report')
+                    ->where('status', 'approved');
+            });
+    }
+
+    // Business Logic Methods
+    /**
+     * Check if project is internal.
+     */
+    public function isInternal(): bool
+    {
+        return $this->type === 'internal';
+    }
+
+    /**
+     * Check if project is external.
+     */
+    public function isExternal(): bool
+    {
+        return $this->type === 'external';
     }
 
     /**
@@ -108,22 +166,171 @@ class Project extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return in_array($this->status, ['assigned', 'in_progress']);
     }
 
     /**
-     * Check if project is featured.
+     * Check if project can submit deliverables.
      */
-    public function isFeatured(): bool
+    public function canSubmitDeliverable(): bool
     {
-        return $this->status === 'featured';
+        return $this->status === 'in_progress';
     }
 
     /**
-     * Get the route key for the model.
+     * Check if project is ready for defense.
      */
-    public function getRouteKeyName(): string
+    public function isReadyForDefense(): bool
     {
-        return 'slug';
+        if ($this->status !== 'submitted') {
+            return false;
+        }
+
+        return $this->submissions()
+            ->where('type', 'final_report')
+            ->where('status', 'approved')
+            ->exists();
+    }
+
+    /**
+     * Start the project.
+     */
+    public function start(): bool
+    {
+        if ($this->status !== 'assigned') {
+            return false;
+        }
+
+        $this->update([
+            'status' => 'in_progress',
+            'started_at' => now(),
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Submit the project for defense.
+     */
+    public function submit(): bool
+    {
+        if ($this->status !== 'in_progress') {
+            return false;
+        }
+
+        // Check if final report is approved
+        $finalReportApproved = $this->submissions()
+            ->where('type', 'final_report')
+            ->where('status', 'approved')
+            ->exists();
+
+        if (!$finalReportApproved) {
+            return false;
+        }
+
+        $this->update([
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Mark project as defended.
+     */
+    public function markAsDefended(): bool
+    {
+        if ($this->status !== 'submitted') {
+            return false;
+        }
+
+        $this->update(['status' => 'defended']);
+
+        return true;
+    }
+
+    /**
+     * Assign supervisor to the project.
+     */
+    public function assignSupervisor(User $supervisor, ?User $coSupervisor = null): bool
+    {
+        if (!$supervisor->isTeacher() && !$supervisor->isExternalSupervisor()) {
+            return false;
+        }
+
+        $this->update([
+            'supervisor_id' => $supervisor->id,
+            'co_supervisor_id' => $coSupervisor?->id,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Get project title.
+     */
+    public function getTitle(): string
+    {
+        if ($this->isInternal()) {
+            return $this->subject?->title ?? 'Untitled Internal Project';
+        }
+
+        return $this->externalProject?->project_description ?? 'Untitled External Project';
+    }
+
+    /**
+     * Get project description.
+     */
+    public function getDescription(): string
+    {
+        if ($this->isInternal()) {
+            return $this->subject?->description ?? '';
+        }
+
+        return $this->externalProject?->project_description ?? '';
+    }
+
+    /**
+     * Get all supervisors (main + co-supervisor).
+     */
+    public function getAllSupervisors(): array
+    {
+        $supervisors = [];
+
+        if ($this->supervisor) {
+            $supervisors[] = $this->supervisor;
+        }
+
+        if ($this->coSupervisor) {
+            $supervisors[] = $this->coSupervisor;
+        }
+
+        return $supervisors;
+    }
+
+    /**
+     * Get latest submission of a specific type.
+     */
+    public function getLatestSubmission(string $type): ?Submission
+    {
+        return $this->submissions()
+            ->where('type', $type)
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * Get project progress percentage.
+     */
+    public function getProgressPercentage(): int
+    {
+        return match ($this->status) {
+            'assigned' => 10,
+            'in_progress' => 50,
+            'submitted' => 90,
+            'defended' => 100,
+            default => 0,
+        };
     }
 }

@@ -10,26 +10,32 @@ class TeamMember extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'team_id',
-        'user_id',
+        'student_id',
         'role',
         'joined_at',
     ];
 
-    protected $casts = [
-        'joined_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'joined_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function user(): BelongsTo
+    public function student(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function isLeader(): bool
+    {
+        return $this->role === 'leader';
     }
 }
