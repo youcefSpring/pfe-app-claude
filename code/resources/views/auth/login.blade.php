@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('title', 'Login')
+@section('title', __('app.login'))
 
 @section('content')
 <section class="py-5 bg-light min-vh-100 d-flex align-items-center">
@@ -12,8 +12,8 @@
                         <!-- Header -->
                         <div class="text-center mb-4">
                             <i class="bi bi-mortarboard text-primary mb-3" style="font-size: 3rem;"></i>
-                            <h2 class="h3 mb-3">Welcome Back</h2>
-                            <p class="text-muted">Sign in to your PFE Management account</p>
+                            <h2 class="h3 mb-3">{{ __('app.welcome_back') }}</h2>
+                            <p class="text-muted">{{ __('app.sign_in_message') }}</p>
                         </div>
 
                         <!-- Login Form -->
@@ -22,7 +22,7 @@
 
                             <!-- Email -->
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
+                                <label for="email" class="form-label">{{ __('app.email_address') }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-envelope"></i>
@@ -35,7 +35,7 @@
                                            required
                                            autocomplete="email"
                                            autofocus
-                                           placeholder="Enter your email">
+                                           placeholder="{{ __('app.enter_email') }}">
                                 </div>
                                 @error('email')
                                     <div class="invalid-feedback">
@@ -46,7 +46,7 @@
 
                             <!-- Password -->
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
+                                <label for="password" class="form-label">{{ __('app.password') }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-lock"></i>
@@ -57,7 +57,7 @@
                                            name="password"
                                            required
                                            autocomplete="current-password"
-                                           placeholder="Enter your password">
+                                           placeholder="{{ __('app.enter_password') }}">
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="togglePasswordIcon"></i>
                                     </button>
@@ -78,7 +78,7 @@
                                            id="remember"
                                            {{ old('remember') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="remember">
-                                        Remember me
+                                        {{ __('app.remember_me') }}
                                     </label>
                                 </div>
                             </div>
@@ -87,14 +87,14 @@
                             <div class="d-grid gap-2 mb-3">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>
-                                    Sign In
+                                    {{ __('app.sign_in') }}
                                 </button>
                             </div>
 
                             <!-- Forgot Password Link -->
                             <div class="text-center">
                                 <a href="#" class="text-decoration-none text-muted small">
-                                    Forgot your password?
+                                    {{ __('app.forgot_password') }}
                                 </a>
                             </div>
                         </form>
@@ -106,7 +106,7 @@
                 <div class="card mt-4 bg-info bg-opacity-10 border-info">
                     <div class="card-body p-3">
                         <h6 class="card-title text-info mb-3">
-                            <i class="bi bi-flask me-2"></i>Quick Test Login
+                            <i class="bi bi-flask me-2"></i>{{ __('app.quick_test_login') }}
                         </h6>
                         <div class="row g-2">
                             <div class="col-6">
@@ -131,7 +131,7 @@
                             </div>
                         </div>
                         <small class="text-muted mt-2 d-block">
-                            <i class="bi bi-info-circle me-1"></i>These buttons are only visible in development mode
+                            <i class="bi bi-info-circle me-1"></i>{{ __('app.dev_mode_notice') }}
                         </small>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                 <!-- Help Text -->
                 <div class="text-center mt-4">
                     <small class="text-muted">
-                        Need help? Contact your system administrator.
+                        {{ __('app.need_help') }}
                     </small>
                 </div>
             </div>

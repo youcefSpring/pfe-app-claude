@@ -128,7 +128,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('dashboard*') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                                 <i class="bi bi-speedometer2 me-2"></i>
-                                Dashboard
+                                {{ __('app.dashboard') }}
                             </a>
                         </li>
 
@@ -136,7 +136,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
                                 <i class="bi bi-journal-text me-2"></i>
-                                Subjects
+                                {{ __('app.subjects') }}
                                 @if(auth()->user()?->role === 'department_head')
                                     <span class="notification-badge bg-warning text-dark" id="pending-subjects">0</span>
                                 @endif
@@ -148,7 +148,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('teams*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
                                 <i class="bi bi-people me-2"></i>
-                                Teams
+                                {{ __('app.teams') }}
                             </a>
                         </li>
                         @endif
@@ -167,7 +167,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('defenses*') ? 'active' : '' }}" href="{{ route('defenses.index') }}">
                                 <i class="bi bi-shield-check me-2"></i>
-                                Defenses
+                                {{ __('app.defenses') }}
                             </a>
                         </li>
 
@@ -176,7 +176,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('conflicts*') ? 'active' : '' }}" href="{{ route('conflicts.index') }}">
                                 <i class="bi bi-exclamation-triangle me-2"></i>
-                                Conflicts
+                                {{ __('app.conflicts') }}
                                 <span class="notification-badge bg-danger" id="pending-conflicts">0</span>
                             </a>
                         </li>
@@ -186,25 +186,25 @@
                         @if(auth()->user()?->role === 'admin')
                         <li class="nav-item mt-3">
                             <h6 class="sidebar-heading text-white-50 text-uppercase px-3 mt-4 mb-1 fs-6">
-                                Administration
+                                {{ __('app.administration') }}
                             </h6>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}" href="{{ route('admin.users') }}">
                                 <i class="bi bi-people-fill me-2"></i>
-                                Users
+                                {{ __('app.users') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}" href="{{ route('admin.reports') }}">
                                 <i class="bi bi-bar-chart me-2"></i>
-                                Reports
+                                {{ __('app.reports') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="{{ route('admin.settings') }}">
                                 <i class="bi bi-gear me-2"></i>
-                                Settings
+                                {{ __('app.settings') }}
                             </a>
                         </li>
                         @endif
@@ -216,7 +216,7 @@
                             @csrf
                             <button type="submit" class="nav-link btn btn-link text-white text-decoration-none d-flex align-items-center w-100">
                                 <i class="bi bi-box-arrow-right me-2"></i>
-                                Logout
+                                {{ __('app.logout') }}
                             </button>
                         </form>
                     </div>
@@ -229,9 +229,14 @@
                 @auth
                 <!-- Header -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">@yield('page-title', 'Dashboard')</h1>
+                    <h1 class="h2">@yield('page-title', __('app.dashboard'))</h1>
 
                     <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <!-- Language Switcher -->
+                            @include('partials.language-switcher')
+                        </div>
+
                         <div class="btn-group me-2">
                             <!-- Notifications -->
                             <div class="dropdown">
@@ -240,13 +245,13 @@
                                     <span class="notification-badge bg-danger" id="notification-count" style="display: none;"></span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
-                                    <li><h6 class="dropdown-header">Notifications</h6></li>
+                                    <li><h6 class="dropdown-header">{{ __('app.notifications') }}</h6></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <div id="notifications-list">
-                                        <li><span class="dropdown-item-text text-muted">No notifications</span></li>
+                                        <li><span class="dropdown-item-text text-muted">{{ __('app.no_notifications') }}</span></li>
                                     </div>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-center small" href="{{ route('notifications.index') }}">View all notifications</a></li>
+                                    <li><a class="dropdown-item text-center small" href="{{ route('notifications.index') }}">{{ __('app.view_all_notifications') }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -260,14 +265,14 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="{{ route('profile.show') }}">
-                                        <i class="bi bi-person me-2"></i>Profile
+                                        <i class="bi bi-person me-2"></i>{{ __('app.profile') }}
                                     </a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
                                             <button type="submit" class="dropdown-item">
-                                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                                <i class="bi bi-box-arrow-right me-2"></i>{{ __('app.logout') }}
                                             </button>
                                         </form>
                                     </li>

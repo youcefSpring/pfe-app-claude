@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Teams Management')
+@section('page-title', __('app.teams_management'))
 
 @section('content')
 <div class="row">
@@ -8,25 +8,25 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-people me-2"></i>All Teams
+                    <i class="bi bi-people me-2"></i>{{ __('app.all_teams') }}
                 </h5>
                 <div class="d-flex gap-2">
                     @if(auth()->user()?->role === 'student' && !auth()->user()->teamMember)
                         <a href="{{ route('teams.create') }}" class="btn btn-primary">
-                            <i class="bi bi-plus me-2"></i>Create Team
+                            <i class="bi bi-plus me-2"></i>{{ __('app.create_team') }}
                         </a>
                     @endif
                     @if(in_array(auth()->user()?->role, ['department_head', 'admin']))
                         <div class="dropdown">
                             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-funnel me-2"></i>Filters
+                                <i class="bi bi-funnel me-2"></i>{{ __('app.filters') }}
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('all')">All Teams</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('forming')">Forming</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('complete')">Complete</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('assigned')">Assigned</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('active')">Active</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('all')">{{ __('app.all_teams') }}</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('forming')">{{ __('app.forming') }}</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('complete')">{{ __('app.complete') }}</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('assigned')">{{ __('app.assigned') }}</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('active')">{{ __('app.active') }}</a></li>
                             </ul>
                         </div>
                     @endif

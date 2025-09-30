@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Subjects Management')
+@section('page-title', __('app.subjects_management'))
 
 @section('content')
 <div class="row">
@@ -8,22 +8,22 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-journal-text me-2"></i>All Subjects
+                    <i class="bi bi-journal-text me-2"></i>{{ __('app.all_subjects') }}
                 </h5>
                 <div class="d-flex gap-2">
                     @if(in_array(auth()->user()?->role, ['teacher', 'student']))
                         <a href="{{ route('subjects.create') }}" class="btn btn-primary">
                             <i class="bi bi-plus me-2"></i>
                             @if(auth()->user()?->role === 'student')
-                                Propose External Subject
+                                {{ __('app.propose_external_subject') }}
                             @else
-                                Add New Subject
+                                {{ __('app.add_new_subject') }}
                             @endif
                         </a>
                     @endif
                     @if(auth()->user()?->role === 'department_head')
                         <a href="{{ route('subjects.pending-validation') }}" class="btn btn-warning">
-                            <i class="bi bi-clock me-2"></i>Pending Validation
+                            <i class="bi bi-clock me-2"></i>{{ __('app.pending_validation') }}
                             <span class="badge bg-light text-dark ms-1" id="pending-count">0</span>
                         </a>
                     @endif
@@ -34,20 +34,20 @@
                 <div class="row mb-4">
                     <div class="col-md-3">
                         <select class="form-select" id="statusFilter">
-                            <option value="">All Statuses</option>
-                            <option value="draft">Draft</option>
-                            <option value="pending">Pending Validation</option>
-                            <option value="validated">Validated</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="assigned">Assigned</option>
+                            <option value="">{{ __('app.all_statuses') }}</option>
+                            <option value="draft">{{ __('app.draft') }}</option>
+                            <option value="pending">{{ __('app.pending_validation') }}</option>
+                            <option value="validated">{{ __('app.validated') }}</option>
+                            <option value="rejected">{{ __('app.rejected') }}</option>
+                            <option value="assigned">{{ __('app.assigned') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <select class="form-select" id="departmentFilter">
-                            <option value="">All Departments</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Engineering">Engineering</option>
-                            <option value="Mathematics">Mathematics</option>
+                            <option value="">{{ __('app.all_departments') }}</option>
+                            <option value="Computer Science">{{ __('app.computer_science') }}</option>
+                            <option value="Engineering">{{ __('app.engineering') }}</option>
+                            <option value="Mathematics">{{ __('app.mathematics') }}</option>
                             <option value="Physics">Physics</option>
                         </select>
                     </div>

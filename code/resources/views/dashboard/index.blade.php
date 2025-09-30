@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Dashboard')
+@section('page-title', __('app.dashboard'))
 
 @section('content')
 <div class="row">
@@ -10,11 +10,11 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h4 class="card-title mb-2">Welcome back, {{ auth()->user()->name }}!</h4>
+                        <h4 class="card-title mb-2">{{ __('app.welcome_back_user', ['name' => auth()->user()->name]) }}</h4>
                         <p class="card-text mb-0">
-                            Academic Year: {{ now()->format('Y') }}/{{ now()->addYear()->format('Y') }}
-                            | Department: Computer Science
-                            | Role: {{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}
+                            {{ __('app.academic_year') }}: {{ now()->format('Y') }}/{{ now()->addYear()->format('Y') }}
+                            | {{ __('app.department') }}: {{ __('app.computer_science') }}
+                            | {{ __('app.role') }}: {{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}
                         </p>
                     </div>
                     <div class="col-auto">

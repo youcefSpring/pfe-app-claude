@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register custom middleware aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'locale' => \App\Http\Middleware\LocaleMiddleware::class,
+        ]);
+
+        // Global middleware
+        $middleware->web(append: [
+            \App\Http\Middleware\LocaleMiddleware::class,
         ]);
 
         // API middleware configuration - Sanctum for API authentication

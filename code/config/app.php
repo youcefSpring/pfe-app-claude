@@ -86,6 +86,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | List all of the supported locales for the application.
+    | This array will be used for language switching functionality.
+    |
+    */
+
+    'available_locales' => [
+        'en' => ['name' => 'English', 'flag' => '🇺🇸', 'dir' => 'ltr'],
+        'fr' => ['name' => 'Français', 'flag' => '🇫🇷', 'dir' => 'ltr'],
+        'ar' => ['name' => 'العربية', 'flag' => '🇸🇦', 'dir' => 'rtl'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

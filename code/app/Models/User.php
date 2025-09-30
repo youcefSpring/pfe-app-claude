@@ -29,6 +29,7 @@ class User extends Authenticatable
         'speciality',
         'grade',
         'role',
+        'locale',
         'speciality_id',
         'numero_inscription',
         'annee_bac',

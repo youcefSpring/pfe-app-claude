@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\GradeController;
 use App\Http\Controllers\Web\SubjectPreferenceController;
 use App\Http\Controllers\Web\AllocationController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +32,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
+
+// Language switching routes
+Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
