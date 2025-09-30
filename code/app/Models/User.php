@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -27,6 +28,12 @@ class User extends Authenticatable
         'speciality',
         'grade',
         'role',
+        'speciality_id',
+        'numero_inscription',
+        'annee_bac',
+        'date_naissance',
+        'section',
+        'groupe',
     ];
 
     /**
@@ -49,7 +56,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_naissance' => 'date',
+            'annee_bac' => 'integer',
         ];
+    }
+
+    // Speciality Relationship
+    /**
+     * Get the speciality that the user belongs to.
+     */
+    public function speciality(): BelongsTo
+    {
+        return $this->belongsTo(Speciality::class);
     }
 
     // Relationships for Teachers
@@ -85,6 +103,14 @@ class User extends Authenticatable
         return $this->hasMany(DefenseJury::class, 'teacher_id');
     }
 
+    /**
+     * Alias for juryParticipations (used in views).
+     */
+    public function juryAssignments(): HasMany
+    {
+        return $this->juryParticipations();
+    }
+
     // Relationships for Students
     /**
      * Get the team memberships for this student.
@@ -92,6 +118,14 @@ class User extends Authenticatable
     public function teamMemberships(): HasMany
     {
         return $this->hasMany(TeamMember::class, 'student_id');
+    }
+
+    /**
+     * Get the current team membership for this student (single relationship).
+     */
+    public function teamMember()
+    {
+        return $this->hasOne(TeamMember::class, 'student_id');
     }
 
     /**

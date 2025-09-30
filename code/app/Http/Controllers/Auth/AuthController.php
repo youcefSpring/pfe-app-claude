@@ -20,9 +20,32 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle user login.
+     * Handle user login for web.
      */
-    public function login(Request $request): JsonResponse
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard'));
+    }
+
+    /**
+     * Handle user login for API.
+     */
+    public function apiLogin(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -38,8 +61,8 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $token = $user->createToken('auth-token')->plainTextToken;
 
+        // For session-based auth, we don't need tokens
         // Get user workflow status
         $workflowStatus = $this->workflowService->getWorkflowStatus($user);
 
@@ -51,7 +74,6 @@ class AuthController extends Controller
                     'id', 'name', 'email', 'role', 'department',
                     'matricule', 'grade', 'title', 'speciality'
                 ]),
-                'token' => $token,
                 'workflow_status' => $workflowStatus,
             ],
         ]);
@@ -60,9 +82,27 @@ class AuthController extends Controller
     /**
      * Handle user logout.
      */
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged out successfully',
+            ]);
+        }
+
+        return redirect()->route('login');
+    }
+
+    /**
+     * Handle API logout.
+     */
+    public function apiLogout(Request $request): JsonResponse
+    {
 
         return response()->json([
             'success' => true,

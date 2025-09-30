@@ -100,6 +100,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
+            @auth
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
                 <div class="position-sticky pt-3">
                     <!-- Logo -->
@@ -219,9 +220,11 @@
                     </div>
                 </div>
             </nav>
+            @endauth
 
             <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-wrapper">
+            <main class="@auth col-md-9 ms-sm-auto col-lg-10 @else col-12 @endauth px-md-4 content-wrapper">
+                @auth
                 <!-- Header -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">@yield('page-title', 'Dashboard')</h1>
@@ -251,7 +254,7 @@
                             <div class="dropdown">
                                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-person-circle"></i>
-                                    {{ auth()->user()->name }}
+                                    {{ auth()->user()?->name ?? 'Guest' }}
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="{{ route('profile.show') }}">
@@ -271,6 +274,7 @@
                         </div>
                     </div>
                 </div>
+                @endauth
 
                 <!-- Flash Messages -->
                 @if(session('success'))

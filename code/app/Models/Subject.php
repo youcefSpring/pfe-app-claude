@@ -68,11 +68,19 @@ class Subject extends Model
     }
 
     /**
-     * Get the project associated with this subject.
+     * Get the projects associated with this subject.
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class, 'subject_id');
+    }
+
+    /**
+     * Get the project associated with this subject (single).
      */
     public function project(): HasOne
     {
-        return $this->hasOne(Project::class);
+        return $this->hasOne(Project::class, 'subject_id');
     }
 
     /**

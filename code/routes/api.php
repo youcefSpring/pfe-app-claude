@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Route;
 
 // Authentication endpoints
 Route::prefix('auth')->name('api.auth.')->group(function () {
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'apiLogin'])->name('login');
 
     // Password reset endpoints (if implementing)
     // Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password');
@@ -48,14 +48,14 @@ Route::get('/health', function () {
 // AUTHENTICATED API ENDPOINTS
 // =========================================================================
 
-Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+Route::middleware(['auth', 'throttle:api'])->group(function () {
 
     // =====================================================================
     // AUTHENTICATION & USER MANAGEMENT
     // =====================================================================
 
     Route::prefix('auth')->name('api.auth.')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/logout', [AuthController::class, 'apiLogout'])->name('logout');
         Route::get('/me', [AuthController::class, 'me'])->name('me');
         Route::put('/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
         Route::put('/change-password', [AuthController::class, 'changePassword'])->name('change-password');

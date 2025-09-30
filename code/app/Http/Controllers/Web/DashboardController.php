@@ -3,23 +3,11 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Services\WorkflowService;
-use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    protected WorkflowService $workflowService;
-    protected ReportService $reportService;
-
-    public function __construct(
-        WorkflowService $workflowService,
-        ReportService $reportService
-    ) {
-        $this->workflowService = $workflowService;
-        $this->reportService = $reportService;
-    }
 
     /**
      * Display the main dashboard.
@@ -28,15 +16,11 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Get workflow status for the user
-        $workflowStatus = $this->workflowService->getWorkflowStatus($user);
-
         // Get role-specific dashboard data
         $dashboardData = $this->getDashboardDataForRole($user);
 
         return view('dashboard.index', [
             'user' => $user,
-            'workflowStatus' => $workflowStatus,
             'dashboardData' => $dashboardData,
         ]);
     }
@@ -47,11 +31,11 @@ class DashboardController extends Controller
     public function student(Request $request): View
     {
         $user = $request->user();
-        $team = $user->activeTeam();
+        $team = $user->teamMember?->team;
 
         $data = [
-            'team' => $team?->load(['members.student', 'subject.teacher', 'project.supervisor']),
-            'availableSubjects' => $team ? [] : \App\Models\Subject::available($user->grade)->get(),
+            'team' => $team?->load(['members.user', 'subject.teacher', 'project.supervisor']),
+            'availableSubjects' => $team ? [] : \App\Models\Subject::where('status', 'validated')->whereDoesntHave('projects')->get(),
             'recentActivity' => $this->getRecentActivityForStudent($user),
             'upcomingDeadlines' => $this->getUpcomingDeadlines($user),
         ];
@@ -67,9 +51,9 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $data = [
-            'subjects' => $user->subjects()->withCount('teams')->get(),
+            'subjects' => $user->subjects()->get(),
             'supervisedProjects' => $user->supervisedProjects()
-                ->with(['team.members.student', 'submissions'])
+                ->with(['team.members.user', 'submissions'])
                 ->get(),
             'pendingSubmissions' => $user->supervisedProjects()
                 ->whereHas('submissions', function ($q) {
@@ -91,20 +75,16 @@ class DashboardController extends Controller
         $department = $user->department;
 
         $data = [
-            'pendingSubjects' => \App\Models\Subject::pendingValidation()
+            'pendingSubjects' => \App\Models\Subject::where('status', 'pending_validation')
                 ->whereHas('teacher', function ($q) use ($department) {
                     $q->where('department', $department);
                 })
                 ->with('teacher')
                 ->get(),
-            'pendingConflicts' => \App\Models\SubjectConflict::pending()
-                ->whereHas('subject.teacher', function ($q) use ($department) {
-                    $q->where('department', $department);
-                })
-                ->with(['subject', 'teams'])
-                ->get(),
+            'pendingConflicts' => [], // Implement if SubjectConflict model exists
             'departmentStats' => $this->getDepartmentStats($department),
-            'recentValidations' => $user->validatedSubjects()
+            'recentValidations' => \App\Models\Subject::where('validated_by', $user->id)
+                ->whereNotNull('validated_at')
                 ->latest('validated_at')
                 ->take(10)
                 ->get(),
@@ -122,10 +102,12 @@ class DashboardController extends Controller
 
         $data = [
             'systemStats' => $this->getSystemStats(),
-            'readyProjects' => \App\Models\Project::readyForDefense()
-                ->with(['team.members.student', 'supervisor'])
+            'readyProjects' => \App\Models\Project::where('status', 'active')
+                ->whereDoesntHave('defense')
+                ->with(['team.members.user', 'supervisor'])
                 ->get(),
-            'recentDefenses' => \App\Models\Defense::recent()
+            'recentDefenses' => \App\Models\Defense::latest()
+                ->take(10)
                 ->with(['project.team', 'room'])
                 ->get(),
             'pendingApprovals' => $this->getPendingApprovals(),
@@ -162,7 +144,7 @@ class DashboardController extends Controller
      */
     private function getStudentDashboardData($user): array
     {
-        $team = $user->activeTeam();
+        $team = $user->teamMember?->team;
 
         return [
             'hasTeam' => $team !== null,
@@ -180,7 +162,7 @@ class DashboardController extends Controller
         return [
             'subjectsCount' => $user->subjects()->count(),
             'supervisedProjectsCount' => $user->supervisedProjects()->count(),
-            'currentWorkload' => $user->getCurrentWorkload(),
+            'currentWorkload' => $user->supervisedProjects()->where('status', 'active')->count(),
             'pendingReviews' => $this->getPendingReviewsForTeacher($user),
         ];
     }
@@ -279,5 +261,73 @@ class DashboardController extends Controller
             'storage' => 'healthy',
             'mail' => 'healthy',
         ];
+    }
+
+    private function getRecentActivityForStudent($user): array
+    {
+        return []; // Placeholder - implement based on activity tracking needs
+    }
+
+    private function getUpcomingDeadlines($user): array
+    {
+        return []; // Placeholder - implement based on deadline tracking needs
+    }
+
+    private function getTeacherWorkloadStats($user): array
+    {
+        return [
+            'total_subjects' => $user->subjects()->count(),
+            'active_projects' => $user->supervisedProjects()->where('status', 'active')->count(),
+            'pending_submissions' => $user->supervisedProjects()
+                ->whereHas('submissions', function($q) {
+                    $q->where('status', 'submitted');
+                })->count(),
+            'upcoming_defenses' => 0 // Implement if needed
+        ];
+    }
+
+    private function getDepartmentStats($department): array
+    {
+        return [
+            'total_projects' => \App\Models\Project::whereHas('team.members.user', function($q) use ($department) {
+                $q->where('department', $department);
+            })->count(),
+            'active_projects' => \App\Models\Project::where('status', 'active')
+                ->whereHas('team.members.user', function($q) use ($department) {
+                    $q->where('department', $department);
+                })->count(),
+            'completed_projects' => \App\Models\Project::where('status', 'completed')
+                ->whereHas('team.members.user', function($q) use ($department) {
+                    $q->where('department', $department);
+                })->count(),
+        ];
+    }
+
+    private function getSystemStats(): array
+    {
+        return [
+            'total_users' => \App\Models\User::count(),
+            'total_projects' => \App\Models\Project::count(),
+            'active_projects' => \App\Models\Project::where('status', 'active')->count(),
+            'completed_projects' => \App\Models\Project::where('status', 'completed')->count(),
+            'total_subjects' => \App\Models\Subject::count(),
+            'validated_subjects' => \App\Models\Subject::where('status', 'validated')->count(),
+        ];
+    }
+
+    private function getPendingApprovals(): array
+    {
+        return [
+            'subjects' => \App\Models\Subject::where('status', 'pending_validation')->count(),
+            'external_projects' => 0, // Implement if external projects model exists
+        ];
+    }
+
+    private function getPendingReviewsForTeacher($user): int
+    {
+        return $user->supervisedProjects()
+            ->whereHas('submissions', function($q) {
+                $q->where('status', 'submitted');
+            })->count();
     }
 }

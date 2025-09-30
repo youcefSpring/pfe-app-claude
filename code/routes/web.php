@@ -38,7 +38,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // AUTHENTICATED WEB ROUTES
 // =========================================================================
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     // =====================================================================
     // DASHBOARD ROUTES
@@ -78,8 +78,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('subjects')->name('subjects.')->group(function () {
         // All users can view subjects
         Route::get('/', [SubjectController::class, 'index'])->name('index');
-        Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
         Route::get('/available/{grade?}', [SubjectController::class, 'available'])->name('available');
+        Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
 
         // Teachers can create and manage their subjects
         Route::middleware('role:teacher')->group(function () {
@@ -88,7 +88,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/{subject}/edit', [SubjectController::class, 'edit'])->name('edit');
             Route::put('/{subject}', [SubjectController::class, 'update'])->name('update');
             Route::delete('/{subject}', [SubjectController::class, 'destroy'])->name('destroy');
-            Route::post('/{subject}/submit', [SubjectController::class, 'submitForValidation'])->name('submit');
+            Route::post('/{subject}/submit-validation', [SubjectController::class, 'submitForValidation'])->name('submit-validation');
         });
 
         // Department heads can validate subjects
@@ -129,6 +129,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/{team}/external-project', [TeamController::class, 'externalProjectForm'])->name('external-project-form');
             Route::post('/{team}/external-project', [TeamController::class, 'submitExternalProject'])->name('external-project');
 
+            // Team actions
+            Route::post('/{team}/join', [TeamController::class, 'join'])->name('join');
+            Route::post('/{team}/leave', [TeamController::class, 'leave'])->name('leave');
+            Route::post('/{team}/transfer-leadership', [TeamController::class, 'transferLeadership'])->name('transfer-leadership');
+
             // Team invitations
             Route::get('/invitations', [TeamController::class, 'invitations'])->name('invitations');
             Route::post('/{team}/accept-invitation', [TeamController::class, 'acceptInvitation'])->name('accept-invitation');
@@ -161,6 +166,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/{project}/submissions/{submission}/grade', [ProjectController::class, 'gradeSubmission'])->name('grade-submission');
         });
 
+        // Download routes (accessible by authorized users)
+        Route::get('/{project}/submissions/{submission}/download/{filename}', [ProjectController::class, 'downloadSubmission'])
+            ->name('download-submission');
+
         // Admins and department heads can create projects
         Route::middleware('role:admin,department_head')->group(function () {
             Route::get('/create', [ProjectController::class, 'create'])->name('create');
@@ -172,14 +181,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // =====================================================================
+    // SUBMISSION MANAGEMENT ROUTES
+    // =====================================================================
+
+    Route::prefix('submissions')->name('submissions.')->group(function () {
+        // Teachers can view and grade submissions
+        Route::middleware('role:teacher')->group(function () {
+            Route::get('/', [ProjectController::class, 'allSubmissions'])->name('index');
+            Route::get('/{submission}', [ProjectController::class, 'showSubmission'])->name('show');
+        });
+    });
+
+    // =====================================================================
     // DEFENSE MANAGEMENT ROUTES
     // =====================================================================
 
     Route::prefix('defenses')->name('defenses.')->group(function () {
         // All users can view defenses
         Route::get('/', [DefenseController::class, 'index'])->name('index');
-        Route::get('/{defense}', [DefenseController::class, 'show'])->name('show');
         Route::get('/calendar', [DefenseController::class, 'calendar'])->name('calendar');
+        Route::get('/{defense}', [DefenseController::class, 'show'])->name('show');
 
         // Students can view their defense details
         Route::middleware('role:student')->group(function () {
@@ -189,13 +210,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Teachers can view jury assignments
         Route::middleware('role:teacher')->group(function () {
             Route::get('/jury-assignments', [DefenseController::class, 'juryAssignments'])->name('jury-assignments');
-            Route::post('/{defense}/grade', [DefenseController::class, 'submitGrade'])->name('submit-grade');
         });
 
         // Admins can schedule and manage defenses
         Route::middleware('role:admin,department_head')->group(function () {
             Route::get('/schedule', [DefenseController::class, 'scheduleForm'])->name('schedule-form');
             Route::post('/schedule', [DefenseController::class, 'schedule'])->name('schedule');
+            Route::post('/{defense}/grade', [DefenseController::class, 'submitGrade'])->name('submit-grade');
             Route::get('/{defense}/edit', [DefenseController::class, 'edit'])->name('edit');
             Route::put('/{defense}', [DefenseController::class, 'update'])->name('update');
             Route::delete('/{defense}', [DefenseController::class, 'cancel'])->name('cancel');
@@ -226,6 +247,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
         Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
+        Route::get('/users/bulk-import', [AdminController::class, 'bulkImport'])->name('users.bulk-import');
+
+        // Student Management
+        Route::get('/students/upload', [AdminController::class, 'studentsUpload'])->name('students.upload');
+        Route::post('/students/upload', [AdminController::class, 'studentsUploadProcess'])->name('students.upload.process');
+
+        // Speciality Management
+        Route::get('/specialities', [AdminController::class, 'specialities'])->name('specialities');
+        Route::get('/specialities/create', [AdminController::class, 'createSpeciality'])->name('specialities.create');
+        Route::post('/specialities', [AdminController::class, 'storeSpeciality'])->name('specialities.store');
+        Route::get('/specialities/{speciality}/edit', [AdminController::class, 'editSpeciality'])->name('specialities.edit');
+        Route::put('/specialities/{speciality}', [AdminController::class, 'updateSpeciality'])->name('specialities.update');
+        Route::delete('/specialities/{speciality}', [AdminController::class, 'destroySpeciality'])->name('specialities.destroy');
 
         // System Configuration
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -234,7 +268,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Reports and Analytics
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
         Route::get('/reports/generate', [AdminController::class, 'generateReport'])->name('reports.generate');
+        Route::get('/reports/subjects', [AdminController::class, 'subjectsReport'])->name('reports.subjects');
+        Route::get('/reports/teams', [AdminController::class, 'teamsReport'])->name('reports.teams');
+        Route::get('/reports/projects', [AdminController::class, 'projectsReport'])->name('reports.projects');
+        Route::get('/reports/defenses', [AdminController::class, 'defensesReport'])->name('reports.defenses');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
+        Route::get('/logs', [AdminController::class, 'logs'])->name('logs');
 
         // Backup and Maintenance
         Route::get('/maintenance', [AdminController::class, 'maintenance'])->name('maintenance');

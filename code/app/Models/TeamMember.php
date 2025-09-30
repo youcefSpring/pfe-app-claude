@@ -34,6 +34,11 @@ class TeamMember extends Model
         return $this->belongsTo(User::class, 'student_id');
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
     public function isLeader(): bool
     {
         return $this->role === 'leader';
