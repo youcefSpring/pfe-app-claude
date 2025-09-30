@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
             $table->enum('role', ['leader', 'member'])->default('member');
             $table->timestamp('joined_at')->useCurrent();
+            $table->timestamps();
 
             $table->unique('student_id'); // One student per team constraint
             $table->index('team_id');

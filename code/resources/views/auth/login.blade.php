@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pfe-app')
 
 @section('title', 'Login')
 
@@ -13,7 +13,7 @@
                         <div class="text-center mb-4">
                             <i class="bi bi-mortarboard text-primary mb-3" style="font-size: 3rem;"></i>
                             <h2 class="h3 mb-3">Welcome Back</h2>
-                            <p class="text-muted">Sign in to access the admin panel</p>
+                            <p class="text-muted">Sign in to your PFE Management account</p>
                         </div>
 
                         <!-- Login Form -->
@@ -101,12 +101,11 @@
                     </div>
                 </div>
 
-                <!-- Back to Site -->
+                <!-- Help Text -->
                 <div class="text-center mt-4">
-                    <a href="{{ route('home') }}" class="text-decoration-none">
-                        <i class="bi bi-arrow-left me-1"></i>
-                        Back to Portfolio
-                    </a>
+                    <small class="text-muted">
+                        Need help? Contact your system administrator.
+                    </small>
                 </div>
             </div>
         </div>
