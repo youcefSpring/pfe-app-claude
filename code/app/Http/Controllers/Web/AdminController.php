@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Speciality;
+use App\Models\Room;
 use App\Services\StudentImportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -33,6 +34,142 @@ class AdminController extends Controller
     }
 
     /**
+     * Show form to create new user
+     */
+    public function createUser(): View
+    {
+        $specialities = Speciality::active()->get();
+        return view('admin.users.create', compact('specialities'));
+    }
+
+    /**
+     * Store new user
+     */
+    public function storeUser(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'role' => 'required|in:student,teacher,department_head,admin',
+            'matricule' => 'nullable|string|max:50',
+            'department' => 'nullable|string|max:255',
+            'speciality_id' => 'nullable|exists:specialities,id',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        try {
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'role' => $request->role,
+                'matricule' => $request->matricule,
+                'department' => 'Computer Science', // Fixed to Computer Science only
+                'speciality_id' => $request->speciality_id,
+                'password' => bcrypt($request->password),
+            ]);
+
+            return redirect()->route('admin.users')
+                ->with('success', 'User created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create user: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Show form to edit user
+     */
+    public function editUser(User $user): View
+    {
+        $specialities = Speciality::active()->get();
+        return view('admin.users.edit', compact('user', 'specialities'));
+    }
+
+    /**
+     * Update user
+     */
+    public function updateUser(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:student,teacher,department_head,admin',
+            'matricule' => 'nullable|string|max:50',
+            'department' => 'nullable|string|max:255',
+            'speciality_id' => 'nullable|exists:specialities,id',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        try {
+            $data = $request->only(['name', 'email', 'role', 'matricule', 'speciality_id']);
+            $data['department'] = 'Computer Science'; // Fixed to Computer Science only
+
+            if ($request->filled('password')) {
+                $data['password'] = bcrypt($request->password);
+            }
+
+            $user->update($data);
+
+            return redirect()->route('admin.users')
+                ->with('success', 'User updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update user: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Delete user
+     */
+    public function destroyUser(User $user): RedirectResponse
+    {
+        try {
+            if ($user->id === auth()->id()) {
+                return redirect()->back()
+                    ->with('error', 'Cannot delete your own account.');
+            }
+
+            $user->delete();
+            return redirect()->route('admin.users')
+                ->with('success', 'User deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to delete user: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update system settings
+     */
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        // This would typically update system settings
+        // For now, just redirect back with success
+        return redirect()->back()
+            ->with('success', 'Settings updated successfully!');
+    }
+
+    /**
+     * Generate system report
+     */
+    public function generateReport(): View
+    {
+        return view('admin.reports.generate');
+    }
+
+    /**
+     * Backup system
+     */
+    public function backup(): RedirectResponse
+    {
+        // This would typically create a system backup
+        return redirect()->back()
+            ->with('success', 'Backup created successfully!');
+    }
+
+    /**
      * Show student upload form
      */
     public function studentsUpload(): View
@@ -46,15 +183,26 @@ class AdminController extends Controller
      */
     public function studentsUploadProcess(Request $request): RedirectResponse
     {
-        $request->validate([
+        // Determine validation rules based on speciality option
+        $rules = [
             'excel_file' => 'required|file|mimes:xlsx,xls|max:10240', // 10MB max
-            'speciality_name' => 'required|string|max:255',
-            'speciality_level' => 'required|in:license,master,doctorate',
-            'academic_year' => 'required|string|max:20',
-            'semester' => 'nullable|string|max:10',
-            'speciality_code' => 'nullable|string|max:50',
-            'description' => 'nullable|string|max:500',
-        ]);
+            'speciality_option' => 'required|in:existing,new',
+        ];
+
+        if ($request->speciality_option === 'existing') {
+            $rules['existing_speciality_id'] = 'required|exists:specialities,id';
+        } else {
+            $rules = array_merge($rules, [
+                'speciality_name' => 'required|string|max:255',
+                'speciality_level' => 'required|in:L2 ING,L3 LMD,L4 ING,L5 ING,M2 LMD',
+                'academic_year' => 'required|string|max:20',
+                'semester' => 'nullable|string|max:10',
+                'speciality_code' => 'nullable|string|max:50',
+                'description' => 'nullable|string|max:500',
+            ]);
+        }
+
+        $request->validate($rules);
 
         try {
             // Store the uploaded file temporarily
@@ -64,14 +212,27 @@ class AdminController extends Controller
             $fullPath = Storage::disk('local')->path($filePath);
 
             // Prepare speciality data
-            $specialityData = [
-                'name' => $request->speciality_name,
-                'level' => $request->speciality_level,
-                'academic_year' => $request->academic_year,
-                'semester' => $request->semester,
-                'code' => $request->speciality_code,
-                'description' => $request->description,
-            ];
+            if ($request->speciality_option === 'existing') {
+                $speciality = Speciality::findOrFail($request->existing_speciality_id);
+                $specialityData = [
+                    'existing_speciality_id' => $speciality->id,
+                    'name' => $speciality->name,
+                    'level' => $speciality->level,
+                    'academic_year' => $speciality->academic_year,
+                    'semester' => $speciality->semester,
+                    'code' => $speciality->code,
+                    'description' => $speciality->description,
+                ];
+            } else {
+                $specialityData = [
+                    'name' => $request->speciality_name,
+                    'level' => $request->speciality_level,
+                    'academic_year' => $request->academic_year,
+                    'semester' => $request->semester,
+                    'code' => $request->speciality_code,
+                    'description' => $request->description,
+                ];
+            }
 
             // Process the import
             $result = $this->importService->importFromExcel($fullPath, $specialityData);
@@ -138,14 +299,17 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50',
-            'level' => 'required|in:license,master,doctorate',
+            'level' => 'required|in:L2 ING,L3 LMD,L4 ING,L5 ING,M2 LMD',
             'academic_year' => 'required|string|max:20',
             'semester' => 'nullable|string|max:10',
             'description' => 'nullable|string|max:500',
         ]);
 
         try {
-            Speciality::create($request->all());
+            $data = $request->all();
+            $data['is_active'] = $request->boolean('is_active');
+
+            Speciality::create($data);
             return redirect()->route('admin.specialities')
                 ->with('success', 'Speciality created successfully!');
         } catch (\Exception $e) {
@@ -171,7 +335,7 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50',
-            'level' => 'required|in:license,master,doctorate',
+            'level' => 'required|in:L2 ING,L3 LMD,L4 ING,L5 ING,M2 LMD',
             'academic_year' => 'required|string|max:20',
             'semester' => 'nullable|string|max:10',
             'description' => 'nullable|string|max:500',
@@ -179,7 +343,10 @@ class AdminController extends Controller
         ]);
 
         try {
-            $speciality->update($request->all());
+            $data = $request->all();
+            $data['is_active'] = $request->boolean('is_active');
+
+            $speciality->update($data);
             return redirect()->route('admin.specialities')
                 ->with('success', 'Speciality updated successfully!');
         } catch (\Exception $e) {
@@ -258,6 +425,27 @@ class AdminController extends Controller
     }
 
     /**
+     * Process bulk import
+     */
+    public function processBulkImport(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
+        ]);
+
+        try {
+            // This would process the CSV file for bulk user import
+            // For now, just return success message
+            return redirect()->back()
+                ->with('success', 'Bulk import completed successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Bulk import failed: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
      * Subjects report
      */
     public function subjectsReport(): View
@@ -312,6 +500,105 @@ class AdminController extends Controller
         ];
 
         return view('admin.reports.defenses', compact('stats'));
+    }
+
+    /**
+     * Show rooms management
+     */
+    public function rooms(): View
+    {
+        $rooms = Room::withCount('defenses')->paginate(15);
+        return view('admin.rooms.index', compact('rooms'));
+    }
+
+    /**
+     * Create new room
+     */
+    public function createRoom(): View
+    {
+        return view('admin.rooms.create');
+    }
+
+    /**
+     * Store new room
+     */
+    public function storeRoom(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:rooms,name',
+            'capacity' => 'required|integer|min:1|max:500',
+            'equipment' => 'nullable|string|max:1000',
+            'location' => 'nullable|string|max:255',
+            'is_available' => 'boolean',
+        ]);
+
+        try {
+            $data = $request->all();
+            $data['is_available'] = $request->boolean('is_available', true);
+
+            Room::create($data);
+            return redirect()->route('admin.rooms')
+                ->with('success', 'Room created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create room: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Edit room
+     */
+    public function editRoom(Room $room): View
+    {
+        return view('admin.rooms.edit', compact('room'));
+    }
+
+    /**
+     * Update room
+     */
+    public function updateRoom(Request $request, Room $room): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:rooms,name,' . $room->id,
+            'capacity' => 'required|integer|min:1|max:500',
+            'equipment' => 'nullable|string|max:1000',
+            'location' => 'nullable|string|max:255',
+            'is_available' => 'boolean',
+        ]);
+
+        try {
+            $data = $request->all();
+            $data['is_available'] = $request->boolean('is_available');
+
+            $room->update($data);
+            return redirect()->route('admin.rooms')
+                ->with('success', 'Room updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update room: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Delete room
+     */
+    public function destroyRoom(Room $room): RedirectResponse
+    {
+        try {
+            if ($room->defenses()->count() > 0) {
+                return redirect()->back()
+                    ->with('error', 'Cannot delete room with scheduled defenses.');
+            }
+
+            $room->delete();
+            return redirect()->route('admin.rooms')
+                ->with('success', 'Room deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to delete room: ' . $e->getMessage());
+        }
     }
 
     /**

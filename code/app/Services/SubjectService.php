@@ -12,25 +12,42 @@ class SubjectService
     /**
      * Create a new subject with validation.
      */
-    public function createSubject(array $data, User $teacher): Subject
+    public function createSubject(array $data, User $user): Subject
     {
-        // Validate that user is a teacher
-        if (!$teacher->isTeacher()) {
-            throw new \Exception('Only teachers can create subjects');
+        // Validate that user can create subjects
+        if (!$user->isTeacher() && !$user->isStudent()) {
+            throw new \Exception('Only teachers and students can create subjects');
         }
 
         // Validate required fields
         $this->validateSubjectData($data);
 
-        return Subject::create([
+        $subjectData = [
             'title' => $data['title'],
             'description' => $data['description'],
             'keywords' => $data['keywords'],
             'tools' => $data['tools'],
             'plan' => $data['plan'],
-            'teacher_id' => $teacher->id,
             'status' => 'draft',
-        ]);
+        ];
+
+        // Handle external subjects for students
+        if ($user->isStudent()) {
+            $subjectData['is_external'] = $data['is_external'] ?? true;
+            $subjectData['student_id'] = $user->id;
+            $subjectData['teacher_id'] = null;
+
+            if ($data['is_external'] ?? true) {
+                $subjectData['company_name'] = $data['company_name'] ?? null;
+                $subjectData['dataset_resources_link'] = $data['dataset_resources_link'] ?? null;
+            }
+        } else {
+            // Teachers create internal subjects
+            $subjectData['teacher_id'] = $user->id;
+            $subjectData['is_external'] = false;
+        }
+
+        return Subject::create($subjectData);
     }
 
     /**
@@ -190,6 +207,58 @@ class SubjectService
         }
 
         return $stats;
+    }
+
+    /**
+     * Get subjects for a specific user based on their role.
+     */
+    public function getSubjectsForUser(User $user, array $filters = [], int $perPage = 15)
+    {
+        $query = Subject::with(['teacher', 'student']);
+
+        // Filter based on user role
+        switch ($user->role) {
+            case 'teacher':
+                $query->where('teacher_id', $user->id);
+                break;
+            case 'department_head':
+                $query->whereHas('teacher', function($q) use ($user) {
+                    $q->where('department', $user->department);
+                });
+                break;
+            case 'student':
+                // Students see validated subjects and their own external subjects
+                $query->where(function($q) use ($user) {
+                    $q->where('status', 'validated')
+                      ->orWhere(function($subq) use ($user) {
+                          $subq->where('is_external', true)
+                               ->where('student_id', $user->id);
+                      });
+                });
+                break;
+            // Admin sees all subjects (no filter)
+        }
+
+        // Apply additional filters
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['search'])) {
+            $query->where(function($q) use ($filters) {
+                $q->where('title', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('description', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('keywords', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        if (!empty($filters['department'])) {
+            $query->whereHas('teacher', function($q) use ($filters) {
+                $q->where('department', $filters['department']);
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 
     /**

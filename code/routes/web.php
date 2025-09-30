@@ -76,15 +76,21 @@ Route::middleware(['auth'])->group(function () {
     // =====================================================================
 
     Route::prefix('subjects')->name('subjects.')->group(function () {
-        // All users can view subjects
+        // Static routes first
         Route::get('/', [SubjectController::class, 'index'])->name('index');
         Route::get('/available/{grade?}', [SubjectController::class, 'available'])->name('available');
-        Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
 
         // Teachers can create and manage their subjects
         Route::middleware('role:teacher')->group(function () {
             Route::get('/create', [SubjectController::class, 'create'])->name('create');
             Route::post('/', [SubjectController::class, 'store'])->name('store');
+        });
+
+        // Dynamic route for viewing specific subjects (must be after static routes)
+        Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
+
+        // Teacher routes that require subject parameter
+        Route::middleware('role:teacher')->group(function () {
             Route::get('/{subject}/edit', [SubjectController::class, 'edit'])->name('edit');
             Route::put('/{subject}', [SubjectController::class, 'update'])->name('update');
             Route::delete('/{subject}', [SubjectController::class, 'destroy'])->name('destroy');
@@ -106,9 +112,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('teams')->name('teams.')->group(function () {
         // All users can view teams
         Route::get('/', [TeamController::class, 'index'])->name('index');
-        Route::get('/{team}', [TeamController::class, 'show'])->name('show');
 
-        // Students can create and manage teams
+        // Students can create and manage teams (static routes before dynamic ones)
         Route::middleware('role:student')->group(function () {
             Route::get('/create', [TeamController::class, 'create'])->name('create');
             Route::post('/', [TeamController::class, 'store'])->name('store');
@@ -139,6 +144,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{team}/accept-invitation', [TeamController::class, 'acceptInvitation'])->name('accept-invitation');
             Route::post('/{team}/decline-invitation', [TeamController::class, 'declineInvitation'])->name('decline-invitation');
         });
+
+        // Dynamic route for viewing teams (must be after static routes)
+        Route::get('/{team}', [TeamController::class, 'show'])->name('show');
     });
 
     // =====================================================================
@@ -146,8 +154,15 @@ Route::middleware(['auth'])->group(function () {
     // =====================================================================
 
     Route::prefix('projects')->name('projects.')->group(function () {
-        // All users can view projects (filtered by role)
+        // Static routes first
         Route::get('/', [ProjectController::class, 'index'])->name('index');
+
+        // Teachers can supervise and review projects (static routes)
+        Route::middleware('role:teacher')->group(function () {
+            Route::get('/supervised', [ProjectController::class, 'supervised'])->name('supervised');
+        });
+
+        // Dynamic route for viewing specific projects (must be after static routes)
         Route::get('/{project}', [ProjectController::class, 'show'])->name('show');
 
         // Students can manage their project submissions
@@ -158,9 +173,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{project}/timeline', [ProjectController::class, 'timeline'])->name('timeline');
         });
 
-        // Teachers can supervise and review projects
+        // Teacher routes that require project parameter
         Route::middleware('role:teacher')->group(function () {
-            Route::get('/supervised', [ProjectController::class, 'supervised'])->name('supervised');
             Route::get('/{project}/review', [ProjectController::class, 'reviewForm'])->name('review-form');
             Route::post('/{project}/review', [ProjectController::class, 'submitReview'])->name('submit-review');
             Route::post('/{project}/submissions/{submission}/grade', [ProjectController::class, 'gradeSubmission'])->name('grade-submission');
@@ -216,6 +230,7 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('role:admin,department_head')->group(function () {
             Route::get('/schedule', [DefenseController::class, 'scheduleForm'])->name('schedule-form');
             Route::post('/schedule', [DefenseController::class, 'schedule'])->name('schedule');
+            Route::post('/auto-schedule', [DefenseController::class, 'autoSchedule'])->name('auto-schedule');
             Route::post('/{defense}/grade', [DefenseController::class, 'submitGrade'])->name('submit-grade');
             Route::get('/{defense}/edit', [DefenseController::class, 'edit'])->name('edit');
             Route::put('/{defense}', [DefenseController::class, 'update'])->name('update');
@@ -240,6 +255,9 @@ Route::middleware(['auth'])->group(function () {
     // =====================================================================
 
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        // Admin Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+
         // User Management
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
@@ -248,6 +266,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
         Route::get('/users/bulk-import', [AdminController::class, 'bulkImport'])->name('users.bulk-import');
+        Route::post('/users/bulk-import', [AdminController::class, 'processBulkImport'])->name('users.bulk-import.process');
 
         // Student Management
         Route::get('/students/upload', [AdminController::class, 'studentsUpload'])->name('students.upload');
@@ -274,6 +293,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/defenses', [AdminController::class, 'defensesReport'])->name('reports.defenses');
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
         Route::get('/logs', [AdminController::class, 'logs'])->name('logs');
+
+        // Room Management
+        Route::get('/rooms', [AdminController::class, 'rooms'])->name('rooms');
+        Route::get('/rooms/create', [AdminController::class, 'createRoom'])->name('rooms.create');
+        Route::post('/rooms', [AdminController::class, 'storeRoom'])->name('rooms.store');
+        Route::get('/rooms/{room}/edit', [AdminController::class, 'editRoom'])->name('rooms.edit');
+        Route::put('/rooms/{room}', [AdminController::class, 'updateRoom'])->name('rooms.update');
+        Route::delete('/rooms/{room}', [AdminController::class, 'destroyRoom'])->name('rooms.destroy');
 
         // Backup and Maintenance
         Route::get('/maintenance', [AdminController::class, 'maintenance'])->name('maintenance');

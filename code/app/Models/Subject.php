@@ -28,6 +28,10 @@ class Subject extends Model
         'validation_feedback',
         'validated_at',
         'validated_by',
+        'is_external',
+        'company_name',
+        'dataset_resources_link',
+        'student_id',
     ];
 
     /**
@@ -39,6 +43,7 @@ class Subject extends Model
     {
         return [
             'validated_at' => 'datetime',
+            'is_external' => 'boolean',
         ];
     }
 
@@ -57,6 +62,14 @@ class Subject extends Model
     public function validator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validated_by');
+    }
+
+    /**
+     * Get the student who created this external subject.
+     */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
     }
 
     /**
@@ -125,6 +138,30 @@ class Subject extends Model
     public function scopeByTeacher($query, $teacherId)
     {
         return $query->where('teacher_id', $teacherId);
+    }
+
+    /**
+     * Scope to get external subjects.
+     */
+    public function scopeExternal($query)
+    {
+        return $query->where('is_external', true);
+    }
+
+    /**
+     * Scope to get internal subjects.
+     */
+    public function scopeInternal($query)
+    {
+        return $query->where('is_external', false);
+    }
+
+    /**
+     * Scope to filter by student (for external subjects).
+     */
+    public function scopeByStudent($query, $studentId)
+    {
+        return $query->where('student_id', $studentId);
     }
 
     // Business Logic Methods

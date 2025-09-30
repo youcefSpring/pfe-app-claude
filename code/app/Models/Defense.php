@@ -47,6 +47,11 @@ class Defense extends Model
         return $this->hasMany(DefenseJury::class);
     }
 
+    public function juries(): HasMany
+    {
+        return $this->jury(); // Alias for consistency
+    }
+
     public function report(): HasOne
     {
         return $this->hasOne(DefenseReport::class);

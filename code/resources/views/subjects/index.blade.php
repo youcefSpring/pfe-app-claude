@@ -11,9 +11,14 @@
                     <i class="bi bi-journal-text me-2"></i>All Subjects
                 </h5>
                 <div class="d-flex gap-2">
-                    @if(in_array(auth()->user()?->role, ['teacher', 'admin']))
+                    @if(in_array(auth()->user()?->role, ['teacher', 'student']))
                         <a href="{{ route('subjects.create') }}" class="btn btn-primary">
-                            <i class="bi bi-plus me-2"></i>Add New Subject
+                            <i class="bi bi-plus me-2"></i>
+                            @if(auth()->user()?->role === 'student')
+                                Propose External Subject
+                            @else
+                                Add New Subject
+                            @endif
                         </a>
                     @endif
                     @if(auth()->user()?->role === 'department_head')
@@ -201,16 +206,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="d-flex align-items-center gap-3">
                                         <small class="text-muted">
                                             <i class="bi bi-person me-1"></i>
-                                            ${subject.teacher ? subject.teacher.name : 'No teacher assigned'}
+                                            ${subject.is_external && subject.student ? subject.student.name + ' (Student)' :
+                                              subject.teacher ? subject.teacher.name : 'No teacher assigned'}
                                         </small>
-                                        <small class="text-muted">
-                                            <i class="bi bi-building me-1"></i>
-                                            ${subject.department || 'No department'}
-                                        </small>
-                                        <small class="text-muted">
-                                            <i class="bi bi-mortarboard me-1"></i>
-                                            ${subject.level ? subject.level.charAt(0).toUpperCase() + subject.level.slice(1) : 'Not specified'}
-                                        </small>
+                                        ${subject.is_external ? `
+                                            <small class="text-info">
+                                                <i class="bi bi-globe me-1"></i>External Subject
+                                            </small>
+                                        ` : ''}
+                                        ${subject.company_name ? `
+                                            <small class="text-muted">
+                                                <i class="bi bi-building me-1"></i>
+                                                ${subject.company_name}
+                                            </small>
+                                        ` : ''}
                                     </div>
                                 </div>
                             </div>

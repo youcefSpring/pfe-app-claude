@@ -153,13 +153,15 @@
                         </li>
                         @endif
 
-                        <!-- Projects -->
+                        {{-- Projects temporarily removed --}}
+                        {{--
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('projects*') ? 'active' : '' }}" href="{{ route('projects.index') }}">
                                 <i class="bi bi-folder me-2"></i>
                                 Projects
                             </a>
                         </li>
+                        --}}
 
                         <!-- Defenses -->
                         <li class="nav-item">

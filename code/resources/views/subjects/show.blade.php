@@ -96,9 +96,27 @@
                                     </div>
 
                                     <div class="mb-3">
+                                        <small class="text-muted">Type</small>
+                                        <div>
+                                            @if($subject->is_external)
+                                                <span class="badge bg-info">External Subject</span>
+                                            @else
+                                                <span class="badge bg-primary">Internal Subject</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
                                         <small class="text-muted">Proposed by</small>
-                                        <div>{{ $subject->teacher->name }}</div>
-                                        <small class="text-muted">{{ $subject->teacher->department }}</small>
+                                        @if($subject->is_external && $subject->student)
+                                            <div>{{ $subject->student->name }}</div>
+                                            <small class="text-muted">Student</small>
+                                        @elseif($subject->teacher)
+                                            <div>{{ $subject->teacher->name }}</div>
+                                            <small class="text-muted">{{ $subject->teacher->department }}</small>
+                                        @else
+                                            <div class="text-muted">Not assigned</div>
+                                        @endif
                                     </div>
 
                                     @if($subject->validated_by)
@@ -107,6 +125,26 @@
                                             <div>{{ $subject->validator?->name }}</div>
                                             <small class="text-muted">{{ $subject->validated_at?->format('M d, Y') }}</small>
                                         </div>
+                                    @endif
+
+                                    @if($subject->is_external)
+                                        @if($subject->company_name)
+                                            <div class="mb-3">
+                                                <small class="text-muted">Company/Organization</small>
+                                                <div>{{ $subject->company_name }}</div>
+                                            </div>
+                                        @endif
+
+                                        @if($subject->dataset_resources_link)
+                                            <div class="mb-3">
+                                                <small class="text-muted">Resources Link</small>
+                                                <div>
+                                                    <a href="{{ $subject->dataset_resources_link }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                                        <i class="bi bi-link-45deg me-1"></i>View Resources
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @endif
 
                                     <div class="mb-3">

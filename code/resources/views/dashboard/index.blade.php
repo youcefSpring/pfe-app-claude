@@ -13,9 +13,7 @@
                         <h4 class="card-title mb-2">Welcome back, {{ auth()->user()->name }}!</h4>
                         <p class="card-text mb-0">
                             Academic Year: {{ now()->format('Y') }}/{{ now()->addYear()->format('Y') }}
-                            @if(auth()->user()->department)
-                                | Department: {{ auth()->user()->department }}
-                            @endif
+                            | Department: Computer Science
                             | Role: {{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}
                         </p>
                     </div>
@@ -26,30 +24,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Role-specific Dashboard Content -->
-    @switch(auth()->user()->role)
-        @case('student')
-            @include('dashboard.partials.student-content')
-            @break
-        @case('teacher')
-            @include('dashboard.partials.teacher-content')
-            @break
-        @case('department_head')
-            @include('dashboard.partials.department-head-content')
-            @break
-        @case('admin')
-            @include('dashboard.partials.admin-content')
-            @break
-        @default
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    Your dashboard is being set up. Please contact the administrator if you need assistance.
-                </div>
-            </div>
-    @endswitch
-</div>
 
 <!-- Quick Actions -->
 <div class="row mt-4">
@@ -64,22 +38,47 @@
                 <div class="row g-3">
                     @switch(auth()->user()->role)
                         @case('student')
+                            @php
+                                $userTeam = auth()->user()->teamMember?->team;
+                                $hasTeam = auth()->user()->teamMember;
+                            @endphp
+
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('subjects.index') }}" class="btn btn-outline-primary w-100">
+                                <a href="{{ route('subjects.available') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-journal-text d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Browse Subjects
+                                    Available Subjects
                                 </a>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('teams.index') }}" class="btn btn-outline-success w-100">
-                                    <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Manage Teams
-                                </a>
-                            </div>
+
+                            @if($hasTeam)
+                                <div class="col-md-6 col-lg-3">
+                                    <a href="{{ route('teams.show', $userTeam) }}" class="btn btn-outline-success w-100">
+                                        <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
+                                        My Team
+                                    </a>
+                                </div>
+                            @else
+                                <div class="col-md-6 col-lg-3">
+                                    <a href="{{ route('teams.index') }}" class="btn btn-outline-success w-100">
+                                        <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
+                                        Join Team
+                                    </a>
+                                </div>
+                            @endif
+
+                            {{-- Projects temporarily hidden --}}
+                            {{--
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('projects.index') }}" class="btn btn-outline-info w-100">
                                     <i class="bi bi-folder d-block mb-2" style="font-size: 1.5rem;"></i>
                                     My Projects
+                                </a>
+                            </div>
+                            --}}
+                            <div class="col-md-6 col-lg-3">
+                                <a href="{{ route('subjects.create') }}" class="btn btn-outline-info w-100">
+                                    <i class="bi bi-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
+                                    Propose External Subject
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
@@ -96,12 +95,15 @@
                                     Add Subject
                                 </a>
                             </div>
+                            {{-- Supervised Projects temporarily removed --}}
+                            {{--
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('projects.supervised') }}" class="btn btn-outline-success w-100">
                                     <i class="bi bi-eye d-block mb-2" style="font-size: 1.5rem;"></i>
                                     Supervised Projects
                                 </a>
                             </div>
+                            --}}
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('defenses.jury-assignments') }}" class="btn btn-outline-info w-100">
                                     <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
@@ -149,21 +151,21 @@
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.students.upload') }}" class="btn btn-outline-success w-100">
-                                    <i class="bi bi-upload d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Upload Students
+                                <a href="{{ route('admin.specialities') }}" class="btn btn-outline-success w-100">
+                                    <i class="bi bi-mortarboard d-block mb-2" style="font-size: 1.5rem;"></i>
+                                    Specialities
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.settings') }}" class="btn btn-outline-info w-100">
-                                    <i class="bi bi-gear d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    System Settings
+                                <a href="{{ route('admin.rooms') }}" class="btn btn-outline-info w-100">
+                                    <i class="bi bi-building d-block mb-2" style="font-size: 1.5rem;"></i>
+                                    Manage Rooms
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100">
                                     <i class="bi bi-graph-up d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Analytics
+                                    Reports & Analytics
                                 </a>
                             </div>
                             @break
@@ -172,6 +174,31 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Role-specific Dashboard Content -->
+<div class="row">
+    @switch(auth()->user()->role)
+        @case('student')
+            @include('dashboard.partials.student-content')
+            @break
+        @case('teacher')
+            @include('dashboard.partials.teacher-content')
+            @break
+        @case('department_head')
+            @include('dashboard.partials.department-head-content')
+            @break
+        @case('admin')
+            @include('dashboard.partials.admin-content')
+            @break
+        @default
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Your dashboard is being set up. Please contact the administrator if you need assistance.
+                </div>
+            </div>
+    @endswitch
 </div>
 
 @if(isset($workflowStatus) && $workflowStatus)

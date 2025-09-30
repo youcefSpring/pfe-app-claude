@@ -63,6 +63,8 @@
     </div>
 </div>
 
+{{-- Projects section hidden as requested --}}
+{{--
 <div class="col-md-3 mb-4">
     <div class="card border-info">
         <div class="card-header bg-info text-white">
@@ -94,6 +96,7 @@
         </div>
     </div>
 </div>
+--}}
 
 <div class="col-md-3 mb-4">
     <div class="card border-warning">
@@ -123,6 +126,71 @@
                 </div>
             </div>
             <a href="{{ route('defenses.index') }}" class="btn btn-warning btn-sm w-100 mt-3">View Defenses</a>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-3 mb-4">
+    <div class="card border-secondary">
+        <div class="card-header bg-secondary text-white">
+            <h6 class="card-title mb-0">
+                <i class="bi bi-mortarboard me-2"></i>Specialities
+            </h6>
+        </div>
+        <div class="card-body">
+            @php
+                $totalSpecialities = \App\Models\Speciality::count();
+                $activeSpecialities = \App\Models\Speciality::where('is_active', true)->count();
+                $studentsEnrolled = \App\Models\User::where('role', 'student')->whereNotNull('speciality_id')->count();
+            @endphp
+            <div class="row text-center">
+                <div class="col-12 mb-2">
+                    <h3 class="text-secondary mb-1">{{ $totalSpecialities }}</h3>
+                    <small class="text-muted">Total Specialities</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-success mb-1">{{ $activeSpecialities }}</h5>
+                    <small class="text-muted">Active</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-info mb-1">{{ $studentsEnrolled }}</h5>
+                    <small class="text-muted">Students</small>
+                </div>
+            </div>
+            <a href="{{ route('admin.specialities') }}" class="btn btn-secondary btn-sm w-100 mt-3">Manage Specialities</a>
+        </div>
+    </div>
+</div>
+
+<!-- Rooms Management Card -->
+<div class="col-md-3 mb-4">
+    <div class="card border-info">
+        <div class="card-header bg-info text-white">
+            <h6 class="card-title mb-0">
+                <i class="bi bi-building me-2"></i>Rooms
+            </h6>
+        </div>
+        <div class="card-body">
+            @php
+                $totalRooms = \App\Models\Room::count();
+                $availableRooms = \App\Models\Room::where('is_available', true)->count();
+                $roomsInUse = \App\Models\Room::has('defenses')->count();
+            @endphp
+            <div class="row text-center">
+                <div class="col-12 mb-2">
+                    <h3 class="text-info mb-1">{{ $totalRooms }}</h3>
+                    <small class="text-muted">Total Rooms</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-success mb-1">{{ $availableRooms }}</h5>
+                    <small class="text-muted">Available</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-warning mb-1">{{ $roomsInUse }}</h5>
+                    <small class="text-muted">In Use</small>
+                </div>
+            </div>
+            <a href="{{ route('admin.rooms') }}" class="btn btn-info btn-sm w-100 mt-3">Manage Rooms</a>
         </div>
     </div>
 </div>
@@ -267,8 +335,9 @@
         <div class="card-body">
             @php
                 $todayLogins = \App\Models\User::where('last_login_at', '>=', now()->startOfDay())->count();
-                $thisWeekProjects = \App\Models\Project::where('created_at', '>=', now()->startOfWeek())->count();
+                // $thisWeekProjects = \App\Models\Project::where('created_at', '>=', now()->startOfWeek())->count(); // Hidden projects
                 $thisMonthDefenses = \App\Models\Defense::where('defense_date', '>=', now()->startOfMonth())->count();
+                $thisWeekSubjects = \App\Models\Subject::where('created_at', '>=', now()->startOfWeek())->count();
             @endphp
 
             <div class="row text-center">
@@ -280,8 +349,8 @@
                 </div>
                 <div class="col-4">
                     <div class="border-end">
-                        <h4 class="text-success mb-1">{{ $thisWeekProjects }}</h4>
-                        <small class="text-muted">Projects This Week</small>
+                        <h4 class="text-success mb-1">{{ $thisWeekSubjects }}</h4>
+                        <small class="text-muted">Subjects This Week</small>
                     </div>
                 </div>
                 <div class="col-4">

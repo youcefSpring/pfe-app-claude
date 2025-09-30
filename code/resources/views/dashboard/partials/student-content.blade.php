@@ -41,6 +41,8 @@
             </h6>
         </div>
         <div class="card-body">
+            {{-- Project-related functionality temporarily hidden --}}
+            {{--
             @if(auth()->user()->teamMember && auth()->user()->teamMember->team->project)
                 <div class="d-flex align-items-center">
                     <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
@@ -52,17 +54,20 @@
                     </div>
                 </div>
             @else
+            --}}
                 <div class="d-flex align-items-center">
                     <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
                         <i class="bi bi-search text-info"></i>
                     </div>
                     <div>
-                        <h6 class="mb-1">Select Subject</h6>
-                        <small class="text-muted">Browse available subjects</small>
+                        <h6 class="mb-1">Browse Subjects</h6>
+                        <small class="text-muted">Explore available subjects</small>
                     </div>
                 </div>
-                <a href="{{ route('subjects.available') }}" class="btn btn-info btn-sm mt-2">Browse Subjects</a>
+                <a href="{{ route('subjects.available') }}" class="btn btn-info btn-sm mt-2">Browse Available Subjects</a>
+            {{--
             @endif
+            --}}
         </div>
     </div>
 </div>

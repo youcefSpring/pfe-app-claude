@@ -26,6 +26,8 @@
     </div>
 </div>
 
+{{-- Supervised Projects Card temporarily removed --}}
+{{--
 <div class="col-md-4 mb-4">
     <div class="card">
         <div class="card-header">
@@ -52,6 +54,7 @@
         </div>
     </div>
 </div>
+--}}
 
 <div class="col-md-4 mb-4">
     <div class="card">
@@ -125,10 +128,8 @@
         </div>
         <div class="card-body">
             @php
-                $pendingSubmissions = auth()->user()->supervisedProjects()
-                    ->whereHas('submissions', function($q) {
-                        $q->where('status', 'submitted');
-                    })->count();
+                // Temporarily removed project submissions
+                $pendingSubmissions = 0;
                 $pendingDefenses = auth()->user()->juryAssignments()
                     ->whereHas('defense', function($q) {
                         $q->where('defense_date', '>', now())
@@ -136,8 +137,10 @@
                     })->count();
             @endphp
 
-            @if($pendingSubmissions > 0 || $pendingDefenses > 0)
+            @if($pendingDefenses > 0)
                 <div class="row">
+                    {{-- Project submissions temporarily removed --}}
+                    {{--
                     @if($pendingSubmissions > 0)
                         <div class="col-md-6">
                             <div class="alert alert-warning">
@@ -146,6 +149,7 @@
                             </div>
                         </div>
                     @endif
+                    --}}
                     @if($pendingDefenses > 0)
                         <div class="col-md-6">
                             <div class="alert alert-info">

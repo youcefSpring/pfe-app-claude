@@ -11,7 +11,7 @@
                     <i class="bi bi-people me-2"></i>All Teams
                 </h5>
                 <div class="d-flex gap-2">
-                    @if(auth()->user()?->role === 'student')
+                    @if(auth()->user()?->role === 'student' && !auth()->user()->teamMember)
                         <a href="{{ route('teams.create') }}" class="btn btn-primary">
                             <i class="bi bi-plus me-2"></i>Create Team
                         </a>

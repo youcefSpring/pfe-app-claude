@@ -118,6 +118,12 @@ class StudentImportService
      */
     protected function createOrGetSpeciality(array $data): Speciality
     {
+        // If an existing speciality ID is provided, use it
+        if (isset($data['existing_speciality_id'])) {
+            return Speciality::findOrFail($data['existing_speciality_id']);
+        }
+
+        // Otherwise, create or find speciality
         return Speciality::firstOrCreate(
             [
                 'name' => $data['name'],
@@ -295,12 +301,35 @@ class StudentImportService
             $existingUser = $this->findExistingUser($rowData);
 
             if ($existingUser) {
-                // Update existing user
-                $existingUser->update($userData);
+                // Update existing user but preserve critical fields if they exist
+                $updateData = $userData;
+
+                // Preserve existing numero_inscription if the current one is empty
+                if (empty($updateData['numero_inscription']) && !empty($existingUser->numero_inscription)) {
+                    $updateData['numero_inscription'] = $existingUser->numero_inscription;
+                }
+
+                // Preserve existing matricule if the current one is empty
+                if (empty($updateData['matricule']) && !empty($existingUser->matricule)) {
+                    $updateData['matricule'] = $existingUser->matricule;
+                }
+
+                // Don't update email if it already exists and is different
+                if ($existingUser->email !== $userData['email']) {
+                    $updateData['email'] = $existingUser->email;
+                }
+
+                $existingUser->update($updateData);
                 $this->updated++;
-                Log::info("Updated user: {$userData['email']} (Row {$rowNumber})");
+                Log::info("Updated user: {$existingUser->email} -> {$userData['name']} (Row {$rowNumber})");
             } else {
-                // Create new user
+                // Double-check for email uniqueness before creating
+                $emailExists = User::where('email', $userData['email'])->exists();
+                if ($emailExists) {
+                    // Generate alternative email
+                    $userData['email'] = $this->generateUniqueEmail($userData['email']);
+                }
+
                 User::create($userData);
                 $this->created++;
                 Log::info("Created user: {$userData['email']} (Row {$rowNumber})");
@@ -360,7 +389,7 @@ class StudentImportService
             'password' => Hash::make('password123'), // Default password
             'role' => 'student',
             'speciality_id' => $speciality->id,
-            'department' => $speciality->name, // Use speciality name as department
+            'department' => 'Computer Science', // Fixed department as requested
             'numero_inscription' => $numeroInscription,
             'matricule' => $rowData['matricule'] ?? null,
             'annee_bac' => $this->parseYear($rowData['annee_bac'] ?? null),
@@ -397,20 +426,58 @@ class StudentImportService
     }
 
     /**
+     * Generate unique email by adding suffix if email already exists
+     */
+    protected function generateUniqueEmail(string $baseEmail): string
+    {
+        $counter = 1;
+        $emailParts = explode('@', $baseEmail);
+        $localPart = $emailParts[0];
+        $domain = $emailParts[1];
+
+        while (User::where('email', $baseEmail)->exists() && $counter <= 999) {
+            $baseEmail = $localPart . $counter . '@' . $domain;
+            $counter++;
+        }
+
+        return $baseEmail;
+    }
+
+    /**
      * Find existing user
      */
     protected function findExistingUser(array $rowData): ?User
     {
         $numeroInscription = $rowData['numero_inscription'] ?? null;
         $matricule = $rowData['matricule'] ?? null;
+        $nom = $rowData['nom'] ?? '';
+        $prenom = $rowData['prenom'] ?? '';
 
+        // Priority 1: Find by numero_inscription (most reliable)
         if ($numeroInscription) {
             $user = User::where('numero_inscription', $numeroInscription)->first();
             if ($user) return $user;
         }
 
+        // Priority 2: Find by matricule
         if ($matricule) {
             $user = User::where('matricule', $matricule)->first();
+            if ($user) return $user;
+        }
+
+        // Priority 3: Find by generated email (prevent email duplicates)
+        if ($numeroInscription && $nom && $prenom) {
+            $email = $this->generateEmail($prenom, $nom, $numeroInscription);
+            $user = User::where('email', $email)->first();
+            if ($user) return $user;
+        }
+
+        // Priority 4: Find by name combination (as last resort)
+        if ($nom && $prenom) {
+            $fullName = trim($prenom . ' ' . $nom);
+            $user = User::where('name', $fullName)
+                        ->where('role', 'student')
+                        ->first();
             if ($user) return $user;
         }
 

@@ -20,6 +20,9 @@
                         <li>Headers should be in <strong>row 4</strong></li>
                         <li>Required columns: <code>Numero Inscription</code>, <code>Nom</code>, <code>Prénom</code></li>
                         <li>Optional columns: <code>Matricule</code>, <code>Année Bac</code>, <code>Date de naissance</code>, <code>Section</code>, <code>Groupe</code></li>
+                        <li>Available speciality levels: <strong>L2 ING, L3 LMD, L4 ING, L5 ING, M2 LMD</strong></li>
+                        <li><strong>Duplicate Prevention:</strong> Students are matched by numero_inscription, matricule, email, or name</li>
+                        <li><strong>Department:</strong> All students will be assigned to Computer Science department</li>
                         <li>Maximum file size: 10MB</li>
                         <li>Supported formats: .xlsx, .xls</li>
                     </ul>
@@ -108,9 +111,11 @@
                                     id="speciality_level"
                                     name="speciality_level">
                                 <option value="">Select level...</option>
-                                <option value="license" {{ old('speciality_level') == 'license' ? 'selected' : '' }}>License</option>
-                                <option value="master" {{ old('speciality_level') == 'master' ? 'selected' : '' }}>Master</option>
-                                <option value="doctorate" {{ old('speciality_level') == 'doctorate' ? 'selected' : '' }}>Doctorate</option>
+                                <option value="L2 ING" {{ old('speciality_level') == 'L2 ING' ? 'selected' : '' }}>L2 ING (2nd Year Engineering)</option>
+                                <option value="L3 LMD" {{ old('speciality_level') == 'L3 LMD' ? 'selected' : '' }}>L3 LMD (3rd Year License LMD)</option>
+                                <option value="L4 ING" {{ old('speciality_level') == 'L4 ING' ? 'selected' : '' }}>L4 ING (4th Year Engineering)</option>
+                                <option value="L5 ING" {{ old('speciality_level') == 'L5 ING' ? 'selected' : '' }}>L5 ING (5th Year Engineering)</option>
+                                <option value="M2 LMD" {{ old('speciality_level') == 'M2 LMD' ? 'selected' : '' }}>M2 LMD (2nd Year Master LMD)</option>
                             </select>
                             @error('speciality_level')
                                 <div class="invalid-feedback">{{ $message }}</div>

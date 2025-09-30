@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\WorkflowService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -111,6 +113,22 @@ class AuthController extends Controller
     }
 
     /**
+     * Show user profile page.
+     */
+    public function profile(): View
+    {
+        $user = Auth::user();
+
+        // Load additional relationships based on role
+        $user->load($this->getUserRelationships($user->role));
+
+        // Get workflow status
+        $workflowStatus = $this->workflowService->getWorkflowStatus($user);
+
+        return view('profile.show', compact('user', 'workflowStatus'));
+    }
+
+    /**
      * Get current user information.
      */
     public function me(Request $request): JsonResponse
@@ -135,9 +153,9 @@ class AuthController extends Controller
     /**
      * Update user profile.
      */
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         $rules = [
             'name' => 'sometimes|string|max:255',
@@ -161,24 +179,29 @@ class AuthController extends Controller
 
         $user->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile updated successfully',
-            'data' => $user->fresh(),
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'data' => $user->fresh(),
+            ]);
+        }
+
+        return redirect()->route('profile.show')
+            ->with('success', 'Profile updated successfully!');
     }
 
     /**
      * Change user password.
      */
-    public function changePassword(Request $request): JsonResponse
+    public function changePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required|string',
             'new_password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = $request->user();
+        $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
             throw ValidationException::withMessages([
@@ -190,10 +213,15 @@ class AuthController extends Controller
             'password' => Hash::make($request->new_password),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Password changed successfully',
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully',
+            ]);
+        }
+
+        return redirect()->route('profile.show')
+            ->with('success', 'Password changed successfully!');
     }
 
     /**

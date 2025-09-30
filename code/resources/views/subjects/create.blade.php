@@ -50,214 +50,112 @@
                         </div>
                     </div>
 
-                    <!-- Requirements -->
+                    <!-- Keywords -->
                     <div class="mb-3">
-                        <label for="requirements" class="form-label">Requirements</label>
-                        <textarea class="form-control @error('requirements') is-invalid @enderror"
-                                  id="requirements"
-                                  name="requirements"
-                                  rows="3"
-                                  placeholder="List technical requirements, prerequisites, skills needed...">{{ old('requirements') }}</textarea>
-                        @error('requirements')
+                        <label for="keywords" class="form-label required">Keywords</label>
+                        <textarea class="form-control @error('keywords') is-invalid @enderror"
+                                  id="keywords"
+                                  name="keywords"
+                                  rows="2"
+                                  required
+                                  placeholder="Enter relevant keywords separated by commas...">{{ old('keywords') }}</textarea>
+                        @error('keywords')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Specify technical skills, tools, or prior knowledge required for this project.
+                            Add keywords that describe the technologies, concepts, or fields involved.
                         </div>
                     </div>
 
-                    <!-- Objectives -->
+                    <!-- Tools -->
                     <div class="mb-3">
-                        <label for="objectives" class="form-label">Learning Objectives</label>
-                        <textarea class="form-control @error('objectives') is-invalid @enderror"
-                                  id="objectives"
-                                  name="objectives"
-                                  rows="3"
-                                  placeholder="What will students learn from this project?">{{ old('objectives') }}</textarea>
-                        @error('objectives')
+                        <label for="tools" class="form-label required">Tools & Technologies</label>
+                        <textarea class="form-control @error('tools') is-invalid @enderror"
+                                  id="tools"
+                                  name="tools"
+                                  rows="2"
+                                  required
+                                  placeholder="List the tools, technologies, and frameworks to be used...">{{ old('tools') }}</textarea>
+                        @error('tools')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Describe the educational goals and skills students will develop.
+                            Specify programming languages, frameworks, libraries, or software tools required.
                         </div>
                     </div>
 
-                    <!-- Expected Deliverables -->
+                    <!-- Plan -->
                     <div class="mb-3">
-                        <label for="expected_deliverables" class="form-label">Expected Deliverables</label>
-                        <textarea class="form-control @error('expected_deliverables') is-invalid @enderror"
-                                  id="expected_deliverables"
-                                  name="expected_deliverables"
-                                  rows="3"
-                                  placeholder="List the expected deliverables (reports, software, prototypes...)">{{ old('expected_deliverables') }}</textarea>
-                        @error('expected_deliverables')
+                        <label for="plan" class="form-label required">Project Plan</label>
+                        <textarea class="form-control @error('plan') is-invalid @enderror"
+                                  id="plan"
+                                  name="plan"
+                                  rows="4"
+                                  required
+                                  placeholder="Describe the project phases, milestones, and expected timeline...">{{ old('plan') }}</textarea>
+                        @error('plan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Specify what students should deliver at the end of the project.
+                            Outline the project plan including major phases and deliverables.
                         </div>
                     </div>
 
-                    <div class="row">
-                        <!-- Department -->
-                        <div class="col-md-6 mb-3">
-                            <label for="department" class="form-label required">Department</label>
-                            <select class="form-select @error('department') is-invalid @enderror"
-                                    id="department"
-                                    name="department"
-                                    required>
-                                <option value="">Select Department</option>
-                                <option value="Computer Science" {{ old('department') === 'Computer Science' ? 'selected' : '' }}>Computer Science</option>
-                                <option value="Engineering" {{ old('department') === 'Engineering' ? 'selected' : '' }}>Engineering</option>
-                                <option value="Mathematics" {{ old('department') === 'Mathematics' ? 'selected' : '' }}>Mathematics</option>
-                                <option value="Physics" {{ old('department') === 'Physics' ? 'selected' : '' }}>Physics</option>
-                            </select>
-                            @error('department')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Academic Level -->
-                        <div class="col-md-6 mb-3">
-                            <label for="level" class="form-label required">Academic Level</label>
-                            <select class="form-select @error('level') is-invalid @enderror"
-                                    id="level"
-                                    name="level"
-                                    required>
-                                <option value="">Select Level</option>
-                                <option value="license" {{ old('level') === 'license' ? 'selected' : '' }}>License (Bachelor)</option>
-                                <option value="master" {{ old('level') === 'master' ? 'selected' : '' }}>Master</option>
-                            </select>
-                            @error('level')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- Maximum Teams -->
-                        <div class="col-md-6 mb-3">
-                            <label for="max_teams" class="form-label">Maximum Teams</label>
-                            <input type="number"
-                                   class="form-control @error('max_teams') is-invalid @enderror"
-                                   id="max_teams"
-                                   name="max_teams"
-                                   value="{{ old('max_teams', 1) }}"
-                                   min="1"
-                                   max="10"
-                                   placeholder="1">
-                            @error('max_teams')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <div class="form-text">
-                                How many teams can work on this subject? (Leave 1 for exclusive subjects)
-                            </div>
-                        </div>
-
-                        <!-- Tags/Keywords -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tags" class="form-label">Tags/Keywords</label>
-                            <input type="text"
-                                   class="form-control @error('tags') is-invalid @enderror"
-                                   id="tags"
-                                   name="tags"
-                                   value="{{ old('tags') }}"
-                                   placeholder="AI, Machine Learning, Web Development...">
-                            @error('tags')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <div class="form-text">
-                                Add relevant tags separated by commas to help students find this subject.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- External Project Section -->
+                    @if(auth()->user()->role === 'student')
+                    <!-- External Subject Section for Students -->
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="is_external" name="is_external" value="1" {{ old('is_external') ? 'checked' : '' }}>
+                            <input class="form-check-input" type="checkbox" id="is_external" name="is_external" value="1" {{ old('is_external', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="is_external">
-                                This is an external project (with industry partner)
+                                This is an external subject (proposed by student)
                             </label>
+                        </div>
+                        <div class="form-text">
+                            External subjects are proposed by students and require validation from faculty.
                         </div>
                     </div>
 
-                    <!-- External Project Details (hidden by default) -->
-                    <div id="external-details" class="d-none">
+                    <!-- External Subject Details -->
+                    <div id="external-details">
                         <div class="card bg-light mb-3">
                             <div class="card-body">
-                                <h6 class="card-title">External Project Information</h6>
+                                <h6 class="card-title">External Subject Information</h6>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="company_name" class="form-label">Company/Organization</label>
-                                        <input type="text"
-                                               class="form-control @error('company_name') is-invalid @enderror"
-                                               id="company_name"
-                                               name="company_name"
-                                               value="{{ old('company_name') }}"
-                                               placeholder="Company or organization name">
-                                        @error('company_name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="external_supervisor_name" class="form-label">External Supervisor</label>
-                                        <input type="text"
-                                               class="form-control @error('external_supervisor_name') is-invalid @enderror"
-                                               id="external_supervisor_name"
-                                               name="external_supervisor_name"
-                                               value="{{ old('external_supervisor_name') }}"
-                                               placeholder="Name of external supervisor">
-                                        @error('external_supervisor_name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="external_supervisor_email" class="form-label">Supervisor Email</label>
-                                        <input type="email"
-                                               class="form-control @error('external_supervisor_email') is-invalid @enderror"
-                                               id="external_supervisor_email"
-                                               name="external_supervisor_email"
-                                               value="{{ old('external_supervisor_email') }}"
-                                               placeholder="supervisor@company.com">
-                                        @error('external_supervisor_email')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="external_supervisor_phone" class="form-label">Supervisor Phone</label>
-                                        <input type="tel"
-                                               class="form-control @error('external_supervisor_phone') is-invalid @enderror"
-                                               id="external_supervisor_phone"
-                                               name="external_supervisor_phone"
-                                               value="{{ old('external_supervisor_phone') }}"
-                                               placeholder="+213 XXX XXX XXX">
-                                        @error('external_supervisor_phone')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                <div class="mb-3">
+                                    <label for="company_name" class="form-label">Company/Organization Name</label>
+                                    <input type="text"
+                                           class="form-control @error('company_name') is-invalid @enderror"
+                                           id="company_name"
+                                           name="company_name"
+                                           value="{{ old('company_name') }}"
+                                           placeholder="Enter company or organization name (if applicable)">
+                                    @error('company_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">
+                                        If this subject involves a company or external organization, enter their name.
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="project_context" class="form-label">Project Context</label>
-                                    <textarea class="form-control @error('project_context') is-invalid @enderror"
-                                              id="project_context"
-                                              name="project_context"
-                                              rows="3"
-                                              placeholder="Describe the business context and real-world application...">{{ old('project_context') }}</textarea>
-                                    @error('project_context')
+                                    <label for="dataset_resources_link" class="form-label">Dataset/Resources Link</label>
+                                    <input type="url"
+                                           class="form-control @error('dataset_resources_link') is-invalid @enderror"
+                                           id="dataset_resources_link"
+                                           name="dataset_resources_link"
+                                           value="{{ old('dataset_resources_link') }}"
+                                           placeholder="https://example.com/dataset (optional)">
+                                    @error('dataset_resources_link')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <div class="form-text">
+                                        Optional: Link to datasets, resources, or documentation relevant to the project.
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- Actions -->
                     <div class="row">
@@ -313,22 +211,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const isExternalCheckbox = document.getElementById('is_external');
     const externalDetails = document.getElementById('external-details');
 
-    // Toggle external project details
-    isExternalCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            externalDetails.classList.remove('d-none');
-            // Make external fields required
-            document.getElementById('company_name').required = true;
-            document.getElementById('external_supervisor_name').required = true;
-            document.getElementById('external_supervisor_email').required = true;
-        } else {
-            externalDetails.classList.add('d-none');
-            // Remove required attribute from external fields
-            document.getElementById('company_name').required = false;
-            document.getElementById('external_supervisor_name').required = false;
-            document.getElementById('external_supervisor_email').required = false;
-        }
-    });
+    // Toggle external subject details (for students only)
+    if (isExternalCheckbox) {
+        isExternalCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                externalDetails.classList.remove('d-none');
+            } else {
+                externalDetails.classList.add('d-none');
+            }
+        });
+    }
 
     // Auto-resize textareas
     const textareas = document.querySelectorAll('textarea');
@@ -386,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
     titleInput.dispatchEvent(new Event('input'));
 
     // Check if editing and show external details if needed
-    if (isExternalCheckbox.checked) {
+    if (isExternalCheckbox && isExternalCheckbox.checked) {
         isExternalCheckbox.dispatchEvent(new Event('change'));
     }
 });

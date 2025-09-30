@@ -14,6 +14,7 @@ class Room extends Model
         'name',
         'capacity',
         'equipment',
+        'location',
         'is_available',
     ];
 
