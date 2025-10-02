@@ -1,0 +1,463 @@
+<?php
+
+return [
+    // Navigation
+    'dashboard' => 'Dashboard',
+    'subjects' => 'Subjects',
+    'teams' => 'Teams',
+    'projects' => 'Projects',
+    'defenses' => 'Defenses',
+    'admin' => 'Administration',
+    'profile' => 'Profile',
+    'logout' => 'Logout',
+    'login' => 'Login',
+
+    // Common Actions
+    'create' => 'Create',
+    'edit' => 'Edit',
+    'update' => 'Update',
+    'delete' => 'Delete',
+    'save' => 'Save',
+    'cancel' => 'Cancel',
+    'submit' => 'Submit',
+    'view' => 'View',
+    'manage' => 'Manage',
+    'search' => 'Search',
+    'filter' => 'Filter',
+    'export' => 'Export',
+    'import' => 'Import',
+    'download' => 'Download',
+    'upload' => 'Upload',
+
+    // Status
+    'status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'pending' => 'Pending',
+    'approved' => 'Approved',
+    'rejected' => 'Rejected',
+    'completed' => 'Completed',
+    'draft' => 'Draft',
+    'validated' => 'Validated',
+    'verified' => 'Verified',
+    'confirmed' => 'Confirmed',
+
+    // User Roles
+    'student' => 'Student',
+    'teacher' => 'Teacher',
+    'department_head' => 'Department Head',
+    'admin' => 'Administrator',
+    'external_supervisor' => 'External Supervisor',
+
+    // Academic
+    'academic_year' => 'Academic Year',
+    'semester' => 'Semester',
+    'speciality' => 'Speciality',
+    'department' => 'Department',
+    'grade' => 'Grade',
+    'average' => 'Average',
+    'coefficient' => 'Coefficient',
+    'subject_name' => 'Subject Name',
+
+    // Messages
+    'welcome' => 'Welcome',
+    'success' => 'Success',
+    'error' => 'Error',
+    'warning' => 'Warning',
+    'info' => 'Information',
+    'no_data' => 'No data available',
+    'loading' => 'Loading...',
+    'please_wait' => 'Please wait...',
+
+    // Forms
+    'required_field' => 'This field is required',
+    'invalid_email' => 'Please enter a valid email address',
+    'password_mismatch' => 'Passwords do not match',
+    'form_errors' => 'Please correct the errors below',
+
+    // PFE Specific
+    'pfe_management' => 'PFE Management System',
+    'final_year_project' => 'Final Year Project',
+    'subject_selection' => 'Subject Selection',
+    'team_formation' => 'Team Formation',
+    'project_defense' => 'Project Defense',
+    'supervisor' => 'Supervisor',
+    'jury' => 'Jury',
+    'defense_date' => 'Defense Date',
+    'room' => 'Room',
+    'external_project' => 'External Project',
+    'company_name' => 'Company Name',
+    'dataset_resources' => 'Dataset Resources',
+
+    // Allocation System
+    'allocation' => 'Allocation',
+    'preferences' => 'Preferences',
+    'deadline' => 'Deadline',
+    'preference_order' => 'Preference Order',
+    'first_choice' => '1st Choice',
+    'second_choice' => '2nd Choice',
+    'third_choice' => '3rd Choice',
+    'tentative' => 'Tentative',
+    'allocation_method' => 'Allocation Method',
+    'automatic_by_merit' => 'Automatic by Merit',
+    'automatic_fallback' => 'Automatic Fallback',
+
+    // Time & Date
+    'today' => 'Today',
+    'yesterday' => 'Yesterday',
+    'tomorrow' => 'Tomorrow',
+    'created_at' => 'Created At',
+    'updated_at' => 'Updated At',
+    'due_date' => 'Due Date',
+
+    // Permissions & Access
+    'unauthorized' => 'Unauthorized',
+    'access_denied' => 'Access Denied',
+    'permission_required' => 'Permission Required',
+    'login_required' => 'Login Required',
+
+    // Language
+    'language' => 'Language',
+    'change_language' => 'Change Language',
+
+    // Authentication
+    'welcome_back' => 'Welcome Back',
+    'sign_in_message' => 'Sign in to your PFE Management account',
+    'email_address' => 'Email Address',
+    'enter_email' => 'Enter your email',
+    'password' => 'Password',
+    'enter_password' => 'Enter your password',
+    'remember_me' => 'Remember me',
+    'sign_in' => 'Sign In',
+    'forgot_password' => 'Forgot your password?',
+    'quick_test_login' => 'Quick Test Login',
+    'dev_mode_notice' => 'These buttons are only visible in development mode',
+    'need_help' => 'Need help? Contact your system administrator.',
+
+    // Admin Menu
+    'administration' => 'Administration',
+    'users' => 'Users',
+    'reports' => 'Reports',
+    'settings' => 'Settings',
+    'conflicts' => 'Conflicts',
+
+    // Notifications
+    'notifications' => 'Notifications',
+    'no_notifications' => 'No notifications',
+    'view_all_notifications' => 'View all notifications',
+
+    // Page Titles
+    'subjects_management' => 'Subjects Management',
+    'teams_management' => 'Teams Management',
+    'defenses_management' => 'Defenses Management',
+    'projects_management' => 'Projects Management',
+
+    // Dashboard
+    'welcome_back_user' => 'Welcome back, :name!',
+    'academic_year' => 'Academic Year',
+    'department' => 'Department',
+    'role' => 'Role',
+    'computer_science' => 'Computer Science',
+    'engineering' => 'Engineering',
+    'mathematics' => 'Mathematics',
+
+    // Subject Management
+    'all_subjects' => 'All Subjects',
+    'propose_external_subject' => 'Propose External Subject',
+    'add_new_subject' => 'Add New Subject',
+    'pending_validation' => 'Pending Validation',
+    'all_statuses' => 'All Statuses',
+    'all_departments' => 'All Departments',
+
+    // Teams
+    'all_teams' => 'All Teams',
+    'create_team' => 'Create Team',
+    'filters' => 'Filters',
+    'forming' => 'Forming',
+    'complete' => 'Complete',
+    'assigned' => 'Assigned',
+
+    // Status Labels
+    'draft' => 'Draft',
+    'pending' => 'Pending',
+    'validated' => 'Validated',
+    'rejected' => 'Rejected',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+
+    // Actions
+    'add' => 'Add',
+    'new' => 'New',
+    'all' => 'All',
+    'show' => 'Show',
+    'hide' => 'Hide',
+    'close' => 'Close',
+    'open' => 'Open',
+
+    // Common Fields
+    'title' => 'Title',
+    'description' => 'Description',
+    'status' => 'Status',
+    'created_at' => 'Created At',
+    'updated_at' => 'Updated At',
+    'created_by' => 'Created By',
+
+    // Forms
+    'select' => 'Select',
+    'choose' => 'Choose',
+    'optional' => 'Optional',
+    'required' => 'Required',
+
+    // Academic Terms
+    'supervisor' => 'Supervisor',
+    'co_supervisor' => 'Co-Supervisor',
+    'student' => 'Student',
+    'students' => 'Students',
+    'teacher' => 'Teacher',
+    'teachers' => 'Teachers',
+    'team' => 'Team',
+    'teams' => 'Teams',
+    'project' => 'Project',
+    'projects' => 'Projects',
+    'subject' => 'Subject',
+    'subjects' => 'Subjects',
+    'defense' => 'Defense',
+    'defenses' => 'Defenses',
+
+    // Additional Dashboard Content
+    'my_projects' => 'My Projects',
+    'recent_activity' => 'Recent Activity',
+    'statistics' => 'Statistics',
+    'overview' => 'Overview',
+    'quick_actions' => 'Quick Actions',
+    'announcements' => 'Announcements',
+    'calendar' => 'Calendar',
+    'upcoming_events' => 'Upcoming Events',
+    'tasks' => 'Tasks',
+    'my_tasks' => 'My Tasks',
+
+    // Project Management
+    'project_title' => 'Project Title',
+    'project_description' => 'Project Description',
+    'project_status' => 'Project Status',
+    'project_type' => 'Project Type',
+    'project_progress' => 'Project Progress',
+    'project_documents' => 'Project Documents',
+    'project_timeline' => 'Project Timeline',
+    'project_deliverables' => 'Project Deliverables',
+    'project_resources' => 'Project Resources',
+    'project_evaluation' => 'Project Evaluation',
+
+    // Team Management
+    'team_leader' => 'Team Leader',
+    'team_members' => 'Team Members',
+    'team_size' => 'Team Size',
+    'member_count' => 'Member Count',
+    'invite_member' => 'Invite Member',
+    'remove_member' => 'Remove Member',
+    'transfer_leadership' => 'Transfer Leadership',
+    'leave_team' => 'Leave Team',
+    'join_team' => 'Join Team',
+
+    // Defense Management
+    'defense_schedule' => 'Defense Schedule',
+    'defense_time' => 'Defense Time',
+    'defense_location' => 'Defense Location',
+    'jury_members' => 'Jury Members',
+    'defense_grade' => 'Defense Grade',
+    'defense_feedback' => 'Defense Feedback',
+    'defense_minutes' => 'Defense Minutes',
+    'schedule_defense' => 'Schedule Defense',
+
+    // User Management
+    'user_management' => 'User Management',
+    'user_profile' => 'User Profile',
+    'user_role' => 'User Role',
+    'user_status' => 'User Status',
+    'user_permissions' => 'User Permissions',
+    'user_details' => 'User Details',
+    'contact_information' => 'Contact Information',
+    'personal_information' => 'Personal Information',
+
+    // System Settings
+    'system_settings' => 'System Settings',
+    'general_settings' => 'General Settings',
+    'email_settings' => 'Email Settings',
+    'notification_settings' => 'Notification Settings',
+    'backup_settings' => 'Backup Settings',
+    'security_settings' => 'Security Settings',
+
+    // File Management
+    'upload_file' => 'Upload File',
+    'download_file' => 'Download File',
+    'delete_file' => 'Delete File',
+    'file_size' => 'File Size',
+    'file_type' => 'File Type',
+    'file_name' => 'File Name',
+    'attachments' => 'Attachments',
+
+    // Validation & Approval
+    'validate' => 'Validate',
+    'approve' => 'Approve',
+    'reject' => 'Reject',
+    'validation_status' => 'Validation Status',
+    'approval_status' => 'Approval Status',
+    'reviewer' => 'Reviewer',
+    'review_date' => 'Review Date',
+    'review_comments' => 'Review Comments',
+
+    // Search & Filters
+    'search_results' => 'Search Results',
+    'no_results' => 'No results found',
+    'search_placeholder' => 'Search...',
+    'advanced_search' => 'Advanced Search',
+    'clear_filters' => 'Clear Filters',
+    'apply_filters' => 'Apply Filters',
+
+    // Pagination & Navigation
+    'previous' => 'Previous',
+    'next' => 'Next',
+    'first' => 'First',
+    'last' => 'Last',
+    'page' => 'Page',
+    'of' => 'of',
+    'showing' => 'Showing',
+    'entries' => 'entries',
+
+    // Error Messages
+    'error_404' => 'Page Not Found',
+    'error_403' => 'Access Forbidden',
+    'error_500' => 'Internal Server Error',
+    'something_went_wrong' => 'Something went wrong',
+    'try_again' => 'Try again',
+    'contact_admin' => 'Contact administrator',
+
+    // Success Messages
+    'operation_successful' => 'Operation completed successfully',
+    'data_saved' => 'Data saved successfully',
+    'data_updated' => 'Data updated successfully',
+    'data_deleted' => 'Data deleted successfully',
+    'email_sent' => 'Email sent successfully',
+
+    // Confirmation Messages
+    'are_you_sure' => 'Are you sure?',
+    'confirm_delete' => 'Are you sure you want to delete this item?',
+    'confirm_action' => 'Are you sure you want to proceed?',
+    'action_cannot_be_undone' => 'This action cannot be undone',
+
+    // Academic Specific
+    'thesis' => 'Thesis',
+    'dissertation' => 'Dissertation',
+    'research' => 'Research',
+    'methodology' => 'Methodology',
+    'literature_review' => 'Literature Review',
+    'conclusion' => 'Conclusion',
+    'references' => 'References',
+    'appendix' => 'Appendix',
+    'abstract' => 'Abstract',
+
+    // Additional Medical/University Terms
+    'faculty' => 'Faculty',
+    'university' => 'University',
+    'institution' => 'Institution',
+    'course' => 'Course',
+    'curriculum' => 'Curriculum',
+    'credit_hours' => 'Credit Hours',
+    'gpa' => 'GPA',
+    'transcript' => 'Transcript',
+    'enrollment' => 'Enrollment',
+    'graduation' => 'Graduation',
+
+    // Dashboard Specific
+    'quick_actions' => 'Quick Actions',
+    'available_subjects' => 'Available Subjects',
+    'my_team' => 'My Team',
+    'join_team' => 'Join Team',
+    'my_projects' => 'My Projects',
+    'propose_external_subject' => 'Propose External Subject',
+    'defense_schedule' => 'Defense Schedule',
+    'add_subject' => 'Add Subject',
+    'supervised_projects' => 'Supervised Projects',
+    'jury_assignments' => 'Jury Assignments',
+    'my_subjects' => 'My Subjects',
+    'validate_subjects' => 'Validate Subjects',
+    'schedule_defense' => 'Schedule Defense',
+    'resolve_conflicts' => 'Resolve Conflicts',
+    'reports' => 'Reports',
+    'manage_users' => 'Manage Users',
+    'specialities' => 'Specialities',
+    'manage_rooms' => 'Manage Rooms',
+    'reports_analytics' => 'Reports & Analytics',
+    'current_status' => 'Current Status',
+    'current_phase' => 'Current Phase',
+    'getting_started' => 'Getting Started',
+    'in_progress' => 'In Progress',
+    'next_actions' => 'Next Actions',
+    'dashboard_setup_message' => 'Your dashboard is being set up. Please contact the administrator if you need assistance.',
+
+    // Student Upload/Import
+    'student_upload' => 'Student Upload',
+    'students_from_excel' => 'Students from Excel',
+    'download_template' => 'Download Template',
+    'history' => 'History',
+    'import_history' => 'Import History',
+    'validation_errors' => 'Validation Errors',
+    'import_instructions' => 'Import Instructions',
+    'excel_file' => 'Excel File',
+    'choose_speciality' => 'Choose a speciality...',
+    'import_students' => 'Import Students',
+    'back_to_users' => 'Back to Users',
+    'import_results' => 'Import Results',
+    'created' => 'Created',
+    'updated' => 'Updated',
+    'skipped' => 'Skipped',
+    'total' => 'Total',
+    'errors' => 'Errors',
+    'speciality_information' => 'Speciality Information',
+    'name' => 'Name',
+    'level' => 'Level',
+    'semester' => 'Semester',
+    'close' => 'Close',
+    'view_specialities' => 'View Specialities',
+
+    // Submissions
+    'all_submissions' => 'All Submissions',
+    'submissions_from_supervised_projects' => 'Submissions from your supervised projects',
+    'project' => 'Project',
+    'submission' => 'Submission',
+    'submitted' => 'Submitted',
+    'actions' => 'Actions',
+    'pending_review' => 'Pending Review',
+    'approved' => 'Approved',
+    'needs_revision' => 'Needs Revision',
+    'view_details' => 'View Details',
+    'view_project' => 'View Project',
+    'no_submissions_yet' => 'No Submissions Yet',
+    'no_submissions_from_projects' => 'No submissions from your supervised projects.',
+    'submission_details' => 'Submission Details',
+    'description' => 'Description',
+    'supervisor_feedback' => 'Supervisor Feedback',
+    'no_files_uploaded' => 'No files uploaded.',
+    'grade_submission' => 'Grade Submission',
+    'grade_0_20' => 'Grade (0-20)',
+
+    // Common table headers
+    'matricule' => 'Student ID',
+    'full_name' => 'Full Name',
+    'email' => 'Email',
+    'section' => 'Section',
+    'group' => 'Group',
+    'creation_date' => 'Creation Date',
+    'no_recent_imports' => 'No recent student imports',
+    'last_50_imported_students' => 'The last 50 imported students will appear here',
+    'start_import' => 'Start an Import',
+
+    // Additional submission fields
+    'notes' => 'Notes',
+    'files' => 'Files',
+    'feedback' => 'Feedback',
+    'submission_information' => 'Submission Information',
+    'submitted_by' => 'Submitted by',
+    'graded' => 'Graded',
+    'download' => 'Download',
+];

@@ -1,0 +1,463 @@
+<?php
+
+return [
+    // Navigation
+    'dashboard' => 'Tableau de bord',
+    'subjects' => 'Sujets',
+    'teams' => 'Équipes',
+    'projects' => 'Projets',
+    'defenses' => 'Soutenances',
+    'admin' => 'Administration',
+    'profile' => 'Profil',
+    'logout' => 'Déconnexion',
+    'login' => 'Connexion',
+
+    // Common Actions
+    'create' => 'Créer',
+    'edit' => 'Modifier',
+    'update' => 'Mettre à jour',
+    'delete' => 'Supprimer',
+    'save' => 'Enregistrer',
+    'cancel' => 'Annuler',
+    'submit' => 'Soumettre',
+    'view' => 'Voir',
+    'manage' => 'Gérer',
+    'search' => 'Rechercher',
+    'filter' => 'Filtrer',
+    'export' => 'Exporter',
+    'import' => 'Importer',
+    'download' => 'Télécharger',
+    'upload' => 'Uploader',
+
+    // Status
+    'status' => 'Statut',
+    'active' => 'Actif',
+    'inactive' => 'Inactif',
+    'pending' => 'En attente',
+    'approved' => 'Approuvé',
+    'rejected' => 'Rejeté',
+    'completed' => 'Terminé',
+    'draft' => 'Brouillon',
+    'validated' => 'Validé',
+    'verified' => 'Vérifié',
+    'confirmed' => 'Confirmé',
+
+    // User Roles
+    'student' => 'Étudiant',
+    'teacher' => 'Enseignant',
+    'department_head' => 'Chef de département',
+    'admin' => 'Administrateur',
+    'external_supervisor' => 'Encadreur externe',
+
+    // Academic
+    'academic_year' => 'Année universitaire',
+    'semester' => 'Semestre',
+    'speciality' => 'Spécialité',
+    'department' => 'Département',
+    'grade' => 'Note',
+    'average' => 'Moyenne',
+    'coefficient' => 'Coefficient',
+    'subject_name' => 'Nom du sujet',
+
+    // Messages
+    'welcome' => 'Bienvenue',
+    'success' => 'Succès',
+    'error' => 'Erreur',
+    'warning' => 'Avertissement',
+    'info' => 'Information',
+    'no_data' => 'Aucune donnée disponible',
+    'loading' => 'Chargement...',
+    'please_wait' => 'Veuillez patienter...',
+
+    // Forms
+    'required_field' => 'Ce champ est obligatoire',
+    'invalid_email' => 'Veuillez saisir une adresse email valide',
+    'password_mismatch' => 'Les mots de passe ne correspondent pas',
+    'form_errors' => 'Veuillez corriger les erreurs ci-dessous',
+
+    // PFE Specific
+    'pfe_management' => 'Système de gestion PFE',
+    'final_year_project' => 'Projet de fin d\'études',
+    'subject_selection' => 'Sélection de sujets',
+    'team_formation' => 'Formation d\'équipes',
+    'project_defense' => 'Soutenance de projet',
+    'supervisor' => 'Encadreur',
+    'jury' => 'Jury',
+    'defense_date' => 'Date de soutenance',
+    'room' => 'Salle',
+    'external_project' => 'Projet externe',
+    'company_name' => 'Nom de l\'entreprise',
+    'dataset_resources' => 'Ressources de données',
+
+    // Allocation System
+    'allocation' => 'Affectation',
+    'preferences' => 'Préférences',
+    'deadline' => 'Date limite',
+    'preference_order' => 'Ordre de préférence',
+    'first_choice' => '1er choix',
+    'second_choice' => '2ème choix',
+    'third_choice' => '3ème choix',
+    'tentative' => 'Provisoire',
+    'allocation_method' => 'Méthode d\'affectation',
+    'automatic_by_merit' => 'Automatique par mérite',
+    'automatic_fallback' => 'Automatique de secours',
+
+    // Time & Date
+    'today' => 'Aujourd\'hui',
+    'yesterday' => 'Hier',
+    'tomorrow' => 'Demain',
+    'created_at' => 'Créé le',
+    'updated_at' => 'Mis à jour le',
+    'due_date' => 'Date d\'échéance',
+
+    // Permissions & Access
+    'unauthorized' => 'Non autorisé',
+    'access_denied' => 'Accès refusé',
+    'permission_required' => 'Permission requise',
+    'login_required' => 'Connexion requise',
+
+    // Language
+    'language' => 'Langue',
+    'change_language' => 'Changer de langue',
+
+    // Authentication
+    'welcome_back' => 'Bon retour',
+    'sign_in_message' => 'Connectez-vous à votre compte de gestion PFE',
+    'email_address' => 'Adresse email',
+    'enter_email' => 'Entrez votre email',
+    'password' => 'Mot de passe',
+    'enter_password' => 'Entrez votre mot de passe',
+    'remember_me' => 'Se souvenir de moi',
+    'sign_in' => 'Se connecter',
+    'forgot_password' => 'Mot de passe oublié ?',
+    'quick_test_login' => 'Connexion test rapide',
+    'dev_mode_notice' => 'Ces boutons ne sont visibles qu\'en mode développement',
+    'need_help' => 'Besoin d\'aide ? Contactez votre administrateur système.',
+
+    // Admin Menu
+    'administration' => 'Administration',
+    'users' => 'Utilisateurs',
+    'reports' => 'Rapports',
+    'settings' => 'Paramètres',
+    'conflicts' => 'Conflits',
+
+    // Notifications
+    'notifications' => 'Notifications',
+    'no_notifications' => 'Aucune notification',
+    'view_all_notifications' => 'Voir toutes les notifications',
+
+    // Page Titles
+    'subjects_management' => 'Gestion des Sujets',
+    'teams_management' => 'Gestion des Équipes',
+    'defenses_management' => 'Gestion des Soutenances',
+    'projects_management' => 'Gestion des Projets',
+
+    // Dashboard
+    'welcome_back_user' => 'Bon retour, :name !',
+    'academic_year' => 'Année Académique',
+    'department' => 'Département',
+    'role' => 'Rôle',
+    'computer_science' => 'Informatique',
+    'engineering' => 'Ingénierie',
+    'mathematics' => 'Mathématiques',
+
+    // Subject Management
+    'all_subjects' => 'Tous les Sujets',
+    'propose_external_subject' => 'Proposer un Sujet Externe',
+    'add_new_subject' => 'Ajouter un Nouveau Sujet',
+    'pending_validation' => 'En Attente de Validation',
+    'all_statuses' => 'Tous les Statuts',
+    'all_departments' => 'Tous les Départements',
+
+    // Teams
+    'all_teams' => 'Toutes les Équipes',
+    'create_team' => 'Créer une Équipe',
+    'filters' => 'Filtres',
+    'forming' => 'En Formation',
+    'complete' => 'Complète',
+    'assigned' => 'Assignée',
+
+    // Status Labels
+    'draft' => 'Brouillon',
+    'pending' => 'En Attente',
+    'validated' => 'Validé',
+    'rejected' => 'Rejeté',
+    'active' => 'Actif',
+    'inactive' => 'Inactif',
+
+    // Actions
+    'add' => 'Ajouter',
+    'new' => 'Nouveau',
+    'all' => 'Tous',
+    'show' => 'Afficher',
+    'hide' => 'Masquer',
+    'close' => 'Fermer',
+    'open' => 'Ouvrir',
+
+    // Common Fields
+    'title' => 'Titre',
+    'description' => 'Description',
+    'status' => 'Statut',
+    'created_at' => 'Créé le',
+    'updated_at' => 'Modifié le',
+    'created_by' => 'Créé par',
+
+    // Forms
+    'select' => 'Sélectionner',
+    'choose' => 'Choisir',
+    'optional' => 'Optionnel',
+    'required' => 'Requis',
+
+    // Academic Terms
+    'supervisor' => 'Superviseur',
+    'co_supervisor' => 'Co-Superviseur',
+    'student' => 'Étudiant',
+    'students' => 'Étudiants',
+    'teacher' => 'Enseignant',
+    'teachers' => 'Enseignants',
+    'team' => 'Équipe',
+    'teams' => 'Équipes',
+    'project' => 'Projet',
+    'projects' => 'Projets',
+    'subject' => 'Sujet',
+    'subjects' => 'Sujets',
+    'defense' => 'Soutenance',
+    'defenses' => 'Soutenances',
+
+    // Additional Dashboard Content
+    'my_projects' => 'Mes Projets',
+    'recent_activity' => 'Activité Récente',
+    'statistics' => 'Statistiques',
+    'overview' => 'Aperçu',
+    'quick_actions' => 'Actions Rapides',
+    'announcements' => 'Annonces',
+    'calendar' => 'Calendrier',
+    'upcoming_events' => 'Événements à Venir',
+    'tasks' => 'Tâches',
+    'my_tasks' => 'Mes Tâches',
+
+    // Project Management
+    'project_title' => 'Titre du Projet',
+    'project_description' => 'Description du Projet',
+    'project_status' => 'Statut du Projet',
+    'project_type' => 'Type de Projet',
+    'project_progress' => 'Progression du Projet',
+    'project_documents' => 'Documents du Projet',
+    'project_timeline' => 'Chronologie du Projet',
+    'project_deliverables' => 'Livrables du Projet',
+    'project_resources' => 'Ressources du Projet',
+    'project_evaluation' => 'Évaluation du Projet',
+
+    // Team Management
+    'team_leader' => 'Chef d\'Équipe',
+    'team_members' => 'Membres de l\'Équipe',
+    'team_size' => 'Taille de l\'Équipe',
+    'member_count' => 'Nombre de Membres',
+    'invite_member' => 'Inviter un Membre',
+    'remove_member' => 'Supprimer un Membre',
+    'transfer_leadership' => 'Transférer le Leadership',
+    'leave_team' => 'Quitter l\'Équipe',
+    'join_team' => 'Rejoindre l\'Équipe',
+
+    // Defense Management
+    'defense_schedule' => 'Programme de Soutenance',
+    'defense_time' => 'Heure de Soutenance',
+    'defense_location' => 'Lieu de Soutenance',
+    'jury_members' => 'Membres du Jury',
+    'defense_grade' => 'Note de Soutenance',
+    'defense_feedback' => 'Commentaires de Soutenance',
+    'defense_minutes' => 'Procès-verbal de Soutenance',
+    'schedule_defense' => 'Programmer une Soutenance',
+
+    // User Management
+    'user_management' => 'Gestion des Utilisateurs',
+    'user_profile' => 'Profil Utilisateur',
+    'user_role' => 'Rôle Utilisateur',
+    'user_status' => 'Statut Utilisateur',
+    'user_permissions' => 'Permissions Utilisateur',
+    'user_details' => 'Détails Utilisateur',
+    'contact_information' => 'Informations de Contact',
+    'personal_information' => 'Informations Personnelles',
+
+    // System Settings
+    'system_settings' => 'Paramètres Système',
+    'general_settings' => 'Paramètres Généraux',
+    'email_settings' => 'Paramètres Email',
+    'notification_settings' => 'Paramètres de Notification',
+    'backup_settings' => 'Paramètres de Sauvegarde',
+    'security_settings' => 'Paramètres de Sécurité',
+
+    // File Management
+    'upload_file' => 'Télécharger un Fichier',
+    'download_file' => 'Télécharger le Fichier',
+    'delete_file' => 'Supprimer le Fichier',
+    'file_size' => 'Taille du Fichier',
+    'file_type' => 'Type de Fichier',
+    'file_name' => 'Nom du Fichier',
+    'attachments' => 'Pièces Jointes',
+
+    // Validation & Approval
+    'validate' => 'Valider',
+    'approve' => 'Approuver',
+    'reject' => 'Rejeter',
+    'validation_status' => 'Statut de Validation',
+    'approval_status' => 'Statut d\'Approbation',
+    'reviewer' => 'Réviseur',
+    'review_date' => 'Date de Révision',
+    'review_comments' => 'Commentaires de Révision',
+
+    // Search & Filters
+    'search_results' => 'Résultats de Recherche',
+    'no_results' => 'Aucun résultat trouvé',
+    'search_placeholder' => 'Rechercher...',
+    'advanced_search' => 'Recherche Avancée',
+    'clear_filters' => 'Effacer les Filtres',
+    'apply_filters' => 'Appliquer les Filtres',
+
+    // Pagination & Navigation
+    'previous' => 'Précédent',
+    'next' => 'Suivant',
+    'first' => 'Premier',
+    'last' => 'Dernier',
+    'page' => 'Page',
+    'of' => 'de',
+    'showing' => 'Affichage',
+    'entries' => 'entrées',
+
+    // Error Messages
+    'error_404' => 'Page Non Trouvée',
+    'error_403' => 'Accès Interdit',
+    'error_500' => 'Erreur Interne du Serveur',
+    'something_went_wrong' => 'Quelque chose s\'est mal passé',
+    'try_again' => 'Réessayer',
+    'contact_admin' => 'Contacter l\'administrateur',
+
+    // Success Messages
+    'operation_successful' => 'Opération terminée avec succès',
+    'data_saved' => 'Données enregistrées avec succès',
+    'data_updated' => 'Données mises à jour avec succès',
+    'data_deleted' => 'Données supprimées avec succès',
+    'email_sent' => 'Email envoyé avec succès',
+
+    // Confirmation Messages
+    'are_you_sure' => 'Êtes-vous sûr ?',
+    'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer cet élément ?',
+    'confirm_action' => 'Êtes-vous sûr de vouloir continuer ?',
+    'action_cannot_be_undone' => 'Cette action ne peut pas être annulée',
+
+    // Academic Specific
+    'thesis' => 'Thèse',
+    'dissertation' => 'Mémoire',
+    'research' => 'Recherche',
+    'methodology' => 'Méthodologie',
+    'literature_review' => 'Revue de Littérature',
+    'conclusion' => 'Conclusion',
+    'references' => 'Références',
+    'appendix' => 'Annexe',
+    'abstract' => 'Résumé',
+
+    // Additional Medical/University Terms
+    'faculty' => 'Faculté',
+    'university' => 'Université',
+    'institution' => 'Institution',
+    'course' => 'Cours',
+    'curriculum' => 'Programme d\'Études',
+    'credit_hours' => 'Heures de Crédit',
+    'gpa' => 'Moyenne Générale',
+    'transcript' => 'Relevé de Notes',
+    'enrollment' => 'Inscription',
+    'graduation' => 'Graduation',
+
+    // Dashboard Specific
+    'quick_actions' => 'Actions Rapides',
+    'available_subjects' => 'Sujets Disponibles',
+    'my_team' => 'Mon Équipe',
+    'join_team' => 'Rejoindre une Équipe',
+    'my_projects' => 'Mes Projets',
+    'propose_external_subject' => 'Proposer un Sujet Externe',
+    'defense_schedule' => 'Programme de Soutenance',
+    'add_subject' => 'Ajouter un Sujet',
+    'supervised_projects' => 'Projets Supervisés',
+    'jury_assignments' => 'Affectations de Jury',
+    'my_subjects' => 'Mes Sujets',
+    'validate_subjects' => 'Valider les Sujets',
+    'schedule_defense' => 'Programmer une Soutenance',
+    'resolve_conflicts' => 'Résoudre les Conflits',
+    'reports' => 'Rapports',
+    'manage_users' => 'Gérer les Utilisateurs',
+    'specialities' => 'Spécialités',
+    'manage_rooms' => 'Gérer les Salles',
+    'reports_analytics' => 'Rapports et Analyses',
+    'current_status' => 'Statut Actuel',
+    'current_phase' => 'Phase Actuelle',
+    'getting_started' => 'Démarrage',
+    'in_progress' => 'En Cours',
+    'next_actions' => 'Prochaines Actions',
+    'dashboard_setup_message' => 'Votre tableau de bord est en cours de configuration. Veuillez contacter l\'administrateur si vous avez besoin d\'aide.',
+
+    // Student Upload/Import
+    'student_upload' => 'Upload d\'Étudiants',
+    'students_from_excel' => 'Étudiants depuis Excel',
+    'download_template' => 'Télécharger Template',
+    'history' => 'Historique',
+    'import_history' => 'Historique des Imports',
+    'validation_errors' => 'Erreurs de validation',
+    'import_instructions' => 'Instructions d\'import',
+    'excel_file' => 'Fichier Excel',
+    'choose_speciality' => 'Choisir une spécialité...',
+    'import_students' => 'Importer les Étudiants',
+    'back_to_users' => 'Retour aux Utilisateurs',
+    'import_results' => 'Résultats de l\'Import',
+    'created' => 'Créés',
+    'updated' => 'Mis à jour',
+    'skipped' => 'Ignorés',
+    'total' => 'Total',
+    'errors' => 'Erreurs',
+    'speciality_information' => 'Informations sur la Spécialité',
+    'name' => 'Nom',
+    'level' => 'Niveau',
+    'semester' => 'Semestre',
+    'close' => 'Fermer',
+    'view_specialities' => 'Voir les Spécialités',
+
+    // Submissions
+    'all_submissions' => 'Toutes les Soumissions',
+    'submissions_from_supervised_projects' => 'Soumissions de vos projets supervisés',
+    'project' => 'Projet',
+    'submission' => 'Soumission',
+    'submitted' => 'Soumis',
+    'actions' => 'Actions',
+    'pending_review' => 'En attente de révision',
+    'approved' => 'Approuvé',
+    'needs_revision' => 'Nécessite une révision',
+    'view_details' => 'Voir les Détails',
+    'view_project' => 'Voir le Projet',
+    'no_submissions_yet' => 'Aucune Soumission',
+    'no_submissions_from_projects' => 'Aucune soumission de vos projets supervisés.',
+    'submission_details' => 'Détails de la Soumission',
+    'description' => 'Description',
+    'supervisor_feedback' => 'Commentaires du Superviseur',
+    'no_files_uploaded' => 'Aucun fichier téléchargé.',
+    'grade_submission' => 'Noter la Soumission',
+    'grade_0_20' => 'Note (0-20)',
+
+    // Common table headers
+    'matricule' => 'Matricule',
+    'full_name' => 'Nom Complet',
+    'email' => 'Email',
+    'section' => 'Section',
+    'group' => 'Groupe',
+    'creation_date' => 'Date de Création',
+    'no_recent_imports' => 'Aucun import récent d\'étudiants',
+    'last_50_imported_students' => 'Les 50 derniers étudiants importés apparaîtront ici',
+    'start_import' => 'Commencer un Import',
+
+    // Additional submission fields
+    'notes' => 'Notes',
+    'files' => 'Fichiers',
+    'feedback' => 'Commentaires',
+    'submission_information' => 'Informations de Soumission',
+    'submitted_by' => 'Soumis par',
+    'graded' => 'Noté',
+    'download' => 'Télécharger',
+];

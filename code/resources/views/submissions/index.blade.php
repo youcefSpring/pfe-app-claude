@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'All Submissions')
+@section('page-title', __('app.all_submissions'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,8 +8,8 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">All Submissions</h4>
-                    <small class="text-muted">Submissions from your supervised projects</small>
+                    <h4 class="card-title mb-0">{{ __('app.all_submissions') }}</h4>
+                    <small class="text-muted">{{ __('app.submissions_from_supervised_projects') }}</small>
                 </div>
                 <div class="card-body">
                     @if($submissions->count() > 0)
@@ -17,14 +17,14 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Project</th>
+                                        <th>{{ __('app.project') }}</th>
                                         <th>Team</th>
-                                        <th>Submission</th>
+                                        <th>{{ __('app.submission') }}</th>
                                         <th>Type</th>
-                                        <th>Submitted</th>
-                                        <th>Status</th>
+                                        <th>{{ __('app.submitted') }}</th>
+                                        <th>{{ __('app.status') }}</th>
                                         <th>Grade</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -59,13 +59,13 @@
                                             </td>
                                             <td>
                                                 @if($submission->status === 'submitted')
-                                                    <span class="badge bg-warning">Pending Review</span>
+                                                    <span class="badge bg-warning">{{ __('app.pending_review') }}</span>
                                                 @elseif($submission->status === 'approved')
-                                                    <span class="badge bg-success">Approved</span>
+                                                    <span class="badge bg-success">{{ __('app.approved') }}</span>
                                                 @elseif($submission->status === 'needs_revision')
-                                                    <span class="badge bg-warning">Needs Revision</span>
+                                                    <span class="badge bg-warning">{{ __('app.needs_revision') }}</span>
                                                 @elseif($submission->status === 'rejected')
-                                                    <span class="badge bg-danger">Rejected</span>
+                                                    <span class="badge bg-danger">{{ __('app.rejected') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -78,11 +78,11 @@
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('submissions.show', $submission) }}"
-                                                       class="btn btn-outline-primary btn-sm" title="View Details">
+                                                       class="btn btn-outline-primary btn-sm" title="{{ __('app.view_details') }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="{{ route('projects.show', $submission->project) }}"
-                                                       class="btn btn-outline-info btn-sm" title="View Project">
+                                                       class="btn btn-outline-info btn-sm" title="{{ __('app.view_project') }}">
                                                         <i class="fas fa-project-diagram"></i>
                                                     </a>
                                                 </div>
@@ -97,8 +97,8 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-file-upload fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Submissions Yet</h5>
-                            <p class="text-muted">No submissions from your supervised projects.</p>
+                            <h5 class="text-muted">{{ __('app.no_submissions_yet') }}</h5>
+                            <p class="text-muted">{{ __('app.no_submissions_from_projects') }}</p>
                         </div>
                     @endif
                 </div>

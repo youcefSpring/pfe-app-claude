@@ -33,9 +33,15 @@ class User extends Authenticatable
         'speciality_id',
         'numero_inscription',
         'annee_bac',
-        'date_naissance',
+        'first_name',
+        'last_name',
         'section',
         'groupe',
+        'date_naissance',
+        'status',
+        'academic_year',
+        'profile_completed',
+        'email_verified_at',
     ];
 
     /**

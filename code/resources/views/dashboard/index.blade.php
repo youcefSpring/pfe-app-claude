@@ -31,7 +31,7 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                    <i class="bi bi-lightning me-2"></i>{{ __('app.quick_actions') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -46,7 +46,7 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('subjects.available') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-journal-text d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Available Subjects
+                                    {{ __('app.available_subjects') }}
                                 </a>
                             </div>
 
@@ -54,14 +54,14 @@
                                 <div class="col-md-6 col-lg-3">
                                     <a href="{{ route('teams.show', $userTeam) }}" class="btn btn-outline-success w-100">
                                         <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                        My Team
+                                        {{ __('app.my_team') }}
                                     </a>
                                 </div>
                             @else
                                 <div class="col-md-6 col-lg-3">
                                     <a href="{{ route('teams.index') }}" class="btn btn-outline-success w-100">
                                         <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                        Join Team
+                                        {{ __('app.join_team') }}
                                     </a>
                                 </div>
                             @endif
@@ -78,13 +78,13 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('subjects.create') }}" class="btn btn-outline-info w-100">
                                     <i class="bi bi-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Propose External Subject
+                                    {{ __('app.propose_external_subject') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('defenses.index') }}" class="btn btn-outline-warning w-100">
                                     <i class="bi bi-shield-check d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Defense Schedule
+                                    {{ __('app.defense_schedule') }}
                                 </a>
                             </div>
                             @break
@@ -92,7 +92,7 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('subjects.create') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Add Subject
+                                    {{ __('app.add_subject') }}
                                 </a>
                             </div>
                             {{-- Supervised Projects temporarily removed --}}
@@ -107,13 +107,13 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('defenses.jury-assignments') }}" class="btn btn-outline-info w-100">
                                     <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Jury Assignments
+                                    {{ __('app.jury_assignments') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('subjects.index') }}" class="btn btn-outline-warning w-100">
                                     <i class="bi bi-journal-text d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    My Subjects
+                                    {{ __('app.my_subjects') }}
                                 </a>
                             </div>
                             @break
@@ -121,25 +121,25 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('subjects.pending-validation') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-check-circle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Validate Subjects
+                                    {{ __('app.validate_subjects') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('defenses.schedule-form') }}" class="btn btn-outline-success w-100">
                                     <i class="bi bi-calendar-plus d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Schedule Defense
+                                    {{ __('app.schedule_defense') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('conflicts.index') }}" class="btn btn-outline-warning w-100">
                                     <i class="bi bi-exclamation-triangle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Resolve Conflicts
+                                    {{ __('app.resolve_conflicts') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('admin.reports') }}" class="btn btn-outline-info w-100">
                                     <i class="bi bi-graph-up d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Reports
+                                    {{ __('app.reports') }}
                                 </a>
                             </div>
                             @break
@@ -147,25 +147,25 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('admin.users') }}" class="btn btn-outline-primary w-100">
                                     <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Manage Users
+                                    {{ __('app.manage_users') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('admin.specialities') }}" class="btn btn-outline-success w-100">
                                     <i class="bi bi-mortarboard d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Specialities
+                                    {{ __('app.specialities') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('admin.rooms') }}" class="btn btn-outline-info w-100">
                                     <i class="bi bi-building d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Manage Rooms
+                                    {{ __('app.manage_rooms') }}
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100">
                                     <i class="bi bi-graph-up d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    Reports & Analytics
+                                    {{ __('app.reports_analytics') }}
                                 </a>
                             </div>
                             @break
@@ -195,7 +195,7 @@
             <div class="col-12">
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i>
-                    Your dashboard is being set up. Please contact the administrator if you need assistance.
+                    {{ __('app.dashboard_setup_message') }}
                 </div>
             </div>
     @endswitch
@@ -208,14 +208,14 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="bi bi-diagram-3 me-2"></i>Current Status
+                    <i class="bi bi-diagram-3 me-2"></i>{{ __('app.current_status') }}
                 </h5>
             </div>
             <div class="card-body">
-                <p class="mb-2"><strong>Current Phase:</strong> {{ $workflowStatus['current_phase'] ?? 'Getting Started' }}</p>
-                <p class="mb-2"><strong>Status:</strong> {{ $workflowStatus['status'] ?? 'In Progress' }}</p>
+                <p class="mb-2"><strong>{{ __('app.current_phase') }}:</strong> {{ $workflowStatus['current_phase'] ?? __('app.getting_started') }}</p>
+                <p class="mb-2"><strong>{{ __('app.status') }}:</strong> {{ $workflowStatus['status'] ?? __('app.in_progress') }}</p>
                 @if(isset($workflowStatus['next_actions']) && count($workflowStatus['next_actions']) > 0)
-                    <p class="mb-2"><strong>Next Actions:</strong></p>
+                    <p class="mb-2"><strong>{{ __('app.next_actions') }}:</strong></p>
                     <ul class="mb-0">
                         @foreach($workflowStatus['next_actions'] as $action)
                             <li>{{ $action }}</li>

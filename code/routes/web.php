@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\GradeController;
 use App\Http\Controllers\Web\SubjectPreferenceController;
 use App\Http\Controllers\Web\AllocationController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Admin\StudentUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -275,9 +276,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users/bulk-import', [AdminController::class, 'bulkImport'])->name('users.bulk-import');
         Route::post('/users/bulk-import', [AdminController::class, 'processBulkImport'])->name('users.bulk-import.process');
 
-        // Student Management
-        Route::get('/students/upload', [AdminController::class, 'studentsUpload'])->name('students.upload');
-        Route::post('/students/upload', [AdminController::class, 'studentsUploadProcess'])->name('students.upload.process');
+        // Student Management - Excel Import
+        Route::get('/students/upload', [StudentUploadController::class, 'showUploadForm'])->name('students.upload');
+        Route::post('/students/upload', [StudentUploadController::class, 'upload'])->name('students.upload.process');
+        Route::get('/students/template', [StudentUploadController::class, 'downloadTemplate'])->name('students.template');
+        Route::get('/students/import-history', [StudentUploadController::class, 'importHistory'])->name('students.import-history');
 
         // Speciality Management
         Route::get('/specialities', [AdminController::class, 'specialities'])->name('specialities');
