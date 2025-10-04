@@ -208,7 +208,7 @@ class Subject extends Model
     /**
      * Validate the subject.
      */
-    public function validate(User $validator, string $feedback = null): bool
+    public function validate(User $validator, ?string $feedback = null): bool
     {
         $this->update([
             'status' => 'validated',

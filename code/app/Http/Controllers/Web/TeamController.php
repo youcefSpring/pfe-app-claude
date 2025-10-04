@@ -18,11 +18,24 @@ class TeamController extends Controller
     /**
      * Display a listing of teams
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $user = Auth::user();
 
         $query = Team::with(['members.user', 'project.subject']);
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
         // Filter based on user role
         switch ($user->role) {
@@ -39,7 +52,7 @@ class TeamController extends Controller
             // Admin sees all teams (no filter)
         }
 
-        $teams = $query->latest()->paginate(12);
+        $teams = $query->latest()->paginate(12)->appends($request->query());
 
         return view('teams.index', compact('teams'));
     }

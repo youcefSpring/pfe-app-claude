@@ -140,16 +140,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Update system settings
-     */
-    public function updateSettings(Request $request): RedirectResponse
-    {
-        // This would typically update system settings
-        // For now, just redirect back with success
-        return redirect()->back()
-            ->with('success', 'Settings updated successfully!');
-    }
 
     /**
      * Generate system report
@@ -382,7 +372,65 @@ class AdminController extends Controller
      */
     public function settings(): View
     {
-        return view('admin.settings');
+        $universityInfo = \App\Models\Setting::getUniversityInfo();
+        $currentLogo = \App\Models\Setting::getUniversityLogo();
+
+        return view('admin.settings', compact('universityInfo', 'currentLogo'));
+    }
+
+    /**
+     * Update system settings
+     */
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'university_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'university_name_ar' => 'nullable|string|max:255',
+            'university_name_fr' => 'nullable|string|max:255',
+            'faculty_name_ar' => 'nullable|string|max:255',
+            'faculty_name_fr' => 'nullable|string|max:255',
+            'department_name_ar' => 'nullable|string|max:255',
+            'department_name_fr' => 'nullable|string|max:255',
+            'ministry_name_ar' => 'nullable|string|max:255',
+            'ministry_name_fr' => 'nullable|string|max:255',
+            'republic_name_ar' => 'nullable|string|max:255',
+            'republic_name_fr' => 'nullable|string|max:255',
+        ]);
+
+        // Handle logo upload
+        if ($request->hasFile('university_logo')) {
+            // Delete old logo if exists
+            $oldLogo = \App\Models\Setting::get('university_logo');
+            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                Storage::disk('public')->delete($oldLogo);
+            }
+
+            // Store new logo
+            $logoPath = $request->file('university_logo')->store('logos', 'public');
+            \App\Models\Setting::set('university_logo', $logoPath, 'string', 'University logo file path');
+        }
+
+        // Update university information
+        $settingsMap = [
+            'university_name_ar' => 'University name in Arabic',
+            'university_name_fr' => 'University name in French',
+            'faculty_name_ar' => 'Faculty name in Arabic',
+            'faculty_name_fr' => 'Faculty name in French',
+            'department_name_ar' => 'Department name in Arabic',
+            'department_name_fr' => 'Department name in French',
+            'ministry_name_ar' => 'Ministry name in Arabic',
+            'ministry_name_fr' => 'Ministry name in French',
+            'republic_name_ar' => 'Republic name in Arabic',
+            'republic_name_fr' => 'Republic name in French',
+        ];
+
+        foreach ($settingsMap as $key => $description) {
+            if ($request->filled($key)) {
+                \App\Models\Setting::set($key, $request->input($key), 'string', $description);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Settings updated successfully!');
     }
 
     /**

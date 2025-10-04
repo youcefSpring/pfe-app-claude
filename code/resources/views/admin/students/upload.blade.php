@@ -42,14 +42,15 @@
 
                 <!-- Instructions -->
                 <div class="alert alert-info">
-                    <h6><i class="bi bi-info-circle me-2"></i>{{ __('app.import_instructions') }}</h6>
+                    <h6><i class="bi bi-info-circle me-2"></i>Instructions d'importation</h6>
                     <ul class="mb-0">
-                        <li>Le fichier Excel doit contenir les colonnes: <code>numero_inscription</code>, <code>annee_bac</code>, <code>matricule</code>, <code>nom</code>, <code>prenom</code>, <code>section</code>, <code>groupe</code></li>
-                        <li>Les colonnes <code>matricule</code>, <code>nom</code>, et <code>prenom</code> sont <strong>obligatoires</strong></li>
-                        <li>L'email sera généré automatiquement si non fourni: <code>matricule@student.university.edu</code></li>
-                        <li>Mot de passe par défaut: <code>student123</code></li>
-                        <li>Taille maximale: 10MB</li>
-                        <li>Formats supportés: .xlsx, .xls, .csv</li>
+                        <li><strong>Structure du fichier:</strong> Les données d'étudiants commencent à la <strong>ligne 5</strong> (ligne 4 = en-têtes)</li>
+                        <li><strong>Métadonnées:</strong> Les 3 premières lignes contiennent: Nom du programme, Semestre, Année académique</li>
+                        <li><strong>Colonnes requises:</strong> <code>Numero Inscription</code>, <code>Annee Bac</code>, <code>Matricule</code>, <code>Nom</code>, <code>Prenom</code>, <code>Section</code>, <code>Groupe</code></li>
+                        <li><strong>Champs obligatoires:</strong> <code>Matricule</code>, <code>Nom</code>, et <code>Prenom</code></li>
+                        <li><strong>Email automatique:</strong> <code>matricule@student.university.edu</code></li>
+                        <li><strong>Mot de passe par défaut:</strong> <code>student123</code></li>
+                        <li><strong>Taille maximale:</strong> 10MB | <strong>Formats:</strong> .xlsx, .xls, .csv</li>
                     </ul>
                 </div>
 

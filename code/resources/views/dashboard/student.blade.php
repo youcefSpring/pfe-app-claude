@@ -3,7 +3,7 @@
 @section('page-title', 'Student Dashboard')
 
 @section('content')
-<div class="row">
+{{-- <div class="row">
     <!-- Welcome Card -->
     <div class="col-12 mb-4">
         <div class="card bg-primary text-white">
@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 <div class="row">
     <!-- Quick Stats -->

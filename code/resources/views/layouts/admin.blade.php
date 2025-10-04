@@ -15,8 +15,7 @@
     <!-- Compiled CSS -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
-    <!-- Axios CDN -->
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- Classical admin layout - no AJAX dependencies -->
 
     @yield('styles')
 </head>

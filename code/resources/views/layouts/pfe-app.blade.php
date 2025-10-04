@@ -316,95 +316,14 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <!-- Common JavaScript -->
+    <!-- Classical JavaScript -->
     <script>
-        // CSRF token setup for axios
-        axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Load notifications count on page load
+        // Classical web application functionality
         document.addEventListener('DOMContentLoaded', function() {
-            loadNotificationCounts();
-            loadNotifications();
+            console.log('PFE Application loaded - Classical mode');
+            // No AJAX calls - using classical page reloads
         });
-
-        async function loadNotificationCounts() {
-            try {
-                const response = await axios.get('/api/workflow/status');
-                const data = response.data.data;
-
-                // Update pending counts based on user role
-                @if(auth()->user()?->role === 'department_head')
-                    if (data.pending_validations) {
-                        updateNotificationBadge('pending-subjects', data.pending_validations);
-                    }
-                    if (data.pending_conflicts) {
-                        updateNotificationBadge('pending-conflicts', data.pending_conflicts);
-                    }
-                @endif
-            } catch (error) {
-                console.log('Could not load notification counts');
-            }
-        }
-
-        async function loadNotifications() {
-            try {
-                const response = await axios.get('/api/auth/notifications');
-                const notifications = response.data.data.data;
-
-                if (notifications.length > 0) {
-                    updateNotificationBadge('notification-count', notifications.length);
-                    renderNotifications(notifications);
-                }
-            } catch (error) {
-                console.log('Could not load notifications');
-            }
-        }
-
-        function updateNotificationBadge(elementId, count) {
-            const badge = document.getElementById(elementId);
-            if (badge && count > 0) {
-                badge.textContent = count;
-                badge.style.display = 'flex';
-            }
-        }
-
-        function renderNotifications(notifications) {
-            const container = document.getElementById('notifications-list');
-            if (!container) return;
-
-            container.innerHTML = notifications.slice(0, 5).map(notification => `
-                <li>
-                    <a class="dropdown-item py-2" href="#" onclick="markAsRead('${notification.id}')">
-                        <div class="fw-semibold">${notification.data.title || 'Notification'}</div>
-                        <small class="text-muted">${notification.data.message || ''}</small>
-                        <small class="text-muted d-block">${formatDate(notification.created_at)}</small>
-                    </a>
-                </li>
-            `).join('');
-        }
-
-        async function markAsRead(notificationId) {
-            try {
-                await axios.post(`/api/auth/notifications/${notificationId}/read`);
-                loadNotifications(); // Reload notifications
-            } catch (error) {
-                console.log('Could not mark notification as read');
-            }
-        }
-
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Auto-refresh notifications every 30 seconds
-        setInterval(loadNotifications, 30000);
     </script>
 
     @stack('scripts')

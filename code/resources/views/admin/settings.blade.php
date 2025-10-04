@@ -12,9 +12,102 @@
                     <small class="text-muted">Configure system-wide settings</small>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.settings.update') }}" method="POST">
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+
+                        <!-- University Information -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">University Information</h5>
+                                        <small class="text-muted">Configure university details for official documents</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="university_logo" class="form-label">University Logo</label>
+                                                    @if($currentLogo)
+                                                        <div class="mb-2">
+                                                            <img src="{{ $currentLogo }}" alt="Current Logo" class="img-thumbnail" style="max-height: 100px;">
+                                                        </div>
+                                                    @endif
+                                                    <input type="file" class="form-control @error('university_logo') is-invalid @enderror"
+                                                           id="university_logo" name="university_logo" accept="image/*">
+                                                    @error('university_logo')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                    <small class="form-text text-muted">Max size: 2MB. Formats: JPG, PNG, GIF</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="university_name_fr" class="form-label">University Name (French)</label>
+                                                    <input type="text" class="form-control" id="university_name_fr" name="university_name_fr"
+                                                           value="{{ $universityInfo['name_fr'] }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="faculty_name_fr" class="form-label">Faculty Name (French)</label>
+                                                    <input type="text" class="form-control" id="faculty_name_fr" name="faculty_name_fr"
+                                                           value="{{ $universityInfo['faculty_fr'] }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="department_name_fr" class="form-label">Department Name (French)</label>
+                                                    <input type="text" class="form-control" id="department_name_fr" name="department_name_fr"
+                                                           value="{{ $universityInfo['department_fr'] }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="ministry_name_fr" class="form-label">Ministry Name (French)</label>
+                                                    <input type="text" class="form-control" id="ministry_name_fr" name="ministry_name_fr"
+                                                           value="{{ $universityInfo['ministry_fr'] }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="republic_name_fr" class="form-label">Republic Name (French)</label>
+                                                    <input type="text" class="form-control" id="republic_name_fr" name="republic_name_fr"
+                                                           value="{{ $universityInfo['republic_fr'] }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="university_name_ar" class="form-label">University Name (Arabic)</label>
+                                                    <input type="text" class="form-control" id="university_name_ar" name="university_name_ar"
+                                                           value="{{ $universityInfo['name_ar'] }}" dir="rtl">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="faculty_name_ar" class="form-label">Faculty Name (Arabic)</label>
+                                                    <input type="text" class="form-control" id="faculty_name_ar" name="faculty_name_ar"
+                                                           value="{{ $universityInfo['faculty_ar'] }}" dir="rtl">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="department_name_ar" class="form-label">Department Name (Arabic)</label>
+                                                    <input type="text" class="form-control" id="department_name_ar" name="department_name_ar"
+                                                           value="{{ $universityInfo['department_ar'] }}" dir="rtl">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="ministry_name_ar" class="form-label">Ministry Name (Arabic)</label>
+                                                    <input type="text" class="form-control" id="ministry_name_ar" name="ministry_name_ar"
+                                                           value="{{ $universityInfo['ministry_ar'] }}" dir="rtl">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="republic_name_ar" class="form-label">Republic Name (Arabic)</label>
+                                                    <input type="text" class="form-control" id="republic_name_ar" name="republic_name_ar"
+                                                           value="{{ $universityInfo['republic_ar'] }}" dir="rtl">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6">

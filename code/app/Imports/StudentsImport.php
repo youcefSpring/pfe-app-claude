@@ -7,16 +7,56 @@ use App\Models\Speciality;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\WithStartRow;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\BeforeImport;
+use Maatwebsite\Excel\Events\BeforeSheet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
-class StudentsImport implements ToModel, WithHeadingRow, WithValidation
+class StudentsImport implements ToModel, WithHeadingRow, WithValidation, WithStartRow, WithEvents
 {
     protected $specialityId;
+    protected $specialityInfo = [];
 
     public function __construct($specialityId = null)
     {
         $this->specialityId = $specialityId;
+    }
+
+    /**
+     * Start reading from row 6 (data rows)
+     */
+    public function startRow(): int
+    {
+        return 6;
+    }
+
+    /**
+     * Specify which row contains the headings
+     */
+    public function headingRow(): int
+    {
+        return 5;
+    }
+
+    /**
+     * Register events to read metadata before processing
+     */
+    public function registerEvents(): array
+    {
+        return [
+            BeforeSheet::class => function(BeforeSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // Read metadata from the first 3 rows
+                $this->specialityInfo = [
+                    'program' => $sheet->getCell('A1')->getValue(),
+                    'semester' => $sheet->getCell('A2')->getValue(),
+                    'academic_year' => $sheet->getCell('A3')->getValue(),
+                ];
+            },
+        ];
     }
 
     /**
@@ -26,32 +66,44 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation
     */
     public function model(array $row)
     {
+        // Map the headers to correct field names (based on the Excel structure)
+        // WithHeadingRow converts "Année Bac" to "annee_bac" and "Prénom" to "prenom"
+        $mappedRow = [
+            'numero_inscription' => isset($row['numero_inscription']) ? (string)$row['numero_inscription'] : null,
+            'annee_bac' => $row['annee_bac'] ?? null,
+            'matricule' => isset($row['matricule']) ? (string)$row['matricule'] : null,
+            'nom' => $row['nom'] ?? null,
+            'prenom' => $row['prenom'] ?? null,
+            'section' => $row['section'] ?? 'Section_1',
+            'groupe' => $row['groupe'] ?? 'G_01',
+        ];
+
         // Skip rows with empty essential data
-        if (empty($row['matricule']) || empty($row['nom']) || empty($row['prenom'])) {
+        if (empty($mappedRow['matricule']) || empty($mappedRow['nom']) || empty($mappedRow['prenom'])) {
             return null;
         }
 
         // Generate email from matricule if not provided
-        $email = !empty($row['email']) ? $row['email'] : $row['matricule'] . '@student.university.edu';
+        $email = $mappedRow['matricule'] . '@student.university.edu';
 
-        // Parse the name field if it contains both first and last name
-        $fullName = trim($row['nom'] . ' ' . $row['prenom']);
+        // Parse the name field
+        $fullName = trim($mappedRow['nom'] . ' ' . $mappedRow['prenom']);
 
-        // Check if user exists by matricule or email
-        $existingUser = User::where('matricule', $row['matricule'])
-                          ->orWhere('email', $email)
+        // Check if user exists by matricule or numero_inscription
+        $existingUser = User::where('matricule', $mappedRow['matricule'])
+                          ->orWhere('numero_inscription', $mappedRow['numero_inscription'])
                           ->first();
 
         $userData = [
             'name' => $fullName,
-            'first_name' => $row['prenom'] ?? '',
-            'last_name' => $row['nom'] ?? '',
+            'first_name' => $mappedRow['prenom'],
+            'last_name' => $mappedRow['nom'],
             'email' => $email,
-            'matricule' => $row['matricule'],
-            'numero_inscription' => $row['numero_inscription'] ?? null,
-            'annee_bac' => isset($row['annee_bac']) ? (int)$row['annee_bac'] : null,
-            'section' => $row['section'] ?? 'Section_1',
-            'groupe' => $row['groupe'] ?? 'G_01',
+            'matricule' => $mappedRow['matricule'],
+            'numero_inscription' => $mappedRow['numero_inscription'],
+            'annee_bac' => isset($mappedRow['annee_bac']) ? (int)$mappedRow['annee_bac'] : null,
+            'section' => $mappedRow['section'],
+            'groupe' => $mappedRow['groupe'],
             'role' => 'student',
             'status' => 'active',
             'speciality_id' => $this->specialityId,
@@ -77,14 +129,13 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'matricule' => 'required|string|max:50',
+            'matricule' => 'required|max:50',
             'nom' => 'required|string|max:100',
             'prenom' => 'required|string|max:100',
-            'numero_inscription' => 'nullable|string|max:100',
+            'numero_inscription' => 'nullable|max:100',
             'annee_bac' => 'nullable|integer|min:2000|max:' . (date('Y') + 5),
             'section' => 'nullable|string|max:50',
             'groupe' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
         ];
     }
 

@@ -3,7 +3,7 @@
 @section('page-title', 'System Administration')
 
 @section('content')
-<div class="row">
+{{-- <div class="row">
     <!-- Welcome Card -->
     <div class="col-12 mb-4">
         <div class="card bg-danger text-white">
@@ -23,7 +23,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 <div class="row">
     <!-- System Overview Stats -->

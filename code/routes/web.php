@@ -222,7 +222,6 @@ Route::middleware(['auth'])->group(function () {
         // All users can view defenses
         Route::get('/', [DefenseController::class, 'index'])->name('index');
         Route::get('/calendar', [DefenseController::class, 'calendar'])->name('calendar');
-        Route::get('/{defense}', [DefenseController::class, 'show'])->name('show');
 
         // Students can view their defense details
         Route::middleware('role:student')->group(function () {
@@ -236,8 +235,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Admins can schedule and manage defenses
         Route::middleware('role:admin,department_head')->group(function () {
-            Route::get('/schedule', [DefenseController::class, 'scheduleForm'])->name('schedule-form');
-            Route::post('/schedule', [DefenseController::class, 'schedule'])->name('schedule');
+            Route::get('/schedule-defense', [DefenseController::class, 'scheduleForm'])->name('schedule-form');
+            Route::post('/schedule-defense', [DefenseController::class, 'schedule'])->name('schedule');
             Route::post('/auto-schedule', [DefenseController::class, 'autoSchedule'])->name('auto-schedule');
             Route::post('/{defense}/grade', [DefenseController::class, 'submitGrade'])->name('submit-grade');
             Route::get('/{defense}/edit', [DefenseController::class, 'edit'])->name('edit');
@@ -245,7 +244,11 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{defense}', [DefenseController::class, 'cancel'])->name('cancel');
             Route::post('/{defense}/complete', [DefenseController::class, 'complete'])->name('complete');
             Route::get('/{defense}/report', [DefenseController::class, 'generateReport'])->name('generate-report');
+            Route::get('/{defense}/report/pdf', [DefenseController::class, 'downloadReportPdf'])->name('download-report-pdf');
         });
+
+        // Dynamic route for viewing specific defenses (must be at the end)
+        Route::get('/{defense}', [DefenseController::class, 'show'])->name('show');
     });
 
     // =====================================================================

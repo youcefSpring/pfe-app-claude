@@ -15,21 +15,39 @@ class SubjectController extends Controller
     /**
      * Display a listing of subjects
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $user = Auth::user();
 
-        $query = Subject::with(['teacher', 'student']);
+        $query = Subject::with(['teacher']);
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Apply grade filter
+        if ($request->filled('grade')) {
+            $query->where('target_grade', $request->grade);
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
         // Filter based on user role
         switch ($user->role) {
             case 'teacher':
                 // Teachers see their own subjects
-                $query->where('teacher_id', $user->id);
+                $query->where('supervisor_id', $user->id);
                 break;
             case 'department_head':
                 // Department heads see subjects from their department
-                $query->whereHas('teacher', function($q) use ($user) {
+                $query->whereHas('supervisor', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
                 break;
@@ -46,7 +64,7 @@ class SubjectController extends Controller
             // Admin sees all subjects (no filter)
         }
 
-        $subjects = $query->latest()->paginate(12);
+        $subjects = $query->latest()->paginate(12)->appends($request->query());
 
         return view('subjects.index', compact('subjects'));
     }

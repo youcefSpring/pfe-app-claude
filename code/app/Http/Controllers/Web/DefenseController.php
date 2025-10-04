@@ -19,11 +19,36 @@ class DefenseController extends Controller
     /**
      * Display a listing of defenses
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $user = Auth::user();
 
         $query = Defense::with(['project.team.members.user', 'project.subject', 'room', 'juries.teacher']);
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->whereHas('project.subject', function($subq) use ($request) {
+                    $subq->where('title', 'like', '%' . $request->search . '%');
+                })
+                ->orWhereHas('project.team', function($teamq) use ($request) {
+                    $teamq->where('name', 'like', '%' . $request->search . '%');
+                });
+            });
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply date filter
+        if ($request->filled('date_from')) {
+            $query->where('defense_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->where('defense_date', '<=', $request->date_to);
+        }
 
         // Filter based on user role
         switch ($user->role) {
@@ -48,7 +73,7 @@ class DefenseController extends Controller
             // Admin sees all defenses (no filter)
         }
 
-        $defenses = $query->orderBy('defense_date')->paginate(12);
+        $defenses = $query->orderBy('defense_date')->paginate(12)->appends($request->query());
 
         return view('defenses.index', compact('defenses'));
     }
@@ -56,7 +81,7 @@ class DefenseController extends Controller
     /**
      * Display the specified defense
      */
-    public function show(Defense $defense): View
+    public function show(Defense $defense)
     {
         $defense->load([
             'project.team.members.user',
@@ -569,7 +594,7 @@ class DefenseController extends Controller
     }
 
     /**
-     * Generate defense report
+     * Generate defense report (HTML view)
      */
     public function generateReport(Defense $defense): View
     {
@@ -578,11 +603,44 @@ class DefenseController extends Controller
         $defense->load([
             'project.team.members.user',
             'project.subject.teacher',
+            'project.team.speciality',
             'room',
             'juries.teacher',
             'report'
         ]);
 
         return view('defenses.report', compact('defense'));
+    }
+
+    /**
+     * Generate defense report as PDF
+     */
+    public function downloadReportPdf(Defense $defense)
+    {
+        //$this->authorize('viewReport', $defense);
+
+        $defense->load([
+            'project.team.members.user',
+            'project.subject.teacher',
+            'project.team.speciality',
+            'room',
+            'juries.teacher',
+            'report'
+        ]);
+
+        $pdf = \PDF::loadView('defenses.report', compact('defense'));
+
+        // Configure PDF options
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isPhpEnabled' => true,
+            'defaultFont' => 'Arial',
+            'isRemoteEnabled' => true,
+        ]);
+
+        $filename = 'PV_Soutenance_' . str_replace(' ', '_', $defense->project->subject->title ?? 'Defense') . '_' . now()->format('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

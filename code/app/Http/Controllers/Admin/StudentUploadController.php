@@ -88,66 +88,68 @@ class StudentUploadController extends Controller
     }
 
     /**
-     * Download a sample Excel template.
+     * Download a sample Excel template that matches the expected format.
      */
     public function downloadTemplate()
     {
-        $headers = [
-            'numero_inscription',
-            'annee_bac',
-            'matricule',
-            'nom',
-            'prenom',
-            'section',
-            'groupe',
-            'email'
-        ];
+        // Create a new spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
+        // Add metadata rows (rows 1-3)
+        $sheet->setCellValue('A1', 'Offre de formation: ingénierie du logiciel et traitement de l\'information');
+        $sheet->setCellValue('A2', 'Semestre: M_S3');
+        $sheet->setCellValue('A3', 'Année Académique: 2025/2026');
+
+        // Row 4: Warning message
+        $sheet->setCellValue('A4', 'Attention : la forme du canevas ne doit pas être modifiée, la colonne section et groupe doit être correcte');
+        $sheet->getStyle('A4')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED))->setBold(true);
+
+        // Row 5: Headers (using names that will be correctly processed by WithHeadingRow)
+        $headers = ['N°', 'Numero Inscription', 'Annee Bac', 'Matricule', 'Nom', 'Prenom', 'Section', 'Groupe'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '5', $header);
+            $col++;
+        }
+
+        // Add sample data starting from row 6
         $sampleData = [
-            [
-                'UN35012025202031025123',
-                '2020',
-                '31025107',
-                'KACED',
-                'NASSIM TAHA',
-                'Section_1',
-                'G_02',
-                'nassim.kaced@student.university.edu'
-            ],
-            [
-                'UN35012025212131066540',
-                '2021',
-                '31066540',
-                'BENTCHAKAL',
-                'FATIMA YASMIN',
-                'Section_1',
-                'G_02',
-                'fatima.bentchakal@student.university.edu'
-            ]
+            [1, 'UN35012025202031025123', 2020, '31025107', 'KACED', 'NASSIM TAHA', 'Section_1', 'G_02'],
+            [2, 'UN35012025212131066540', 2021, '31066540', 'BENTCHAKAL', 'FATIMA YASMIN', 'Section_1', 'G_02'],
+            [3, 'UN35012025212131058079', 2021, '31058079', 'BELHOUT', 'ABDERREZAK', 'Section_1', 'G_02'],
         ];
 
-        $filename = 'template_import_etudiants.xlsx';
-
-        return Excel::download(new class($headers, $sampleData) implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
-            private $headers;
-            private $data;
-
-            public function __construct($headers, $data)
-            {
-                $this->headers = $headers;
-                $this->data = $data;
+        $row = 6;
+        foreach ($sampleData as $data) {
+            $col = 'A';
+            foreach ($data as $value) {
+                $sheet->setCellValue($col . $row, $value);
+                $col++;
             }
+            $row++;
+        }
 
-            public function array(): array
-            {
-                return $this->data;
-            }
+        // Style the headers
+        $sheet->getStyle('A5:H5')->getFont()->setBold(true);
+        $sheet->getStyle('A5:H5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+              ->getStartColor()->setARGB('FFE0E0E0');
 
-            public function headings(): array
-            {
-                return $this->headers;
-            }
-        }, $filename);
+        // Auto-size columns
+        foreach (range('A', 'H') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Create Excel writer and download
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        $filename = 'template_etudiants_' . date('Y-m-d') . '.xlsx';
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     /**

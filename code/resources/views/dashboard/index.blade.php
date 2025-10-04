@@ -5,7 +5,7 @@
 @section('content')
 <div class="row">
     <!-- Welcome Card -->
-    <div class="col-12 mb-4">
+    {{-- <div class="col-12 mb-4">
         <div class="card bg-primary text-white">
             <div class="card-body">
                 <div class="row align-items-center">
@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
 <!-- Quick Actions -->
 <div class="row mt-4">
