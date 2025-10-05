@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => [__('app.invalid_credentials')],
             ]);
         }
 
@@ -58,7 +58,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => [__('app.invalid_credentials')],
             ]);
         }
 
@@ -70,7 +70,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged in successfully',
+            'message' => __('app.login_success'),
             'data' => [
                 'user' => $user->only([
                     'id', 'name', 'email', 'role', 'department',
@@ -93,7 +93,7 @@ class AuthController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Logged out successfully',
+                'message' => __('app.logout_success'),
             ]);
         }
 
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out successfully',
+            'message' => __('app.logout_success'),
         ]);
     }
 
@@ -182,13 +182,13 @@ class AuthController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Profile updated successfully',
+                'message' => __('app.profile_updated'),
                 'data' => $user->fresh(),
             ]);
         }
 
         return redirect()->route('profile.show')
-            ->with('success', 'Profile updated successfully!');
+            ->with('success', __('app.profile_updated'));
     }
 
     /**
@@ -205,7 +205,7 @@ class AuthController extends Controller
 
         if (!Hash::check($request->current_password, $user->password)) {
             throw ValidationException::withMessages([
-                'current_password' => ['The current password is incorrect.'],
+                'current_password' => [__('app.incorrect_password')],
             ]);
         }
 
@@ -216,18 +216,18 @@ class AuthController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Password changed successfully',
+                'message' => __('app.password_changed'),
             ]);
         }
 
         return redirect()->route('profile.show')
-            ->with('success', 'Password changed successfully!');
+            ->with('success', __('app.password_changed'));
     }
 
     /**
      * Get user notifications.
      */
-    public function notifications(Request $request): JsonResponse
+    public function notifications(Request $request)
     {
         $user = $request->user();
         $perPage = $request->get('per_page', 15);
@@ -235,40 +235,54 @@ class AuthController extends Controller
         $notifications = $user->notifications()
             ->paginate($perPage);
 
-        return response()->json([
-            'success' => true,
-            'data' => $notifications,
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $notifications,
+            ]);
+        }
+
+        return view('notifications.index', compact('notifications'));
     }
 
     /**
      * Mark notification as read.
      */
-    public function markNotificationRead(Request $request, $notificationId): JsonResponse
+    public function markNotificationRead(Request $request, $notificationId)
     {
         $user = $request->user();
         $notification = $user->notifications()->findOrFail($notificationId);
 
         $notification->markAsRead();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification marked as read',
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('app.notification_read'),
+            ]);
+        }
+
+        return redirect()->route('notifications.index')
+            ->with('success', __('app.notification_read'));
     }
 
     /**
      * Mark all notifications as read.
      */
-    public function markAllNotificationsRead(Request $request): JsonResponse
+    public function markAllNotificationsRead(Request $request)
     {
         $user = $request->user();
         $user->unreadNotifications->markAsRead();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'All notifications marked as read',
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('app.all_notifications_read'),
+            ]);
+        }
+
+        return redirect()->route('notifications.index')
+            ->with('success', __('app.all_notifications_read'));
     }
 
     /**
@@ -278,13 +292,13 @@ class AuthController extends Controller
     {
         switch ($role) {
             case 'student':
-                return ['activeTeam.members.student', 'activeTeam.subject', 'activeTeam.project'];
+                return ['teamMember.team.members', 'teamMember.team.project.subject'];
 
             case 'teacher':
-                return ['subjects', 'supervisedProjects.team', 'validatedSubjects'];
+                return ['subjects', 'supervisedProjects.team'];
 
             case 'department_head':
-                return ['validatedSubjects', 'resolvedConflicts'];
+                return ['subjects'];
 
             case 'admin':
                 return [];

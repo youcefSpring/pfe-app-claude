@@ -136,7 +136,7 @@ class SubjectController extends Controller
         $subject = Subject::create($validated);
 
         return redirect()->route('subjects.show', $subject)
-            ->with('success', 'Subject created successfully!');
+            ->with('success', __('app.subject_created'));
     }
 
     /**
@@ -184,7 +184,7 @@ class SubjectController extends Controller
         $subject->update($validated);
 
         return redirect()->route('subjects.show', $subject)
-            ->with('success', 'Subject updated successfully!');
+            ->with('success', __('app.subject_updated'));
     }
 
     /**
@@ -196,13 +196,13 @@ class SubjectController extends Controller
 
         if ($subject->projects()->exists()) {
             return redirect()->back()
-                ->with('error', 'Cannot delete subject with associated projects.');
+                ->with('error', __('app.cannot_delete_subject_with_projects'));
         }
 
         $subject->delete();
 
         return redirect()->route('subjects.index')
-            ->with('success', 'Subject deleted successfully!');
+            ->with('success', __('app.subject_deleted'));
     }
 
     /**
@@ -214,13 +214,13 @@ class SubjectController extends Controller
 
         if ($subject->status !== 'draft') {
             return redirect()->back()
-                ->with('error', 'Only draft subjects can be submitted for validation.');
+                ->with('error', __('app.only_draft_can_submit'));
         }
 
         $subject->update(['status' => 'pending_validation']);
 
         return redirect()->back()
-            ->with('success', 'Subject submitted for validation!');
+            ->with('success', __('app.subject_submitted_validation'));
     }
 
     /**
@@ -329,7 +329,7 @@ class SubjectController extends Controller
         $action = $request->action === 'approve' ? 'approved' : 'rejected';
 
         return redirect()->back()
-            ->with('success', "{$count} subjects {$action} successfully!");
+            ->with('success', __('app.subjects_bulk_action', ['count' => $count, 'action' => $action]));
     }
 
     /**

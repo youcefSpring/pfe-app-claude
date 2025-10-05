@@ -104,7 +104,7 @@ class TeamController extends Controller
         // Check if user is already in a team
         if ($user->teamMember) {
             return redirect()->route('teams.index')
-                ->with('error', 'You are already a member of a team. You cannot create another team.');
+                ->with('error', __('app.already_member_cannot_create'));
         }
 
         // Generate next team name
@@ -125,7 +125,7 @@ class TeamController extends Controller
         // Check if user is already in a team
         if ($user->teamMember) {
             return redirect()->back()
-                ->with('error', 'You are already a member of a team.');
+                ->with('error', __('app.already_member_of_team'));
         }
 
         DB::beginTransaction();
@@ -150,12 +150,12 @@ class TeamController extends Controller
             DB::commit();
 
             return redirect()->route('teams.show', $team)
-                ->with('success', 'Team created successfully! You are now the team leader.');
+                ->with('success', __('app.team_created_leader'));
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Failed to create team: ' . $e->getMessage());
+                ->with('error', __('app.team_create_failed', ['message' => $e->getMessage()]));
         }
     }
 
@@ -200,7 +200,7 @@ class TeamController extends Controller
         $team->update($validated);
 
         return redirect()->route('teams.show', $team)
-            ->with('success', 'Team updated successfully!');
+            ->with('success', __('app.team_updated'));
     }
 
     /**
@@ -212,13 +212,13 @@ class TeamController extends Controller
 
         if ($team->project) {
             return redirect()->back()
-                ->with('error', 'Cannot delete team with an associated project.');
+                ->with('error', __('app.cannot_delete_team_with_project'));
         }
 
         $team->delete();
 
         return redirect()->route('teams.index')
-            ->with('success', 'Team deleted successfully!');
+            ->with('success', __('app.team_deleted'));
     }
 
     /**
@@ -238,17 +238,17 @@ class TeamController extends Controller
 
         if (!$student) {
             return redirect()->back()
-                ->with('error', 'Student not found or user is not a student.');
+                ->with('error', __('app.student_not_found'));
         }
 
         if ($student->teamMember) {
             return redirect()->back()
-                ->with('error', 'Student is already a member of another team.');
+                ->with('error', __('app.student_already_in_team'));
         }
 
         if ($team->members->count() >= 4) { // Max team size
             return redirect()->back()
-                ->with('error', 'Team is full. Maximum 4 members allowed.');
+                ->with('error', __('app.team_full_max_members'));
         }
 
         TeamMember::create([
@@ -259,7 +259,7 @@ class TeamController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', 'Student added to team successfully!');
+            ->with('success', __('app.student_added_to_team'));
     }
 
     /**
@@ -271,7 +271,7 @@ class TeamController extends Controller
 
         if ($member->role === 'leader' && $team->members->count() > 1) {
             return redirect()->back()
-                ->with('error', 'Cannot remove team leader. Transfer leadership first or dissolve the team.');
+                ->with('error', __('app.cannot_remove_leader'));
         }
 
         $member->delete();
@@ -280,11 +280,11 @@ class TeamController extends Controller
         if ($team->members->count() === 0) {
             $team->delete();
             return redirect()->route('teams.index')
-                ->with('success', 'Team dissolved as the leader left.');
+                ->with('success', __('app.team_dissolved_leader_left'));
         }
 
         return redirect()->back()
-            ->with('success', 'Member removed from team successfully!');
+            ->with('success', __('app.member_removed_from_team'));
     }
 
     /**
@@ -302,17 +302,17 @@ class TeamController extends Controller
 
         if ($subject->status !== 'validated') {
             return redirect()->back()
-                ->with('error', 'Selected subject is not validated.');
+                ->with('error', __('app.subject_not_validated'));
         }
 
         if ($subject->projects()->exists()) {
             return redirect()->back()
-                ->with('error', 'Subject is already taken by another team.');
+                ->with('error', __('app.subject_already_taken'));
         }
 
         if ($team->project) {
             return redirect()->back()
-                ->with('error', 'Team already has a project assigned.');
+                ->with('error', __('app.team_already_has_project'));
         }
 
         // Create project for the team
@@ -326,7 +326,7 @@ class TeamController extends Controller
         $team->update(['status' => 'active']);
 
         return redirect()->back()
-            ->with('success', 'Subject selected successfully! Your project has been created.');
+            ->with('success', __('app.subject_selected_project_created'));
     }
 
     /**
@@ -338,7 +338,7 @@ class TeamController extends Controller
 
         if ($team->project) {
             return redirect()->route('teams.show', $team)
-                ->with('error', 'Team already has a project assigned.');
+                ->with('error', __('app.team_already_has_project'));
         }
 
         return view('teams.external-project', compact('team'));
@@ -365,7 +365,7 @@ class TeamController extends Controller
 
         if ($team->project) {
             return redirect()->back()
-                ->with('error', 'Team already has a project assigned.');
+                ->with('error', __('app.team_already_has_project'));
         }
 
         // Create external project
@@ -375,7 +375,7 @@ class TeamController extends Controller
         ]);
 
         return redirect()->route('teams.show', $team)
-            ->with('success', 'External project submitted for approval!');
+            ->with('success', __('app.external_project_submitted'));
     }
 
     /**
@@ -387,17 +387,17 @@ class TeamController extends Controller
 
         if ($user->role !== 'student') {
             return redirect()->back()
-                ->with('error', 'Only students can join teams.');
+                ->with('error', __('app.only_students_join_teams'));
         }
 
         if ($user->teamMember) {
             return redirect()->back()
-                ->with('error', 'You are already a member of a team.');
+                ->with('error', __('app.already_member_of_team'));
         }
 
         if ($team->members->count() >= 4) {
             return redirect()->back()
-                ->with('error', 'Team is full.');
+                ->with('error', __('app.team_full'));
         }
 
         TeamMember::create([
@@ -408,7 +408,7 @@ class TeamController extends Controller
         ]);
 
         return redirect()->route('teams.show', $team)
-            ->with('success', 'You have joined the team successfully!');
+            ->with('success', __('app.joined_team_success'));
     }
 
     /**
@@ -421,7 +421,7 @@ class TeamController extends Controller
 
         if (!$membership) {
             return redirect()->back()
-                ->with('error', 'You are not a member of this team.');
+                ->with('error', __('app.not_team_member'));
         }
 
         DB::beginTransaction();
@@ -442,17 +442,17 @@ class TeamController extends Controller
                 $team->delete();
                 DB::commit();
                 return redirect()->route('teams.index')
-                    ->with('success', 'You left the team and it has been dissolved.');
+                    ->with('success', __('app.left_team_dissolved'));
             }
 
             DB::commit();
             return redirect()->route('teams.index')
-                ->with('success', 'You have left the team successfully.');
+                ->with('success', __('app.left_team_success'));
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Failed to leave team: ' . $e->getMessage());
+                ->with('error', __('app.leave_team_failed', ['message' => $e->getMessage()]));
         }
     }
 
@@ -472,7 +472,7 @@ class TeamController extends Controller
 
         if (!$newLeader) {
             return redirect()->back()
-                ->with('error', 'Selected member is not part of this team.');
+                ->with('error', __('app.member_not_in_team'));
         }
 
         DB::beginTransaction();
@@ -484,12 +484,12 @@ class TeamController extends Controller
             DB::commit();
 
             return redirect()->back()
-                ->with('success', 'Leadership transferred successfully!');
+                ->with('success', __('app.leadership_transferred'));
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Failed to transfer leadership.');
+                ->with('error', __('app.transfer_leadership_failed'));
         }
     }
 

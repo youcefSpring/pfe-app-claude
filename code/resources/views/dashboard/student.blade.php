@@ -33,9 +33,9 @@
         <div class="card text-center h-100">
             <div class="card-body">
                 <i class="bi bi-journal-text text-primary mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Available Subjects</h5>
+                <h5 class="card-title">{{ __('app.available_subjects') }}</h5>
                 <h3 class="text-primary" id="available-subjects">-</h3>
-                <small class="text-muted">Ready for selection</small>
+                <small class="text-muted">{{ __('app.ready_for_selection') }}</small>
             </div>
         </div>
     </div>
@@ -44,9 +44,9 @@
         <div class="card text-center h-100">
             <div class="card-body">
                 <i class="bi bi-people text-success mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">My Team</h5>
+                <h5 class="card-title">{{ __('app.my_team') }}</h5>
                 <h3 class="text-success" id="team-status">-</h3>
-                <small class="text-muted">Current status</small>
+                <small class="text-muted">{{ __('app.current_status') }}</small>
             </div>
         </div>
     </div>
@@ -55,9 +55,9 @@
         <div class="card text-center h-100">
             <div class="card-body">
                 <i class="bi bi-folder text-warning mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Project Status</h5>
+                <h5 class="card-title">{{ __('app.project_status') }}</h5>
                 <h3 class="text-warning" id="project-status">-</h3>
-                <small class="text-muted">Current phase</small>
+                <small class="text-muted">{{ __('app.current_phase') }}</small>
             </div>
         </div>
     </div>
@@ -66,9 +66,9 @@
         <div class="card text-center h-100">
             <div class="card-body">
                 <i class="bi bi-shield-check text-info mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Defense</h5>
+                <h5 class="card-title">{{ __('app.defense') }}</h5>
                 <h3 class="text-info" id="defense-status">-</h3>
-                <small class="text-muted">Upcoming</small>
+                <small class="text-muted">{{ __('app.upcoming') }}</small>
             </div>
         </div>
     </div>
@@ -80,7 +80,7 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-people me-2"></i>My Team
+                    <i class="bi bi-people me-2"></i>{{ __('app.my_team') }}
                 </h5>
                 <a href="{{ route('teams.index') }}" class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-arrow-right"></i>
@@ -100,7 +100,7 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-folder me-2"></i>Current Project
+                    <i class="bi bi-folder me-2"></i>{{ __('app.current_project') }}
                 </h5>
                 <a href="{{ route('projects.index') }}" class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-arrow-right"></i>
@@ -122,7 +122,7 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-clock-history me-2"></i>Recent Activity
+                    <i class="bi bi-clock-history me-2"></i>{{ __('app.recent_activity') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -143,28 +143,28 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                    <i class="bi bi-lightning me-2"></i>{{ __('app.quick_actions') }}
                 </h5>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
                     <a href="{{ route('subjects.index') }}" class="btn btn-outline-primary">
-                        <i class="bi bi-journal-text me-2"></i>Browse Subjects
+                        <i class="bi bi-journal-text me-2"></i>{{ __('app.browse_subjects') }}
                     </a>
                     <a href="{{ route('teams.create') }}" class="btn btn-outline-success">
-                        <i class="bi bi-people me-2"></i>Create Team
+                        <i class="bi bi-people me-2"></i>{{ __('app.create_team') }}
                     </a>
                     <a href="{{ route('projects.index') }}" class="btn btn-outline-warning">
-                        <i class="bi bi-folder me-2"></i>View Projects
+                        <i class="bi bi-folder me-2"></i>{{ __('app.view_projects') }}
                     </a>
                     <a href="{{ route('defenses.index') }}" class="btn btn-outline-info">
-                        <i class="bi bi-shield-check me-2"></i>Defense Schedule
+                        <i class="bi bi-shield-check me-2"></i>{{ __('app.defense_schedule') }}
                     </a>
                 </div>
 
                 <!-- Upcoming Deadlines -->
                 <div class="mt-4">
-                    <h6 class="text-muted">Upcoming Deadlines</h6>
+                    <h6 class="text-muted">{{ __('app.upcoming_deadlines') }}</h6>
                     <div id="upcoming-deadlines">
                         <small class="text-muted">Loading deadlines...</small>
                     </div>
@@ -180,7 +180,7 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-diagram-3 me-2"></i>PFE Progress Timeline
+                    <i class="bi bi-diagram-3 me-2"></i>{{ __('app.pfe_progress_timeline') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -191,8 +191,8 @@
                             <div class="step-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
                                 <i class="bi bi-journal-text"></i>
                             </div>
-                            <h6 class="step-title">Subject Selection</h6>
-                            <small class="text-muted">Choose your topic</small>
+                            <h6 class="step-title">{{ __('app.subject_selection') }}</h6>
+                            <small class="text-muted">{{ __('app.choose_your_topic') }}</small>
                         </div>
                     </div>
 
@@ -202,8 +202,8 @@
                             <div class="step-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
                                 <i class="bi bi-people"></i>
                             </div>
-                            <h6 class="step-title">Team Formation</h6>
-                            <small class="text-muted">Build your team</small>
+                            <h6 class="step-title">{{ __('app.team_formation') }}</h6>
+                            <small class="text-muted">{{ __('app.build_your_team') }}</small>
                         </div>
                     </div>
 
@@ -213,8 +213,8 @@
                             <div class="step-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
                                 <i class="bi bi-clipboard-check"></i>
                             </div>
-                            <h6 class="step-title">Assignment</h6>
-                            <small class="text-muted">Get supervisor</small>
+                            <h6 class="step-title">{{ __('app.assignment') }}</h6>
+                            <small class="text-muted">{{ __('app.get_supervisor') }}</small>
                         </div>
                     </div>
 
@@ -224,8 +224,8 @@
                             <div class="step-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
                                 <i class="bi bi-code-slash"></i>
                             </div>
-                            <h6 class="step-title">Development</h6>
-                            <small class="text-muted">Work on project</small>
+                            <h6 class="step-title">{{ __('app.development') }}</h6>
+                            <small class="text-muted">{{ __('app.work_on_project') }}</small>
                         </div>
                     </div>
 
@@ -235,8 +235,8 @@
                             <div class="step-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
                                 <i class="bi bi-file-earmark-arrow-up"></i>
                             </div>
-                            <h6 class="step-title">Submission</h6>
-                            <small class="text-muted">Submit deliverables</small>
+                            <h6 class="step-title">{{ __('app.submission') }}</h6>
+                            <small class="text-muted">{{ __('app.submit_deliverables') }}</small>
                         </div>
                     </div>
 
@@ -246,8 +246,8 @@
                             <div class="step-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
                                 <i class="bi bi-shield-check"></i>
                             </div>
-                            <h6 class="step-title">Defense</h6>
-                            <small class="text-muted">Present project</small>
+                            <h6 class="step-title">{{ __('app.defense') }}</h6>
+                            <small class="text-muted">{{ __('app.present_project') }}</small>
                         </div>
                     </div>
                 </div>

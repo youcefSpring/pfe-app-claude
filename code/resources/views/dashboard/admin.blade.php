@@ -31,9 +31,9 @@
         <div class="card text-center h-100 border-primary">
             <div class="card-body">
                 <i class="bi bi-people text-primary mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Total Users</h5>
+                <h5 class="card-title">{{ __('app.total_users') }}</h5>
                 <h3 class="text-primary" id="total-users">-</h3>
-                <small class="text-muted">All system users</small>
+                <small class="text-muted">{{ __('app.all_system_users') }}</small>
             </div>
         </div>
     </div>
@@ -42,9 +42,9 @@
         <div class="card text-center h-100 border-success">
             <div class="card-body">
                 <i class="bi bi-journal-text text-success mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Active Subjects</h5>
+                <h5 class="card-title">{{ __('app.active_subjects') }}</h5>
                 <h3 class="text-success" id="active-subjects">-</h3>
-                <small class="text-muted">Available & assigned</small>
+                <small class="text-muted">{{ __('app.available_assigned') }}</small>
             </div>
         </div>
     </div>
@@ -53,9 +53,9 @@
         <div class="card text-center h-100 border-warning">
             <div class="card-body">
                 <i class="bi bi-folder text-warning mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Active Projects</h5>
+                <h5 class="card-title">{{ __('app.active_projects') }}</h5>
                 <h3 class="text-warning" id="active-projects">-</h3>
-                <small class="text-muted">In development</small>
+                <small class="text-muted">{{ __('app.in_development') }}</small>
             </div>
         </div>
     </div>
@@ -64,9 +64,9 @@
         <div class="card text-center h-100 border-info">
             <div class="card-body">
                 <i class="bi bi-shield-check text-info mb-3" style="font-size: 2.5rem;"></i>
-                <h5 class="card-title">Completed Defenses</h5>
+                <h5 class="card-title">{{ __('app.completed_defenses') }}</h5>
                 <h3 class="text-info" id="completed-defenses">-</h3>
-                <small class="text-muted">This academic year</small>
+                <small class="text-muted">{{ __('app.this_academic_year') }}</small>
             </div>
         </div>
     </div>
@@ -78,10 +78,10 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-activity me-2"></i>System Health & Alerts
+                    <i class="bi bi-activity me-2"></i>{{ __('app.system_health_alerts') }}
                 </h5>
                 <div class="d-flex align-items-center">
-                    <span class="badge bg-success me-2" id="system-status">Online</span>
+                    <span class="badge bg-success me-2" id="system-status">{{ __('app.online') }}</span>
                     <button class="btn btn-sm btn-outline-primary" onclick="refreshSystemHealth()">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>

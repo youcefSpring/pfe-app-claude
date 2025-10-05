@@ -8,7 +8,7 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-plus-circle me-2"></i>Create New Subject
+                    <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_new_subject') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -17,89 +17,175 @@
 
                     <!-- Title -->
                     <div class="mb-3">
-                        <label for="title" class="form-label required">Subject Title</label>
+                        <label for="title" class="form-label required">{{ __('app.subject_title') }}</label>
                         <input type="text"
                                class="form-control @error('title') is-invalid @enderror"
                                id="title"
                                name="title"
                                value="{{ old('title') }}"
                                required
-                               placeholder="Enter a clear and descriptive title">
+                               placeholder="{{ __('app.enter_clear_descriptive_title') }}">
                         @error('title')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Choose a title that clearly describes the project topic and scope.
+                            {{ __('app.choose_title_clearly_describes') }}
                         </div>
                     </div>
 
                     <!-- Description -->
                     <div class="mb-3">
-                        <label for="description" class="form-label required">Description</label>
+                        <label for="description" class="form-label required">{{ __('app.description') }}</label>
                         <textarea class="form-control @error('description') is-invalid @enderror"
                                   id="description"
                                   name="description"
                                   rows="4"
                                   required
-                                  placeholder="Provide a detailed description of the project...">{{ old('description') }}</textarea>
+                                  placeholder="{{ __('app.provide_detailed_description') }}">{{ old('description') }}</textarea>
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Describe the project context, main goals, and expected outcomes.
+                            {{ __('app.describe_project_context') }}
                         </div>
                     </div>
 
                     <!-- Keywords -->
                     <div class="mb-3">
-                        <label for="keywords" class="form-label required">Keywords</label>
+                        <label for="keywords" class="form-label required">{{ __('app.keywords') }}</label>
                         <textarea class="form-control @error('keywords') is-invalid @enderror"
                                   id="keywords"
                                   name="keywords"
                                   rows="2"
                                   required
-                                  placeholder="Enter relevant keywords separated by commas...">{{ old('keywords') }}</textarea>
+                                  placeholder="{{ __('app.enter_keywords_comma_separated') }}">{{ old('keywords') }}</textarea>
                         @error('keywords')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Add keywords that describe the technologies, concepts, or fields involved.
+                            {{ __('app.keywords_help_text') }}
                         </div>
                     </div>
 
                     <!-- Tools -->
                     <div class="mb-3">
-                        <label for="tools" class="form-label required">Tools & Technologies</label>
+                        <label for="tools" class="form-label required">{{ __('app.tools_technologies') }}</label>
                         <textarea class="form-control @error('tools') is-invalid @enderror"
                                   id="tools"
                                   name="tools"
                                   rows="2"
                                   required
-                                  placeholder="List the tools, technologies, and frameworks to be used...">{{ old('tools') }}</textarea>
+                                  placeholder="{{ __('app.list_tools_technologies') }}">{{ old('tools') }}</textarea>
                         @error('tools')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Specify programming languages, frameworks, libraries, or software tools required.
+                            {{ __('app.tools_help_text') }}
                         </div>
                     </div>
 
                     <!-- Plan -->
                     <div class="mb-3">
-                        <label for="plan" class="form-label required">Project Plan</label>
+                        <label for="plan" class="form-label required">{{ __('app.project_plan') }}</label>
                         <textarea class="form-control @error('plan') is-invalid @enderror"
                                   id="plan"
                                   name="plan"
                                   rows="4"
                                   required
-                                  placeholder="Describe the project phases, milestones, and expected timeline...">{{ old('plan') }}</textarea>
+                                  placeholder="{{ __('app.describe_project_phases') }}">{{ old('plan') }}</textarea>
                         @error('plan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text">
-                            Outline the project plan including major phases and deliverables.
+                            {{ __('app.project_plan_help_text') }}
                         </div>
                     </div>
+
+                    @if(auth()->user()->role === 'teacher')
+                    <!-- Teacher-specific fields -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="target_grade" class="form-label required">{{ __('app.target_grade') }}</label>
+                                <select class="form-select @error('target_grade') is-invalid @enderror"
+                                        id="target_grade"
+                                        name="target_grade"
+                                        required>
+                                    <option value="">{{ __('app.select_target_grade') }}</option>
+                                    <option value="L3" {{ old('target_grade') === 'L3' ? 'selected' : '' }}>{{ __('app.license_3') }} (L3)</option>
+                                    <option value="M1" {{ old('target_grade') === 'M1' ? 'selected' : '' }}>{{ __('app.master_1') }} (M1)</option>
+                                    <option value="M2" {{ old('target_grade') === 'M2' ? 'selected' : '' }}>{{ __('app.master_2') }} (M2)</option>
+                                </select>
+                                @error('target_grade')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">
+                                    {{ __('app.target_grade_help_text') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="max_teams" class="form-label required">{{ __('app.max_teams') }}</label>
+                                <input type="number"
+                                       class="form-control @error('max_teams') is-invalid @enderror"
+                                       id="max_teams"
+                                       name="max_teams"
+                                       value="{{ old('max_teams', 1) }}"
+                                       min="1"
+                                       max="10"
+                                       required>
+                                @error('max_teams')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">
+                                    {{ __('app.max_teams_help_text') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject Type for Teachers -->
+                    <div class="mb-3">
+                        <label class="form-label required">{{ __('app.subject_type') }}</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="type" id="type_internal" value="internal" {{ old('type', 'internal') === 'internal' ? 'checked' : '' }} required>
+                                    <label class="form-check-label" for="type_internal">
+                                        <i class="bi bi-building me-2"></i>{{ __('app.internal_project') }}
+                                    </label>
+                                </div>
+                                <small class="text-muted">{{ __('app.internal_project_description') }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="type" id="type_external" value="external" {{ old('type') === 'external' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="type_external">
+                                        <i class="bi bi-briefcase me-2"></i>{{ __('app.external_project') }}
+                                    </label>
+                                </div>
+                                <small class="text-muted">{{ __('app.external_project_description') }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prerequisites -->
+                    <div class="mb-3">
+                        <label for="prerequisites" class="form-label">{{ __('app.prerequisites') }}</label>
+                        <textarea class="form-control @error('prerequisites') is-invalid @enderror"
+                                  id="prerequisites"
+                                  name="prerequisites"
+                                  rows="3"
+                                  placeholder="{{ __('app.list_prerequisites') }}">{{ old('prerequisites') }}</textarea>
+                        @error('prerequisites')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">
+                            {{ __('app.prerequisites_help_text') }}
+                        </div>
+                    </div>
+                    @endif
 
                     @if(auth()->user()->role === 'student')
                     <!-- External Subject Section for Students -->
@@ -107,11 +193,11 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="is_external" name="is_external" value="1" {{ old('is_external', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="is_external">
-                                This is an external subject (proposed by student)
+                                {{ __('app.this_is_external_subject') }}
                             </label>
                         </div>
                         <div class="form-text">
-                            External subjects are proposed by students and require validation from faculty.
+                            {{ __('app.external_subjects_description') }}
                         </div>
                     </div>
 
@@ -119,37 +205,37 @@
                     <div id="external-details">
                         <div class="card bg-light mb-3">
                             <div class="card-body">
-                                <h6 class="card-title">External Subject Information</h6>
+                                <h6 class="card-title">{{ __('app.external_subject_information') }}</h6>
 
                                 <div class="mb-3">
-                                    <label for="company_name" class="form-label">Company/Organization Name</label>
+                                    <label for="company_name" class="form-label">{{ __('app.company_organization_name') }}</label>
                                     <input type="text"
                                            class="form-control @error('company_name') is-invalid @enderror"
                                            id="company_name"
                                            name="company_name"
                                            value="{{ old('company_name') }}"
-                                           placeholder="Enter company or organization name (if applicable)">
+                                           placeholder="{{ __('app.enter_company_name') }}">
                                     @error('company_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <div class="form-text">
-                                        If this subject involves a company or external organization, enter their name.
+                                        {{ __('app.company_name_help_text') }}
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="dataset_resources_link" class="form-label">Dataset/Resources Link</label>
+                                    <label for="dataset_resources_link" class="form-label">{{ __('app.dataset_resources_link') }}</label>
                                     <input type="url"
                                            class="form-control @error('dataset_resources_link') is-invalid @enderror"
                                            id="dataset_resources_link"
                                            name="dataset_resources_link"
                                            value="{{ old('dataset_resources_link') }}"
-                                           placeholder="https://example.com/dataset (optional)">
+                                           placeholder="{{ __('app.dataset_link_placeholder') }}">
                                     @error('dataset_resources_link')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <div class="form-text">
-                                        Optional: Link to datasets, resources, or documentation relevant to the project.
+                                        {{ __('app.dataset_link_help_text') }}
                                     </div>
                                 </div>
 
@@ -157,22 +243,22 @@
                                 <div class="card bg-info bg-opacity-10 mt-3">
                                     <div class="card-body">
                                         <h6 class="card-title">
-                                            <i class="bi bi-person-plus-fill me-2"></i>External Supervisor Information
+                                            <i class="bi bi-person-plus-fill me-2"></i>{{ __('app.external_supervisor_information') }}
                                         </h6>
                                         <p class="small text-muted mb-3">
-                                            Provide the details of your external supervisor. If they don't have an account, one will be created automatically.
+                                            {{ __('app.external_supervisor_description') }}
                                         </p>
 
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="external_supervisor_name" class="form-label required">Supervisor Name</label>
+                                                    <label for="external_supervisor_name" class="form-label required">{{ __('app.supervisor_name') }}</label>
                                                     <input type="text"
                                                            class="form-control @error('external_supervisor_name') is-invalid @enderror"
                                                            id="external_supervisor_name"
                                                            name="external_supervisor_name"
                                                            value="{{ old('external_supervisor_name') }}"
-                                                           placeholder="Full name of external supervisor">
+                                                           placeholder="{{ __('app.full_name_supervisor') }}">
                                                     @error('external_supervisor_name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -180,13 +266,13 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="external_supervisor_email" class="form-label required">Supervisor Email</label>
+                                                    <label for="external_supervisor_email" class="form-label required">{{ __('app.supervisor_email') }}</label>
                                                     <input type="email"
                                                            class="form-control @error('external_supervisor_email') is-invalid @enderror"
                                                            id="external_supervisor_email"
                                                            name="external_supervisor_email"
                                                            value="{{ old('external_supervisor_email') }}"
-                                                           placeholder="supervisor@company.com">
+                                                           placeholder="{{ __('app.supervisor_email_placeholder') }}">
                                                     @error('external_supervisor_email')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -197,13 +283,13 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="external_supervisor_phone" class="form-label">Phone Number</label>
+                                                    <label for="external_supervisor_phone" class="form-label">{{ __('app.phone_number') }}</label>
                                                     <input type="tel"
                                                            class="form-control @error('external_supervisor_phone') is-invalid @enderror"
                                                            id="external_supervisor_phone"
                                                            name="external_supervisor_phone"
                                                            value="{{ old('external_supervisor_phone') }}"
-                                                           placeholder="+213 xx xx xx xx (optional)">
+                                                           placeholder="{{ __('app.phone_placeholder') }}">
                                                     @error('external_supervisor_phone')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -211,13 +297,13 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="external_supervisor_position" class="form-label">Position/Title</label>
+                                                    <label for="external_supervisor_position" class="form-label">{{ __('app.position_title') }}</label>
                                                     <input type="text"
                                                            class="form-control @error('external_supervisor_position') is-invalid @enderror"
                                                            id="external_supervisor_position"
                                                            name="external_supervisor_position"
                                                            value="{{ old('external_supervisor_position') }}"
-                                                           placeholder="e.g., Senior Developer, Project Manager">
+                                                           placeholder="{{ __('app.position_placeholder') }}">
                                                     @error('external_supervisor_position')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -236,15 +322,24 @@
                         <div class="col-12">
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('subjects.index') }}" class="btn btn-secondary">
-                                    <i class="bi bi-arrow-left me-2"></i>Cancel
+                                    <i class="bi bi-arrow-left me-2"></i>{{ __('app.cancel') }}
                                 </a>
                                 <div>
-                                    <button type="submit" name="action" value="draft" class="btn btn-outline-primary me-2">
-                                        <i class="bi bi-file-earmark me-2"></i>Save as Draft
-                                    </button>
-                                    <button type="submit" name="action" value="submit" class="btn btn-primary">
-                                        <i class="bi bi-send me-2"></i>Submit for Validation
-                                    </button>
+                                    @if(auth()->user()->role === 'teacher')
+                                        <button type="submit" name="action" value="draft" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-file-earmark me-2"></i>{{ __('app.save_as_draft') }}
+                                        </button>
+                                        <button type="submit" name="action" value="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle me-2"></i>{{ __('app.create_subject') }}
+                                        </button>
+                                    @else
+                                        <button type="submit" name="action" value="draft" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-file-earmark me-2"></i>{{ __('app.save_as_draft') }}
+                                        </button>
+                                        <button type="submit" name="action" value="submit" class="btn btn-primary">
+                                            <i class="bi bi-send me-2"></i>{{ __('app.submit_for_validation') }}
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
