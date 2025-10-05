@@ -126,7 +126,7 @@
                     <ul class="nav flex-column px-3">
                         <!-- Dashboard -->
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard*') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                            <a class="nav-link {{ request()->routeIs('dashboard*', 'student.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                                 <i class="bi bi-speedometer2 me-2"></i>
                                 {{ __('app.dashboard') }}
                             </a>
@@ -143,8 +143,8 @@
                             </a>
                         </li>
 
-                        <!-- Teams -->
-                        @if(in_array(auth()->user()?->role, ['student', 'teacher', 'department_head', 'admin']))
+                        <!-- Teams (not for students) -->
+                        @if(in_array(auth()->user()?->role, ['teacher', 'department_head', 'admin']))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('teams*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
                                 <i class="bi bi-people me-2"></i>
@@ -163,13 +163,40 @@
                         </li>
                         --}}
 
-                        <!-- Defenses -->
+                        <!-- Defenses (not for students) -->
+                        @if(in_array(auth()->user()?->role, ['teacher', 'department_head', 'admin']))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('defenses*') ? 'active' : '' }}" href="{{ route('defenses.index') }}">
                                 <i class="bi bi-shield-check me-2"></i>
                                 {{ __('app.defenses') }}
                             </a>
                         </li>
+                        @endif
+
+                        <!-- Student-specific navigation -->
+                        @if(auth()->user()?->role === 'student')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('teams.my-team') ? 'active' : '' }}" href="{{ route('teams.my-team') }}">
+                                <i class="bi bi-people me-2"></i>
+                                {{ __('app.my_team') }}
+                            </a>
+                        </li>
+
+                        @php
+                            $hasScheduledDefense = \App\Models\Defense::whereHas('project.team.members', function($q) {
+                                $q->where('student_id', auth()->id());
+                            })->exists();
+                        @endphp
+
+                        @if($hasScheduledDefense)
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('defenses.my-defense') ? 'active' : '' }}" href="{{ route('defenses.my-defense') }}">
+                                <i class="bi bi-shield-check me-2"></i>
+                                {{ __('app.my_defense') }}
+                            </a>
+                        </li>
+                        @endif
+                        @endif
 
                         <!-- Conflicts (Department Heads only) -->
                         @if(auth()->user()?->role === 'department_head')

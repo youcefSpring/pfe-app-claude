@@ -119,6 +119,20 @@
                                         @endif
                                     </div>
 
+                                    @if($subject->is_external && $subject->externalSupervisor)
+                                        <div class="mb-3">
+                                            <small class="text-muted">External Supervisor</small>
+                                            <div>{{ $subject->externalSupervisor->name }}</div>
+                                            <small class="text-muted">{{ $subject->externalSupervisor->email }}</small>
+                                            @if($subject->externalSupervisor->position)
+                                                <br><small class="text-muted">{{ $subject->externalSupervisor->position }}</small>
+                                            @endif
+                                            @if($subject->externalSupervisor->phone)
+                                                <br><small class="text-muted">{{ $subject->externalSupervisor->phone }}</small>
+                                            @endif
+                                        </div>
+                                    @endif
+
                                     @if($subject->validated_by)
                                         <div class="mb-3">
                                             <small class="text-muted">Validated by</small>

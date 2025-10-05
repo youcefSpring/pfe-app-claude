@@ -26,81 +26,93 @@
                 </div>
                 <div class="card-body">
                     @if($subjects->count() > 0)
-                        <div class="row">
-                            @foreach($subjects as $subject)
-                                <div class="col-lg-6 col-xl-4 mb-4">
-                                    <div class="card h-100 border-2">
-                                        <div class="card-body d-flex flex-column">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h6 class="card-title text-primary">{{ $subject->title }}</h6>
-                                                <span class="badge bg-success">Available</span>
-                                            </div>
-
-                                            <div class="mb-2">
-                                                <small class="text-muted">Proposed by:</small>
-                                                <div class="fw-bold">{{ $subject->teacher->name }}</div>
-                                                <small class="text-muted">{{ $subject->teacher->department }}</small>
-                                            </div>
-
-                                            <div class="mb-3 flex-grow-1">
-                                                <p class="card-text text-truncate-3">
-                                                    {{ Str::limit($subject->description, 150) }}
-                                                </p>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <small class="text-muted">Keywords:</small>
-                                                        <div class="d-flex flex-wrap">
-                                                            @foreach(array_slice(explode(',', $subject->keywords), 0, 3) as $keyword)
-                                                                <span class="badge bg-secondary me-1 mb-1">{{ trim($keyword) }}</span>
-                                                            @endforeach
-                                                            @if(count(explode(',', $subject->keywords)) > 3)
-                                                                <span class="badge bg-light text-dark me-1 mb-1">+{{ count(explode(',', $subject->keywords)) - 3 }} more</span>
-                                                            @endif
-                                                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{{ __('app.title') }}</th>
+                                        <th>{{ __('app.proposed_by') }}</th>
+                                        <th>{{ __('app.description') }}</th>
+                                        <th>{{ __('app.keywords') }}</th>
+                                        <th>{{ __('app.tools') }}</th>
+                                        <th>{{ __('app.created_at') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($subjects as $subject)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <strong class="text-primary">{{ $subject->title }}</strong>
+                                                        <br><span class="badge bg-success">{{ __('app.available') }}</span>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <small class="text-muted">Tools:</small>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ $subject->teacher->name }}</strong>
+                                                    <br><small class="text-muted">{{ $subject->teacher->department }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span title="{{ $subject->description }}">
+                                                    {{ Str::limit($subject->description, 80) }}
+                                                </span>
+                                            </td>
+                                            <td>
                                                 <div class="d-flex flex-wrap">
-                                                    @foreach(array_slice(explode(',', $subject->tools), 0, 3) as $tool)
-                                                        <span class="badge bg-info me-1 mb-1">{{ trim($tool) }}</span>
+                                                    @foreach(array_slice(explode(',', $subject->keywords), 0, 2) as $keyword)
+                                                        <span class="badge bg-secondary me-1 mb-1">{{ trim($keyword) }}</span>
                                                     @endforeach
-                                                    @if(count(explode(',', $subject->tools)) > 3)
-                                                        <span class="badge bg-light text-dark me-1 mb-1">+{{ count(explode(',', $subject->tools)) - 3 }} more</span>
+                                                    @if(count(explode(',', $subject->keywords)) > 2)
+                                                        <span class="badge bg-light text-dark">+{{ count(explode(',', $subject->keywords)) - 2 }}</span>
                                                     @endif
                                                 </div>
-                                            </div>
-
-                                            <div class="mt-auto">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <small class="text-muted">
-                                                        Added {{ $subject->created_at->diffForHumans() }}
-                                                    </small>
-                                                    <div>
-                                                        <a href="{{ route('subjects.show', $subject) }}" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-eye"></i> View
-                                                        </a>
-                                                        @if(auth()->user()->role === 'student' && auth()->user()->teamMember?->team && !auth()->user()->teamMember->team->project)
-                                                            <button type="button" class="btn btn-success btn-sm"
-                                                                    onclick="selectSubject({{ $subject->id }}, '{{ $subject->title }}')">
-                                                                <i class="fas fa-check"></i> Select
-                                                            </button>
-                                                        @endif
-                                                    </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-wrap">
+                                                    @foreach(array_slice(explode(',', $subject->tools), 0, 2) as $tool)
+                                                        <span class="badge bg-info me-1 mb-1">{{ trim($tool) }}</span>
+                                                    @endforeach
+                                                    @if(count(explode(',', $subject->tools)) > 2)
+                                                        <span class="badge bg-light text-dark">+{{ count(explode(',', $subject->tools)) - 2 }}</span>
+                                                    @endif
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+                                            </td>
+                                            <td class="text-nowrap">
+                                                {{ $subject->created_at->format('M d, Y') }}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button"
+                                                            class="btn btn-outline-primary"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#subjectModal"
+                                                            data-subject-id="{{ $subject->id }}"
+                                                            title="{{ __('app.view_details') }}">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    @if(auth()->user()->role === 'student' && auth()->user()->teamMember?->team && !auth()->user()->teamMember->team->project)
+                                                        <button type="button" class="btn btn-outline-success"
+                                                                onclick="selectSubject({{ $subject->id }}, '{{ $subject->title }}')"
+                                                                title="{{ __('app.select_subject') }}">
+                                                            <i class="bi bi-check"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
 
-                        {{ $subjects->links() }}
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $subjects->appends(request()->query())->links() }}
+                        </div>
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
@@ -155,6 +167,30 @@
     </div>
 @endif
 
+<!-- Subject Details Modal -->
+<div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subjectModalLabel">{{ __('app.subject_details') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="subjectModalContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if(auth()->user()->role === 'student' && !auth()->user()->teamMember)
     <div class="alert alert-warning mt-3">
         <h6><i class="fas fa-info-circle"></i> Join or Create a Team First</h6>
@@ -196,5 +232,39 @@ function selectSubject(subjectId, subjectTitle) {
     const modal = new bootstrap.Modal(document.getElementById('selectSubjectModal'));
     modal.show();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectModal = document.getElementById('subjectModal');
+
+    subjectModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const subjectId = button.getAttribute('data-subject-id');
+        const modalContent = document.getElementById('subjectModalContent');
+
+        // Show loading spinner
+        modalContent.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+
+        // Fetch subject details
+        fetch(`/subjects/${subjectId}/modal`)
+            .then(response => response.text())
+            .then(html => {
+                modalContent.innerHTML = html;
+            })
+            .catch(error => {
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Error loading subject details. Please try again.
+                    </div>
+                `;
+            });
+    });
+});
 </script>
 @endpush

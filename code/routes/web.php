@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\SubjectPreferenceController;
 use App\Http\Controllers\Web\AllocationController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\StudentUploadController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -88,11 +89,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [SubjectController::class, 'index'])->name('index');
         Route::get('/available/{grade?}', [SubjectController::class, 'available'])->name('available');
 
-        // Teachers can create and manage their subjects
-        Route::middleware('role:teacher')->group(function () {
+        // Teachers and students can create subjects
+        Route::middleware('role:teacher,student')->group(function () {
             Route::get('/create', [SubjectController::class, 'create'])->name('create');
             Route::post('/', [SubjectController::class, 'store'])->name('store');
         });
+
+        // Dynamic route for modal content
+        Route::get('/{subject}/modal', [SubjectController::class, 'modal'])->name('modal');
 
         // Dynamic route for viewing specific subjects (must be after static routes)
         Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
@@ -123,6 +127,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Students can create and manage teams (static routes before dynamic ones)
         Route::middleware('role:student')->group(function () {
+            Route::get('/my-team', [TeamController::class, 'myTeam'])->name('my-team');
             Route::get('/create', [TeamController::class, 'create'])->name('create');
             Route::post('/', [TeamController::class, 'store'])->name('store');
             Route::get('/{team}/edit', [TeamController::class, 'edit'])->name('edit');
@@ -219,9 +224,11 @@ Route::middleware(['auth'])->group(function () {
     // =====================================================================
 
     Route::prefix('defenses')->name('defenses.')->group(function () {
-        // All users can view defenses
-        Route::get('/', [DefenseController::class, 'index'])->name('index');
-        Route::get('/calendar', [DefenseController::class, 'calendar'])->name('calendar');
+        // Teachers, department heads, and admins can view defenses
+        Route::middleware('role:teacher,department_head,admin')->group(function () {
+            Route::get('/', [DefenseController::class, 'index'])->name('index');
+            Route::get('/calendar', [DefenseController::class, 'calendar'])->name('calendar');
+        });
 
         // Students can view their defense details
         Route::middleware('role:student')->group(function () {
@@ -414,6 +421,60 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{allocation}/reject', [AllocationController::class, 'reject'])->name('reject');
         });
     });
+});
+
+// =========================================================================
+// ADMIN ROUTES
+// =========================================================================
+
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:admin')->group(function () {
+        // User management
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+        Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+        Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
+        Route::get('/users/bulk-import', [AdminController::class, 'bulkImport'])->name('users.bulk-import');
+        Route::post('/users/bulk-import', [AdminController::class, 'processBulkImport'])->name('users.bulk-import.process');
+
+        // Student marks management
+        Route::get('/marks', [AdminController::class, 'marks'])->name('marks');
+        Route::get('/marks/create', [AdminController::class, 'createMark'])->name('marks.create');
+        Route::post('/marks', [AdminController::class, 'storeMark'])->name('marks.store');
+        Route::get('/marks/{mark}/edit', [AdminController::class, 'editMark'])->name('marks.edit');
+        Route::put('/marks/{mark}', [AdminController::class, 'updateMark'])->name('marks.update');
+        Route::delete('/marks/{mark}', [AdminController::class, 'destroyMark'])->name('marks.destroy');
+
+        // Bulk marks management
+        Route::get('/marks/bulk-create', [AdminController::class, 'bulkMarksCreate'])->name('marks.bulk-create');
+        Route::post('/marks/bulk-store', [AdminController::class, 'bulkMarksStore'])->name('marks.bulk-store');
+
+        // Bulk marks for all students
+        Route::get('/marks/bulk-all-students', [AdminController::class, 'bulkAllStudentsCreate'])->name('marks.bulk-all-create');
+        Route::post('/marks/bulk-all-store', [AdminController::class, 'bulkAllStudentsStore'])->name('marks.bulk-all-store');
+
+        Route::get('/students/{user}/marks/{semester}', [AdminController::class, 'studentMarksBySemester'])->name('students.marks.semester');
+        Route::get('/students/{user}/marks-summary', [AdminController::class, 'studentMarksSummary'])->name('students.marks.summary');
+
+        // Student Alerts Management
+        Route::get('/alerts', [AdminController::class, 'alerts'])->name('alerts');
+        Route::get('/alerts/{alert}', [AdminController::class, 'showAlert'])->name('alerts.show');
+        Route::post('/alerts/{alert}/respond', [AdminController::class, 'respondToAlert'])->name('alerts.respond');
+
+        // Reports and analytics
+        Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+        Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    });
+});
+
+// =========================================================================
+// STUDENT ROUTES
+// =========================================================================
+Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
+    Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
+    Route::post('/alert', [StudentController::class, 'storeAlert'])->name('alert.store');
 });
 
 // =========================================================================

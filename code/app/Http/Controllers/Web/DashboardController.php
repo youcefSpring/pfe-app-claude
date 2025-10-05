@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class DashboardController extends Controller
 {
@@ -12,9 +13,14 @@ class DashboardController extends Controller
     /**
      * Display the main dashboard.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $user = $request->user();
+
+        // Redirect students to their specific dashboard with marks and alerts
+        if ($user->role === 'student') {
+            return redirect()->route('student.dashboard');
+        }
 
         // Get role-specific dashboard data
         $dashboardData = $this->getDashboardDataForRole($user);

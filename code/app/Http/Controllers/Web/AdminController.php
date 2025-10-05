@@ -8,6 +8,7 @@ use App\Models\Speciality;
 use App\Models\Room;
 use App\Models\Subject;
 use App\Models\StudentMark;
+use App\Models\StudentAlert;
 use App\Services\StudentImportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,7 +33,7 @@ class AdminController extends Controller
     public function users(): View
     {
 
-        $users = User::with('speciality')->paginate(20);
+        $users = User::paginate(20);
         // dd($users->toArray());
         $specialities = Speciality::active()->get();
 
@@ -925,31 +926,56 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'subject_name' => 'required|string|max:255',
-            'mark' => 'required|numeric|min:0',
-            'max_mark' => 'required|numeric|min:0.01',
-            'semester' => 'nullable|string|max:10',
-            'academic_year' => 'nullable|string|max:20',
-            'notes' => 'nullable|string|max:500',
+            // Required marks
+            'mark_1' => 'required|numeric|min:0|max:20',
+            'mark_2' => 'required|numeric|min:0|max:20',
+            // Optional marks
+            'mark_3' => 'nullable|numeric|min:0|max:20',
+            'mark_4' => 'nullable|numeric|min:0|max:20',
+            'mark_5' => 'nullable|numeric|min:0|max:20',
         ]);
 
-        // Validate that mark doesn't exceed max_mark
-        if ($request->mark > $request->max_mark) {
-            return redirect()->back()
-                ->with('error', 'Mark cannot exceed maximum mark.')
-                ->withInput();
-        }
-
         try {
+            // Calculate simple average of entered marks
+            $marks = array_filter([
+                $request->mark_1,
+                $request->mark_2,
+                $request->mark_3,
+                $request->mark_4,
+                $request->mark_5
+            ], function($mark) {
+                return $mark !== null && $mark !== '';
+            });
+
+            $averageMark = count($marks) > 0 ? array_sum($marks) / count($marks) : 0;
+
             StudentMark::create([
                 'user_id' => $request->user_id,
-                'subject_name' => $request->subject_name,
-                'mark' => $request->mark,
-                'max_mark' => $request->max_mark,
-                'semester' => $request->semester,
-                'academic_year' => $request->academic_year,
-                'notes' => $request->notes,
+                'subject_name' => 'General Assessment', // Default subject name
+                'mark' => $averageMark, // Average of all marks
+                'max_mark' => 20, // Standard max mark
+                'semester' => null, // Not used anymore
+                'academic_year' => date('Y') . '-' . (date('Y') + 1), // Current academic year
+                'notes' => null, // Not used anymore
                 'created_by' => Auth::id(),
+                // Individual marks
+                'mark_1' => $request->mark_1,
+                'mark_2' => $request->mark_2,
+                'mark_3' => $request->mark_3,
+                'mark_4' => $request->mark_4,
+                'mark_5' => $request->mark_5,
+                // Max marks (all 20)
+                'max_mark_1' => 20,
+                'max_mark_2' => 20,
+                'max_mark_3' => 20,
+                'max_mark_4' => 20,
+                'max_mark_5' => 20,
+                // Equal weights
+                'weight_1' => 20,
+                'weight_2' => 20,
+                'weight_3' => 20,
+                'weight_4' => 20,
+                'weight_5' => 20,
             ]);
 
             return redirect()->route('admin.marks')
@@ -977,53 +1003,279 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'subject_name' => 'required|string|max:255',
-            'mark' => 'required|numeric|min:0',
-            'max_mark' => 'required|numeric|min:0.01',
-            'semester' => 'nullable|string|max:10',
-            'academic_year' => 'nullable|string|max:20',
-            'notes' => 'nullable|string|max:500',
+            'mark_1' => 'required|numeric|min:0|max:20',
+            'mark_2' => 'required|numeric|min:0|max:20',
+            'mark_3' => 'nullable|numeric|min:0|max:20',
+            'mark_4' => 'nullable|numeric|min:0|max:20',
+            'mark_5' => 'nullable|numeric|min:0|max:20',
         ]);
-
-        // Validate that mark doesn't exceed max_mark
-        if ($request->mark > $request->max_mark) {
-            return redirect()->back()
-                ->with('error', 'Mark cannot exceed maximum mark.')
-                ->withInput();
-        }
 
         try {
             $mark->update([
                 'user_id' => $request->user_id,
-                'subject_name' => $request->subject_name,
-                'mark' => $request->mark,
-                'max_mark' => $request->max_mark,
-                'semester' => $request->semester,
-                'academic_year' => $request->academic_year,
-                'notes' => $request->notes,
+                'mark_1' => $request->mark_1,
+                'mark_2' => $request->mark_2,
+                'mark_3' => $request->mark_3,
+                'mark_4' => $request->mark_4,
+                'mark_5' => $request->mark_5,
             ]);
 
             return redirect()->route('admin.marks')
-                ->with('success', 'Student mark updated successfully!');
+                ->with('success', __('app.mark_updated_successfully'));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update mark: ' . $e->getMessage())
+                ->with('error', __('app.failed_to_update_mark') . ': ' . $e->getMessage())
                 ->withInput();
         }
     }
 
     /**
-     * Delete mark
+     * Delete a student mark
      */
     public function destroyMark(StudentMark $mark): RedirectResponse
     {
         try {
+            $studentName = $mark->student->name;
             $mark->delete();
+
             return redirect()->route('admin.marks')
-                ->with('success', 'Student mark deleted successfully!');
+                ->with('success', __('app.mark_deleted_successfully', ['student' => $studentName]));
+
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to delete mark: ' . $e->getMessage());
+                ->with('error', __('app.failed_to_delete_mark') . ': ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Show bulk marks creation form.
+     */
+    public function bulkMarksCreate(): View
+    {
+        $students = User::where('role', 'student')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.marks.bulk-create', compact('students'));
+    }
+
+    /**
+     * Store bulk marks for a student.
+     */
+    public function bulkMarksStore(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'semester' => 'required|string',
+            'academic_year' => 'required|string',
+            'marks' => 'required|array|min:1',
+            'marks.*.subject_name' => 'required|string|max:255',
+            'marks.*.mark' => 'required|numeric|min:0',
+            'marks.*.max_mark' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        // Validate that mark doesn't exceed max_mark
+        foreach ($request->marks as $markData) {
+            if ($markData['mark'] > $markData['max_mark']) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', __('app.mark_cannot_exceed_max_mark') . ': ' . $markData['subject_name']);
+            }
+        }
+
+        try {
+            $user = User::findOrFail($request->user_id);
+            $createdMarks = 0;
+
+            foreach ($request->marks as $markData) {
+                // Check if mark already exists for this student, subject, and semester
+                $existingMark = StudentMark::where([
+                    'user_id' => $user->id,
+                    'subject_name' => $markData['subject_name'],
+                    'semester' => $request->semester,
+                    'academic_year' => $request->academic_year,
+                ])->first();
+
+                if ($existingMark) {
+                    // Update existing mark
+                    $existingMark->update([
+                        'mark' => $markData['mark'],
+                        'max_mark' => $markData['max_mark'],
+                        'notes' => $request->notes,
+                    ]);
+                } else {
+                    // Create new mark
+                    StudentMark::create([
+                        'user_id' => $user->id,
+                        'subject_name' => $markData['subject_name'],
+                        'mark' => $markData['mark'],
+                        'max_mark' => $markData['max_mark'],
+                        'semester' => $request->semester,
+                        'academic_year' => $request->academic_year,
+                        'notes' => $request->notes,
+                    ]);
+                    $createdMarks++;
+                }
+            }
+
+            $message = $createdMarks > 0
+                ? __('app.marks_saved_successfully', ['count' => $createdMarks, 'student' => $user->name])
+                : __('app.marks_updated_successfully', ['student' => $user->name]);
+
+            return redirect()->route('admin.marks')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', __('app.failed_to_save_marks') . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show student marks by semester.
+     */
+    public function studentMarksBySemester(User $user, string $semester): View
+    {
+        $marks = StudentMark::where('user_id', $user->id)
+            ->where('semester', $semester)
+            ->orderBy('subject_name')
+            ->get();
+
+        return view('admin.marks.semester-view', compact('user', 'semester', 'marks'));
+    }
+
+    /**
+     * Get student marks summary.
+     */
+    public function studentMarksSummary(User $user): View
+    {
+        $marksBySemester = StudentMark::where('user_id', $user->id)
+            ->selectRaw('semester, COUNT(*) as subject_count, AVG(mark/max_mark*100) as average_percentage')
+            ->groupBy('semester')
+            ->orderBy('semester')
+            ->get();
+
+        $allMarks = StudentMark::where('user_id', $user->id)
+            ->orderBy('semester')
+            ->orderBy('subject_name')
+            ->get();
+
+        return view('admin.marks.student-summary', compact('user', 'marksBySemester', 'allMarks'));
+    }
+
+    /**
+     * Show bulk marks entry form for all students.
+     */
+    public function bulkAllStudentsCreate(): View
+    {
+        $students = User::where('role', 'student')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.marks.bulk-all-students', compact('students'));
+    }
+
+    /**
+     * Store bulk marks for all students.
+     */
+    public function bulkAllStudentsStore(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'selected_students' => 'required|array|min:1',
+            'selected_students.*' => 'exists:users,id',
+            'mark_1' => 'required|array',
+            'mark_1.*' => 'required|numeric|min:0|max:20',
+            'mark_2' => 'required|array',
+            'mark_2.*' => 'required|numeric|min:0|max:20',
+            'mark_3' => 'array',
+            'mark_3.*' => 'nullable|numeric|min:0|max:20',
+            'mark_4' => 'array',
+            'mark_4.*' => 'nullable|numeric|min:0|max:20',
+            'mark_5' => 'array',
+            'mark_5.*' => 'nullable|numeric|min:0|max:20',
+        ]);
+
+        try {
+            $processedStudents = 0;
+
+            foreach ($request->selected_students as $studentId) {
+                // Check if student already has marks (enforce one record per student)
+                $existingMark = StudentMark::where('user_id', $studentId)->first();
+
+                $markData = [
+                    'user_id' => $studentId,
+                    'mark_1' => $request->mark_1[$studentId] ?? null,
+                    'mark_2' => $request->mark_2[$studentId] ?? null,
+                    'mark_3' => $request->mark_3[$studentId] ?? null,
+                    'mark_4' => $request->mark_4[$studentId] ?? null,
+                    'mark_5' => $request->mark_5[$studentId] ?? null,
+                    'created_by' => Auth::id(),
+                ];
+
+                // Only process if mark_1 and mark_2 are provided (required)
+                if (!empty($markData['mark_1']) && !empty($markData['mark_2'])) {
+                    if ($existingMark) {
+                        // Update existing record
+                        $existingMark->update($markData);
+                    } else {
+                        // Create new record
+                        StudentMark::create($markData);
+                    }
+                    $processedStudents++;
+                }
+            }
+
+            $message = __('app.bulk_marks_saved_successfully_simple', [
+                'count' => $processedStudents,
+            ]);
+
+            return redirect()->route('admin.marks')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', __('app.failed_to_save_marks') . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Display student alerts management page
+     */
+    public function alerts(): View
+    {
+        $alerts = StudentAlert::with(['student', 'respondedBy'])
+            ->orderBy('status', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.alerts.index', compact('alerts'));
+    }
+
+    /**
+     * Show alert details and response form
+     */
+    public function showAlert($id): View
+    {
+        $alert = StudentAlert::with(['student', 'respondedBy'])->findOrFail($id);
+        return view('admin.alerts.show', compact('alert'));
+    }
+
+    /**
+     * Respond to student alert
+     */
+    public function respondToAlert(Request $request, $id): RedirectResponse
+    {
+        $request->validate([
+            'admin_response' => 'required|string|max:1000',
+        ]);
+
+        $alert = StudentAlert::findOrFail($id);
+        $alert->markAsResponded($request->admin_response, Auth::id());
+
+        return redirect()->route('admin.alerts')
+            ->with('success', __('app.response_sent_successfully'));
     }
 }

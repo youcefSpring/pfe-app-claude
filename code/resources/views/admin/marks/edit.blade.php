@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', __('app.add_student_mark'))
+@section('page-title', __('app.edit_student_mark'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,12 +8,13 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">{{ __('app.add_student_mark') }}</h4>
-                    <small class="text-muted">{{ __('app.add_mark_description') }}</small>
+                    <h4 class="card-title mb-0">{{ __('app.edit_student_mark') }}</h4>
+                    <small class="text-muted">{{ __('app.edit_mark_description') }}</small>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.marks.store') }}" method="POST">
+                    <form action="{{ route('admin.marks.update', $mark) }}" method="POST">
                         @csrf
+                        @method('PUT')
 
                         <div class="row">
                             <div class="col-md-12">
@@ -23,7 +24,7 @@
                                             id="user_id" name="user_id" required>
                                         <option value="">{{ __('app.select_student') }}</option>
                                         @foreach($students as $student)
-                                            <option value="{{ $student->id }}" {{ old('user_id') == $student->id ? 'selected' : '' }}>
+                                            <option value="{{ $student->id }}" {{ (old('user_id', $mark->user_id) == $student->id) ? 'selected' : '' }}>
                                                 {{ $student->name }} @if($student->matricule)({{ $student->matricule }})@endif
                                             </option>
                                         @endforeach
@@ -50,7 +51,7 @@
                                     <label for="mark_1" class="form-label">{{ __('app.mark') }} 1 <span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" min="0" max="20"
                                            class="form-control @error('mark_1') is-invalid @enderror"
-                                           id="mark_1" name="mark_1" value="{{ old('mark_1') }}"
+                                           id="mark_1" name="mark_1" value="{{ old('mark_1', $mark->mark_1) }}"
                                            placeholder="0.00" required>
                                     @error('mark_1')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -62,7 +63,7 @@
                                     <label for="mark_2" class="form-label">{{ __('app.mark') }} 2 <span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" min="0" max="20"
                                            class="form-control @error('mark_2') is-invalid @enderror"
-                                           id="mark_2" name="mark_2" value="{{ old('mark_2') }}"
+                                           id="mark_2" name="mark_2" value="{{ old('mark_2', $mark->mark_2) }}"
                                            placeholder="0.00" required>
                                     @error('mark_2')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -74,7 +75,7 @@
                                     <label for="mark_3" class="form-label">{{ __('app.mark') }} 3</label>
                                     <input type="number" step="0.01" min="0" max="20"
                                            class="form-control @error('mark_3') is-invalid @enderror"
-                                           id="mark_3" name="mark_3" value="{{ old('mark_3') }}"
+                                           id="mark_3" name="mark_3" value="{{ old('mark_3', $mark->mark_3) }}"
                                            placeholder="0.00">
                                     @error('mark_3')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -86,7 +87,7 @@
                                     <label for="mark_4" class="form-label">{{ __('app.mark') }} 4</label>
                                     <input type="number" step="0.01" min="0" max="20"
                                            class="form-control @error('mark_4') is-invalid @enderror"
-                                           id="mark_4" name="mark_4" value="{{ old('mark_4') }}"
+                                           id="mark_4" name="mark_4" value="{{ old('mark_4', $mark->mark_4) }}"
                                            placeholder="0.00">
                                     @error('mark_4')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -98,7 +99,7 @@
                                     <label for="mark_5" class="form-label">{{ __('app.mark') }} 5</label>
                                     <input type="number" step="0.01" min="0" max="20"
                                            class="form-control @error('mark_5') is-invalid @enderror"
-                                           id="mark_5" name="mark_5" value="{{ old('mark_5') }}"
+                                           id="mark_5" name="mark_5" value="{{ old('mark_5', $mark->mark_5) }}"
                                            placeholder="0.00">
                                     @error('mark_5')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -113,13 +114,12 @@
                             </div>
                         </div>
 
-
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('admin.marks') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> {{ __('app.back_to_marks') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ __('app.add_mark') }}
+                                <i class="fas fa-save"></i> {{ __('app.update_mark') }}
                             </button>
                         </div>
                     </form>
@@ -133,7 +133,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Calculate simple average of the 5 marks
+    // Calculate simple average of the 5 marks (only for entered marks)
     function calculateAverage() {
         let total = 0;
         let count = 0;

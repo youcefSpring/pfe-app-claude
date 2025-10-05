@@ -32,6 +32,7 @@ class Subject extends Model
         'company_name',
         'dataset_resources_link',
         'student_id',
+        'external_supervisor_id',
     ];
 
     /**
@@ -70,6 +71,14 @@ class Subject extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+    /**
+     * Get the external supervisor for this subject.
+     */
+    public function externalSupervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'external_supervisor_id');
     }
 
     /**

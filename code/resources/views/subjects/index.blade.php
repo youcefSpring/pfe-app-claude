@@ -117,11 +117,14 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{{ route('subjects.show', $subject) }}"
-                                                   class="btn btn-outline-primary btn-sm"
-                                                   title="{{ __('app.view_details') }}">
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#subjectModal"
+                                                        data-subject-id="{{ $subject->id }}"
+                                                        title="{{ __('app.view_details') }}">
                                                     <i class="bi bi-eye"></i>
-                                                </a>
+                                                </button>
                                                 @if(auth()->user()?->id === $subject->teacher_id)
                                                     <a href="{{ route('subjects.edit', $subject) }}"
                                                        class="btn btn-outline-warning btn-sm"
@@ -176,4 +179,66 @@
             </div>
         @endif
     </div>
+
+    <!-- Subject Details Modal -->
+    <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="subjectModalLabel">{{ __('app.subject_details') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="subjectModalContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.close') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectModal = document.getElementById('subjectModal');
+
+    subjectModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const subjectId = button.getAttribute('data-subject-id');
+        const modalContent = document.getElementById('subjectModalContent');
+
+        // Show loading spinner
+        modalContent.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+
+        // Fetch subject details
+        fetch(`/subjects/${subjectId}/modal`)
+            .then(response => response.text())
+            .then(html => {
+                modalContent.innerHTML = html;
+            })
+            .catch(error => {
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Error loading subject details. Please try again.
+                    </div>
+                `;
+            });
+    });
+});
+</script>
+@endpush

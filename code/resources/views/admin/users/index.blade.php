@@ -9,12 +9,12 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">{{ __('app.user_management') }}</h4>
-                        <div>
-                            <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-plus"></i> {{ __('app.add_user') }}
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+                                <i class="bi bi-person-plus me-2"></i>{{ __('app.add_user') }}
                             </a>
-                            <a href="{{ route('admin.users.bulk-import') }}" class="btn btn-success btn-sm">
-                                <i class="fas fa-upload"></i> {{ __('app.bulk_import') }}
+                            <a href="{{ route('admin.users.bulk-import') }}" class="btn btn-success">
+                                <i class="bi bi-upload me-2"></i>{{ __('app.bulk_import') }}
                             </a>
                         </div>
                     </div>
@@ -91,15 +91,15 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <div class="btn-group" role="group">
+                                                    <div class="btn-group btn-group-sm" role="group">
                                                         <a href="{{ route('admin.users.edit', $user) }}"
-                                                           class="btn btn-outline-primary btn-sm" title="{{ __('app.edit') }}">
-                                                            <i class="fas fa-edit"></i>
+                                                           class="btn btn-outline-primary" title="{{ __('app.edit') }}">
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </a>
                                                         @if($user->id !== auth()->id())
-                                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                            <button type="button" class="btn btn-outline-danger"
                                                                     onclick="deleteUser({{ $user->id }}, '{{ $user->name }}')" title="{{ __('app.delete') }}">
-                                                                <i class="fas fa-trash"></i>
+                                                                <i class="bi bi-trash"></i>
                                                             </button>
                                                         @endif
                                                     </div>
@@ -121,7 +121,7 @@
                                 <h5 class="text-muted">{{ __('app.no_users_found') }}</h5>
                                 <p class="text-muted">{{ __('app.start_by_adding_users') }}</p>
                                 <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> {{ __('app.add_first_user') }}
+                                    <i class="bi bi-person-plus me-2"></i>{{ __('app.add_first_user') }}
                                 </a>
                             </div>
                         @endif

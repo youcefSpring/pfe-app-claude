@@ -152,6 +152,80 @@
                                         Optional: Link to datasets, resources, or documentation relevant to the project.
                                     </div>
                                 </div>
+
+                                <!-- External Supervisor Information -->
+                                <div class="card bg-info bg-opacity-10 mt-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-person-plus-fill me-2"></i>External Supervisor Information
+                                        </h6>
+                                        <p class="small text-muted mb-3">
+                                            Provide the details of your external supervisor. If they don't have an account, one will be created automatically.
+                                        </p>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="external_supervisor_name" class="form-label required">Supervisor Name</label>
+                                                    <input type="text"
+                                                           class="form-control @error('external_supervisor_name') is-invalid @enderror"
+                                                           id="external_supervisor_name"
+                                                           name="external_supervisor_name"
+                                                           value="{{ old('external_supervisor_name') }}"
+                                                           placeholder="Full name of external supervisor">
+                                                    @error('external_supervisor_name')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="external_supervisor_email" class="form-label required">Supervisor Email</label>
+                                                    <input type="email"
+                                                           class="form-control @error('external_supervisor_email') is-invalid @enderror"
+                                                           id="external_supervisor_email"
+                                                           name="external_supervisor_email"
+                                                           value="{{ old('external_supervisor_email') }}"
+                                                           placeholder="supervisor@company.com">
+                                                    @error('external_supervisor_email')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="external_supervisor_phone" class="form-label">Phone Number</label>
+                                                    <input type="tel"
+                                                           class="form-control @error('external_supervisor_phone') is-invalid @enderror"
+                                                           id="external_supervisor_phone"
+                                                           name="external_supervisor_phone"
+                                                           value="{{ old('external_supervisor_phone') }}"
+                                                           placeholder="+213 xx xx xx xx (optional)">
+                                                    @error('external_supervisor_phone')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="external_supervisor_position" class="form-label">Position/Title</label>
+                                                    <input type="text"
+                                                           class="form-control @error('external_supervisor_position') is-invalid @enderror"
+                                                           id="external_supervisor_position"
+                                                           name="external_supervisor_position"
+                                                           value="{{ old('external_supervisor_position') }}"
+                                                           placeholder="e.g., Senior Developer, Project Manager">
+                                                    @error('external_supervisor_position')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -213,11 +287,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle external subject details (for students only)
     if (isExternalCheckbox) {
+        const supervisorFields = document.querySelectorAll('#external_supervisor_name, #external_supervisor_email');
+
         isExternalCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 externalDetails.classList.remove('d-none');
+                // Make supervisor fields required when external is checked
+                supervisorFields.forEach(field => {
+                    field.setAttribute('required', 'required');
+                });
             } else {
                 externalDetails.classList.add('d-none');
+                // Remove required attribute when external is unchecked
+                supervisorFields.forEach(field => {
+                    field.removeAttribute('required');
+                });
             }
         });
     }

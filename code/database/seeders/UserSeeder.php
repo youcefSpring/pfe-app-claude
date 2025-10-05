@@ -34,11 +34,12 @@ class UserSeeder extends Seeder
         }
 
         // Create Teachers for Computer Science
-        $teacher =
-            ['name' => 'Dr. Benabderrezak Youcef', 'email' => 'benabderrezak.youcef@university.edu']
-        ;
+        $teachers = [
+            ['name' => 'Dr. Benabderrezak Youcef', 'email' => 'benabderrezak.youcef@university.edu'],
+            ['name' => 'Dr. Kherfi Rachid', 'email' => 'ahmed.hassan@university.edu']
+        ];
 
-
+        foreach ($teachers as $teacher) {
             User::create([
                 'name' => $teacher['name'],
                 'email' => $teacher['email'],
@@ -46,15 +47,16 @@ class UserSeeder extends Seeder
                 'role' => 'teacher',
                 'department' => 'Computer Science',
                 'email_verified_at' => now(),
-             ]);
-
+            ]);
+        }
 
         // Create Computer Science Students (License level)
-        $student =
-            ['name' => 'Medjdene Imade ddine', 'email' => 'medjdene.imade.ddine@student.university.edu']
-        ;
+        $students = [
+            ['name' => 'Medjdene Imade ddine', 'email' => 'medjdene.imade.ddine@student.university.edu'],
+            ['name' => 'Alice dubois', 'email' => 'alice.dubois@student.university.edu']
+        ];
 
-
+        foreach ($students as $student) {
             User::create([
                 'name' => $student['name'],
                 'email' => $student['email'],
@@ -64,7 +66,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]);
 
-
+        }
         // Create External Supervisors
         $externalSupervisors =[
             ['name' => 'Mr Ayoub Souhaib', 'email' => 'ayoub.souhaib@techcorp.com']]

@@ -74,8 +74,8 @@
                         <tbody>
                             @foreach($teams as $team)
                                 @php
-                                    $userIsMember = $team->members->contains('user_id', auth()->id());
-                                    $isLeader = $team->members->where('user_id', auth()->id())->where('role', 'leader')->count() > 0;
+                                    $userIsMember = $team->members->contains('student_id', auth()->id());
+                                    $isLeader = $team->members->where('student_id', auth()->id())->where('role', 'leader')->count() > 0;
                                     $leader = $team->members->where('role', 'leader')->first();
                                 @endphp
                                 <tr>
@@ -121,6 +121,9 @@
                                                 <i class="bi bi-journal"></i>
                                                 {{ Str::limit($team->project->subject->title, 25) }}
                                             </span>
+                                            @if(auth()->user()?->role === 'teacher')
+                                                <br><small class="text-success">{{ __('app.your_subject') }}</small>
+                                            @endif
                                         @else
                                             <span class="text-muted">
                                                 <i class="bi bi-question-circle"></i> {{ __('app.not_selected') }}
@@ -190,6 +193,8 @@
                     <p class="text-muted">
                         @if(request()->hasAny(['search', 'status']))
                             No teams match your current filters. Try adjusting your search criteria.
+                        @elseif(auth()->user()?->role === 'teacher')
+                            No teams have selected your subjects yet. Teams will appear here once they choose your subjects.
                         @else
                             There are no teams available at the moment.
                         @endif

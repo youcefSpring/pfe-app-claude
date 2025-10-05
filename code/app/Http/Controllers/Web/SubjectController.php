@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class SubjectController extends Controller
 {
@@ -100,6 +102,10 @@ class SubjectController extends Controller
             $rules['is_external'] = 'boolean';
             $rules['company_name'] = 'required_if:is_external,true|string|max:255';
             $rules['dataset_resources_link'] = 'nullable|url|max:1000';
+            $rules['external_supervisor_name'] = 'required_if:is_external,true|string|max:255';
+            $rules['external_supervisor_email'] = 'required_if:is_external,true|email|max:255';
+            $rules['external_supervisor_phone'] = 'nullable|string|max:20';
+            $rules['external_supervisor_position'] = 'nullable|string|max:255';
         }
 
         $validated = $request->validate($rules);
@@ -109,6 +115,16 @@ class SubjectController extends Controller
             $validated['student_id'] = $user->id;
             $validated['is_external'] = $request->boolean('is_external', true);
             $validated['teacher_id'] = null; // External subjects don't have teachers initially
+
+            // Handle external supervisor creation if this is an external subject
+            if ($validated['is_external'] && $request->filled('external_supervisor_email')) {
+                $externalSupervisor = $this->createOrFindExternalSupervisor($request);
+                $validated['external_supervisor_id'] = $externalSupervisor->id;
+            }
+
+            // Remove supervisor fields from validated data as they're not in the subjects table
+            unset($validated['external_supervisor_name'], $validated['external_supervisor_email'],
+                  $validated['external_supervisor_phone'], $validated['external_supervisor_position']);
         } else {
             // Teacher creating internal subject
             $validated['teacher_id'] = $user->id;
@@ -128,8 +144,17 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject): View
     {
-        $subject->load(['teacher', 'student', 'validator', 'projects.team.members.user']);
+        $subject->load(['teacher', 'student', 'validator', 'externalSupervisor', 'projects.team.members.user']);
         return view('subjects.show', compact('subject'));
+    }
+
+    /**
+     * Display subject details for modal
+     */
+    public function modal(Subject $subject): View
+    {
+        $subject->load(['teacher', 'student', 'validator', 'externalSupervisor', 'projects.team.members.user']);
+        return view('subjects.modal', compact('subject'));
     }
 
     /**
@@ -305,5 +330,41 @@ class SubjectController extends Controller
 
         return redirect()->back()
             ->with('success', "{$count} subjects {$action} successfully!");
+    }
+
+    /**
+     * Create or find external supervisor user
+     */
+    private function createOrFindExternalSupervisor(Request $request): User
+    {
+        $email = $request->external_supervisor_email;
+
+        // Check if user already exists
+        $existingUser = User::where('email', $email)->first();
+
+        if ($existingUser) {
+            // Update user information if they exist
+            $existingUser->update([
+                'name' => $request->external_supervisor_name,
+                'phone' => $request->external_supervisor_phone,
+                'position' => $request->external_supervisor_position ?? 'External Supervisor',
+                'role' => 'external_supervisor',
+            ]);
+
+            return $existingUser;
+        }
+
+        // Create new external supervisor user
+        $user = User::create([
+            'name' => $request->external_supervisor_name,
+            'email' => $email,
+            'phone' => $request->external_supervisor_phone,
+            'position' => $request->external_supervisor_position ?? 'External Supervisor',
+            'role' => 'external_supervisor',
+            'password' => Hash::make(Str::random(16)), // Random password
+            'email_verified_at' => now(), // Auto-verify external supervisors
+        ]);
+
+        return $user;
     }
 }

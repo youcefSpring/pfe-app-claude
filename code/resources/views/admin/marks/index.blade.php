@@ -9,12 +9,15 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">{{ __('app.student_marks_management') }}</h4>
-                    <div>
-                        <a href="{{ route('admin.marks.create') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> {{ __('app.add_mark') }}
+                    <div class="btn-group" role="group">
+                        <a href="{{ route('admin.marks.create') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_mark') }}
                         </a>
-                        <a href="{{ route('admin.marks.bulk-import') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-upload"></i> {{ __('app.bulk_import') }}
+                        <a href="{{ route('admin.marks.bulk-create') }}" class="btn btn-success">
+                            <i class="bi bi-journal-plus me-2"></i>{{ __('app.add_student_marks_bulk') }}
+                        </a>
+                        <a href="{{ route('admin.marks.bulk-all-create') }}" class="btn btn-warning">
+                            <i class="bi bi-people-fill me-2"></i>{{ __('app.add_marks_all_students') }}
                         </a>
                     </div>
                 </div>
@@ -64,15 +67,15 @@
                                             <td>{{ $mark->academic_year ?? '-' }}</td>
                                             <td>{{ $mark->creator->name ?? '-' }}</td>
                                             <td>
-                                                <div class="btn-group" role="group">
+                                                <div class="btn-group btn-group-sm" role="group">
                                                     <a href="{{ route('admin.marks.edit', $mark) }}"
-                                                       class="btn btn-outline-primary btn-sm" title="{{ __('app.edit') }}">
-                                                        <i class="fas fa-edit"></i>
+                                                       class="btn btn-outline-primary" title="{{ __('app.edit') }}">
+                                                        <i class="bi bi-pencil-square"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    <button type="button" class="btn btn-outline-danger"
                                                             onclick="deleteMark({{ $mark->id }}, '{{ $mark->student->name }} - {{ $mark->subject_name }}')"
                                                             title="{{ __('app.delete') }}">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="bi bi-trash"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -93,7 +96,7 @@
                             <h5 class="text-muted">{{ __('app.no_marks_found') }}</h5>
                             <p class="text-muted">{{ __('app.start_by_adding_marks') }}</p>
                             <a href="{{ route('admin.marks.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> {{ __('app.add_first_mark') }}
+                                <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_first_mark') }}
                             </a>
                         </div>
                     @endif

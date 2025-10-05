@@ -22,7 +22,7 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        $query = Team::with(['members.user', 'project.subject']);
+        $query = Team::with(['members.user', 'project.subject.teacher', 'project.subject.externalSupervisor']);
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -43,8 +43,20 @@ class TeamController extends Controller
                 // Students see all teams (for joining)
                 break;
             case 'teacher':
+                // Teachers see only teams that have chosen their subjects or external projects they supervise
+                $query->where(function($q) use ($user) {
+                    // Teams with internal projects using teacher's subjects
+                    $q->whereHas('project.subject', function($subq) use ($user) {
+                        $subq->where('teacher_id', $user->id);
+                    })
+                    // OR teams with external projects where teacher is external supervisor
+                    ->orWhereHas('project.subject', function($subq) use ($user) {
+                        $subq->where('external_supervisor_id', $user->id);
+                    });
+                });
+                break;
             case 'department_head':
-                // Teachers and dept heads see teams from their department
+                // Department heads see teams from their department
                 $query->whereHas('members.user', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
@@ -55,6 +67,29 @@ class TeamController extends Controller
         $teams = $query->latest()->paginate(12)->appends($request->query());
 
         return view('teams.index', compact('teams'));
+    }
+
+    /**
+     * Display the student's team
+     */
+    public function myTeam(): View
+    {
+        $user = Auth::user();
+        $teamMember = $user->teamMember;
+
+        if (!$teamMember) {
+            // Student is not in a team, show option to create or join one
+            return view('teams.my-team', [
+                'team' => null,
+                'availableTeams' => Team::whereHas('members', function($query) {
+                    $query->havingRaw('COUNT(*) < 2'); // Teams with less than 2 members
+                })->with(['members.user'])->get()
+            ]);
+        }
+
+        $team = $teamMember->team->load(['members.user', 'subject.teacher', 'project.supervisor']);
+
+        return view('teams.my-team', compact('team'));
     }
 
     /**
@@ -127,7 +162,7 @@ class TeamController extends Controller
      */
     public function show(Team $team): View
     {
-        $team->load(['members.user', 'project.subject.teacher']);
+        $team->load(['members.user', 'project.subject.teacher', 'project.subject.externalSupervisor']);
 
         $user = Auth::user();
         $isMember = $team->members->contains('student_id', $user->id);
