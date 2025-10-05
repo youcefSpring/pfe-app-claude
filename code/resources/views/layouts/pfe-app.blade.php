@@ -229,6 +229,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.alerts*') ? 'active' : '' }}" href="{{ route('admin.alerts') }}">
+                                <i class="bi bi-bell me-2"></i>
+                                {{ __('app.student_alerts') }}
+                                @php
+                                    $pendingAlertsCount = \App\Models\StudentAlert::where('status', 'pending')->count();
+                                @endphp
+                                @if($pendingAlertsCount > 0)
+                                    <span class="notification-badge bg-danger">{{ $pendingAlertsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}" href="{{ route('admin.reports') }}">
                                 <i class="bi bi-bar-chart me-2"></i>
                                 {{ __('app.reports') }}

@@ -167,14 +167,21 @@
                                                        title="{{ __('app.edit_team') }}">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    <form method="POST" action="{{ route('teams.destroy', $team) }}" class="d-inline">
+                                                    @if($team->members->count() > 1)
+                                                        <button type="button"
+                                                                class="btn btn-outline-info btn-sm"
+                                                                title="{{ __('app.transfer_leadership') }}"
+                                                                data-bs-toggle="tooltip">
+                                                            <i class="bi bi-arrow-repeat"></i>
+                                                        </button>
+                                                    @endif
+                                                    <form method="POST" action="{{ route('teams.leave', $team) }}" class="d-inline">
                                                         @csrf
-                                                        @method('DELETE')
                                                         <button type="submit"
                                                                 class="btn btn-outline-danger btn-sm"
-                                                                title="{{ __('app.delete_team') }}"
-                                                                onclick="return confirm('{{ __('app.confirm_delete_team') }}')">
-                                                            <i class="bi bi-trash"></i>
+                                                                title="{{ __('app.leave_team') }}"
+                                                                onclick="return confirm('{{ __('app.confirm_leave_team_leader') }}')">
+                                                            <i class="bi bi-person-dash"></i>
                                                         </button>
                                                     </form>
                                                 @endif

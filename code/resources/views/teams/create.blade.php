@@ -17,13 +17,13 @@
                         <div class="mb-4">
                             <label for="name" class="form-label">Team Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                   id="name" name="name" value="{{ old('name') }}"
-                                   placeholder="Enter a unique team name">
+                                   id="name" name="name" value="{{ old('name', $nextTeamName ?? '') }}"
+                                   readonly>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="form-text text-muted">
-                                Choose a unique name that represents your team. This will be visible to other students and teachers.
+                                Team name is automatically generated. Your team will be called "{{ $nextTeamName ?? 'team-1' }}".
                             </small>
                         </div>
 

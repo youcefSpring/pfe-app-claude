@@ -107,7 +107,10 @@ class TeamController extends Controller
                 ->with('error', 'You are already a member of a team. You cannot create another team.');
         }
 
-        return view('teams.create');
+        // Generate next team name
+        $nextTeamName = $this->generateNextTeamName();
+
+        return view('teams.create', compact('nextTeamName'));
     }
 
     /**
@@ -116,10 +119,6 @@ class TeamController extends Controller
     public function store(Request $request): RedirectResponse
     {
         //$this->authorize('create', Team::class);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:teams,name',
-        ]);
 
         $user = Auth::user();
 
@@ -131,9 +130,12 @@ class TeamController extends Controller
 
         DB::beginTransaction();
         try {
+            // Generate unique team name
+            $teamName = $this->generateNextTeamName();
+
             // Create team
             $team = Team::create([
-                'name' => $validated['name'],
+                'name' => $teamName,
                 'status' => 'forming'
             ]);
 
@@ -422,22 +424,36 @@ class TeamController extends Controller
                 ->with('error', 'You are not a member of this team.');
         }
 
-        if ($membership->role === 'leader' && $team->members->count() > 1) {
-            return redirect()->back()
-                ->with('error', 'You cannot leave as team leader. Transfer leadership first.');
-        }
+        DB::beginTransaction();
+        try {
+            // If this is the leader and there are other members, transfer leadership to the first member
+            if ($membership->role === 'leader' && $team->members->count() > 1) {
+                $newLeader = $team->members()->where('student_id', '!=', $user->id)->first();
+                if ($newLeader) {
+                    $newLeader->update(['role' => 'leader']);
+                }
+            }
 
-        $membership->delete();
+            // Remove the member
+            $membership->delete();
 
-        // If last member left, delete team
-        if ($team->members->count() === 0) {
-            $team->delete();
+            // If last member left, delete team
+            if ($team->fresh()->members->count() === 0) {
+                $team->delete();
+                DB::commit();
+                return redirect()->route('teams.index')
+                    ->with('success', 'You left the team and it has been dissolved.');
+            }
+
+            DB::commit();
             return redirect()->route('teams.index')
-                ->with('success', 'You left the team and it has been dissolved.');
-        }
+                ->with('success', 'You have left the team successfully.');
 
-        return redirect()->route('teams.index')
-            ->with('success', 'You have left the team.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Failed to leave team: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -475,5 +491,35 @@ class TeamController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to transfer leadership.');
         }
+    }
+
+    /**
+     * Generate the next available team name
+     */
+    private function generateNextTeamName(): string
+    {
+        // Find the highest team number
+        $lastTeamNumber = Team::where('name', 'LIKE', 'team-%')
+            ->get()
+            ->map(function ($team) {
+                // Extract number from team name (e.g., 'team-5' -> 5)
+                if (preg_match('/team-(\d+)/', $team->name, $matches)) {
+                    return (int) $matches[1];
+                }
+                return 0;
+            })
+            ->max();
+
+        // Generate next team name
+        $nextNumber = ($lastTeamNumber ?? 0) + 1;
+        $teamName = "team-{$nextNumber}";
+
+        // Ensure uniqueness (in case of race conditions)
+        while (Team::where('name', $teamName)->exists()) {
+            $nextNumber++;
+            $teamName = "team-{$nextNumber}";
+        }
+
+        return $teamName;
     }
 }
