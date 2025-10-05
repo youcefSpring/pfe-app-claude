@@ -43,11 +43,11 @@ class SubjectController extends Controller
         switch ($user->role) {
             case 'teacher':
                 // Teachers see their own subjects
-                $query->where('supervisor_id', $user->id);
+                $query->where('teacher_id', $user->id);
                 break;
             case 'department_head':
                 // Department heads see subjects from their department
-                $query->whereHas('supervisor', function($q) use ($user) {
+                $query->whereHas('teacher', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
                 break;

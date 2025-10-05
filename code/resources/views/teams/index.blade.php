@@ -1,14 +1,14 @@
 @extends('layouts.pfe-app')
 
-@section('title', 'Teams')
+@section('title', __('app.teams'))
 
 @section('content')
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Teams</h1>
+        <h1 class="h3 mb-0">{{ __('app.teams') }}</h1>
         @if(auth()->user()?->role === 'student')
             <a href="{{ route('teams.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus"></i> Create Team
+                <i class="bi bi-plus"></i> {{ __('app.create_team') }}
             </a>
         @endif
     </div>
@@ -18,23 +18,23 @@
         <div class="card-body">
             <form method="GET" action="{{ route('teams.index') }}" class="row g-3">
                 <div class="col-md-4">
-                    <label for="status" class="form-label">Status</label>
+                    <label for="status" class="form-label">{{ __('app.status') }}</label>
                     <select class="form-select" id="status" name="status">
-                        <option value="">All Statuses</option>
-                        <option value="forming" {{ request('status') === 'forming' ? 'selected' : '' }}>Forming</option>
-                        <option value="complete" {{ request('status') === 'complete' ? 'selected' : '' }}>Complete</option>
-                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="">{{ __('app.all_statuses') }}</option>
+                        <option value="forming" {{ request('status') === 'forming' ? 'selected' : '' }}>{{ __('app.forming') }}</option>
+                        <option value="complete" {{ request('status') === 'complete' ? 'selected' : '' }}>{{ __('app.complete') }}</option>
+                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('app.active') }}</option>
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label for="search" class="form-label">Search</label>
+                    <label for="search" class="form-label">{{ __('app.search') }}</label>
                     <input type="text" class="form-control" id="search" name="search"
-                           value="{{ request('search') }}" placeholder="Search teams...">
+                           value="{{ request('search') }}" placeholder="{{ __('app.search') }} {{ __('app.teams') }}...">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-outline-primary">Filter</button>
+                        <button type="submit" class="btn btn-outline-primary">{{ __('app.filter') }}</button>
                     </div>
                 </div>
             </form>
@@ -44,12 +44,12 @@
     <!-- Results Info -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="text-muted">
-            Showing {{ $teams->firstItem() ?? 0 }} to {{ $teams->lastItem() ?? 0 }}
-            of {{ $teams->total() }} results
+            {{ __('app.showing') }} {{ $teams->firstItem() ?? 0 }} {{ __('app.to') }} {{ $teams->lastItem() ?? 0 }}
+            {{ __('app.of') }} {{ $teams->total() }} {{ __('app.results') }}
         </div>
         @if(request()->hasAny(['search', 'status']))
             <a href="{{ route('teams.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-x-circle"></i> Clear Filters
+                <i class="bi bi-x-circle"></i> {{ __('app.clear_filters') }}
             </a>
         @endif
     </div>
@@ -62,13 +62,13 @@
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>Team Name</th>
-                                <th>Members</th>
-                                <th>Leader</th>
-                                <th>Status</th>
-                                <th>Subject</th>
-                                <th>Created</th>
-                                <th>Actions</th>
+                                <th>{{ __('app.team_name') }}</th>
+                                <th>{{ __('app.members') }}</th>
+                                <th>{{ __('app.leader') }}</th>
+                                <th>{{ __('app.status') }}</th>
+                                <th>{{ __('app.subject') }}</th>
+                                <th>{{ __('app.created_at') }}</th>
+                                <th>{{ __('app.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,7 +98,7 @@
                                                 <span class="badge bg-secondary small">+{{ $team->members->count() - 3 }}</span>
                                             @endif
                                         </div>
-                                        <small class="text-muted">{{ $team->members->count() }} total</small>
+                                        <small class="text-muted">{{ $team->members->count() }} {{ __('app.total') }}</small>
                                     </td>
                                     <td>
                                         @if($leader)
@@ -107,7 +107,7 @@
                                                 {{ $leader->user->name }}
                                             </span>
                                         @else
-                                            <span class="text-muted">No leader</span>
+                                            <span class="text-muted">{{ __('app.no_leader') }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -123,7 +123,7 @@
                                             </span>
                                         @else
                                             <span class="text-muted">
-                                                <i class="bi bi-question-circle"></i> Not selected
+                                                <i class="bi bi-question-circle"></i> {{ __('app.not_selected') }}
                                             </span>
                                         @endif
                                     </td>
@@ -144,7 +144,7 @@
                                                         @csrf
                                                         <button type="submit"
                                                                 class="btn btn-outline-success btn-sm"
-                                                                title="Join Team">
+                                                                title="{{ __('app.join_team') }}">
                                                             <i class="bi bi-person-plus"></i>
                                                         </button>
                                                     </form>
@@ -153,15 +153,15 @@
                                                         @csrf
                                                         <button type="submit"
                                                                 class="btn btn-outline-danger btn-sm"
-                                                                title="Leave Team"
-                                                                onclick="return confirm('Are you sure you want to leave this team?')">
+                                                                title="{{ __('app.leave_team') }}"
+                                                                onclick="return confirm('{{ __('app.confirm_leave_team') }}')">
                                                             <i class="bi bi-person-dash"></i>
                                                         </button>
                                                     </form>
                                                 @elseif($isLeader)
                                                     <a href="{{ route('teams.edit', $team) }}"
                                                        class="btn btn-outline-warning btn-sm"
-                                                       title="Edit Team">
+                                                       title="{{ __('app.edit_team') }}">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <form method="POST" action="{{ route('teams.destroy', $team) }}" class="d-inline">
@@ -169,8 +169,8 @@
                                                         @method('DELETE')
                                                         <button type="submit"
                                                                 class="btn btn-outline-danger btn-sm"
-                                                                title="Delete Team"
-                                                                onclick="return confirm('Are you sure you want to delete this team?')">
+                                                                title="{{ __('app.delete_team') }}"
+                                                                onclick="return confirm('{{ __('app.confirm_delete_team') }}')">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
@@ -196,7 +196,7 @@
                     </p>
                     @if(auth()->user()?->role === 'student')
                         <a href="{{ route('teams.create') }}" class="btn btn-primary">
-                            <i class="bi bi-plus"></i> Create First Team
+                            <i class="bi bi-plus"></i> {{ __('app.create_first_team') }}
                         </a>
                     @endif
                 </div>
@@ -207,7 +207,9 @@
     <!-- Pagination -->
     @if($teams->hasPages())
         <div class="d-flex justify-content-center mt-4">
-            {{ $teams->appends(request()->query())->links() }}
+            <nav aria-label="Teams pagination">
+                {{ $teams->appends(request()->query())->links('pagination::bootstrap-4') }}
+            </nav>
         </div>
     @endif
 </div>

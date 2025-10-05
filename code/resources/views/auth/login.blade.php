@@ -111,25 +111,25 @@
 
                         <!-- User Type Selector -->
                         <div class="mb-3">
-                            <label for="userTypeSelector" class="form-label text-muted small">Choose User Type:</label>
+                            <label for="userTypeSelector" class="form-label text-muted small">{{ __('app.choose_user_type') }}:</label>
                             <select id="userTypeSelector" class="form-select form-select-sm" onchange="fillLoginByUserType()">
-                                <option value="">-- Select User Type --</option>
-                                <option value="admin">👤 Administrator</option>
-                                <option value="teacher">🎓 Teacher</option>
-                                <option value="student">📚 Student</option>
+                                <option value="">{{ __('app.select_user_type') }}</option>
+                                <option value="admin">👤 {{ __('app.administrator') }}</option>
+                                <option value="teacher">🎓 {{ __('app.teacher') }}</option>
+                                <option value="student">📚 {{ __('app.student') }}</option>
                             </select>
                         </div>
 
                         <!-- Available Test Credentials -->
                         <div class="credentials-display">
                             <h6 class="text-muted small mb-2">
-                                <i class="bi bi-key me-1"></i>Available Test Credentials:
+                                <i class="bi bi-key me-1"></i>{{ __('app.available_test_credentials') }}:
                             </h6>
                             <div class="credential-item mb-2">
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-primary me-2">👤</span>
                                     <div class="credential-text">
-                                        <strong>Administrator:</strong><br>
+                                        <strong>{{ __('app.administrator') }}:</strong><br>
                                         <code class="text-primary">admin@university.edu</code> / <code class="text-primary">password</code>
                                     </div>
                                 </div>
@@ -138,7 +138,7 @@
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-success me-2">🎓</span>
                                     <div class="credential-text">
-                                        <strong>Teacher:</strong><br>
+                                        <strong>{{ __('app.teacher') }}:</strong><br>
                                         <code class="text-success">ahmed.hassan@university.edu</code> / <code class="text-success">password</code>
                                     </div>
                                 </div>
@@ -147,7 +147,7 @@
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-warning me-2">📚</span>
                                     <div class="credential-text">
-                                        <strong>Student:</strong><br>
+                                        <strong>{{ __('app.student') }}:</strong><br>
                                         <code class="text-warning">alice.dubois@student.university.edu</code> / <code class="text-warning">password</code>
                                     </div>
                                 </div>
@@ -391,7 +391,7 @@
         const form = document.querySelector('form');
         form.addEventListener('submit', function() {
             const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Signing In...';
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>{{ __('app.signing_in') }}';
             submitBtn.disabled = true;
         });
     });

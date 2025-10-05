@@ -93,7 +93,11 @@
                             </table>
                         </div>
 
-                        {{ $submissions->links() }}
+                        <div class="d-flex justify-content-center mt-4">
+                            <nav aria-label="Submissions pagination">
+                                {{ $submissions->links('pagination::bootstrap-4') }}
+                            </nav>
+                        </div>
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-file-upload fa-3x text-muted mb-3"></i>

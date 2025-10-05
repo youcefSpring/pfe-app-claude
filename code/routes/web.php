@@ -293,6 +293,22 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/specialities/{speciality}', [AdminController::class, 'updateSpeciality'])->name('specialities.update');
         Route::delete('/specialities/{speciality}', [AdminController::class, 'destroySpeciality'])->name('specialities.destroy');
 
+        // Student Marks Management
+        Route::get('/marks', [AdminController::class, 'marks'])->name('marks');
+        Route::get('/marks/create', [AdminController::class, 'createMark'])->name('marks.create');
+        Route::post('/marks', [AdminController::class, 'storeMark'])->name('marks.store');
+        Route::get('/marks/{mark}/edit', [AdminController::class, 'editMark'])->name('marks.edit');
+        Route::put('/marks/{mark}', [AdminController::class, 'updateMark'])->name('marks.update');
+        Route::delete('/marks/{mark}', [AdminController::class, 'destroyMark'])->name('marks.destroy');
+        Route::get('/marks/bulk-import', [AdminController::class, 'bulkImportMarks'])->name('marks.bulk-import');
+        Route::post('/marks/bulk-import', [AdminController::class, 'processBulkImportMarks'])->name('marks.bulk-import.process');
+
+        // Subject Approval Management
+        Route::get('/subjects/pending', [AdminController::class, 'pendingSubjects'])->name('subjects.pending');
+        Route::post('/subjects/{subject}/approve', [AdminController::class, 'approveSubject'])->name('subjects.approve');
+        Route::post('/subjects/{subject}/reject', [AdminController::class, 'rejectSubject'])->name('subjects.reject');
+        Route::get('/subjects/all', [AdminController::class, 'allSubjects'])->name('subjects.all');
+
         // System Configuration
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');

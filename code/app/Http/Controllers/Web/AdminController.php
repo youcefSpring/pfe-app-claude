@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Speciality;
 use App\Models\Room;
+use App\Models\Subject;
+use App\Models\StudentMark;
 use App\Services\StudentImportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class AdminController extends Controller
 {
@@ -27,7 +31,9 @@ class AdminController extends Controller
      */
     public function users(): View
     {
+
         $users = User::with('speciality')->paginate(20);
+        // dd($users->toArray());
         $specialities = Speciality::active()->get();
 
         return view('admin.users.index', compact('users', 'specialities'));
@@ -476,23 +482,178 @@ class AdminController extends Controller
     /**
      * Process bulk import
      */
-    public function processBulkImport(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
-        ]);
 
-        try {
-            // This would process the CSV file for bulk user import
-            // For now, just return success message
-            return redirect()->back()
-                ->with('success', 'Bulk import completed successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Bulk import failed: ' . $e->getMessage())
-                ->withInput();
+
+public function processBulkImport(Request $request): RedirectResponse
+{
+    $request->validate([
+        'users_file' => 'required|file|mimes:xlsx,csv,xls',
+        'default_role' => 'nullable|string|in:student,teacher',
+        'default_department' => 'nullable|string',
+    ]);
+
+    // try {
+        $file = $request->file('users_file');
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $rows = $sheet->toArray(null, true, true, true);
+
+        // Get default master speciality
+        $masterSpeciality = Speciality::where('level', 'LIKE', '%master%')
+            ->orWhere('level', 'LIKE', '%M2%')
+            ->orWhere('level', 'LIKE', '%L5%')
+            ->first();
+
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        $errors = [];
+
+        // Process data rows starting from row 5 as specified
+        foreach ($rows as $index => $row) {
+            // dd($index);
+          if ($index == 1) {
+    $speciality = null;
+
+    if (!empty($row['A'])) {
+        // On découpe avec ":" et on récupère la partie après
+        $parts = explode(':', $row['A'], 2);
+        if (isset($parts[1])) {
+            $speciality = trim($parts[1]);
+        } else {
+            // Si ":" n'existe pas, on prend tout le texte
+            $speciality = trim($row['A']);
         }
     }
+
+}
+
+
+            if ($index < 7) continue; // Skip until row 5
+
+            try {
+                // Initialize variables
+                $matricule = null;
+                $nom = null;
+                $prenom = null;
+                $section = null;
+                $groupe = null;
+
+                // Debug: Log the row data for debugging
+                \Log::info("Processing row {$index}: " . json_encode($row));
+
+                // Try original C, D, E mapping first (as per specification)
+                if (isset($row['C']) && isset($row['D']) && isset($row['E']) &&
+                    !empty(trim($row['C'])) && !empty(trim($row['D'])) && !empty(trim($row['E']))) {
+                    $matricule = trim($row['D']);  // Column C: Matricule
+                    $nom = trim($row['E']);        // Column D: Nom (Last Name)
+                    $prenom = trim($row['F']);     // Column E: Prénom (First Name)
+                    $section = trim($row['G'] ?? '');  // Column F: Section
+                    $groupe = trim($row['H'] ?? '');   // Column G: Groupe
+
+                    \Log::info("Using direct column mapping - Matricule: {$matricule}, Nom: {$nom}, Prénom: {$prenom}");
+                } else {
+                    // Fallback: Filter out empty cells and get all values in order
+                    $allValues = [];
+                    foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as $col) {
+                        if (isset($row[$col]) && !empty(trim($row[$col]))) {
+                            $allValues[] = trim($row[$col]);
+                        }
+                    }
+
+                    \Log::info("Fallback mode - All values: " . json_encode($allValues));
+
+                    // Skip if no data in row
+                    if (count($allValues) < 3) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    // For fallback, assume order is: matricule, nom, prenom, section, groupe
+                    // Don't try to identify matricule - just use positional mapping
+                    if (count($allValues) >= 3) {
+                        $matricule = $allValues[0];  // First value is matricule
+                        $nom = $allValues[1];        // Second value is nom
+                        $prenom = $allValues[2];     // Third value is prenom
+                        $section = isset($allValues[3]) ? $allValues[3] : '';
+                        $groupe = isset($allValues[4]) ? $allValues[4] : '';
+
+                        \Log::info("Fallback extraction - Matricule: {$matricule}, Nom: {$nom}, Prénom: {$prenom}");
+                    }
+                }
+
+                // Validate required fields
+                if (!$matricule || !$nom || !$prenom) {
+                    $skipped++;
+                    continue; // Skip invalid rows
+                }
+
+                // Clean and format data
+                $matricule = strtoupper(trim($matricule));
+                $nom = ucfirst(strtolower(trim($nom)));
+                $prenom = ucfirst(strtolower(trim($prenom)));
+                $fullName = $nom . ' ' . $prenom;  // Nom + Prénom (Last Name + First Name)
+
+                // Debug: Log final processed values
+                \Log::info("Final values - Matricule: '{$matricule}', Nom: '{$nom}', Prénom: '{$prenom}', FullName: '{$fullName}'");
+
+                // Generate email and password based on matricule
+                $email = strtolower($matricule . '@gmail.com');
+                $password = $matricule; // Password is the matricule
+
+                // Check if user exists
+                $existingUser = User::where('matricule', $matricule)->first();
+
+                // Update or create student
+                $userData = [
+                    'name'          => $fullName,
+                    'email'         => $email,
+                    'role'          => $request->input('default_role', 'student'),
+                    'department'    => $request->input('default_department', 'Computer Science'),
+                    'speciality' => $speciality,
+                    'password'      => bcrypt($password),
+                    'section'       => $section,
+                    'groupe'        => $groupe,
+                ];
+
+                if ($existingUser) {
+                    $existingUser->update($userData);
+                    $updated++;
+                } else {
+                    User::create(array_merge(
+                        ['matricule' => $matricule],
+                        $userData
+                    ));
+                    $created++;
+                }
+
+            } catch (\Exception $e) {
+                $errors[] = "Row {$index}: {$e->getMessage()}";
+                $skipped++;
+            }
+        }
+
+        $message = "Bulk import completed! Created: {$created}, Updated: {$updated}, Skipped: {$skipped}";
+        if (!empty($errors)) {
+            $message .= ". Errors: " . count($errors);
+        }
+
+        return redirect()->back()
+            ->with('success', $message)
+            ->with('import_details', [
+                'created' => $created,
+                'updated' => $updated,
+                'skipped' => $skipped,
+                'errors' => $errors
+            ]);
+
+    // } catch (\Exception $e) {
+    //     return redirect()->back()
+    //         ->with('error', 'Bulk import failed: ' . $e->getMessage())
+    //         ->withInput();
+    // }
+}
 
     /**
      * Subjects report
@@ -651,10 +812,218 @@ class AdminController extends Controller
     }
 
     /**
+     * Show pending subjects for approval
+     */
+    public function pendingSubjects(): View
+    {
+        $pendingSubjects = Subject::with(['teacher'])
+            ->where('status', 'pending_validation')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('admin.subjects.pending', compact('pendingSubjects'));
+    }
+
+    /**
+     * Show all subjects
+     */
+    public function allSubjects(): View
+    {
+        $subjects = Subject::with(['teacher'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        $stats = [
+            'total' => Subject::count(),
+            'pending' => Subject::where('status', 'pending_validation')->count(),
+            'validated' => Subject::where('status', 'validated')->count(),
+            'rejected' => Subject::where('status', 'rejected')->count(),
+        ];
+
+        return view('admin.subjects.all', compact('subjects', 'stats'));
+    }
+
+    /**
+     * Approve a subject
+     */
+    public function approveSubject(Request $request, Subject $subject): RedirectResponse
+    {
+        if ($subject->status !== 'pending_validation') {
+            return redirect()->back()->with('error', 'Subject is not pending validation.');
+        }
+
+        $subject->update([
+            'status' => 'validated',
+            'validated_at' => now(),
+            'validated_by' => Auth::id(),
+            'validation_feedback' => $request->input('feedback', 'Subject approved by admin.')
+        ]);
+
+        return redirect()->back()->with('success', "Subject '{$subject->title}' has been approved.");
+    }
+
+    /**
+     * Reject a subject
+     */
+    public function rejectSubject(Request $request, Subject $subject): RedirectResponse
+    {
+        if ($subject->status !== 'pending_validation') {
+            return redirect()->back()->with('error', 'Subject is not pending validation.');
+        }
+
+        $validated = $request->validate([
+            'feedback' => 'required|string|max:500'
+        ]);
+
+        $subject->update([
+            'status' => 'rejected',
+            'validated_at' => now(),
+            'validated_by' => Auth::id(),
+            'validation_feedback' => $validated['feedback']
+        ]);
+
+        return redirect()->back()->with('success', "Subject '{$subject->title}' has been rejected.");
+    }
+
+    /**
      * Maintenance page
      */
     public function maintenance(): View
     {
         return view('admin.maintenance');
+    }
+
+    // =====================================================================
+    // STUDENT MARKS MANAGEMENT
+    // =====================================================================
+
+    /**
+     * Show marks management
+     */
+    public function marks(): View
+    {
+        $marks = StudentMark::with(['student', 'creator'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.marks.index', compact('marks'));
+    }
+
+    /**
+     * Show create mark form
+     */
+    public function createMark(): View
+    {
+        $students = User::where('role', 'student')->get();
+        return view('admin.marks.create', compact('students'));
+    }
+
+    /**
+     * Store new mark
+     */
+    public function storeMark(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'subject_name' => 'required|string|max:255',
+            'mark' => 'required|numeric|min:0',
+            'max_mark' => 'required|numeric|min:0.01',
+            'semester' => 'nullable|string|max:10',
+            'academic_year' => 'nullable|string|max:20',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // Validate that mark doesn't exceed max_mark
+        if ($request->mark > $request->max_mark) {
+            return redirect()->back()
+                ->with('error', 'Mark cannot exceed maximum mark.')
+                ->withInput();
+        }
+
+        try {
+            StudentMark::create([
+                'user_id' => $request->user_id,
+                'subject_name' => $request->subject_name,
+                'mark' => $request->mark,
+                'max_mark' => $request->max_mark,
+                'semester' => $request->semester,
+                'academic_year' => $request->academic_year,
+                'notes' => $request->notes,
+                'created_by' => Auth::id(),
+            ]);
+
+            return redirect()->route('admin.marks')
+                ->with('success', 'Student mark added successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to add mark: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Show edit mark form
+     */
+    public function editMark(StudentMark $mark): View
+    {
+        $students = User::where('role', 'student')->get();
+        return view('admin.marks.edit', compact('mark', 'students'));
+    }
+
+    /**
+     * Update mark
+     */
+    public function updateMark(Request $request, StudentMark $mark): RedirectResponse
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'subject_name' => 'required|string|max:255',
+            'mark' => 'required|numeric|min:0',
+            'max_mark' => 'required|numeric|min:0.01',
+            'semester' => 'nullable|string|max:10',
+            'academic_year' => 'nullable|string|max:20',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // Validate that mark doesn't exceed max_mark
+        if ($request->mark > $request->max_mark) {
+            return redirect()->back()
+                ->with('error', 'Mark cannot exceed maximum mark.')
+                ->withInput();
+        }
+
+        try {
+            $mark->update([
+                'user_id' => $request->user_id,
+                'subject_name' => $request->subject_name,
+                'mark' => $request->mark,
+                'max_mark' => $request->max_mark,
+                'semester' => $request->semester,
+                'academic_year' => $request->academic_year,
+                'notes' => $request->notes,
+            ]);
+
+            return redirect()->route('admin.marks')
+                ->with('success', 'Student mark updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update mark: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Delete mark
+     */
+    public function destroyMark(StudentMark $mark): RedirectResponse
+    {
+        try {
+            $mark->delete();
+            return redirect()->route('admin.marks')
+                ->with('success', 'Student mark deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to delete mark: ' . $e->getMessage());
+        }
     }
 }

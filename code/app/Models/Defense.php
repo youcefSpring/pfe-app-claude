@@ -14,6 +14,7 @@ class Defense extends Model
 
     protected $fillable = [
         'project_id',
+        'subject_id',
         'room_id',
         'defense_date',
         'defense_time',
@@ -21,6 +22,8 @@ class Defense extends Model
         'status',
         'notes',
         'final_grade',
+        'scheduled_by',
+        'scheduled_at',
     ];
 
     protected function casts(): array
@@ -35,6 +38,11 @@ class Defense extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
     }
 
     public function room(): BelongsTo

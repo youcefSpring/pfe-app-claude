@@ -1,5 +1,5 @@
 <!-- Back to Top Button -->
-<button type="button" class="btn btn-primary btn-floating" id="backToTopBtn" title="Back to top">
+<button type="button" class="btn btn-primary btn-floating" id="backToTopBtn" title="{{ __('app.back_to_top') }}">
     <i class="bi bi-arrow-up"></i>
 </button>
 

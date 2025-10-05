@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Schedule Defense')
+@section('page-title', __('app.schedule_defense'))
 
 @section('content')
 <div class="container-fluid">
@@ -11,8 +11,8 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <h4 class="card-title mb-2">Defense Scheduling</h4>
-                            <p class="card-text mb-0">Schedule defenses manually or use automatic planning</p>
+                            <h4 class="card-title mb-2">{{ __('app.defense_scheduling') }}</h4>
+                            <p class="card-text mb-0">{{ __('app.schedule_defenses_manually') }}</p>
                         </div>
                         <div class="col-auto">
                             <i class="bi bi-calendar-plus" style="font-size: 3rem; opacity: 0.7;"></i>
@@ -30,10 +30,10 @@
                 <div class="card-body">
                     <div class="btn-group w-100" role="group">
                         <button type="button" class="btn btn-outline-primary active" id="manual-tab">
-                            <i class="bi bi-pencil-square me-2"></i>Manual Scheduling
+                            <i class="bi bi-pencil-square me-2"></i>{{ __('app.manual_scheduling') }}
                         </button>
                         <button type="button" class="btn btn-outline-success" id="auto-tab">
-                            <i class="bi bi-cpu me-2"></i>Auto Defense Plan
+                            <i class="bi bi-cpu me-2"></i>{{ __('app.auto_defense_plan') }}
                         </button>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-calendar-event me-2"></i>Schedule New Defense
+                            <i class="bi bi-calendar-event me-2"></i>{{ __('app.schedule_new_defense') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -58,30 +58,30 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="project_id" class="form-label">Project <span class="text-danger">*</span></label>
-                                        <select class="form-select @error('project_id') is-invalid @enderror"
-                                                id="project_id" name="project_id" required>
-                                            <option value="">Select Project</option>
-                                            @foreach($projects as $project)
-                                                <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
-                                                    {{ $project->subject->title }} - Team: {{ $project->team->name }}
+                                        <label for="subject_id" class="form-label">{{ __('app.subject') }} <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('subject_id') is-invalid @enderror"
+                                                id="subject_id" name="subject_id" required>
+                                            <option value="">{{ __('app.select_subject') }}</option>
+                                            @foreach($subjects as $subject)
+                                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                                    {{ $subject->title }} - {{ $subject->teacher->name ?? __('app.no_teacher') }} ({{ ucfirst($subject->type) }})
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('project_id')
+                                        @error('subject_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="room_id" class="form-label">Room <span class="text-danger">*</span></label>
+                                        <label for="room_id" class="form-label">{{ __('app.room') }} <span class="text-danger">*</span></label>
                                         <select class="form-select @error('room_id') is-invalid @enderror"
                                                 id="room_id" name="room_id" required>
-                                            <option value="">Select Room</option>
+                                            <option value="">{{ __('app.select_room') }}</option>
                                             @foreach($rooms as $room)
                                                 <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                                                    {{ $room->name }} (Capacity: {{ $room->capacity ?? 'N/A' }})
+                                                    {{ $room->name }} ({{ __('app.capacity') }}: {{ $room->capacity ?? __('app.na') }})
                                                 </option>
                                             @endforeach
                                         </select>
@@ -95,7 +95,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="defense_date" class="form-label">Defense Date <span class="text-danger">*</span></label>
+                                        <label for="defense_date" class="form-label">{{ __('app.defense_date') }} <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control @error('defense_date') is-invalid @enderror"
                                                id="defense_date" name="defense_date" value="{{ old('defense_date') }}"
                                                min="{{ now()->format('Y-m-d') }}" required>
@@ -106,7 +106,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="defense_time" class="form-label">Defense Time <span class="text-danger">*</span></label>
+                                        <label for="defense_time" class="form-label">{{ __('app.defense_time') }} <span class="text-danger">*</span></label>
                                         <input type="time" class="form-control @error('defense_time') is-invalid @enderror"
                                                id="defense_time" name="defense_time" value="{{ old('defense_time') }}" required>
                                         @error('defense_time')
@@ -117,38 +117,74 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Jury Members <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    @foreach($teachers as $teacher)
-                                        <div class="col-md-4 mb-2">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="jury_members[]"
-                                                       value="{{ $teacher->id }}" id="teacher_{{ $teacher->id }}"
-                                                       {{ in_array($teacher->id, old('jury_members', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="teacher_{{ $teacher->id }}">
-                                                    {{ $teacher->name }}
-                                                </label>
+                                <label class="form-label">{{ __('app.jury_composition') }}</label>
+
+                                <!-- Supervisor (Auto-filled) -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="card border-success">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="badge bg-success me-2">{{ __('app.supervisor') }}</div>
+                                                    <span id="supervisor-name" class="text-muted">{{ __('app.select_subject_to_see_supervisor') }}</span>
+                                                    <input type="hidden" name="supervisor_id" id="supervisor_id">
+                                                </div>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    </div>
                                 </div>
-                                @error('jury_members')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
+
+                                <!-- President -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label for="president_id" class="form-label">{{ __('app.president') }} <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('president_id') is-invalid @enderror"
+                                                id="president_id" name="president_id" required>
+                                            <option value="">{{ __('app.select_president') }}</option>
+                                            @foreach($teachers as $teacher)
+                                                <option value="{{ $teacher->id }}" {{ old('president_id') == $teacher->id ? 'selected' : '' }}>
+                                                    {{ $teacher->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('president_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Examiner -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label for="examiner_id" class="form-label">{{ __('app.examiner') }} <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('examiner_id') is-invalid @enderror"
+                                                id="examiner_id" name="examiner_id" required>
+                                            <option value="">{{ __('app.select_examiner') }}</option>
+                                            @foreach($teachers as $teacher)
+                                                <option value="{{ $teacher->id }}" {{ old('examiner_id') == $teacher->id ? 'selected' : '' }}>
+                                                    {{ $teacher->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('examiner_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="notes" class="form-label">Notes</label>
+                                <label for="notes" class="form-label">{{ __('app.notes') }}</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="3"
-                                          placeholder="Additional notes for the defense">{{ old('notes') }}</textarea>
+                                          placeholder="{{ __('app.additional_notes') }}">{{ old('notes') }}</textarea>
                             </div>
 
                             <div class="text-end">
                                 <a href="{{ route('defenses.index') }}" class="btn btn-outline-secondary me-2">
-                                    <i class="bi bi-arrow-left me-2"></i>Cancel
+                                    <i class="bi bi-arrow-left me-2"></i>{{ __('app.cancel') }}
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-calendar-check me-2"></i>Schedule Defense
+                                    <i class="bi bi-calendar-check me-2"></i>{{ __('app.schedule_defense') }}
                                 </button>
                             </div>
                         </form>
@@ -166,8 +202,12 @@
                     <div class="card-body">
                         <div class="list-group list-group-flush">
                             <div class="list-group-item px-0">
-                                <strong>Minimum Jury Size:</strong>
-                                <span class="text-muted">3 teachers</span>
+                                <strong>Jury Composition:</strong>
+                                <span class="text-muted">Supervisor + President + Examiner</span>
+                            </div>
+                            <div class="list-group-item px-0">
+                                <strong>Project Requirement:</strong>
+                                <span class="text-muted">Subject must have an associated project</span>
                             </div>
                             <div class="list-group-item px-0">
                                 <strong>Defense Duration:</strong>
@@ -194,8 +234,8 @@
                     <div class="card-body">
                         <div class="row text-center">
                             <div class="col-6">
-                                <h4 class="text-primary mb-1">{{ $projects->count() }}</h4>
-                                <small class="text-muted">Projects Ready</small>
+                                <h4 class="text-primary mb-1">{{ $subjects->count() }}</h4>
+                                <small class="text-muted">Subjects Available</small>
                             </div>
                             <div class="col-6">
                                 <h4 class="text-success mb-1">{{ $rooms->count() }}</h4>
@@ -378,16 +418,102 @@ document.addEventListener('DOMContentLoaded', function() {
         manualSection.style.display = 'none';
     });
 
-    // Jury member validation
-    const juryCheckboxes = document.querySelectorAll('input[name="jury_members[]"]');
-    const form = document.querySelector('form[action*="defenses.schedule"]');
+    // Subject selection and supervisor auto-population
+    const subjectSelect = document.getElementById('subject_id');
+    const supervisorName = document.getElementById('supervisor-name');
+    const supervisorId = document.getElementById('supervisor_id');
+    const presidentSelect = document.getElementById('president_id');
+    const examinerSelect = document.getElementById('examiner_id');
 
+    // Subject data for supervisor lookup
+    const subjectData = @json($subjects->map(function($subject) {
+        return [
+            'id' => $subject->id,
+            'teacher_id' => $subject->teacher_id,
+            'teacher_name' => $subject->teacher->name ?? 'No Teacher'
+        ];
+    }));
+
+    if (subjectSelect) {
+        subjectSelect.addEventListener('change', function() {
+            const selectedSubjectId = this.value;
+            const subject = subjectData.find(s => s.id == selectedSubjectId);
+
+            if (subject && subject.teacher_id) {
+                supervisorName.textContent = subject.teacher_name;
+                supervisorId.value = subject.teacher_id;
+
+                // Remove supervisor from president and examiner options if selected
+                updateJuryOptions();
+            } else {
+                supervisorName.textContent = 'Select a subject to see supervisor';
+                supervisorId.value = '';
+                updateJuryOptions();
+            }
+        });
+    }
+
+    function updateJuryOptions() {
+        const supervisorIdValue = supervisorId.value;
+
+        // Update president options
+        Array.from(presidentSelect.options).forEach(option => {
+            if (option.value === supervisorIdValue) {
+                option.disabled = true;
+                option.text = option.text.replace(' (Supervisor)', '') + ' (Supervisor)';
+            } else {
+                option.disabled = false;
+                option.text = option.text.replace(' (Supervisor)', '');
+            }
+        });
+
+        // Update examiner options
+        Array.from(examinerSelect.options).forEach(option => {
+            if (option.value === supervisorIdValue) {
+                option.disabled = true;
+                option.text = option.text.replace(' (Supervisor)', '') + ' (Supervisor)';
+            } else {
+                option.disabled = false;
+                option.text = option.text.replace(' (Supervisor)', '');
+            }
+        });
+    }
+
+    // Form validation
+    const form = document.querySelector('form[action*="defenses.schedule"]');
     if (form) {
         form.addEventListener('submit', function(e) {
-            const checkedJury = Array.from(juryCheckboxes).filter(cb => cb.checked);
-            if (checkedJury.length < 3) {
+            const presidentId = presidentSelect.value;
+            const examinerId = examinerSelect.value;
+            const supervisorIdValue = supervisorId.value;
+
+            if (!supervisorIdValue) {
                 e.preventDefault();
-                alert('Please select at least 3 jury members for the defense.');
+                alert('Please select a subject with a supervisor.');
+                return false;
+            }
+
+            if (!presidentId) {
+                e.preventDefault();
+                alert('Please select a president for the jury.');
+                return false;
+            }
+
+            if (!examinerId) {
+                e.preventDefault();
+                alert('Please select an examiner for the jury.');
+                return false;
+            }
+
+            if (presidentId === examinerId) {
+                e.preventDefault();
+                alert('President and Examiner must be different people.');
+                return false;
+            }
+
+            if (presidentId === supervisorIdValue || examinerId === supervisorIdValue) {
+                e.preventDefault();
+                alert('Supervisor cannot be the same as President or Examiner.');
                 return false;
             }
         });

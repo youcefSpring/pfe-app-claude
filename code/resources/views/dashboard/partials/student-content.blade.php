@@ -3,7 +3,7 @@
     <div class="card">
         <div class="card-header">
             <h6 class="card-title mb-0">
-                <i class="bi bi-people me-2"></i>My Team Status
+                <i class="bi bi-people me-2"></i>{{ __('app.my_team_status') }}
             </h6>
         </div>
         <div class="card-body">
@@ -14,7 +14,7 @@
                     </div>
                     <div>
                         <h6 class="mb-1">{{ auth()->user()->teamMember->team->name }}</h6>
-                        <small class="text-muted">Role: {{ ucfirst(auth()->user()->teamMember->role) }}</small>
+                        <small class="text-muted">{{ __('app.role') }}: {{ ucfirst(auth()->user()->teamMember->role) }}</small>
                     </div>
                 </div>
             @else
@@ -23,11 +23,11 @@
                         <i class="bi bi-exclamation-triangle text-warning"></i>
                     </div>
                     <div>
-                        <h6 class="mb-1">No Team</h6>
-                        <small class="text-muted">Join or create a team</small>
+                        <h6 class="mb-1">{{ __('app.no_team') }}</h6>
+                        <small class="text-muted">{{ __('app.join_or_create_team') }}</small>
                     </div>
                 </div>
-                <a href="{{ route('teams.create') }}" class="btn btn-primary btn-sm mt-2">Create Team</a>
+                <a href="{{ route('teams.create') }}" class="btn btn-primary btn-sm mt-2">{{ __('app.create_team') }}</a>
             @endif
         </div>
     </div>
@@ -37,7 +37,7 @@
     <div class="card">
         <div class="card-header">
             <h6 class="card-title mb-0">
-                <i class="bi bi-journal-text me-2"></i>Subject Selection
+                <i class="bi bi-journal-text me-2"></i>{{ __('app.subject_selection') }}
             </h6>
         </div>
         <div class="card-body">

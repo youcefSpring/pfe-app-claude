@@ -288,4 +288,95 @@ class Team extends Model
         // For now, return default
         return config('team.sizes.licence', ['min' => 2, 'max' => 3]);
     }
+
+    /**
+     * Get the best student's average marks in this team.
+     * Used for subject allocation priority.
+     */
+    public function getAverageMarksAttribute(): float
+    {
+        $members = $this->members()->get();
+
+        if ($members->isEmpty()) {
+            return 0;
+        }
+
+        $bestStudentAverage = 0;
+
+        foreach ($members as $member) {
+            $userAverage = $member->user->average_percentage;
+            if ($userAverage > $bestStudentAverage) {
+                $bestStudentAverage = $userAverage;
+            }
+        }
+
+        return round($bestStudentAverage, 2);
+    }
+
+    /**
+     * Get the best performing student in this team.
+     */
+    public function getBestStudent(): ?User
+    {
+        $members = $this->members()->get();
+
+        if ($members->isEmpty()) {
+            return null;
+        }
+
+        $bestStudent = null;
+        $bestAverage = 0;
+
+        foreach ($members as $member) {
+            $userAverage = $member->user->average_percentage;
+            if ($userAverage > $bestAverage) {
+                $bestAverage = $userAverage;
+                $bestStudent = $member->user;
+            }
+        }
+
+        return $bestStudent;
+    }
+
+    /**
+     * Get team priority score for subject allocation.
+     * Higher score = higher priority
+     */
+    public function getPriorityScoreAttribute(): float
+    {
+        // Base score is the team average marks
+        $baseScore = $this->average_marks;
+
+        // Additional factors can be added here:
+        // - Team completion bonus (if team is complete)
+        // - Early selection bonus (if selected subject early)
+        // - Other academic factors
+
+        $completionBonus = $this->status === 'complete' ? 5 : 0;
+
+        return round($baseScore + $completionBonus, 2);
+    }
+
+    /**
+     * Check if this team has selected a specific subject.
+     */
+    public function hasSelectedSubject(int $subjectId): bool
+    {
+        return $this->subject_id == $subjectId;
+    }
+
+    /**
+     * Get teams that have selected the same subject (conflict).
+     */
+    public function getConflictingTeams(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (!$this->subject_id) {
+            return collect();
+        }
+
+        return Team::where('subject_id', $this->subject_id)
+            ->where('id', '!=', $this->id)
+            ->with(['members.user'])
+            ->get();
+    }
 }

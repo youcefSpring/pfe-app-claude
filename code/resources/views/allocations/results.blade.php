@@ -149,7 +149,9 @@
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4">
-                    {{ $allocations->links() }}
+                    <nav aria-label="Allocation results pagination">
+                        {{ $allocations->links('pagination::bootstrap-4') }}
+                    </nav>
                 </div>
             @else
                 <div class="text-center py-5">

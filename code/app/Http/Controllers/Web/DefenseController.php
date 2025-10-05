@@ -7,6 +7,7 @@ use App\Models\Defense;
 use App\Models\DefenseJury;
 use App\Models\Project;
 use App\Models\Room;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,16 +24,16 @@ class DefenseController extends Controller
     {
         $user = Auth::user();
 
-        $query = Defense::with(['project.team.members.user', 'project.subject', 'room', 'juries.teacher']);
+        $query = Defense::with(['subject', 'room', 'juries.teacher']);
 
         // Apply search filter
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
-                $q->whereHas('project.subject', function($subq) use ($request) {
+                $q->whereHas('subject', function($subq) use ($request) {
                     $subq->where('title', 'like', '%' . $request->search . '%');
                 })
-                ->orWhereHas('project.team', function($teamq) use ($request) {
-                    $teamq->where('name', 'like', '%' . $request->search . '%');
+                ->orWhereHas('room', function($roomq) use ($request) {
+                    $roomq->where('name', 'like', '%' . $request->search . '%');
                 });
             });
         }
@@ -184,16 +185,15 @@ class DefenseController extends Controller
     {
         //$this->authorize('schedule', Defense::class);
 
-        $projects = Project::with(['team.members.user', 'subject'])
-            ->where('status', 'active')
-            ->whereDoesntHave('defense')
+        $subjects = Subject::with(['teacher'])
+            ->where('status', 'validated')
             ->get();
 
         $rooms = Room::orderBy('name')->get();
 
         $teachers = User::where('role', 'teacher')->orderBy('name')->get();
 
-        return view('defenses.schedule', compact('projects', 'rooms', 'teachers'));
+        return view('defenses.schedule', compact('subjects', 'rooms', 'teachers'));
     }
 
     /**
@@ -204,20 +204,35 @@ class DefenseController extends Controller
         //$this->authorize('schedule', Defense::class);
 
         $validated = $request->validate([
-            'project_id' => 'required|exists:projects,id',
+            'subject_id' => 'required|exists:subjects,id',
             'defense_date' => 'required|date|after:now',
             'defense_time' => 'required|date_format:H:i',
             'room_id' => 'required|exists:rooms,id',
-            'jury_members' => 'required|array|min:3',
-            'jury_members.*' => 'exists:users,id',
+            'supervisor_id' => 'required|exists:users,id',
+            'president_id' => 'required|exists:users,id|different:supervisor_id',
+            'examiner_id' => 'required|exists:users,id|different:supervisor_id,president_id',
             'notes' => 'nullable|string|max:500'
         ]);
 
-        $project = Project::find($validated['project_id']);
+        // Check if subject exists and is validated
+        $subject = Subject::find($validated['subject_id']);
 
-        if ($project->defense) {
+        if (!$subject) {
             return redirect()->back()
-                ->with('error', 'Project already has a defense scheduled.');
+                ->with('error', 'Subject not found.');
+        }
+
+        if ($subject->status !== 'validated') {
+            return redirect()->back()
+                ->with('error', 'Only validated subjects can have defenses scheduled.');
+        }
+
+        // Check if subject already has a defense scheduled
+        $existingDefense = Defense::where('subject_id', $validated['subject_id'])->first();
+
+        if ($existingDefense) {
+            return redirect()->back()
+                ->with('error', 'Subject already has a defense scheduled.');
         }
 
         // Combine date and time
@@ -234,7 +249,8 @@ class DefenseController extends Controller
         }
 
         // Check jury availability
-        $conflictingJury = DefenseJury::whereIn('teacher_id', $validated['jury_members'])
+        $juryMembers = [$validated['supervisor_id'], $validated['president_id'], $validated['examiner_id']];
+        $conflictingJury = DefenseJury::whereIn('teacher_id', $juryMembers)
             ->whereHas('defense', function($q) use ($defenseDateTime) {
                 $q->where('defense_date', $defenseDateTime);
             })->first();
@@ -248,7 +264,7 @@ class DefenseController extends Controller
         try {
             // Create defense
             $defense = Defense::create([
-                'project_id' => $project->id,
+                'subject_id' => $validated['subject_id'],
                 'defense_date' => $defenseDateTime,
                 'room_id' => $validated['room_id'],
                 'duration' => 90, // Default 90 minutes
@@ -258,15 +274,24 @@ class DefenseController extends Controller
                 'scheduled_at' => now()
             ]);
 
-            // Create jury assignments with roles
-            $roles = ['president', 'examiner', 'supervisor'];
-            foreach ($validated['jury_members'] as $index => $teacherId) {
-                DefenseJury::create([
-                    'defense_id' => $defense->id,
-                    'teacher_id' => $teacherId,
-                    'role' => $roles[$index] ?? 'member'
-                ]);
-            }
+            // Create jury assignments with specific roles
+            DefenseJury::create([
+                'defense_id' => $defense->id,
+                'teacher_id' => $validated['supervisor_id'],
+                'role' => 'supervisor'
+            ]);
+
+            DefenseJury::create([
+                'defense_id' => $defense->id,
+                'teacher_id' => $validated['president_id'],
+                'role' => 'president'
+            ]);
+
+            DefenseJury::create([
+                'defense_id' => $defense->id,
+                'teacher_id' => $validated['examiner_id'],
+                'role' => 'examiner'
+            ]);
 
             DB::commit();
 

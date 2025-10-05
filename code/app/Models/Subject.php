@@ -296,4 +296,160 @@ class Subject extends Model
 
         return true;
     }
+
+    /**
+     * Get teams competing for this subject.
+     */
+    public function getCompetingTeams(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->teams()
+            ->where('status', 'subject_selected')
+            ->with(['members.user'])
+            ->get();
+    }
+
+    /**
+     * Check if subject has multiple teams competing.
+     */
+    public function hasMultipleTeams(): bool
+    {
+        return $this->teams()
+            ->where('status', 'subject_selected')
+            ->count() > 1;
+    }
+
+    /**
+     * Resolve subject conflict using team priority scoring.
+     */
+    public function resolveConflict(): array
+    {
+        $competingTeams = $this->getCompetingTeams();
+
+        if ($competingTeams->count() <= 1) {
+            return ['success' => false, 'message' => 'No conflict to resolve'];
+        }
+
+        // Calculate priority scores for all teams
+        $teamScores = $competingTeams->map(function ($team) {
+            return [
+                'team' => $team,
+                'priority_score' => $team->priority_score,
+                'average_marks' => $team->average_marks
+            ];
+        });
+
+        // Sort by priority score (highest first)
+        $rankedTeams = $teamScores->sortByDesc('priority_score');
+
+        $winner = $rankedTeams->first();
+        $losers = $rankedTeams->slice(1);
+
+        // Assign subject to winning team
+        $this->assignSubjectToWinner($winner['team']);
+
+        // Reset other teams
+        foreach ($losers as $loser) {
+            $this->resetTeamSelection($loser['team']);
+        }
+
+        // Mark any existing conflicts as resolved
+        $this->markConflictsResolved($winner['team']);
+
+        return [
+            'success' => true,
+            'winner' => $winner,
+            'losers' => $losers->toArray(),
+            'total_teams' => $competingTeams->count()
+        ];
+    }
+
+    /**
+     * Assign subject to the winning team.
+     */
+    private function assignSubjectToWinner(Team $team): void
+    {
+        $team->update([
+            'subject_id' => $this->id,
+            'status' => 'assigned'
+        ]);
+
+        $this->update([
+            'status' => 'assigned'
+        ]);
+    }
+
+    /**
+     * Reset team's subject selection.
+     */
+    private function resetTeamSelection(Team $team): void
+    {
+        $team->update([
+            'subject_id' => null,
+            'status' => 'complete'
+        ]);
+    }
+
+    /**
+     * Mark conflicts as resolved.
+     */
+    private function markConflictsResolved(Team $winningTeam): void
+    {
+        $this->conflicts()
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'resolved',
+                'winning_team_id' => $winningTeam->id,
+                'resolved_at' => now()
+            ]);
+    }
+
+    /**
+     * Get the status badge color for display.
+     */
+    public function getStatusBadgeClass(): string
+    {
+        return match ($this->status) {
+            'draft' => 'status-draft',
+            'pending_validation' => 'status-pending',
+            'validated' => 'status-validated',
+            'rejected' => 'status-rejected',
+            'needs_correction' => 'status-pending',
+            'assigned' => 'status-assigned',
+            default => 'status-draft'
+        };
+    }
+
+    /**
+     * Check if subject selection is currently in conflict.
+     */
+    public function isInConflict(): bool
+    {
+        return $this->hasMultipleTeams() || $this->hasConflicts();
+    }
+
+    /**
+     * Get conflict priority information.
+     */
+    public function getConflictInfo(): array
+    {
+        if (!$this->isInConflict()) {
+            return ['has_conflict' => false];
+        }
+
+        $competingTeams = $this->getCompetingTeams();
+
+        return [
+            'has_conflict' => true,
+            'team_count' => $competingTeams->count(),
+            'teams' => $competingTeams->map(function ($team) {
+                return [
+                    'id' => $team->id,
+                    'name' => $team->name,
+                    'priority_score' => $team->priority_score,
+                    'average_marks' => $team->average_marks,
+                    'member_count' => $team->members()->count()
+                ];
+            })->toArray()
+        ];
+    }
 }

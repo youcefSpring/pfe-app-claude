@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Specialities Management')
+@section('page-title', __('app.specialities_management'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,10 +8,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Specialities Management</h4>
+                    <h4 class="card-title mb-0">{{ __('app.specialities_management') }}</h4>
                     <div>
                         <a href="{{ route('admin.specialities.create') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Add Speciality
+                            <i class="fas fa-plus"></i> {{ __('app.add_speciality') }}
                         </a>
                     </div>
                 </div>
@@ -21,13 +21,13 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Code</th>
-                                        <th>Level</th>
-                                        <th>Academic Year</th>
-                                        <th>Students</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('app.name') }}</th>
+                                        <th>{{ __('app.code') }}</th>
+                                        <th>{{ __('app.level') }}</th>
+                                        <th>{{ __('app.academic_year') }}</th>
+                                        <th>{{ __('app.students') }}</th>
+                                        <th>{{ __('app.status') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -101,7 +101,11 @@
                             </table>
                         </div>
 
-                        {{ $specialities->links() }}
+                        <div class="d-flex justify-content-center mt-4">
+                            <nav aria-label="Specialities pagination">
+                                {{ $specialities->links('pagination::bootstrap-4') }}
+                            </nav>
+                        </div>
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>

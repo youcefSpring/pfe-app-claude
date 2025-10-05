@@ -164,7 +164,9 @@
         <!-- Pagination -->
         @if($assignments->hasPages())
             <div class="d-flex justify-content-center mt-4">
-                {{ $assignments->links() }}
+                <nav aria-label="Jury assignments pagination">
+                    {{ $assignments->links('pagination::bootstrap-4') }}
+                </nav>
             </div>
         @endif
     @else

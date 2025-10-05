@@ -88,6 +88,39 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the marks for this student.
+     */
+    public function marks(): HasMany
+    {
+        return $this->hasMany(StudentMark::class, 'user_id');
+    }
+
+    /**
+     * Get the average mark for this student.
+     */
+    public function getAverageMarkAttribute(): float
+    {
+        return $this->marks()->avg('mark') ?? 0;
+    }
+
+    /**
+     * Get the average percentage for this student.
+     */
+    public function getAveragePercentageAttribute(): float
+    {
+        $marks = $this->marks()->get();
+        if ($marks->isEmpty()) {
+            return 0;
+        }
+
+        $totalPercentage = $marks->sum(function($mark) {
+            return $mark->percentage;
+        });
+
+        return round($totalPercentage / $marks->count(), 2);
+    }
+
+    /**
      * Get the projects supervised by this teacher.
      */
     public function supervisedProjects(): HasMany

@@ -196,6 +196,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.marks*') ? 'active' : '' }}" href="{{ route('admin.marks') }}">
+                                <i class="bi bi-award me-2"></i>
+                                {{ __('app.student_marks') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}" href="{{ route('admin.reports') }}">
                                 <i class="bi bi-bar-chart me-2"></i>
                                 {{ __('app.reports') }}

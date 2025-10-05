@@ -3,7 +3,7 @@
     <div class="card border-primary">
         <div class="card-header bg-primary text-white">
             <h6 class="card-title mb-0">
-                <i class="bi bi-people me-2"></i>Users
+                <i class="bi bi-people me-2"></i>{{ __('app.users') }}
             </h6>
         </div>
         <div class="card-body">
@@ -15,18 +15,18 @@
             <div class="row text-center">
                 <div class="col-12 mb-2">
                     <h3 class="text-primary mb-1">{{ $totalUsers }}</h3>
-                    <small class="text-muted">Total Users</small>
+                    <small class="text-muted">{{ __('app.total_users') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-success mb-1">{{ $activeUsers }}</h5>
-                    <small class="text-muted">Active</small>
+                    <small class="text-muted">{{ __('app.active') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-info mb-1">{{ $newUsersThisMonth }}</h5>
-                    <small class="text-muted">New This Month</small>
+                    <small class="text-muted">{{ __('app.new_this_month') }}</small>
                 </div>
             </div>
-            <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm w-100 mt-3">Manage Users</a>
+            <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm w-100 mt-3">{{ __('app.manage_users') }}</a>
         </div>
     </div>
 </div>
@@ -35,7 +35,7 @@
     <div class="card border-success">
         <div class="card-header bg-success text-white">
             <h6 class="card-title mb-0">
-                <i class="bi bi-journal-text me-2"></i>Subjects
+                <i class="bi bi-journal-text me-2"></i>{{ __('app.subjects') }}
             </h6>
         </div>
         <div class="card-body">
@@ -47,18 +47,30 @@
             <div class="row text-center">
                 <div class="col-12 mb-2">
                     <h3 class="text-success mb-1">{{ $totalSubjects }}</h3>
-                    <small class="text-muted">Total Subjects</small>
+                    <small class="text-muted">{{ __('app.total_subjects') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-success mb-1">{{ $validatedSubjects }}</h5>
-                    <small class="text-muted">Validated</small>
+                    <small class="text-muted">{{ __('app.validated') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-warning mb-1">{{ $pendingSubjects }}</h5>
-                    <small class="text-muted">Pending</small>
+                    <small class="text-muted">{{ __('app.pending') }}</small>
                 </div>
             </div>
-            <a href="{{ route('subjects.index') }}" class="btn btn-success btn-sm w-100 mt-3">View Subjects</a>
+            @if($pendingSubjects > 0)
+                <a href="{{ route('admin.subjects.pending') }}" class="btn btn-warning btn-sm w-100 mt-2">
+                    <i class="bi bi-clock"></i> {{ __('app.review_pending') }} ({{ $pendingSubjects }})
+                </a>
+            @endif
+            <div class="btn-group w-100 mt-2">
+                <a href="{{ route('admin.subjects.all') }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-list"></i> {{ __('app.all_subjects') }}
+                </a>
+                <a href="{{ route('subjects.index') }}" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-eye"></i> {{ __('app.public_view') }}
+                </a>
+            </div>
         </div>
     </div>
 </div>

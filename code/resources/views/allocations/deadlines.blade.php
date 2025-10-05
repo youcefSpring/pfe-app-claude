@@ -107,7 +107,9 @@
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4">
-                    {{ $deadlines->links() }}
+                    <nav aria-label="Deadlines pagination">
+                        {{ $deadlines->links('pagination::bootstrap-4') }}
+                    </nav>
                 </div>
             @else
                 <div class="text-center py-5">

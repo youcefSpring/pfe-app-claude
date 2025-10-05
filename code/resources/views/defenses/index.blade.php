@@ -1,18 +1,18 @@
 @extends('layouts.pfe-app')
 
-@section('title', 'Defenses')
+@section('title', __('app.defenses'))
 
 @section('content')
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Defenses</h1>
+        <h1 class="h3 mb-0">{{ __('app.defenses') }}</h1>
         @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
             <div class="btn-group">
                 <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
-                    <i class="bi bi-calendar-plus"></i> Schedule Defense
+                    <i class="bi bi-calendar-plus"></i> {{ __('app.schedule_defense') }}
                 </a>
                 <a href="{{ route('defenses.calendar') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-calendar"></i> Calendar View
+                    <i class="bi bi-calendar"></i> {{ __('app.calendar_view') }}
                 </a>
             </div>
         @endif
@@ -23,34 +23,34 @@
         <div class="card-body">
             <form method="GET" action="{{ route('defenses.index') }}" class="row g-3">
                 <div class="col-md-3">
-                    <label for="status" class="form-label">Status</label>
+                    <label for="status" class="form-label">{{ __('app.status') }}</label>
                     <select class="form-select" id="status" name="status">
-                        <option value="">All Statuses</option>
-                        <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                        <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        <option value="">{{ __('app.all_statuses') }}</option>
+                        <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>{{ __('app.scheduled') }}</option>
+                        <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>{{ __('app.in_progress') }}</option>
+                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>{{ __('app.completed') }}</option>
+                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>{{ __('app.cancelled') }}</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="date_from" class="form-label">From Date</label>
+                    <label for="date_from" class="form-label">{{ __('app.from_date') }}</label>
                     <input type="date" class="form-control" id="date_from" name="date_from"
                            value="{{ request('date_from') }}">
                 </div>
                 <div class="col-md-2">
-                    <label for="date_to" class="form-label">To Date</label>
+                    <label for="date_to" class="form-label">{{ __('app.to_date') }}</label>
                     <input type="date" class="form-control" id="date_to" name="date_to"
                            value="{{ request('date_to') }}">
                 </div>
                 <div class="col-md-3">
-                    <label for="search" class="form-label">Search</label>
+                    <label for="search" class="form-label">{{ __('app.search') }}</label>
                     <input type="text" class="form-control" id="search" name="search"
-                           value="{{ request('search') }}" placeholder="Search defenses...">
+                           value="{{ request('search') }}" placeholder="{{ __('app.search_defenses') }}...">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-outline-primary">Filter</button>
+                        <button type="submit" class="btn btn-outline-primary">{{ __('app.filter') }}</button>
                     </div>
                 </div>
             </form>
@@ -60,12 +60,12 @@
     <!-- Results Info -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="text-muted">
-            Showing {{ $defenses->firstItem() ?? 0 }} to {{ $defenses->lastItem() ?? 0 }}
-            of {{ $defenses->total() }} results
+            {{ __('app.showing') }} {{ $defenses->firstItem() ?? 0 }} {{ __('app.to') }} {{ $defenses->lastItem() ?? 0 }}
+            {{ __('app.of') }} {{ $defenses->total() }} {{ __('app.results') }}
         </div>
         @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
             <a href="{{ route('defenses.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-x-circle"></i> Clear Filters
+                <i class="bi bi-x-circle"></i> {{ __('app.clear_filters') }}
             </a>
         @endif
     </div>
@@ -85,9 +85,9 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">
-                            {{ $defense->project->subject->title ?? 'Defense' }}
+                            {{ $defense->subject->title ?? 'Defense' }}
                         </h5>
-                        <h6 class="text-muted">{{ $defense->project->team->name ?? 'Team' }}</h6>
+                        <h6 class="text-muted">{{ $defense->subject->teacher->name ?? 'No Teacher' }}</h6>
 
                         <!-- Defense Details -->
                         <div class="text-muted small mb-2">
@@ -100,18 +100,13 @@
                             <div><i class="bi bi-clock"></i> {{ $defense->duration ?? 60 }} minutes</div>
                         </div>
 
-                        <!-- Team Members -->
-                        @if($defense->project->team->members->count() > 0)
-                            <div class="mb-2">
-                                <h6 class="text-muted mb-1">Team:</h6>
-                                @foreach($defense->project->team->members->take(2) as $member)
-                                    <span class="badge bg-light text-dark me-1">{{ $member->user->name }}</span>
-                                @endforeach
-                                @if($defense->project->team->members->count() > 2)
-                                    <span class="badge bg-secondary">+{{ $defense->project->team->members->count() - 2 }} more</span>
-                                @endif
-                            </div>
-                        @endif
+                        <!-- Subject Details -->
+                        <div class="mb-2">
+                            <h6 class="text-muted mb-1">{{ __('app.subject_type') }}:</h6>
+                            <span class="badge bg-{{ $defense->subject->is_external ? 'secondary' : 'primary' }}">
+                                {{ $defense->subject->is_external ? __('app.external') : __('app.internal') }}
+                            </span>
+                        </div>
 
                         <!-- Jury -->
                         @if($defense->juries->count() > 0)
@@ -189,7 +184,9 @@
     <!-- Pagination -->
     @if($defenses->hasPages())
         <div class="d-flex justify-content-center mt-4">
-            {{ $defenses->appends(request()->query())->links() }}
+            <nav aria-label="Defenses pagination">
+                {{ $defenses->appends(request()->query())->links('pagination::bootstrap-4') }}
+            </nav>
         </div>
     @endif
 </div>
