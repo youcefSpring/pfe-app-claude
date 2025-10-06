@@ -76,7 +76,7 @@ class Defense extends Model
             ->where('status', 'scheduled');
     }
 
-    public function complete(float $finalGrade, string $notes = null): bool
+    public function complete(float $finalGrade, ?string $notes = null): bool
     {
         $this->update([
             'status' => 'completed',

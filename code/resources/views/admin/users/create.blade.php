@@ -103,6 +103,82 @@
                             </div>
                         </div>
 
+                        <!-- Additional User Information -->
+                        <div class="mb-3">
+                            <h6 class="text-primary">Additional Information</h6>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control @error('first_name') is-invalid @enderror"
+                                           id="first_name" name="first_name" value="{{ old('first_name') }}">
+                                    @error('first_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control @error('last_name') is-invalid @enderror"
+                                           id="last_name" name="last_name" value="{{ old('last_name') }}">
+                                    @error('last_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="date_naissance" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control @error('date_naissance') is-invalid @enderror"
+                                           id="date_naissance" name="date_naissance" value="{{ old('date_naissance') }}">
+                                    @error('date_naissance')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lieu_naissance" class="form-label">Place of Birth</label>
+                                    <input type="text" class="form-control @error('lieu_naissance') is-invalid @enderror"
+                                           id="lieu_naissance" name="lieu_naissance" value="{{ old('lieu_naissance') }}">
+                                    @error('lieu_naissance')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="grade" class="form-label">Grade</label>
+                                    <input type="text" class="form-control @error('grade') is-invalid @enderror"
+                                           id="grade" name="grade" value="{{ old('grade') }}">
+                                    @error('grade')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Academic grade for teachers (e.g., Professeur, Maître de Conférences)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="position" class="form-label">Position</label>
+                                    <input type="text" class="form-control @error('position') is-invalid @enderror"
+                                           id="position" name="position" value="{{ old('position') }}">
+                                    @error('position')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Position or title</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <h6 class="text-primary">Password Settings</h6>
                         </div>

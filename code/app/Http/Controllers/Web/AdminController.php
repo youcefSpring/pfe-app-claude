@@ -30,14 +30,56 @@ class AdminController extends Controller
     /**
      * Display users management page
      */
-    public function users(): View
+    public function users(Request $request): View
     {
+        $query = User::query();
 
-        $users = User::paginate(20);
-        // dd($users->toArray());
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('matricule', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply role filter (default to student)
+        $selectedRole = $request->get('role', 'student');
+        if ($selectedRole && $selectedRole !== 'all') {
+            $query->where('role', $selectedRole);
+        }
+
+        // Apply speciality filter
+        if ($request->filled('speciality_id')) {
+            $query->where('speciality_id', $request->speciality_id);
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by name and paginate
+        $users = $query->orderBy('name')
+                      ->with('teamMember.team')
+                      ->paginate(20)
+                      ->appends($request->all());
+
         $specialities = Speciality::active()->get();
 
-        return view('admin.users.index', compact('users', 'specialities'));
+        // Get counts for each role
+        $roleCounts = [
+            'all' => User::count(),
+            'student' => User::where('role', 'student')->count(),
+            'teacher' => User::where('role', 'teacher')->count(),
+            'department_head' => User::where('role', 'department_head')->count(),
+            'admin' => User::where('role', 'admin')->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'specialities', 'roleCounts', 'selectedRole'));
     }
 
     /**
@@ -62,6 +104,12 @@ class AdminController extends Controller
             'department' => 'nullable|string|max:255',
             'speciality_id' => 'nullable|exists:specialities,id',
             'password' => 'required|string|min:8|confirmed',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'date_naissance' => 'nullable|date',
+            'lieu_naissance' => 'nullable|string|max:255',
+            'grade' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -73,6 +121,12 @@ class AdminController extends Controller
                 'department' => 'Computer Science', // Fixed to Computer Science only
                 'speciality_id' => $request->speciality_id,
                 'password' => bcrypt($request->password),
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'date_naissance' => $request->date_naissance,
+                'lieu_naissance' => $request->lieu_naissance,
+                'grade' => $request->grade,
+                'position' => $request->position,
             ]);
 
             return redirect()->route('admin.users')
@@ -106,10 +160,16 @@ class AdminController extends Controller
             'department' => 'nullable|string|max:255',
             'speciality_id' => 'nullable|exists:specialities,id',
             'password' => 'nullable|string|min:8|confirmed',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'date_naissance' => 'nullable|date',
+            'lieu_naissance' => 'nullable|string|max:255',
+            'grade' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255',
         ]);
 
         try {
-            $data = $request->only(['name', 'email', 'role', 'matricule', 'speciality_id']);
+            $data = $request->only(['name', 'email', 'role', 'matricule', 'speciality_id', 'first_name', 'last_name', 'date_naissance', 'lieu_naissance', 'grade', 'position']);
             $data['department'] = 'Computer Science'; // Fixed to Computer Science only
 
             if ($request->filled('password')) {

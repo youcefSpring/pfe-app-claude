@@ -248,7 +248,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{defense}/grade', [DefenseController::class, 'submitGrade'])->name('submit-grade');
             Route::get('/{defense}/edit', [DefenseController::class, 'edit'])->name('edit');
             Route::put('/{defense}', [DefenseController::class, 'update'])->name('update');
-            Route::delete('/{defense}', [DefenseController::class, 'cancel'])->name('cancel');
+            Route::delete('/{defense}/cancel', [DefenseController::class, 'cancel'])->name('cancel');
+            Route::delete('/{defense}', [DefenseController::class, 'destroy'])->name('destroy');
             Route::post('/{defense}/complete', [DefenseController::class, 'complete'])->name('complete');
             Route::get('/{defense}/report', [DefenseController::class, 'generateReport'])->name('generate-report');
             Route::get('/{defense}/report/pdf', [DefenseController::class, 'downloadReportPdf'])->name('download-report-pdf');

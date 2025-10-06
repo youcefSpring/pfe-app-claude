@@ -38,15 +38,15 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-muted">Project Information</h6>
-                            <p><strong>Subject:</strong> {{ $defense->project->subject->title ?? 'N/A' }}</p>
-                            <p><strong>Team:</strong> {{ $defense->project->team->name ?? 'N/A' }}</p>
-                            <p><strong>Type:</strong> {{ ucfirst($defense->project->subject->type ?? 'N/A') }}</p>
+                            <h6 class="text-muted">Subject Information</h6>
+                            <p><strong>Subject:</strong> {{ $defense->subject->title ?? 'N/A' }}</p>
+                            <p><strong>Teacher:</strong> {{ $defense->subject->teacher->name ?? 'N/A' }}</p>
+                            <p><strong>Type:</strong> {{ $defense->subject->is_external ? 'External' : 'Internal' }}</p>
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-muted">Defense Details</h6>
-                            <p><strong>Date:</strong> {{ $defense->defense_date ? $defense->defense_date->format('M d, Y') : 'TBD' }}</p>
-                            <p><strong>Time:</strong> {{ $defense->defense_date ? $defense->defense_date->format('g:i A') : 'TBD' }}</p>
+                            <p><strong>Date:</strong> {{ $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('M d, Y') : 'TBD' }}</p>
+                            <p><strong>Time:</strong> {{ $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('g:i A') : 'TBD' }}</p>
                             <p><strong>Duration:</strong> {{ $defense->duration ?? 60 }} minutes</p>
                             <p><strong>Room:</strong> {{ $defense->room->name ?? 'TBD' }}
                                 @if($defense->room && $defense->room->location)
@@ -66,7 +66,7 @@
             </div>
 
             <!-- Team Members -->
-            @if($defense->project->team->members->count() > 0)
+            @if($defense->project && $defense->project->team && $defense->project->team->members->count() > 0)
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">Team Members</h5>

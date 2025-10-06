@@ -4,164 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procès-Verbal de Soutenance de Mémoire de Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @page {
-            margin: 2cm;
-            size: A4;
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.5in;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
         }
-
         body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #000;
-            margin: 0;
-            padding: 0;
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.2;
         }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 20px;
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
         }
-
-        .header-left {
-            flex: 1;
-            text-align: left;
+        .header-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 10px;
         }
-
-        .header-center {
-            flex: 0 0 120px;
-            text-align: center;
-            margin: 0 20px;
-        }
-
-        .header-right {
-            flex: 1;
-            text-align: right;
-            direction: rtl;
-        }
-
         .logo {
-            max-width: 100px;
-            max-height: 100px;
-            object-fit: contain;
+            height: 80px;
         }
-
+        .header-text {
+            text-align: right;
+        }
+        .university-name {
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 5px;
+        }
+        .faculty-name {
+            font-size: 12pt;
+            margin-bottom: 5px;
+        }
         .title {
             text-align: center;
             font-weight: bold;
-            font-size: 14px;
-            border: 2px solid #000;
-            padding: 8px;
             margin: 20px 0;
+            text-decoration: underline;
         }
-
-        .field-row {
-            margin: 8px 0;
-            line-height: 1.6;
-        }
-
-        .field-row strong {
-            font-weight: bold;
-        }
-
-        .underline {
+        .form-field {
             border-bottom: 1px solid #000;
             display: inline-block;
             min-width: 200px;
-            padding-bottom: 2px;
+            margin: 0 5px;
         }
-
-        .jury-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .jury-table th,
-        .jury-table td {
+        .table-custom {
             border: 1px solid #000;
-            padding: 8px;
+            margin-bottom: 20px;
+        }
+        .table-custom th, .table-custom td {
+            border: 1px solid #000;
+            padding: 5px;
             text-align: center;
             vertical-align: middle;
         }
-
-        .jury-table th {
-            background-color: #f0f0f0;
+        .table-custom th {
+            background-color: #f8f9fa;
             font-weight: bold;
         }
-
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
+        .results-section {
+            margin-bottom: 20px;
         }
-
-        .results-table th,
-        .results-table td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: center;
+        .checkbox-group {
+            margin: 10px 0;
         }
-
-        .results-table th {
-            background-color: #f0f0f0;
-            font-weight: bold;
+        .checkbox-item {
+            margin-right: 20px;
         }
-
-        .mention-section {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .mention-box {
-            border: 1px solid #000;
-            padding: 8px;
-            margin: 5px;
-            text-align: center;
-            min-width: 120px;
-        }
-
-        .checkbox {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 1px solid #000;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-
-        .signatures {
-            display: flex;
-            justify-content: space-between;
+        .signature-section {
             margin-top: 40px;
         }
-
-        .signature-block {
-            text-align: center;
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 40px;
             width: 200px;
-        }
-
-        .dotted-line {
-            border-bottom: 1px dotted #000;
             display: inline-block;
-            min-width: 300px;
-            padding-bottom: 2px;
         }
-
-        .arabic {
-            direction: rtl;
-            text-align: right;
+        .mention-table {
+            width: 100%;
+            margin-top: 10px;
         }
-
-        .page-break {
-            page-break-before: always;
+        .mention-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+        .underline {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -169,215 +113,205 @@
     @php
         $universityInfo = \App\Models\Setting::getUniversityInfo();
         $logo = \App\Models\Setting::getUniversityLogo();
+
+        // Get student data
+        $student = null;
+        if ($defense->project && $defense->project->team && $defense->project->team->members) {
+            $student = $defense->project->team->members->first()?->user;
+        }
+
+        // Get president of jury
+        $president = $defense->juries->where('role', 'president')->first()?->teacher;
+        $examiner = $defense->juries->where('role', 'examiner')->first()?->teacher;
+        $supervisor = $defense->juries->where('role', 'supervisor')->first()?->teacher;
+
+        // Default values for missing data
+        $studentName = $student ? $student->first_name . ' ' . $student->last_name : 'NOM Prénom';
+        $birthDate = $student && $student->date_naissance ? $student->date_naissance->format('d/m/Y') : '__/__/____';
+        $birthPlace = $student ? $student->lieu_naissance ?? '___________' : '___________';
+        $academicYear = $defense->project?->academic_year ?? '2024/2025';
+        $speciality = $defense->project?->team?->speciality?->name ?? 'Informatique';
+        $subjectTitle = $defense->subject?->title ?? '';
     @endphp
 
-    <!-- Header -->
-    <div class="header">
-        <div class="header-left">
-            <div><strong>{{ $universityInfo['republic_fr'] }}</strong></div>
-            <div><strong>{{ $universityInfo['ministry_fr'] }}</strong></div>
-            <div><strong>{{ $universityInfo['university_name_fr'] }}</strong></div>
-            <div><strong>{{ $universityInfo['faculty_fr'] }}</strong></div>
-            <div><strong>{{ $universityInfo['department_fr'] }}</strong></div>
+    <div class="container">
+        <div class="header-section">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    @if($logo)
+                        <img src="{{ Storage::url($logo) }}" alt="Logo" class="logo">
+                    @else
+                        <img src="https://ubins.univ-boumerdes.dz/assets/images/LOGO.png" alt="Logo" class="logo">
+                    @endif
+                </div>
+                <div class="col-6 header-text">
+                    <div class="university-name">{{ $universityInfo['name_fr'] ?? 'Université de Boumerdes' }}</div>
+                    <div class="faculty-name">{{ $universityInfo['faculty_fr'] ?? 'Faculté des Sciences' }}</div>
+                    <div class="faculty-name">{{ $universityInfo['department_fr'] ?? 'Département d\'Informatique' }}</div>
+                </div>
+            </div>
         </div>
 
-        <div class="header-center">
-            @if($logo)
-                <img src="{{ public_path(str_replace('/storage', 'storage/app/public', $logo)) }}" alt="University Logo" class="logo">
-            @endif
-        </div>
+        <h3 class="title">Procès-Verbal de Soutenance de Mémoire de Master</h3>
 
-        <div class="header-right arabic">
-            <div><strong>{{ $universityInfo['republic_ar'] }}</strong></div>
-            <div><strong>{{ $universityInfo['ministry_ar'] }}</strong></div>
-            <div><strong>{{ $universityInfo['university_name_ar'] }}</strong></div>
-            <div><strong>{{ $universityInfo['faculty_ar'] }}</strong></div>
-            <div><strong>{{ $universityInfo['department_ar'] }}</strong></div>
-        </div>
-    </div>
+        <p>En date du : <span class="form-field">{{ $defense->defense_date ? $defense->defense_date->format('d/m/Y') : '__/__/____' }}</span> a eu lieu la soutenance de Mémoire de
+        Master de l'étudiant(e) : <span class="form-field">{{ $studentName }}</span> né(e) le
+        <span class="form-field">{{ $birthDate }}</span> à <span class="form-field">{{ $birthPlace }}</span></p>
 
-    <!-- Title -->
-    <div class="title">
-        Procès-Verbal de Soutenance de Mémoire de Master
-    </div>
+        <p>Année universitaire : <span class="form-field">{{ $academicYear }}</span></p>
 
-    <!-- Defense Information -->
-    <div class="field-row">
-        En date du <span class="underline">{{ $defense->defense_date ? $defense->defense_date->format('d/m/Y') : '.......................' }}</span>
-        à eu lieu la soutenance de Mémoire de Master de l'étudiant(e) :
-    </div>
+        <p><strong>Domaine</strong> : Mathématique et Informatique</p>
 
-    <div class="field-row">
-        <strong class="underline">
-            {{ $defense->project->team->members->map(fn($member) => $member->user->name)->join(' - ') }}
-        </strong>
-        né(e) le <span class="underline">................</span> à <span class="underline">................</span>
-    </div>
+        <p><strong>Filière</strong> : Informatique</p>
 
-    <div class="field-row">
-        Année universitaire : <span class="underline">{{ $defense->project->academic_year ?? '2025/2026' }}</span>
-    </div>
+        <p><strong>Spécialité</strong> : <span class="form-field">{{ $speciality }}</span></p>
 
-    <div class="field-row">
-        <strong>Domaine</strong> : Mathématique et Informatique
-    </div>
+        <p><strong>Type de diplôme</strong> : Professionnelle.</p>
 
-    <div class="field-row">
-        <strong>Filière</strong> : Informatique
-    </div>
+        <p>Devant le Jury composé de :</p>
 
-    <div class="field-row">
-        <strong>Spécialité</strong> : <span class="underline">{{ $defense->project->team->speciality->name ?? '......................................................' }}</span>
-    </div>
-
-    <div class="field-row">
-        <strong>Type de diplôme</strong> : Professionnelle.
-    </div>
-
-    <!-- Jury Composition -->
-    <div class="field-row" style="margin-top: 30px;">
-        Devant le Jury composé de :
-    </div>
-
-    <table class="jury-table">
-        <thead>
-            <tr>
-                <th style="width: 50px;"></th>
-                <th>Membre du Jury (Nom / Prénom)</th>
-                <th>Grade</th>
-                <th>Qualité</th>
-                <th>Signature</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($defense->juries->take(3) as $index => $jury)
+        <table class="table table-bordered table-custom">
+            <thead>
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $jury->teacher->name }}</td>
-                    <td>{{ $jury->teacher->grade ?? '' }}</td>
-                    <td>
-                        @if($jury->role === 'president')
-                            <em>Président</em>
-                        @elseif($jury->role === 'examiner')
-                            <em>Examinateur</em>
-                        @elseif($jury->role === 'supervisor')
-                            <em>Encadreur</em>
-                        @endif
-                    </td>
-                    <td>&nbsp;</td>
+                    <th>Membre du Jury (Nom / Prénom)</th>
+                    <th>Grade</th>
+                    <th>Qualité</th>
+                    <th>Signature</th>
                 </tr>
-            @endforeach
-
-            @for($i = $defense->juries->count(); $i < 3; $i++)
+            </thead>
+            <tbody>
                 <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
+                    <td>{{ $president ? $president->name : '_________________' }}</td>
+                    <td>{{ $president ? $president->grade ?? '________' : '________' }}</td>
+                    <td><strong>Président</strong></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>{{ $examiner ? $examiner->name : '_________________' }}</td>
+                    <td>{{ $examiner ? $examiner->grade ?? '________' : '________' }}</td>
+                    <td><strong>Examinateur</strong></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>{{ $supervisor ? $supervisor->name : '_________________' }}</td>
+                    <td>{{ $supervisor ? $supervisor->grade ?? '________' : '________' }}</td>
+                    <td><strong>Encadreur</strong></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Intitulé du sujet</strong> :<br>
+        «<span class="form-field" style="min-width: 500px;">{{ $subjectTitle }}</span><br>
+        <span class="form-field" style="min-width: 500px;"></span>»</p>
+
+        <div class="results-section">
+            <h5 class="underline">Résultats de la délibération :</h5>
+
+            <p><strong>Notes attribuées par le Jury :</strong></p>
+
+            <table class="table table-bordered table-custom">
+                <thead>
+                    <tr>
+                        <th>Manuscrit (6/8)</th>
+                        <th>Exposé oral (4/6)</th>
+                        <th>Réponses aux questions (5/6)</th>
+                        <th>Réalisation (5/-)</th>
+                        <th>Note finale du PFE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ $defense->report?->manuscript_score ?? '' }}</td>
+                        <td>{{ $defense->report?->presentation_score ?? '' }}</td>
+                        <td>{{ $defense->report?->questions_score ?? '' }}</td>
+                        <td>{{ $defense->report?->realization_score ?? '' }}</td>
+                        <td>{{ $defense->final_grade ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Par conséquent, l'étudiant(e) est déclaré(e) :</p>
+
+            <div class="checkbox-group">
+                <span class="checkbox-item">
+                    @if($defense->final_grade && $defense->final_grade >= 10)
+                        ☑ <strong>Admis(e)</strong>
+                    @else
+                        □ <strong>Admis(e)</strong>
+                    @endif
+                </span>
+                <span class="checkbox-item">
+                    @if($defense->final_grade && $defense->final_grade < 10)
+                        ☑ <strong>Ajourné(e)</strong>
+                    @else
+                        □ <strong>Ajourné(e)</strong>
+                    @endif
+                </span>
+            </div>
+
+            <p>à l'examen de soutenance de son Mémoire de Master avec la mention :</p>
+
+            <table class="table table-bordered mention-table">
+                <tr>
                     <td>
-                        @if($i === 0)
-                            <em>Président</em>
-                        @elseif($i === 1)
-                            <em>Examinateur</em>
+                        @if($defense->final_grade && $defense->final_grade >= 10 && $defense->final_grade < 12)
+                            ☑ <strong>Passable</strong>
                         @else
-                            <em>Encadreur</em>
+                            □ <strong>Passable</strong>
                         @endif
                     </td>
-                    <td>&nbsp;</td>
+                    <td>
+                        @if($defense->final_grade && $defense->final_grade >= 12 && $defense->final_grade < 14)
+                            ☑ <strong>Assez Bien</strong>
+                        @else
+                            □ <strong>Assez Bien</strong>
+                        @endif
+                    </td>
+                    <td>
+                        @if($defense->final_grade && $defense->final_grade >= 14 && $defense->final_grade < 16)
+                            ☑ <strong>Bien</strong>
+                        @else
+                            □ <strong>Bien</strong>
+                        @endif
+                    </td>
+                    <td>
+                        @if($defense->final_grade && $defense->final_grade >= 16 && $defense->final_grade < 18)
+                            ☑ <strong>Très Bien</strong>
+                        @else
+                            □ <strong>Très Bien</strong>
+                        @endif
+                    </td>
+                    <td>
+                        @if($defense->final_grade && $defense->final_grade >= 18)
+                            ☑ <strong>Excellent</strong>
+                        @else
+                            □ <strong>Excellent</strong>
+                        @endif
+                    </td>
                 </tr>
-            @endfor
-        </tbody>
-    </table>
-
-    <!-- Subject Title -->
-    <div class="field-row" style="margin-top: 30px;">
-        <strong>Intitulé du sujet :</strong>
-    </div>
-    <div style="margin: 10px 0;">
-        «<span class="dotted-line">{{ $defense->project->subject->title ?? '' }}</span>
-    </div>
-    <div style="margin: 10px 0;">
-        <span class="dotted-line" style="width: 100%;"></span> ».
-    </div>
-
-    <!-- Results -->
-    <div style="margin-top: 30px;">
-        <strong>Résultats de la délibération :</strong>
-    </div>
-
-    <div style="margin: 10px 0;">
-        <strong>Notes attribuées par le Jury :</strong>
-    </div>
-
-    <table class="results-table">
-        <thead>
-            <tr>
-                <th>Manuscrit (6/8)</th>
-                <th>Exposé oral (4/6)</th>
-                <th>Réponses aux questions (5/6)</th>
-                <th>Réalisation (5/-)</th>
-                <th>Note finale du PFE</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="field-row" style="margin-top: 20px;">
-        Par conséquent, l'étudiant(e) est déclaré(e) :
-    </div>
-
-    <div style="margin: 10px 0;">
-        <span class="checkbox"></span> <strong>Admis(e)</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <span class="checkbox"></span> <strong>Ajourné(e)</strong>
-    </div>
-
-    <div class="field-row">
-        à l'examen de soutenance de son Mémoire de Master avec la mention :
-    </div>
-
-    <!-- Mentions -->
-    <div class="mention-section">
-        <div class="mention-box">
-            <span class="checkbox"></span><strong>Excellent</strong><br>
-            (18≤N≤20)
+                <tr>
+                    <td>(10≤N<12)</td>
+                    <td>(12≤N<14)</td>
+                    <td>(14≤N<16)</td>
+                    <td>(16≤N<18)</td>
+                    <td>(18≤N≤20)</td>
+                </tr>
+            </table>
         </div>
-        <div class="mention-box">
-            <span class="checkbox"></span><strong>Très Bien</strong><br>
-            (16≤N<18)
-        </div>
-        <div class="mention-box">
-            <span class="checkbox"></span><strong>Bien</strong><br>
-            (14≤N<16)
-        </div>
-        <div class="mention-box">
-            <span class="checkbox"></span><strong>Assez Bien</strong><br>
-            (12≤N<14)
-        </div>
-        <div class="mention-box">
-            <span class="checkbox"></span><strong>Passable</strong><br>
-            (10≤N<12)
+
+        <div class="signature-section row">
+            <div class="col-6 text-center">
+                <p>Le Président du Jury</p>
+                <div class="signature-line"></div>
+            </div>
+            <div class="col-6 text-center">
+                <p>Le Chef de Département</p>
+                <div class="signature-line"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Signatures -->
-    <div class="signatures">
-        <div class="signature-block">
-            <strong>Le Président du Jury</strong>
-            <div style="height: 60px;"></div>
-            <div style="border-top: 1px solid #000; margin-top: 20px;"></div>
-        </div>
-        <div class="signature-block">
-            <strong>Le Chef de Département</strong>
-            <div style="height: 60px;"></div>
-            <div style="border-top: 1px solid #000; margin-top: 20px;"></div>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

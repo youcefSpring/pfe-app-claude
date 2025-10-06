@@ -84,16 +84,21 @@
                                     <div class="card border-start border-{{ $defense->status === 'completed' ? 'success' : ($defense->status === 'in_progress' ? 'warning' : ($defense->status === 'cancelled' ? 'danger' : 'primary')) }} border-3">
                                         <div class="card-body p-3">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h6 class="card-title mb-1">{{ $defense->project->subject->title ?? 'Defense' }}</h6>
+                                                <h6 class="card-title mb-1">{{ $defense->subject->title ?? 'Defense' }}</h6>
                                                 <span class="badge bg-{{ $defense->status === 'completed' ? 'success' : ($defense->status === 'in_progress' ? 'warning' : ($defense->status === 'cancelled' ? 'danger' : 'primary')) }}">
                                                     {{ ucfirst(str_replace('_', ' ', $defense->status)) }}
                                                 </span>
                                             </div>
-                                            <p class="text-muted small mb-2">{{ $defense->project->team->name ?? 'Team' }}</p>
-                                            @if($defense->defense_date)
+                                            <p class="text-muted small mb-2">{{ $defense->subject->teacher->name ?? 'No Teacher' }}</p>
+                                            @if($defense->defense_date && $defense->defense_time)
                                                 <p class="small mb-2">
                                                     <i class="bi bi-calendar me-1"></i>
-                                                    {{ $defense->defense_date->format('M d, Y \\a\\t g:i A') }}
+                                                    {{ \Carbon\Carbon::parse($defense->defense_date)->format('M d, Y') }} at {{ \Carbon\Carbon::parse($defense->defense_time)->format('g:i A') }}
+                                                </p>
+                                            @elseif($defense->defense_date)
+                                                <p class="small mb-2">
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    {{ \Carbon\Carbon::parse($defense->defense_date)->format('M d, Y') }}
                                                 </p>
                                             @endif
                                             @if($defense->room)
@@ -133,7 +138,16 @@
 
 <script>
 // Defense data from Laravel
-const defenses = [];
+const defenses = @json($defenses->map(function($defense) {
+    return [
+        'id' => $defense->id,
+        'title' => $defense->subject->title ?? 'Defense',
+        'date' => $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : null,
+        'time' => $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : null,
+        'status' => $defense->status,
+        'room' => $defense->room->name ?? 'TBD',
+    ];
+}));
 
 let currentDate = new Date();
 

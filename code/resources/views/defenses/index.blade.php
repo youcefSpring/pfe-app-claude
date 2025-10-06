@@ -3,191 +3,413 @@
 @section('title', __('app.defenses'))
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{{ __('app.defenses') }}</h1>
-        @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
-            <div class="btn-group">
-                <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
-                    <i class="bi bi-calendar-plus"></i> {{ __('app.schedule_defense') }}
-                </a>
-                <a href="{{ route('defenses.calendar') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-calendar"></i> {{ __('app.calendar_view') }}
-                </a>
-            </div>
-        @endif
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('defenses.index') }}" class="row g-3">
-                <div class="col-md-3">
-                    <label for="status" class="form-label">{{ __('app.status') }}</label>
-                    <select class="form-select" id="status" name="status">
-                        <option value="">{{ __('app.all_statuses') }}</option>
-                        <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>{{ __('app.scheduled') }}</option>
-                        <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>{{ __('app.in_progress') }}</option>
-                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>{{ __('app.completed') }}</option>
-                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>{{ __('app.cancelled') }}</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="date_from" class="form-label">{{ __('app.from_date') }}</label>
-                    <input type="date" class="form-control" id="date_from" name="date_from"
-                           value="{{ request('date_from') }}">
-                </div>
-                <div class="col-md-2">
-                    <label for="date_to" class="form-label">{{ __('app.to_date') }}</label>
-                    <input type="date" class="form-control" id="date_to" name="date_to"
-                           value="{{ request('date_to') }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="search" class="form-label">{{ __('app.search') }}</label>
-                    <input type="text" class="form-control" id="search" name="search"
-                           value="{{ request('search') }}" placeholder="{{ __('app.search_defenses') }}...">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">&nbsp;</label>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-outline-primary">{{ __('app.filter') }}</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Results Info -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="text-muted">
-            {{ __('app.showing') }} {{ $defenses->firstItem() ?? 0 }} {{ __('app.to') }} {{ $defenses->lastItem() ?? 0 }}
-            {{ __('app.of') }} {{ $defenses->total() }} {{ __('app.results') }}
-        </div>
-        @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-            <a href="{{ route('defenses.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-x-circle"></i> {{ __('app.clear_filters') }}
-            </a>
-        @endif
-    </div>
-
-    <!-- Defenses List -->
+<div class="container-fluid">
     <div class="row">
-        @forelse($defenses as $defense)
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="badge bg-{{ $defense->status === 'completed' ? 'success' : ($defense->status === 'in_progress' ? 'warning' : ($defense->status === 'cancelled' ? 'danger' : 'primary')) }}">
-                            {{ ucfirst(str_replace('_', ' ', $defense->status)) }}
-                        </span>
-                        <small class="text-muted">
-                            {{ $defense->defense_date ? $defense->defense_date->format('M d, Y') : 'TBD' }}
-                        </small>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {{ $defense->subject->title ?? 'Defense' }}
-                        </h5>
-                        <h6 class="text-muted">{{ $defense->subject->teacher->name ?? 'No Teacher' }}</h6>
-
-                        <!-- Defense Details -->
-                        <div class="text-muted small mb-2">
-                            @if($defense->defense_date)
-                                <div><i class="bi bi-calendar"></i> {{ $defense->defense_date->format('M d, Y \a\t g:i A') }}</div>
-                            @endif
-                            @if($defense->room)
-                                <div><i class="bi bi-geo-alt"></i> {{ $defense->room->name }} ({{ $defense->room->location ?? 'Location TBD' }})</div>
-                            @endif
-                            <div><i class="bi bi-clock"></i> {{ $defense->duration ?? 60 }} minutes</div>
-                        </div>
-
-                        <!-- Subject Details -->
-                        <div class="mb-2">
-                            <h6 class="text-muted mb-1">{{ __('app.subject_type') }}:</h6>
-                            <span class="badge bg-{{ $defense->subject->is_external ? 'secondary' : 'primary' }}">
-                                {{ $defense->subject->is_external ? __('app.external') : __('app.internal') }}
-                            </span>
-                        </div>
-
-                        <!-- Jury -->
-                        @if($defense->juries->count() > 0)
-                            <div class="mb-2">
-                                <h6 class="text-muted mb-1">Jury:</h6>
-                                @foreach($defense->juries->take(2) as $jury)
-                                    <span class="badge bg-info text-dark me-1">{{ $jury->teacher->name }}</span>
-                                @endforeach
-                                @if($defense->juries->count() > 2)
-                                    <span class="badge bg-secondary">+{{ $defense->juries->count() - 2 }} more</span>
-                                @endif
-                            </div>
-                        @endif
-                    </div>
-                    <div class="card-footer">
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ route('defenses.show', $defense) }}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-eye"></i> View Details
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">{{ __('app.defenses') }}</h4>
+                    @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
+                                <i class="bi bi-calendar-plus me-2"></i>{{ __('app.schedule_defense') }}
                             </a>
-                            @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
-                                <div class="btn-group">
-                                    @if($defense->status === 'scheduled')
-                                        <a href="{{ route('defenses.edit', $defense) }}" class="btn btn-warning btn-sm">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <form method="POST" action="{{ route('defenses.cancel', $defense) }}" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Are you sure you want to cancel this defense?')">
-                                                <i class="bi bi-x-circle"></i>
-                                            </button>
-                                        </form>
-                                    @elseif($defense->status === 'completed')
-                                        <a href="{{ route('defenses.generate-report', $defense) }}" class="btn btn-success btn-sm">
-                                            <i class="bi bi-file-text"></i> Report
-                                        </a>
-                                        <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-danger btn-sm">
-                                            <i class="bi bi-file-pdf"></i> PDF
-                                        </a>
-                                    @endif
+                            <a href="{{ route('defenses.calendar') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-calendar me-2"></i>{{ __('app.calendar_view') }}
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Search and Filter Section -->
+                <div class="card-body border-bottom">
+                    <form method="GET" action="{{ route('defenses.index') }}" id="filterForm">
+                        <div class="row g-3">
+                            <!-- Real-time Search -->
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">{{ __('app.search') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="search"
+                                           name="search"
+                                           value="{{ request('search') }}"
+                                           placeholder="{{ __('app.search_defenses_placeholder') }}">
                                 </div>
-                            @elseif(auth()->user()?->role === 'teacher' && $defense->juries->contains('teacher_id', auth()->id()))
-                                @if($defense->status === 'scheduled' || $defense->status === 'in_progress')
-                                    <a href="{{ route('defenses.show', $defense) }}" class="btn btn-success btn-sm">
-                                        <i class="bi bi-clipboard"></i> Evaluate
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="col-md-2">
+                                <label for="status" class="form-label">{{ __('app.status') }}</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="">{{ __('app.all_statuses') }} ({{ $statusCounts['all'] }})</option>
+                                    <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>
+                                        {{ __('app.scheduled') }} ({{ $statusCounts['scheduled'] }})
+                                    </option>
+                                    <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>
+                                        {{ __('app.completed') }} ({{ $statusCounts['completed'] }})
+                                    </option>
+                                    <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>
+                                        {{ __('app.cancelled') }} ({{ $statusCounts['cancelled'] ?? 0 }})
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Date Range Filters -->
+                            <div class="col-md-2">
+                                <label for="date_from" class="form-label">{{ __('app.from_date') }}</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from"
+                                       value="{{ request('date_from') }}">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="date_to" class="form-label">{{ __('app.to_date') }}</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to"
+                                       value="{{ request('date_to') }}">
+                            </div>
+
+                            <!-- Clear Button -->
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <a href="{{ route('defenses.index') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>{{ __('app.clear') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-body">
+                    @if($defenses->count() > 0)
+                        <!-- Results Summary -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-muted">
+                                {{ __('app.showing_results', [
+                                    'from' => $defenses->firstItem() ?? 0,
+                                    'to' => $defenses->lastItem() ?? 0,
+                                    'total' => $defenses->total()
+                                ]) }}
+                            </div>
+                            <div class="text-muted">
+                                {{ __('app.per_page') }}: {{ $defenses->perPage() }}
+                            </div>
+                        </div>
+
+                        <!-- Defenses Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('app.subject') }}</th>
+                                        <th>{{ __('app.student_team') }}</th>
+                                        <th>{{ __('app.date_time') }}</th>
+                                        <th>{{ __('app.room') }}</th>
+                                        <th>{{ __('app.jury') }}</th>
+                                        <th>{{ __('app.status') }}</th>
+                                        <th>{{ __('app.grade') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($defenses as $defense)
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <h6 class="mb-1">{{ $defense->subject?->title ?? __('app.no_subject') }}</h6>
+                                                    @if($defense->subject?->teacher)
+                                                        <small class="text-muted">{{ __('app.supervisor') }}: {{ $defense->subject->teacher->name }}</small>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if($defense->project && $defense->project->team && $defense->project->team->members)
+                                                    @foreach($defense->project->team->members as $member)
+                                                        <div class="d-flex align-items-center mb-1">
+                                                            <div class="avatar-circle bg-primary text-white me-2">
+                                                                {{ strtoupper(substr($member->user->name, 0, 2)) }}
+                                                            </div>
+                                                            <div>
+                                                                <small class="fw-bold">{{ $member->user->name }}</small>
+                                                                @if($member->user->matricule)
+                                                                    <br><small class="text-muted">{{ $member->user->matricule }}</small>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-muted">{{ __('app.no_team_assigned') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($defense->defense_date)
+                                                    <div class="text-center">
+                                                        <div class="fw-bold">{{ $defense->defense_date->format('d/m/Y') }}</div>
+                                                        @if($defense->defense_time)
+                                                            <small class="text-muted">{{ $defense->defense_time->format('H:i') }}</small>
+                                                        @endif
+                                                        @if($defense->duration)
+                                                            <br><small class="badge bg-info">{{ $defense->duration }}min</small>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">{{ __('app.not_scheduled') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($defense->room)
+                                                    <span class="badge bg-secondary">{{ $defense->room->name }}</span>
+                                                    @if($defense->room->capacity)
+                                                        <br><small class="text-muted">{{ $defense->room->capacity }} {{ __('app.seats') }}</small>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted">{{ __('app.no_room') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($defense->juries && $defense->juries->count() > 0)
+                                                    @foreach($defense->juries as $jury)
+                                                        <div class="mb-1">
+                                                            <small class="fw-bold">{{ $jury->teacher->name }}</small>
+                                                            <br>
+                                                            @if($jury->role === 'president')
+                                                                <span class="badge bg-warning">{{ __('app.president') }}</span>
+                                                            @elseif($jury->role === 'examiner')
+                                                                <span class="badge bg-info">{{ __('app.examiner') }}</span>
+                                                            @elseif($jury->role === 'supervisor')
+                                                                <span class="badge bg-success">{{ __('app.supervisor') }}</span>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-muted">{{ __('app.no_jury') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($defense->status === 'scheduled')
+                                                    <span class="badge bg-warning">{{ __('app.scheduled') }}</span>
+                                                @elseif($defense->status === 'in_progress')
+                                                    <span class="badge bg-primary">{{ __('app.in_progress') }}</span>
+                                                @elseif($defense->status === 'completed')
+                                                    <span class="badge bg-success">{{ __('app.completed') }}</span>
+                                                @elseif($defense->status === 'cancelled')
+                                                    <span class="badge bg-danger">{{ __('app.cancelled') }}</span>
+                                                @else
+                                                    <span class="badge bg-secondary">{{ ucfirst($defense->status) }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($defense->final_grade)
+                                                    <div class="text-center">
+                                                        <span class="fw-bold text-primary">{{ number_format($defense->final_grade, 2) }}/20</span>
+                                                        @php
+                                                            $grade = $defense->final_grade;
+                                                            if ($grade >= 18) $mention = __('app.excellent');
+                                                            elseif ($grade >= 16) $mention = __('app.very_good');
+                                                            elseif ($grade >= 14) $mention = __('app.good');
+                                                            elseif ($grade >= 12) $mention = __('app.fairly_good');
+                                                            elseif ($grade >= 10) $mention = __('app.passable');
+                                                            else $mention = __('app.failed');
+                                                        @endphp
+                                                        <br><small class="text-muted">{{ $mention }}</small>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">{{ __('app.not_graded') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('defenses.show', $defense) }}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="{{ __('app.view') }}">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+
+                                                    @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
+                                                        <a href="{{ route('defenses.edit', $defense) }}"
+                                                           class="btn btn-sm btn-outline-warning"
+                                                           title="{{ __('app.edit') }}">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+
+                                                        <!-- PDF Download Button -->
+                                                        <a href="{{ route('defenses.download-report-pdf', $defense) }}"
+                                                           class="btn btn-sm btn-outline-danger"
+                                                           title="{{ __('app.download_pdf_report') }}"
+                                                           target="_blank">
+                                                            <i class="bi bi-file-pdf"></i>
+                                                        </a>
+                                                    @endif
+
+                                                    @if(auth()->user()?->role === 'admin')
+                                                        <form action="{{ route('defenses.destroy', $defense) }}"
+                                                              method="POST"
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('{{ __('app.confirm_delete_defense') }}')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-sm btn-outline-danger"
+                                                                    title="{{ __('app.delete') }}">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $defenses->links() }}
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x display-1 text-muted"></i>
+                            <h4 class="mt-3">{{ __('app.no_defenses_found') }}</h4>
+                            @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
+                                <p class="text-muted">{{ __('app.try_different_filters') }}</p>
+                                <a href="{{ route('defenses.index') }}" class="btn btn-primary">
+                                    {{ __('app.show_all_defenses') }}
+                                </a>
+                            @else
+                                <p class="text-muted">{{ __('app.no_defenses_yet') }}</p>
+                                @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
+                                    <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
+                                        <i class="bi bi-calendar-plus me-2"></i>{{ __('app.schedule_first_defense') }}
                                     </a>
                                 @endif
                             @endif
                         </div>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="bi bi-shield-check text-muted" style="font-size: 4rem;"></i>
-                    <h4 class="mt-3">No Defenses Found</h4>
-                    <p class="text-muted">
-                        @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                            No defenses match your current filters. Try adjusting your search criteria.
-                        @else
-                            There are no defenses scheduled at the moment.
-                        @endif
-                    </p>
-                    @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
-                        <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
-                            <i class="bi bi-calendar-plus"></i> Schedule First Defense
-                        </a>
                     @endif
                 </div>
             </div>
-        @endforelse
-    </div>
-
-    <!-- Pagination -->
-    @if($defenses->hasPages())
-        <div class="d-flex justify-content-center mt-4">
-            <nav aria-label="Defenses pagination">
-                {{ $defenses->appends(request()->query())->links('pagination::bootstrap-4') }}
-            </nav>
         </div>
-    @endif
+    </div>
 </div>
+
+<style>
+    .avatar-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--bs-gray-50);
+    }
+
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+    }
+
+    .btn-group .btn + .btn {
+        margin-left: 0.25rem;
+    }
+
+    #search {
+        transition: all 0.3s ease;
+    }
+
+    #search:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .pagination .page-link {
+        color: #0d6efd;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        background-color: var(--bs-gray-50);
+    }
+</style>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const statusSelect = document.getElementById('status');
+    const dateFromInput = document.getElementById('date_from');
+    const dateToInput = document.getElementById('date_to');
+    const form = document.getElementById('filterForm');
+
+    let searchTimeout;
+
+    // Real-time search
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            form.submit();
+        }, 500); // Wait 500ms after user stops typing
+    });
+
+    // Instant filtering on dropdown changes
+    statusSelect.addEventListener('change', function() {
+        form.submit();
+    });
+
+    // Date filter changes
+    dateFromInput.addEventListener('change', function() {
+        form.submit();
+    });
+
+    dateToInput.addEventListener('change', function() {
+        form.submit();
+    });
+
+    // Show loading state during search
+    form.addEventListener('submit', function() {
+        const submitBtn = document.querySelector('#filterForm button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i>{{ __('app.searching') }}...';
+            submitBtn.disabled = true;
+        }
+    });
+
+    // Add spinning animation for loading
+    const style = document.createElement('style');
+    style.textContent = `
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+@endpush

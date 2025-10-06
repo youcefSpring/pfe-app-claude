@@ -24,16 +24,26 @@ class DefenseController extends Controller
     {
         $user = Auth::user();
 
-        $query = Defense::with(['subject', 'room', 'juries.teacher']);
+        $query = Defense::with(['subject.teacher', 'room', 'juries.teacher', 'project.team.members.user']);
 
         // Apply search filter
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->whereHas('subject', function($subq) use ($request) {
-                    $subq->where('title', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('subject', function($subq) use ($search) {
+                    $subq->where('title', 'like', '%' . $search . '%');
                 })
-                ->orWhereHas('room', function($roomq) use ($request) {
-                    $roomq->where('name', 'like', '%' . $request->search . '%');
+                ->orWhereHas('room', function($roomq) use ($search) {
+                    $roomq->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('project.team.members.user', function($userq) use ($search) {
+                    $userq->where('name', 'like', '%' . $search . '%')
+                          ->orWhere('first_name', 'like', '%' . $search . '%')
+                          ->orWhere('last_name', 'like', '%' . $search . '%')
+                          ->orWhere('matricule', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('juries.teacher', function($teacherq) use ($search) {
+                    $teacherq->where('name', 'like', '%' . $search . '%');
                 });
             });
         }
@@ -55,7 +65,7 @@ class DefenseController extends Controller
         switch ($user->role) {
             case 'student':
                 // Students see defenses from their department
-                $query->whereHas('project.team.members.user', function($q) use ($user) {
+                $query->whereHas('subject.teacher', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
                 break;
@@ -67,16 +77,27 @@ class DefenseController extends Controller
                 break;
             case 'department_head':
                 // Department heads see defenses from their department
-                $query->whereHas('project.team.members.user', function($q) use ($user) {
+                $query->whereHas('subject.teacher', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
                 break;
             // Admin sees all defenses (no filter)
         }
 
-        $defenses = $query->orderBy('defense_date')->paginate(12)->appends($request->query());
+        $defenses = $query->orderBy('defense_date', 'desc')
+                          ->orderBy('defense_time', 'desc')
+                          ->paginate(20)
+                          ->appends($request->query());
 
-        return view('defenses.index', compact('defenses'));
+        // Get status counts for filters
+        $statusCounts = [
+            'all' => Defense::count(),
+            'scheduled' => Defense::where('status', 'scheduled')->count(),
+            'completed' => Defense::where('status', 'completed')->count(),
+            'cancelled' => Defense::where('status', 'cancelled')->count(),
+        ];
+
+        return view('defenses.index', compact('defenses', 'statusCounts'));
     }
 
     /**
@@ -85,15 +106,25 @@ class DefenseController extends Controller
     public function show(Defense $defense)
     {
         $defense->load([
-            'project.team.members.user',
-            'project.subject.teacher',
+            'subject.teacher',
             'room',
             'juries.teacher',
             'report'
         ]);
 
+        // Also load project relationship if it exists
+        if ($defense->project_id) {
+            $defense->load(['project.team.members.user']);
+        }
+
         $user = Auth::user();
-        $isTeamMember = $defense->project->team->members->contains('student_id', $user->id);
+
+        // Check if user is a team member (only if project exists)
+        $isTeamMember = false;
+        if ($defense->project && $defense->project->team) {
+            $isTeamMember = $defense->project->team->members->contains('student_id', $user->id);
+        }
+
         $isJuryMember = $defense->juries->contains('teacher_id', $user->id);
 
         return view('defenses.show', compact('defense', 'isTeamMember', 'isJuryMember'));
@@ -106,12 +137,12 @@ class DefenseController extends Controller
     {
         $user = Auth::user();
 
-        $query = Defense::with(['project.team', 'room']);
+        $query = Defense::with(['subject.teacher', 'room', 'juries.teacher']);
 
         // Filter based on user role
         switch ($user->role) {
             case 'student':
-                $query->whereHas('project.team.members.user', function($q) use ($user) {
+                $query->whereHas('subject.teacher', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
                 break;
@@ -121,7 +152,7 @@ class DefenseController extends Controller
                 });
                 break;
             case 'department_head':
-                $query->whereHas('project.team.members.user', function($q) use ($user) {
+                $query->whereHas('subject.teacher', function($q) use ($user) {
                     $q->where('department', $user->department);
                 });
                 break;
@@ -191,7 +222,7 @@ class DefenseController extends Controller
 
         $rooms = Room::orderBy('name')->get();
 
-        $teachers = User::where('role', 'teacher')->orderBy('name')->get();
+        $teachers = User::whereIn('role', ['teacher','department_head'])->orderBy('name')->get();
 
         return view('defenses.schedule', compact('subjects', 'rooms', 'teachers'));
     }
@@ -235,12 +266,10 @@ class DefenseController extends Controller
                 ->with('error', 'Subject already has a defense scheduled.');
         }
 
-        // Combine date and time
-        $defenseDateTime = $validated['defense_date'] . ' ' . $validated['defense_time'];
-
         // Check room availability
         $conflictingDefense = Defense::where('room_id', $validated['room_id'])
-            ->where('defense_date', $defenseDateTime)
+            ->where('defense_date', $validated['defense_date'])
+            ->where('defense_time', $validated['defense_time'])
             ->first();
 
         if ($conflictingDefense) {
@@ -251,8 +280,9 @@ class DefenseController extends Controller
         // Check jury availability
         $juryMembers = [$validated['supervisor_id'], $validated['president_id'], $validated['examiner_id']];
         $conflictingJury = DefenseJury::whereIn('teacher_id', $juryMembers)
-            ->whereHas('defense', function($q) use ($defenseDateTime) {
-                $q->where('defense_date', $defenseDateTime);
+            ->whereHas('defense', function($q) use ($validated) {
+                $q->where('defense_date', $validated['defense_date'])
+                  ->where('defense_time', $validated['defense_time']);
             })->first();
 
         if ($conflictingJury) {
@@ -265,7 +295,8 @@ class DefenseController extends Controller
             // Create defense
             $defense = Defense::create([
                 'subject_id' => $validated['subject_id'],
-                'defense_date' => $defenseDateTime,
+                'defense_date' => $validated['defense_date'],
+                'defense_time' => $validated['defense_time'],
                 'room_id' => $validated['room_id'],
                 'duration' => 90, // Default 90 minutes
                 'status' => 'scheduled',
@@ -503,15 +534,16 @@ class DefenseController extends Controller
             'room_id' => 'required|exists:rooms,id',
             'duration' => 'required|integer|min:30|max:180',
             'notes' => 'nullable|string|max:500',
-            'status' => 'required|in:scheduled,in_progress,completed,cancelled'
+            'status' => 'required|in:scheduled,in_progress,completed,cancelled',
+            'supervisor_id' => 'required|exists:users,id',
+            'president_id' => 'required|exists:users,id|different:supervisor_id',
+            'examiner_id' => 'required|exists:users,id|different:supervisor_id,president_id',
         ]);
-
-        // Combine date and time
-        $defenseDateTime = $validated['defense_date'] . ' ' . $validated['defense_time'];
 
         // Check room availability (excluding current defense)
         $conflictingDefense = Defense::where('room_id', $validated['room_id'])
-            ->where('defense_date', $defenseDateTime)
+            ->where('defense_date', $validated['defense_date'])
+            ->where('defense_time', $validated['defense_time'])
             ->where('id', '!=', $defense->id)
             ->first();
 
@@ -520,16 +552,64 @@ class DefenseController extends Controller
                 ->with('error', 'Room is not available at the selected time.');
         }
 
-        $defense->update([
-            'defense_date' => $defenseDateTime,
-            'room_id' => $validated['room_id'],
-            'duration' => $validated['duration'],
-            'notes' => $validated['notes'],
-            'status' => $validated['status']
-        ]);
+        // Check jury availability (excluding current defense)
+        $juryMembers = [$validated['supervisor_id'], $validated['president_id'], $validated['examiner_id']];
+        $conflictingJury = DefenseJury::whereIn('teacher_id', $juryMembers)
+            ->whereHas('defense', function($q) use ($validated, $defense) {
+                $q->where('defense_date', $validated['defense_date'])
+                  ->where('defense_time', $validated['defense_time'])
+                  ->where('id', '!=', $defense->id);
+            })->first();
 
-        return redirect()->route('defenses.show', $defense)
-            ->with('success', 'Defense updated successfully!');
+        if ($conflictingJury) {
+            return redirect()->back()
+                ->with('error', 'One or more jury members are not available at the selected time.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update defense
+            $defense->update([
+                'defense_date' => $validated['defense_date'],
+                'defense_time' => $validated['defense_time'],
+                'room_id' => $validated['room_id'],
+                'duration' => $validated['duration'],
+                'notes' => $validated['notes'],
+                'status' => $validated['status']
+            ]);
+
+            // Update jury members - delete old and create new
+            $defense->juries()->delete();
+
+            // Create new jury assignments
+            DefenseJury::create([
+                'defense_id' => $defense->id,
+                'teacher_id' => $validated['supervisor_id'],
+                'role' => 'supervisor'
+            ]);
+
+            DefenseJury::create([
+                'defense_id' => $defense->id,
+                'teacher_id' => $validated['president_id'],
+                'role' => 'president'
+            ]);
+
+            DefenseJury::create([
+                'defense_id' => $defense->id,
+                'teacher_id' => $validated['examiner_id'],
+                'role' => 'examiner'
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('defenses.show', $defense)
+                ->with('success', __('app.defense_updated'));
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()
+                ->with('error', 'Failed to update defense: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -626,12 +706,25 @@ class DefenseController extends Controller
         //$this->authorize('viewReport', $defense);
 
         $defense->load([
-            'project.team.members.user',
-            'project.subject.teacher',
-            'project.team.speciality',
+            'subject.teacher',
             'room',
             'juries.teacher',
             'report'
+        ]);
+
+        // Also load project relationships if they exist
+        if ($defense->project_id) {
+            $defense->load([
+                'project.team.members.user',
+                'project.team.speciality'
+            ]);
+        }
+
+        // Load additional relationships for comprehensive data
+        $defense->load([
+            'project.team.members.user' => function($query) {
+                $query->select('id', 'first_name', 'last_name', 'name', 'date_naissance', 'lieu_naissance');
+            }
         ]);
 
         return view('defenses.report', compact('defense'));
@@ -645,12 +738,25 @@ class DefenseController extends Controller
         //$this->authorize('viewReport', $defense);
 
         $defense->load([
-            'project.team.members.user',
-            'project.subject.teacher',
-            'project.team.speciality',
+            'subject.teacher',
             'room',
             'juries.teacher',
             'report'
+        ]);
+
+        // Also load project relationships if they exist
+        if ($defense->project_id) {
+            $defense->load([
+                'project.team.members.user',
+                'project.team.speciality'
+            ]);
+        }
+
+        // Load additional relationships for comprehensive data
+        $defense->load([
+            'project.team.members.user' => function($query) {
+                $query->select('id', 'first_name', 'last_name', 'name', 'date_naissance', 'lieu_naissance');
+            }
         ]);
 
         $pdf = \PDF::loadView('defenses.report', compact('defense'));
@@ -667,5 +773,32 @@ class DefenseController extends Controller
         $filename = 'PV_Soutenance_' . str_replace(' ', '_', $defense->project->subject->title ?? 'Defense') . '_' . now()->format('Y-m-d') . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Delete a defense (for admins only)
+     */
+    public function destroy(Defense $defense): RedirectResponse
+    {
+        try {
+            // Only admins can delete defenses
+            if (auth()->user()->role !== 'admin') {
+                return redirect()->back()
+                    ->with('error', __('app.unauthorized_action'));
+            }
+
+            // Store defense info for the success message
+            $defenseInfo = $defense->subject?->title ?? __('app.defense');
+
+            // Delete the defense
+            $defense->delete();
+
+            return redirect()->route('defenses.index')
+                ->with('success', __('app.defense_deleted_successfully', ['defense' => $defenseInfo]));
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', __('app.defense_delete_failed'));
+        }
     }
 }

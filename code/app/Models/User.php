@@ -39,6 +39,7 @@ class User extends Authenticatable
         'section',
         'groupe',
         'date_naissance',
+        'lieu_naissance',
         'status',
         'academic_year',
         'profile_completed',

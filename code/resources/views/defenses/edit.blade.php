@@ -45,7 +45,7 @@
                                     <label for="defense_time" class="form-label">Defense Time</label>
                                     <input type="time" class="form-control @error('defense_time') is-invalid @enderror"
                                            id="defense_time" name="defense_time"
-                                           value="{{ old('defense_time', $defense->defense_date ? $defense->defense_date->format('H:i') : '') }}" required>
+                                           value="{{ old('defense_time', $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : '') }}" required>
                                     @error('defense_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -107,6 +107,72 @@
                             @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- Jury Composition -->
+                        <div class="mb-4">
+                            <label class="form-label">Jury Composition</label>
+
+                            @php
+                                $supervisor = $defense->juries->firstWhere('role', 'supervisor');
+                                $president = $defense->juries->firstWhere('role', 'president');
+                                $examiner = $defense->juries->firstWhere('role', 'examiner');
+                            @endphp
+
+                            <!-- Supervisor (Auto-filled from subject) -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="card border-success">
+                                        <div class="card-body py-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="badge bg-success me-2">Supervisor</div>
+                                                <span>{{ $supervisor ? $supervisor->teacher->name : ($defense->subject->teacher->name ?? 'No Supervisor') }}</span>
+                                                <input type="hidden" name="supervisor_id" value="{{ $supervisor ? $supervisor->teacher_id : $defense->subject->teacher_id }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- President -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="president_id" class="form-label">President <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('president_id') is-invalid @enderror"
+                                            id="president_id" name="president_id" required>
+                                        <option value="">Select President</option>
+                                        @foreach($teachers as $teacher)
+                                            <option value="{{ $teacher->id }}"
+                                                {{ old('president_id', $president ? $president->teacher_id : '') == $teacher->id ? 'selected' : '' }}>
+                                                {{ $teacher->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('president_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Examiner -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="examiner_id" class="form-label">Examiner <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('examiner_id') is-invalid @enderror"
+                                            id="examiner_id" name="examiner_id" required>
+                                        <option value="">Select Examiner</option>
+                                        @foreach($teachers as $teacher)
+                                            <option value="{{ $teacher->id }}"
+                                                {{ old('examiner_id', $examiner ? $examiner->teacher_id : '') == $teacher->id ? 'selected' : '' }}>
+                                                {{ $teacher->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('examiner_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-3">

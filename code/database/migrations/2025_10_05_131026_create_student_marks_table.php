@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('student_marks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id'); // Student ID
-            $table->string('subject_name'); // Subject/Module name
+            // $table->string('subject_name'); // Subject/Module name
             $table->decimal('mark', 5, 2); // Mark/Grade (e.g., 15.75 out of 20)
             $table->decimal('max_mark', 5, 2)->default(20.00); // Maximum possible mark
             $table->string('semester')->nullable(); // e.g., S1, S2, S3, etc.
