@@ -443,33 +443,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const examinerSelect = document.getElementById('examiner_id');
 
     // Subject data for supervisor lookup and team management
-    const subjectData = @json($subjects->map(function($subject) {
-        return [
-            'id' => $subject->id,
-            'teacher_id' => $subject->teacher_id,
-            'teacher_name' => $subject->teacher->name ?? 'No Teacher',
-            'has_project' => $subject->projects->count() > 0,
-            'assigned_team' => $subject->projects->count() > 0 ? [
-                'id' => $subject->projects->first()->team->id,
-                'name' => $subject->projects->first()->team->name,
-                'members' => $subject->projects->first()->team->members->map(function($member) {
-                    return $member->user->name;
-                })
-            ] : null
-        ];
-    }));
+    const subjectData = @json($subjectData);
 
     // Teams without defense data
-    const teamsWithoutDefense = @json($teamsWithoutDefense->map(function($team) {
-        return [
-            'id' => $team->id,
-            'name' => $team->name,
-            'members' => $team->members->map(function($member) {
-                return $member->user->name;
-            }),
-            'project_title' => $team->project ? $team->project->title : 'No Project'
-        ];
-    }));
+    const teamsWithoutDefense = @json($teamsData);
 
     if (subjectSelect) {
         subjectSelect.addEventListener('change', function() {
@@ -480,14 +457,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 supervisorName.textContent = subject.teacher_name;
                 supervisorId.value = subject.teacher_id;
 
+                // Handle team selection based on subject
+                updateTeamSelection(subject);
+
                 // Remove supervisor from president and examiner options if selected
                 updateJuryOptions();
             } else {
                 supervisorName.textContent = 'Select a subject to see supervisor';
                 supervisorId.value = '';
+                clearTeamSelection();
                 updateJuryOptions();
             }
         });
+    }
+
+    function updateTeamSelection(subject) {
+        const teamSelect = document.getElementById('team_id');
+        const teamInfo = document.getElementById('team-info');
+
+        // Clear existing options
+        teamSelect.innerHTML = '<option value="">Choose team...</option>';
+        teamInfo.innerHTML = '';
+
+        if (subject.has_project && subject.assigned_team) {
+            // Subject has assigned team - show readonly
+            const option = document.createElement('option');
+            option.value = subject.assigned_team.id;
+            option.textContent = `${subject.assigned_team.name} (Assigned Team)`;
+            option.selected = true;
+            teamSelect.appendChild(option);
+            teamSelect.disabled = true;
+
+            teamInfo.innerHTML = `<small class="text-success">
+                <i class="bi bi-check-circle"></i> Team assigned: ${subject.assigned_team.members.join(', ')}
+            </small>`;
+        } else {
+            // Subject has no team - allow selection from available teams
+            teamSelect.disabled = false;
+
+            if (teamsWithoutDefense.length > 0) {
+                teamsWithoutDefense.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.id;
+
+                    if (team.has_project) {
+                        option.textContent = `${team.name} (${team.members.length} members) - Has Project`;
+                    } else {
+                        option.textContent = `${team.name} (${team.members.length} members) - No Subject Chosen`;
+                    }
+
+                    teamSelect.appendChild(option);
+                });
+
+                const teamsWithoutProject = teamsWithoutDefense.filter(team => !team.has_project).length;
+                const teamsWithProject = teamsWithoutDefense.filter(team => team.has_project).length;
+
+                teamInfo.innerHTML = `<small class="text-info">
+                    <i class="bi bi-info-circle"></i> Available teams: ${teamsWithProject} with projects, ${teamsWithoutProject} without subjects
+                </small>`;
+            } else {
+                teamInfo.innerHTML = `<small class="text-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No teams available without defense
+                </small>`;
+            }
+        }
+    }
+
+    function clearTeamSelection() {
+        const teamSelect = document.getElementById('team_id');
+        const teamInfo = document.getElementById('team-info');
+
+        teamSelect.innerHTML = '<option value="">{{ __("app.select_subject_first") }}</option>';
+        teamSelect.disabled = true;
+        teamInfo.innerHTML = '';
     }
 
     function updateJuryOptions() {

@@ -27,22 +27,14 @@ class TeamSeeder extends Seeder
             [
                 'name' => 'CodeCrafters',
                 'status' => 'forming',
-            ],
-            [
-                'name' => 'TechTalkers',
-                'status' => 'forming',
-            ],
-            [
-                'name' => 'AI Innovators',
-                'status' => 'forming',
-            ],
+            ]
         ];
 
         foreach ($teams as $teamData) {
             $team = Team::create($teamData);
 
             // Add some team members
-            $students = $csStudents->take(3);
+            $students = $csStudents->take(1);
             foreach ($students as $index => $student) {
                 TeamMember::create([
                     'team_id' => $team->id,
@@ -53,7 +45,7 @@ class TeamSeeder extends Seeder
             }
 
             // Skip used students for next team
-            $csStudents = $csStudents->skip(3);
+            $csStudents = $csStudents->skip(1);
         }
 
         $this->command->info('Created 3 teams with members');

@@ -130,7 +130,7 @@
         $birthDate = $student && $student->date_naissance ? \Carbon\Carbon::parse($student->date_naissance)->format('d/m/Y') : '__/__/____';
         $birthPlace = $student ? $student->lieu_naissance ?? '___________' : '___________';
         $academicYear = $defense->project?->academic_year ?? '2024/2025';
-        $speciality = $defense->project?->team?->speciality?->name ?? 'Informatique';
+        $speciality = $defense->project?->team?->members?->first()?->user?->speciality ?? 'Informatique';
         $subjectTitle = $defense->subject?->title ?? '';
     @endphp
 

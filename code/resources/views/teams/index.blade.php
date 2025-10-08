@@ -64,10 +64,9 @@
                             <tr>
                                 <th>{{ __('app.team_name') }}</th>
                                 <th>{{ __('app.members') }}</th>
-                                <th>{{ __('app.leader') }}</th>
+                                <th>Leader & Created</th>
                                 <th>{{ __('app.status') }}</th>
                                 <th>{{ __('app.subject') }}</th>
-                                <th>{{ __('app.created_at') }}</th>
                                 <th>{{ __('app.actions') }}</th>
                             </tr>
                         </thead>
@@ -102,13 +101,14 @@
                                     </td>
                                     <td>
                                         @if($leader)
-                                            <span class="text-nowrap">
+                                            <div class="text-nowrap">
                                                 <i class="bi bi-star-fill text-warning"></i>
                                                 {{ $leader->user->name }}
-                                            </span>
+                                            </div>
                                         @else
-                                            <span class="text-muted">{{ __('app.no_leader') }}</span>
+                                            <div class="text-muted">{{ __('app.no_leader') }}</div>
                                         @endif
+                                        <small class="text-muted">{{ $team->created_at->format('M d, Y') }}</small>
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $team->status === 'active' ? 'success' : ($team->status === 'complete' ? 'primary' : 'warning') }}">
@@ -129,9 +129,6 @@
                                                 <i class="bi bi-question-circle"></i> {{ __('app.not_selected') }}
                                             </span>
                                         @endif
-                                    </td>
-                                    <td class="text-nowrap">
-                                        {{ $team->created_at->format('M d, Y') }}
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">

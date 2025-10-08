@@ -135,6 +135,16 @@
                                                         title="{{ __('app.view_details') }}">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
+                                                @if($subject->preferences_count > 0)
+                                                    <button type="button"
+                                                            class="btn btn-outline-info btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#requestsModal"
+                                                            data-subject-id="{{ $subject->id }}"
+                                                            title="See Requests ({{ $subject->preferences_count }})">
+                                                        <i class="bi bi-list-ul"></i>
+                                                    </button>
+                                                @endif
                                                 @if(auth()->user()?->id === $subject->teacher_id)
                                                     <a href="{{ route('subjects.edit', $subject) }}"
                                                        class="btn btn-outline-warning btn-sm"
@@ -213,13 +223,39 @@
             </div>
         </div>
     </div>
+
+    <!-- Team Requests Modal -->
+    <div class="modal fade" id="requestsModal" tabindex="-1" aria-labelledby="requestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="requestsModalLabel">Team Requests</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="requestsModalContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const subjectModal = document.getElementById('subjectModal');
+    const requestsModal = document.getElementById('requestsModal');
 
+    // Subject details modal
     subjectModal.addEventListener('show.bs.modal', function(event) {
         const button = event.relatedTarget;
         const subjectId = button.getAttribute('data-subject-id');
@@ -245,6 +281,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle"></i>
                         Error loading subject details. Please try again.
+                    </div>
+                `;
+            });
+    });
+
+    // Team requests modal
+    requestsModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const subjectId = button.getAttribute('data-subject-id');
+        const modalContent = document.getElementById('requestsModalContent');
+
+        // Show loading spinner
+        modalContent.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+
+        // Fetch team requests
+        fetch(`/subjects/${subjectId}/requests`)
+            .then(response => response.text())
+            .then(html => {
+                modalContent.innerHTML = html;
+            })
+            .catch(error => {
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Error loading team requests. Please try again.
                     </div>
                 `;
             });

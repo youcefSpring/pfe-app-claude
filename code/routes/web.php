@@ -99,6 +99,9 @@ Route::middleware(['auth'])->group(function () {
         // Dynamic route for modal content
         Route::get('/{subject}/modal', [SubjectController::class, 'modal'])->name('modal');
 
+        // Dynamic route for team requests
+        Route::get('/{subject}/requests', [SubjectController::class, 'requests'])->name('requests');
+
         // Dynamic route for viewing specific subjects (must be after static routes)
         Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
 

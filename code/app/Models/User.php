@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -123,6 +124,34 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the team membership for this student.
+     */
+    public function teamMember(): HasOne
+    {
+        return $this->hasOne(TeamMember::class, 'student_id');
+    }
+
+    /**
+     * Check if user is a team member.
+     */
+    public function isTeamMember(): bool
+    {
+        return $this->role === 'student' && $this->teamMember()->exists();
+    }
+
+    /**
+     * Get display role including team membership status.
+     */
+    public function getDisplayRole(): string
+    {
+        if ($this->role === 'student' && $this->isTeamMember()) {
+            return 'Team Member';
+        }
+
+        return ucfirst(str_replace('_', ' ', $this->role));
+    }
+
+    /**
      * Get the projects supervised by this teacher.
      */
     public function supervisedProjects(): HasMany
@@ -166,10 +195,10 @@ class User extends Authenticatable
     /**
      * Get the current team membership for this student (single relationship).
      */
-    public function teamMember()
-    {
-        return $this->hasOne(TeamMember::class, 'student_id');
-    }
+    // public function teamMember()
+    // {
+    //     return $this->hasOne(TeamMember::class, 'student_id');
+    // }
 
     /**
      * Get the current active team for this student.

@@ -174,6 +174,42 @@ class SubjectController extends Controller
     }
 
     /**
+     * Display team requests for a subject
+     */
+    public function requests(Subject $subject): View
+    {
+        // Get students that have chosen this subject as a preference, ordered by priority
+        $studentRequests = \App\Models\SubjectPreference::where('subject_id', $subject->id)
+            ->with([
+                'student.teamMember.team.members.user'
+            ])
+            ->orderBy('preference_order')
+            ->get();
+
+        // Group by team to show team-based requests
+        $teamRequests = $studentRequests->groupBy(function($preference) {
+            return $preference->student->teamMember ? $preference->student->teamMember->team_id : null;
+        })->map(function($preferences, $teamId) {
+            if($teamId === null) {
+                // Students without teams
+                return $preferences;
+            }
+
+            // Return the first preference for each team (assuming team members have same priorities)
+            $firstPreference = $preferences->first();
+            $team = $firstPreference->student->teamMember->team;
+
+            // Add team data to the preference object
+            $firstPreference->team = $team;
+            $firstPreference->team_members_preferences = $preferences;
+
+            return $firstPreference;
+        })->filter()->sortBy('preference_order');
+
+        return view('subjects.requests', compact('subject', 'teamRequests'));
+    }
+
+    /**
      * Show the form for editing the specified subject
      */
     public function edit(Subject $subject): View

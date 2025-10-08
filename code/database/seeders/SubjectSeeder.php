@@ -23,6 +23,15 @@ class SubjectSeeder extends Seeder
                 'plan' => 'Phase 1: Data collection and analysis. Phase 2: Model development. Phase 3: Web application creation.',
                 'status' => 'validated',
                 'teacher_id' => $csTeachers->random()->id,
+            ],
+            [
+                'title' => 'Système de Recommandation E-commerce Propulsé par l\'IA',
+                'description' => 'évelopper un système d\'apprentissage automatique qui fournit des recommandations de produits personnalisées pour les plateformes de commerce électronique.',
+                'keywords' => 'apprentissage automatique, systèmes de recommandation, commerce électronique, analyse de données, Python, TensorFlow',
+                'tools' => 'Python, TensorFlow/PyTorch, frameworks web, bases de données, APIs',
+                'plan' => 'Phase 1: Collecte et analyse des données. Phase 2: Développement du modèle. Phase 3: Création de l\'application web.',
+                'status' => 'validated',
+                'teacher_id' => $csTeachers->random()->id,
             ]
         ];
 

@@ -8,6 +8,7 @@ use App\Models\DefenseJury;
 use App\Models\Project;
 use App\Models\Room;
 use App\Models\Subject;
+use App\Models\Team;
 use App\Models\User;
 use App\Models\AllocationDeadline;
 use App\Services\ReportService;
@@ -230,14 +231,71 @@ class DefenseController extends Controller
         $teachers = User::whereIn('role', ['teacher','department_head'])->orderBy('name')->get();
 
         // Get teams that don't have a defense scheduled for current academic year
+        // This includes teams with projects but no defense AND teams without projects (no subject chosen)
         $currentAcademicYear = '2024-2025'; // This should be dynamic based on your system
-        $teamsWithoutDefense = Team::with(['members.user', 'project'])
-            ->where('academic_year', $currentAcademicYear)
-            ->whereDoesntHave('project.defense')
-            ->whereHas('project') // Only teams with assigned projects
+
+        $teamsWithoutDefense = Team::with(['members.user', 'project.subject'])
+            ->whereHas('members') // Teams must have at least one member
+            ->where(function($outerQuery) use ($currentAcademicYear) {
+                // First condition: teams where academic_year is null (no academic year set)
+                $outerQuery->whereHas('members.user', function($query) {
+                    $query->whereNull('academic_year');
+                })
+                // OR teams with the current academic year
+                ->orWhereHas('members.user', function($query) use ($currentAcademicYear) {
+                    $query->where('academic_year', $currentAcademicYear);
+                });
+            })
+            ->where(function($query) {
+                $query->whereDoesntHave('project') // Teams without any project (no subject chosen)
+                      ->orWhereHas('project', function($subQuery) { // OR teams with project but no defense
+                          $subQuery->whereDoesntHave('defense');
+                      });
+            })
             ->get();
 
-        return view('defenses.schedule', compact('subjects', 'rooms', 'teachers', 'teamsWithoutDefense'));
+        // Prepare subject data for JavaScript
+        $subjectData = $subjects->map(function($subject) {
+            $assignedTeam = null;
+            if ($subject->projects->count() > 0) {
+                $project = $subject->projects->first();
+                $assignedTeam = [
+                    'id' => $project->team->id,
+                    'name' => $project->team->name,
+                    'members' => $project->team->members->map(function($member) {
+                        return $member->user->name;
+                    })->toArray()
+                ];
+            }
+
+            return [
+                'id' => $subject->id,
+                'teacher_id' => $subject->teacher_id,
+                'teacher_name' => $subject->teacher->name ?? 'No Teacher',
+                'has_project' => $subject->projects->count() > 0,
+                'assigned_team' => $assignedTeam
+            ];
+        });
+
+        // Prepare teams data for JavaScript
+        $teamsData = $teamsWithoutDefense->map(function($team) {
+            $hasProject = $team->project !== null;
+            $projectTitle = $hasProject ? ($team->project->subject ? $team->project->subject->title : 'Project without subject') : 'No Subject Chosen';
+
+            return [
+                'id' => $team->id,
+                'name' => $team->name,
+                'members' => $team->members->map(function($member) {
+                    return $member->user->name;
+                })->toArray(),
+                'project_title' => $projectTitle,
+                'has_project' => $hasProject,
+                'subject_id' => $hasProject && $team->project->subject ? $team->project->subject->id : null,
+                'status' => $hasProject ? 'Has Project' : 'No Subject Chosen'
+            ];
+        });
+
+        return view('defenses.schedule', compact('subjects', 'rooms', 'teachers', 'teamsWithoutDefense', 'subjectData', 'teamsData'));
     }
 
     /**
@@ -249,6 +307,7 @@ class DefenseController extends Controller
 
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
+            'team_id' => 'required|exists:teams,id',
             'defense_date' => 'required|date|after:now',
             'defense_time' => 'required|date_format:H:i',
             'room_id' => 'required|exists:rooms,id',
@@ -301,6 +360,17 @@ class DefenseController extends Controller
                 ->with('error', 'Room is not available at the selected time.');
         }
 
+        // Check if team already has a defense scheduled
+        $team = Team::find($validated['team_id']);
+        $existingTeamDefense = Defense::whereHas('project.team', function($q) use ($team) {
+            $q->where('id', $team->id);
+        })->first();
+
+        if ($existingTeamDefense) {
+            return redirect()->back()
+                ->with('error', "Team {$team->name} already has a defense scheduled.");
+        }
+
         // Check jury availability
         $juryMembers = [$validated['supervisor_id'], $validated['president_id'], $validated['examiner_id']];
         $conflictingJury = DefenseJury::whereIn('teacher_id', $juryMembers)
@@ -314,10 +384,22 @@ class DefenseController extends Controller
                 ->with('error', 'One or more jury members are not available at the selected time.');
         }
 
+        // Create or update project if needed
+        $project = Project::firstOrCreate([
+            'team_id' => $validated['team_id'],
+            'subject_id' => $validated['subject_id'],
+        ], [
+            'supervisor_id' => $subject->teacher_id,
+            'type' => $subject->is_external ? 'external' : 'internal',
+            'status' => 'assigned',
+            'started_at' => now(),
+        ]);
+
         DB::beginTransaction();
         try {
             // Create defense
             $defense = Defense::create([
+                'project_id' => $project->id,
                 'subject_id' => $validated['subject_id'],
                 'defense_date' => $validated['defense_date'],
                 'defense_time' => $validated['defense_time'],
@@ -752,8 +834,7 @@ class DefenseController extends Controller
         // Also load project relationships if they exist
         if ($defense->project_id) {
             $defense->load([
-                'project.team.members.user',
-                'project.team.speciality'
+                'project.team.members.user'
             ]);
         }
 
@@ -784,8 +865,7 @@ class DefenseController extends Controller
         // Also load project relationships if they exist
         if ($defense->project_id) {
             $defense->load([
-                'project.team.members.user',
-                'project.team.speciality'
+                'project.team.members.user'
             ]);
         }
 
