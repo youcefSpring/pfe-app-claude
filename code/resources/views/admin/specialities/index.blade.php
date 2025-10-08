@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', __('app.specialities_management'))
+@section('title', 'Gestion des Spécialités')
 
 @section('content')
 <div class="container-fluid">
@@ -8,12 +8,79 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">{{ __('app.specialities_management') }}</h4>
-                    <div>
-                        <a href="{{ route('admin.specialities.create') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> {{ __('app.add_speciality') }}
-                        </a>
-                    </div>
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-mortarboard me-2"></i>Gestion des Spécialités
+                    </h4>
+                    <a href="{{ route('admin.specialities.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Nouvelle Spécialité
+                    </a>
+                </div>
+
+                <!-- Search and Filter Section -->
+                <div class="card-body border-bottom">
+                    <form method="GET" action="{{ route('admin.specialities.index') }}" id="filterForm">
+                        <div class="row g-3">
+                            <!-- Search -->
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">Rechercher</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="search"
+                                           name="search"
+                                           value="{{ request('search') }}"
+                                           placeholder="Nom, code ou niveau...">
+                                </div>
+                            </div>
+
+                            <!-- Level Filter -->
+                            <div class="col-md-2">
+                                <label for="level" class="form-label">Niveau</label>
+                                <select class="form-select" id="level" name="level">
+                                    <option value="">Tous les niveaux</option>
+                                    @foreach(\App\Models\Speciality::LEVELS as $key => $label)
+                                        <option value="{{ $key }}" {{ request('level') === $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Academic Year Filter -->
+                            <div class="col-md-2">
+                                <label for="academic_year" class="form-label">Année Académique</label>
+                                <select class="form-select" id="academic_year" name="academic_year">
+                                    <option value="">Toutes les années</option>
+                                    @foreach($academicYears ?? [] as $year)
+                                        <option value="{{ $year }}" {{ request('academic_year') === $year ? 'selected' : '' }}>
+                                            {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="col-md-2">
+                                <label for="status" class="form-label">Statut</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
+                                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
+                                </select>
+                            </div>
+
+                            <!-- Clear Button -->
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Effacer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-body">
                     @if($specialities->count() > 0)

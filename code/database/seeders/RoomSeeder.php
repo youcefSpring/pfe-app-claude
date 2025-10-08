@@ -11,60 +11,66 @@ class RoomSeeder extends Seeder
     {
         $rooms = [
             [
-                'name' => 'Amphitheater A',
+                'name' => 'Amphi 100',
                 'capacity' => 200,
-                'equipment' => json_encode(['projector', 'microphone', 'audio_system', 'recording']),
+                'equipment' => 'projector'
             ],
             [
-                'name' => 'Amphitheater B',
+                'name' => 'Amphi 101',
                 'capacity' => 150,
-                'equipment' => json_encode(['projector', 'microphone', 'audio_system']),
+                'equipment' => 'projector',
             ],
             [
-                'name' => 'Conference Room 101',
-                'capacity' => 30,
-                'equipment' => json_encode(['projector', 'whiteboard', 'video_conference']),
-            ],
-            [
-                'name' => 'Conference Room 102',
-                'capacity' => 25,
-                'equipment' => json_encode(['projector', 'whiteboard']),
-            ],
-            [
-                'name' => 'Conference Room 201',
-                'capacity' => 40,
-                'equipment' => json_encode(['projector', 'whiteboard', 'video_conference', 'recording']),
-            ],
-            [
-                'name' => 'Seminar Room 301',
-                'capacity' => 20,
-                'equipment' => json_encode(['projector', 'whiteboard']),
-            ],
-            [
-                'name' => 'Seminar Room 302',
+                'name' => '4.101',
                 'capacity' => 15,
-                'equipment' => json_encode(['projector', 'whiteboard']),
+                'equipment' => 'projector'
             ],
             [
-                'name' => 'Computer Lab 1',
-                'capacity' => 30,
-                'equipment' => json_encode(['computers', 'projector', 'whiteboard']),
-            ],
-            [
-                'name' => 'Computer Lab 2',
+                'name' => '4.102',
                 'capacity' => 25,
-                'equipment' => json_encode(['computers', 'projector']),
+                'equipment' => 'projector'
             ],
             [
-                'name' => 'Research Lab A',
-                'capacity' => 12,
-                'equipment' => json_encode(['computers', 'specialized_equipment', 'whiteboard']),
-            ],
-            [
-                'name' => 'Executive Meeting Room',
+                'name' => '4.201',
                 'capacity' => 15,
-                'equipment' => json_encode(['projector', 'video_conference', 'recording', 'premium_furniture']),
+                'equipment' => 'projector',
             ],
+            [
+                'name' => '4.202',
+                'capacity' => 15,
+                'equipment' => '',
+            ],
+            [
+                'name' => '4.203',
+                'capacity' => 15,
+                'equipment' => 'projector',
+            ],
+            [
+                'name' => '4.301',
+                'capacity' => 15,
+                'equipment' => 'projector',
+            ],
+            [
+                'name' => '4.302',
+                'capacity' => 15,
+                'equipment' => '',
+            ],
+            [
+                'name' => '4.303',
+                'capacity' => 15,
+                'equipment' => 'projector',
+            ],
+            [
+                'name' => '4.305',
+                'capacity' => 15,
+                'equipment' => '',
+            ],
+
+            [
+                'name' => 'Conference Room Bloc 5',
+                'capacity' => 25,
+                'equipment' => 'projector',
+            ]
         ];
 
         foreach ($rooms as $roomData) {

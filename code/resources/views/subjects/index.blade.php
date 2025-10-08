@@ -77,6 +77,7 @@
                                     <th>{{ __('app.grade') }}</th>
                                     <th>{{ __('app.status') }}</th>
                                     <th>{{ __('app.type') }}</th>
+                                    <th>Teams</th>
                                     <th>{{ __('app.created') }}</th>
                                     <th>{{ __('app.actions') }}</th>
                                 </tr>
@@ -110,6 +111,15 @@
                                                 <span class="badge bg-primary">
                                                     <i class="bi bi-house"></i> {{ __('app.internal') }}
                                                 </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($subject->preferences_count > 0)
+                                                <span class="badge bg-success" title="{{ $subject->preferences_count }} teams interested">
+                                                    <i class="bi bi-people"></i> {{ $subject->preferences_count }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td class="text-nowrap">

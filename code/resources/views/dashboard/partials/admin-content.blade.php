@@ -169,7 +169,7 @@
                     <small class="text-muted">Students</small>
                 </div>
             </div>
-            <a href="{{ route('admin.specialities') }}" class="btn btn-secondary btn-sm w-100 mt-3">Manage Specialities</a>
+            <a href="{{ route('admin.specialities.index') }}" class="btn btn-secondary btn-sm w-100 mt-3">Manage Specialities</a>
         </div>
     </div>
 </div>

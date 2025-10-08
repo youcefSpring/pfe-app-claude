@@ -34,7 +34,7 @@
                                     <label for="defense_date" class="form-label">Defense Date</label>
                                     <input type="date" class="form-control @error('defense_date') is-invalid @enderror"
                                            id="defense_date" name="defense_date"
-                                           value="{{ old('defense_date', $defense->defense_date ? $defense->defense_date->format('Y-m-d') : '') }}" required>
+                                           value="{{ old('defense_date', $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : '') }}" required>
                                     @error('defense_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

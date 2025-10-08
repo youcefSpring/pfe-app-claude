@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\SubjectPreferenceController;
 use App\Http\Controllers\Web\AllocationController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\StudentUploadController;
+use App\Http\Controllers\Admin\AllocationController as AdminAllocationController;
 use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -253,6 +254,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{defense}/complete', [DefenseController::class, 'complete'])->name('complete');
             Route::get('/{defense}/report', [DefenseController::class, 'generateReport'])->name('generate-report');
             Route::get('/{defense}/report/pdf', [DefenseController::class, 'downloadReportPdf'])->name('download-report-pdf');
+            Route::get('/{defense}/student/{student}/report/pdf', [DefenseController::class, 'downloadStudentReportPdf'])->name('download-student-report-pdf');
+            Route::get('/{defense}/batch-reports/pdf', [DefenseController::class, 'downloadBatchStudentReports'])->name('download-batch-reports-pdf');
         });
 
         // Dynamic route for viewing specific defenses (must be at the end)
@@ -294,12 +297,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/students/import-history', [StudentUploadController::class, 'importHistory'])->name('students.import-history');
 
         // Speciality Management
-        Route::get('/specialities', [AdminController::class, 'specialities'])->name('specialities');
-        Route::get('/specialities/create', [AdminController::class, 'createSpeciality'])->name('specialities.create');
-        Route::post('/specialities', [AdminController::class, 'storeSpeciality'])->name('specialities.store');
-        Route::get('/specialities/{speciality}/edit', [AdminController::class, 'editSpeciality'])->name('specialities.edit');
-        Route::put('/specialities/{speciality}', [AdminController::class, 'updateSpeciality'])->name('specialities.update');
-        Route::delete('/specialities/{speciality}', [AdminController::class, 'destroySpeciality'])->name('specialities.destroy');
+        Route::resource('specialities', \App\Http\Controllers\Admin\SpecialityController::class);
+        Route::patch('/specialities/{speciality}/toggle-status', [\App\Http\Controllers\Admin\SpecialityController::class, 'toggleStatus'])->name('specialities.toggle-status');
+        Route::get('/specialities/api/current-year', [\App\Http\Controllers\Admin\SpecialityController::class, 'getCurrentAcademicYear'])->name('specialities.current-year');
+
+        // Allocation Management
+        Route::prefix('allocations')->name('allocations.')->group(function () {
+            Route::get('/', [AdminAllocationController::class, 'index'])->name('index');
+            Route::get('/{deadline}', [AdminAllocationController::class, 'show'])->name('show');
+            Route::post('/{deadline}/auto-allocation', [AdminAllocationController::class, 'performAutoAllocation'])->name('auto-allocation');
+            Route::post('/manual-assignment', [AdminAllocationController::class, 'manualAssignment'])->name('manual-assignment');
+            Route::post('/{deadline}/second-round', [AdminAllocationController::class, 'initializeSecondRound'])->name('second-round');
+            Route::delete('/allocation/{allocation}', [AdminAllocationController::class, 'removeAllocation'])->name('remove-allocation');
+        });
 
         // Student Marks Management
         Route::get('/marks', [AdminController::class, 'marks'])->name('marks');

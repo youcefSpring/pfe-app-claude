@@ -179,6 +179,46 @@
                                             @endforeach
                                         </div>
                                     @endif
+
+                                    @if($teamPreferences->count() > 0)
+                                        <div class="mb-3">
+                                            <small class="text-muted">Teams that chose this subject</small>
+                                            <div class="small text-muted mb-2">Ordered by preference priority</div>
+                                            @foreach($teamPreferences as $preference)
+                                                <div class="border-start border-info ps-2 mb-2">
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <div>
+                                                            <div class="fw-bold d-flex align-items-center">
+                                                                <span class="badge bg-info me-2" style="font-size: 0.7rem;">
+                                                                    {{ $preference->preference_order }}{{ $preference->preference_order == 1 ? 'st' : ($preference->preference_order == 2 ? 'nd' : ($preference->preference_order == 3 ? 'rd' : 'th')) }} choice
+                                                                </span>
+                                                                {{ $preference->team->name }}
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                {{ $preference->team->members->count() }} members:
+                                                                @foreach($preference->team->members->take(3) as $member)
+                                                                    {{ $member->user->name }}@if(!$loop->last), @endif
+                                                                @endforeach
+                                                                @if($preference->team->members->count() > 3)
+                                                                    and {{ $preference->team->members->count() - 3 }} more
+                                                                @endif
+                                                            </small>
+                                                        </div>
+                                                        @if($preference->preference_order == 1)
+                                                            <span class="badge bg-warning text-dark" title="First choice">
+                                                                <i class="fas fa-star"></i>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                    @if($preference->allocationDeadline)
+                                                        <small class="text-muted">
+                                                            Deadline: {{ $preference->allocationDeadline->academic_year }} - {{ $preference->allocationDeadline->level }}
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 

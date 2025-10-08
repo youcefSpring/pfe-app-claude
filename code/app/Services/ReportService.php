@@ -10,6 +10,7 @@ use App\Models\Subject;
 use App\Models\Team;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use PDF;
 
 class ReportService
 {
@@ -87,8 +88,8 @@ class ReportService
 
         return [
             'defense' => [
-                'date' => $defense->defense_date->format('d/m/Y'),
-                'time' => $defense->defense_time->format('H:i'),
+                'date' => $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('d/m/Y') : '',
+                'time' => $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : '',
                 'room' => $defense->room->name,
                 'duration' => $defense->duration,
                 'final_grade' => $defense->final_grade,
@@ -146,16 +147,115 @@ class ReportService
      */
     private function generateDefenseReportPDF(array $data): string
     {
-        // This would use a PDF generation library like DomPDF
-        // For now, return a placeholder
-        $html = view('reports.defense-pv', $data)->render();
+        $pdf = \PDF::loadView('reports.defense-pv', $data);
+        return $pdf->output();
+    }
 
-        // Using DomPDF (would need to be installed)
-        // $pdf = \PDF::loadHTML($html);
-        // return $pdf->output();
+    /**
+     * Generate individual student defense report.
+     */
+    public function generateStudentDefenseReport(Defense $defense, User $student): string
+    {
+        $project = $defense->project;
+        $team = $project->team;
 
-        // Placeholder implementation
-        return "PDF content for defense report - " . json_encode($data);
+        $data = $this->prepareStudentReportData($defense, $student);
+
+        $pdf = \PDF::loadView('reports.defense-pv', $data);
+        return $pdf->output();
+    }
+
+    /**
+     * Generate batch reports for all students in a team.
+     */
+    public function generateBatchStudentReports(Defense $defense): array
+    {
+        $project = $defense->project;
+        $team = $project->team;
+        $reports = [];
+
+        foreach ($team->members as $member) {
+            $student = $member->student;
+            $pdfContent = $this->generateStudentDefenseReport($defense, $student);
+            $fileName = $this->generateStudentReportFileName($defense, $student);
+
+            $reports[] = [
+                'student_name' => $student->name,
+                'filename' => $fileName,
+                'content' => $pdfContent
+            ];
+        }
+
+        return $reports;
+    }
+
+    /**
+     * Prepare data for individual student report.
+     */
+    private function prepareStudentReportData(Defense $defense, User $student): array
+    {
+        $project = $defense->project;
+        $team = $project->team;
+        $subject = $project->subject;
+
+        return [
+            'defense' => [
+                'date' => $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('d/m/Y') : '',
+                'time' => $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : '',
+                'room' => $defense->room->name ?? '',
+                'duration' => $defense->duration ?? '',
+                'final_grade' => $defense->final_grade ?? '',
+                'manuscript_grade' => $defense->manuscript_grade ?? '',
+                'oral_grade' => $defense->oral_grade ?? '',
+                'questions_grade' => $defense->questions_grade ?? '',
+                'realization_grade' => $defense->realization_grade ?? '',
+                'academic_year' => $project->academic_year ?? '2023/2024',
+            ],
+            'project' => [
+                'title' => $project->getTitle() ?? $subject->title ?? '',
+                'description' => $project->getDescription() ?? '',
+                'type' => $project->type ?? '',
+            ],
+            'team' => [
+                'name' => $team->name ?? '',
+                'members' => [
+                    [
+                        'name' => $student->name ?? '',
+                        'matricule' => $student->matricule ?? '',
+                        'birth_date' => $student->birth_date ? \Carbon\Carbon::parse($student->birth_date)->format('d/m/Y') : '',
+                        'birth_place' => $student->birth_place ?? '',
+                        'speciality' => $student->speciality ?? '',
+                    ]
+                ],
+            ],
+            'subject' => $subject ? [
+                'title' => $subject->title ?? '',
+                'teacher' => $subject->teacher->name ?? '',
+            ] : null,
+            'jury' => $defense->jury()->with('teacher')->get()->map(function ($juryMember) {
+                return [
+                    'name' => $juryMember->teacher->name ?? '',
+                    'role' => ucfirst($juryMember->role ?? ''),
+                    'grade' => $juryMember->teacher->grade ?? '',
+                ];
+            })->toArray(),
+            'supervisor' => [
+                'name' => $project->supervisor->name ?? '',
+                'department' => $project->supervisor->department ?? '',
+            ],
+            'logo_path' => public_path('logo.png'),
+        ];
+    }
+
+    /**
+     * Generate report file name for individual student.
+     */
+    private function generateStudentReportFileName(Defense $defense, User $student): string
+    {
+        $date = $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : date('Y-m-d');
+        $studentName = str_replace(' ', '_', $student->name);
+
+        return "PV_Soutenance_{$studentName}_{$date}.pdf";
     }
 
     /**
@@ -164,7 +264,7 @@ class ReportService
     private function generateReportFileName(Defense $defense): string
     {
         $project = $defense->project;
-        $date = $defense->defense_date->format('Y-m-d');
+        $date = $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : date('Y-m-d');
         $teamName = str_replace(' ', '_', $project->team->name);
 
         return "PV_Soutenance_{$teamName}_{$date}.pdf";

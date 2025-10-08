@@ -21,7 +21,8 @@ class SubjectController extends Controller
     {
         $user = Auth::user();
 
-        $query = Subject::with(['teacher']);
+        $query = Subject::with(['teacher'])
+            ->withCount(['preferences as preferences_count']);
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -145,7 +146,22 @@ class SubjectController extends Controller
     public function show(Subject $subject): View
     {
         $subject->load(['teacher', 'student', 'validator', 'externalSupervisor', 'projects.team.members.user']);
-        return view('subjects.show', compact('subject'));
+
+        // Get teams that have chosen this subject as a preference, ordered by priority
+        $teamPreferences = \App\Models\SubjectPreference::where('subject_id', $subject->id)
+            ->with([
+                'team.members.user',
+                'allocationDeadline'
+            ])
+            ->orderBy('preference_order')
+            ->get()
+            ->groupBy('team_id')
+            ->map(function ($preferences) {
+                return $preferences->first(); // Get the first (highest priority) preference for each team
+            })
+            ->sortBy('preference_order');
+
+        return view('subjects.show', compact('subject', 'teamPreferences'));
     }
 
     /**

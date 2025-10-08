@@ -127,7 +127,7 @@
 
         // Default values for missing data
         $studentName = $student ? $student->first_name . ' ' . $student->last_name : 'NOM Prénom';
-        $birthDate = $student && $student->date_naissance ? $student->date_naissance->format('d/m/Y') : '__/__/____';
+        $birthDate = $student && $student->date_naissance ? \Carbon\Carbon::parse($student->date_naissance)->format('d/m/Y') : '__/__/____';
         $birthPlace = $student ? $student->lieu_naissance ?? '___________' : '___________';
         $academicYear = $defense->project?->academic_year ?? '2024/2025';
         $speciality = $defense->project?->team?->speciality?->name ?? 'Informatique';
@@ -154,7 +154,7 @@
 
         <h3 class="title">Procès-Verbal de Soutenance de Mémoire de Master</h3>
 
-        <p>En date du : <span class="form-field">{{ $defense->defense_date ? $defense->defense_date->format('d/m/Y') : '__/__/____' }}</span> a eu lieu la soutenance de Mémoire de
+        <p>En date du : <span class="form-field">{{ $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('d/m/Y') : '__/__/____' }}</span> a eu lieu la soutenance de Mémoire de
         Master de l'étudiant(e) : <span class="form-field">{{ $studentName }}</span> né(e) le
         <span class="form-field">{{ $birthDate }}</span> à <span class="form-field">{{ $birthPlace }}</span></p>
 

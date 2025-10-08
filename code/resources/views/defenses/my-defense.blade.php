@@ -28,7 +28,7 @@
                                 </h2>
                                 @if($defense->defense_date)
                                     <p class="text-muted mb-0">
-                                        {{ $defense->defense_date->format('F d, Y \\a\\t g:i A') }}
+                                        {{ $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('F d, Y \\a\\t g:i A') : 'TBD' }}
                                     </p>
                                 @endif
                             </div>
@@ -71,8 +71,8 @@
                             </div>
                             <div class="col-md-6">
                                 <h6 class="text-muted">Schedule & Location</h6>
-                                <p><strong>Date:</strong> {{ $defense->defense_date ? $defense->defense_date->format('M d, Y') : 'TBD' }}</p>
-                                <p><strong>Time:</strong> {{ $defense->defense_date ? $defense->defense_date->format('g:i A') : 'TBD' }}</p>
+                                <p><strong>Date:</strong> {{ $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('M d, Y') : 'TBD' }}</p>
+                                <p><strong>Time:</strong> {{ $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('g:i A') : 'TBD' }}</p>
                                 <p><strong>Duration:</strong> {{ $defense->duration ?? 60 }} minutes</p>
                                 <p><strong>Room:</strong> {{ $defense->room->name ?? 'TBD' }}
                                     @if($defense->room && $defense->room->location)

@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Create New Speciality</h4>
-                    <a href="{{ route('admin.specialities') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Back to Specialities
                     </a>
                 </div>
@@ -117,7 +117,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-graduation-cap"></i> Create Speciality
                             </button>
-                            <a href="{{ route('admin.specialities') }}" class="btn btn-outline-secondary">
+                            <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>

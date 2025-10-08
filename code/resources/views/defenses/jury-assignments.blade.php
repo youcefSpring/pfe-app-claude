@@ -74,7 +74,7 @@
                                 @if($assignment->defense->defense_date)
                                     <p class="small mb-1">
                                         <i class="bi bi-calendar me-1"></i>
-                                        {{ $assignment->defense->defense_date->format('M d, Y \\a\\t g:i A') }}
+                                        {{ $assignment->defense->defense_date ? \Carbon\Carbon::parse($assignment->defense->defense_date)->format('M d, Y \\a\\t g:i A') : 'TBD' }}
                                     </p>
                                 @else
                                     <p class="small mb-1 text-muted">
@@ -202,7 +202,7 @@
                         <div class="alert alert-warning">
                             <strong>{{ $upcoming->defense->project->subject->title ?? 'Defense' }}</strong><br>
                             <small>
-                                {{ $upcoming->defense->defense_date->format('M d, Y \\a\\t g:i A') }} -
+                                {{ $upcoming->defense->defense_date ? \Carbon\Carbon::parse($upcoming->defense->defense_date)->format('M d, Y \\a\\t g:i A') : 'TBD' }} -
                                 {{ $upcoming->defense->room->name ?? 'Room TBD' }}<br>
                                 Role: {{ ucfirst($upcoming->role) }}
                             </small>

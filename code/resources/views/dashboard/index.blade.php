@@ -151,7 +151,7 @@
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.specialities') }}" class="btn btn-outline-success w-100">
+                                <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-success w-100">
                                     <i class="bi bi-mortarboard d-block mb-2" style="font-size: 1.5rem;"></i>
                                     {{ __('app.specialities') }}
                                 </a>

@@ -22,6 +22,31 @@ class Speciality extends Model
     ];
 
     /**
+     * Available levels for specialities
+     */
+    public const LEVELS = [
+        'licence' => 'Licence',
+        'master' => 'Master',
+        'ingenieur' => 'Ingénieur',
+    ];
+
+    /**
+     * Generate current academic year automatically
+     */
+    public static function getCurrentAcademicYear(): string
+    {
+        $currentDate = now();
+        $currentYear = $currentDate->year;
+
+        // Academic year starts in September
+        if ($currentDate->month >= 9) {
+            return $currentYear . '/' . ($currentYear + 1);
+        } else {
+            return ($currentYear - 1) . '/' . $currentYear;
+        }
+    }
+
+    /**
      * Get the students for the speciality.
      */
     public function students(): HasMany

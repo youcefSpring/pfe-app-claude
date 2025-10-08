@@ -17,9 +17,32 @@
                     </a>
                 @endif
                 @if($defense->status === 'completed')
-                    <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-danger">
-                        <i class="bi bi-file-pdf"></i> Download PDF
-                    </a>
+                    <div class="btn-group">
+                        <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-danger">
+                            <i class="bi bi-file-pdf"></i> Download PDF
+                        </a>
+                        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header">Individual Reports</h6></li>
+                            @if($defense->project && $defense->project->team)
+                                @foreach($defense->project->team->members as $member)
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('defenses.download-student-report-pdf', [$defense, $member->user]) }}">
+                                            <i class="bi bi-person-fill"></i> {{ $member->user->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-primary fw-bold" href="{{ route('defenses.download-batch-reports-pdf', $defense) }}">
+                                        <i class="bi bi-archive-fill"></i> Download All (ZIP)
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
                 @endif
             @endif
         </div>
@@ -75,21 +98,41 @@
                         <div class="row">
                             @foreach($defense->project->team->members as $member)
                                 <div class="col-md-6 mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                                            {{ substr($member->user->name, 0, 1) }}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                {{ substr($member->user->name, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">{{ $member->user->name }}</h6>
+                                                <small class="text-muted">{{ $member->user->email }}</small>
+                                                @if($member->is_leader)
+                                                    <span class="badge bg-success ms-2">Leader</span>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h6 class="mb-1">{{ $member->user->name }}</h6>
-                                            <small class="text-muted">{{ $member->user->email }}</small>
-                                            @if($member->is_leader)
-                                                <span class="badge bg-success ms-2">Leader</span>
-                                            @endif
-                                        </div>
+                                        @if($defense->status === 'completed' && in_array(auth()->user()?->role, ['admin', 'department_head']))
+                                            <a href="{{ route('defenses.download-student-report-pdf', [$defense, $member->user]) }}"
+                                               class="btn btn-sm btn-outline-danger"
+                                               title="Download {{ $member->user->name }}'s report">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
                         </div>
+
+                        @if($defense->status === 'completed' && in_array(auth()->user()?->role, ['admin', 'department_head']))
+                            <div class="border-top pt-3 mt-3">
+                                <div class="d-flex justify-content-center">
+                                    <a href="{{ route('defenses.download-batch-reports-pdf', $defense) }}"
+                                       class="btn btn-primary">
+                                        <i class="bi bi-archive-fill"></i> Download All Reports (ZIP)
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif

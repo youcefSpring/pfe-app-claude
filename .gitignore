@@ -1,10 +1,10 @@
-/code*.log
-/code.DS_Store
-/code.env
-/code.env.backup
-/code.env.production
-/code.phpactor.json
-/code.phpunit.result.cache
+/code/*.log
+/code/.DS_Store
+/code/.env
+/code/.env.backup
+/code/.env.production
+/code/.phpactor.json
+/code/.phpunit.result.cache
 /code/.fleet
 /code/.idea
 /code/.nova

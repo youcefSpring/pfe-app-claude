@@ -19,9 +19,14 @@ class AllocationDeadline extends Model
         'preferences_deadline',
         'grades_verification_deadline',
         'allocation_date',
+        'second_round_start',
+        'second_round_deadline',
+        'defense_scheduling_allowed_after',
         'status',
         'description',
         'created_by',
+        'auto_allocation_completed',
+        'second_round_needed',
     ];
 
     protected function casts(): array
@@ -31,6 +36,11 @@ class AllocationDeadline extends Model
             'preferences_deadline' => 'datetime',
             'grades_verification_deadline' => 'datetime',
             'allocation_date' => 'datetime',
+            'second_round_start' => 'datetime',
+            'second_round_deadline' => 'datetime',
+            'defense_scheduling_allowed_after' => 'datetime',
+            'auto_allocation_completed' => 'boolean',
+            'second_round_needed' => 'boolean',
         ];
     }
 
@@ -108,5 +118,68 @@ class AllocationDeadline extends Model
         } elseif ($this->isPreferencesDeadlinePassed()) {
             $this->update(['status' => 'preferences_closed']);
         }
+    }
+
+    /**
+     * Check if defense scheduling is allowed (deadline passed)
+     */
+    public function canScheduleDefenses(): bool
+    {
+        return $this->defense_scheduling_allowed_after
+            ? now()->gte($this->defense_scheduling_allowed_after)
+            : $this->isPreferencesDeadlinePassed();
+    }
+
+    /**
+     * Check if second round is active
+     */
+    public function isSecondRoundActive(): bool
+    {
+        return $this->second_round_needed &&
+               $this->second_round_start &&
+               $this->second_round_deadline &&
+               now()->between($this->second_round_start, $this->second_round_deadline);
+    }
+
+    /**
+     * Check if second round deadline has passed
+     */
+    public function isSecondRoundDeadlinePassed(): bool
+    {
+        return $this->second_round_deadline && now()->gt($this->second_round_deadline);
+    }
+
+    /**
+     * Check if auto-allocation can be performed
+     */
+    public function canPerformAutoAllocation(): bool
+    {
+        return $this->isPreferencesDeadlinePassed() &&
+               $this->isGradesVerificationDeadlinePassed() &&
+               !$this->auto_allocation_completed;
+    }
+
+    /**
+     * Mark auto-allocation as completed
+     */
+    public function markAutoAllocationCompleted(): void
+    {
+        $this->update([
+            'auto_allocation_completed' => true,
+            'status' => 'auto_allocation_completed'
+        ]);
+    }
+
+    /**
+     * Initialize second round for teams without subjects
+     */
+    public function initializeSecondRound(\Carbon\Carbon $startDate, \Carbon\Carbon $endDate): void
+    {
+        $this->update([
+            'second_round_needed' => true,
+            'second_round_start' => $startDate,
+            'second_round_deadline' => $endDate,
+            'status' => 'second_round_active'
+        ]);
     }
 }

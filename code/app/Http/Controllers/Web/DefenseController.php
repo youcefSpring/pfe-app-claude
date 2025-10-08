@@ -9,11 +9,16 @@ use App\Models\Project;
 use App\Models\Room;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\AllocationDeadline;
+use App\Services\ReportService;
+use App\Services\AutoAllocationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
+use ZipArchive;
 
 class DefenseController extends Controller
 {
@@ -216,7 +221,7 @@ class DefenseController extends Controller
     {
         //$this->authorize('schedule', Defense::class);
 
-        $subjects = Subject::with(['teacher'])
+        $subjects = Subject::with(['teacher', 'projects.team.members.user'])
             ->where('status', 'validated')
             ->get();
 
@@ -224,7 +229,15 @@ class DefenseController extends Controller
 
         $teachers = User::whereIn('role', ['teacher','department_head'])->orderBy('name')->get();
 
-        return view('defenses.schedule', compact('subjects', 'rooms', 'teachers'));
+        // Get teams that don't have a defense scheduled for current academic year
+        $currentAcademicYear = '2024-2025'; // This should be dynamic based on your system
+        $teamsWithoutDefense = Team::with(['members.user', 'project'])
+            ->where('academic_year', $currentAcademicYear)
+            ->whereDoesntHave('project.defense')
+            ->whereHas('project') // Only teams with assigned projects
+            ->get();
+
+        return view('defenses.schedule', compact('subjects', 'rooms', 'teachers', 'teamsWithoutDefense'));
     }
 
     /**
@@ -256,6 +269,17 @@ class DefenseController extends Controller
         if ($subject->status !== 'validated') {
             return redirect()->back()
                 ->with('error', 'Only validated subjects can have defenses scheduled.');
+        }
+
+        // Check if deadline for subject choice has passed (NEW VALIDATION)
+        $deadline = AllocationDeadline::where('academic_year', $subject->academic_year)
+            ->where('level', $subject->level)
+            ->where('status', '!=', 'draft')
+            ->first();
+
+        if ($deadline && !$deadline->canScheduleDefenses()) {
+            return redirect()->back()
+                ->with('error', 'La soutenance ne peut pas être programmée car la date limite de choix des sujets n\'est pas encore dépassée. Veuillez attendre après le ' . $deadline->defense_scheduling_allowed_after?->format('d/m/Y H:i') ?? $deadline->preferences_deadline->format('d/m/Y H:i') . '.');
         }
 
         // Check if subject already has a defense scheduled
@@ -361,6 +385,19 @@ class DefenseController extends Controller
         if ($projects->isEmpty()) {
             return redirect()->back()
                 ->with('info', 'No unscheduled projects found.');
+        }
+
+        // Check if deadline for subject choice has passed for any project
+        foreach ($projects as $project) {
+            $deadline = AllocationDeadline::where('academic_year', $project->subject->academic_year)
+                ->where('level', $project->subject->level)
+                ->where('status', '!=', 'draft')
+                ->first();
+
+            if ($deadline && !$deadline->canScheduleDefenses()) {
+                return redirect()->back()
+                    ->with('error', 'La soutenance auto ne peut pas être exécutée car la date limite de choix des sujets n\'est pas encore dépassée pour tous les projets. Veuillez attendre après le ' . ($deadline->defense_scheduling_allowed_after?->format('d/m/Y H:i') ?? $deadline->preferences_deadline->format('d/m/Y H:i')) . '.');
+            }
         }
 
         $rooms = Room::orderBy('name')->get();
@@ -773,6 +810,78 @@ class DefenseController extends Controller
         $filename = 'PV_Soutenance_' . str_replace(' ', '_', $defense->project->subject->title ?? 'Defense') . '_' . now()->format('Y-m-d') . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Download individual student defense report as PDF
+     */
+    public function downloadStudentReportPdf(Defense $defense, User $student, ReportService $reportService)
+    {
+        // Validate that the student belongs to the defense team
+        if (!$defense->project || !$defense->project->team ||
+            !$defense->project->team->members->pluck('student_id')->contains($student->id)) {
+            abort(404, 'Student not found in this defense team.');
+        }
+
+        try {
+            $pdfContent = $reportService->generateStudentDefenseReport($defense, $student);
+            $filename = 'PV_Soutenance_' . str_replace(' ', '_', $student->name) . '_' . ($defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : date('Y-m-d')) . '.pdf';
+
+            return response($pdfContent)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to generate report: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download batch reports for all students in a team as ZIP
+     */
+    public function downloadBatchStudentReports(Defense $defense, ReportService $reportService)
+    {
+        if (!$defense->project || !$defense->project->team || $defense->project->team->members->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'No team members found for this defense.');
+        }
+
+        try {
+            $reports = $reportService->generateBatchStudentReports($defense);
+
+            if (empty($reports)) {
+                return redirect()->back()
+                    ->with('error', 'No reports to generate.');
+            }
+
+            // Create temporary ZIP file
+            $tempFile = tempnam(sys_get_temp_dir(), 'defense_reports_');
+            $zip = new ZipArchive();
+
+            if ($zip->open($tempFile, ZipArchive::CREATE) !== TRUE) {
+                return redirect()->back()
+                    ->with('error', 'Failed to create ZIP file.');
+            }
+
+            // Add each report to the ZIP
+            foreach ($reports as $report) {
+                $zip->addFromString($report['filename'], $report['content']);
+            }
+
+            $zip->close();
+
+            // Generate ZIP filename
+            $teamName = str_replace(' ', '_', $defense->project->team->name ?? 'Team');
+            $date = $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : date('Y-m-d');
+            $zipFilename = "PV_Soutenance_{$teamName}_{$date}_All_Students.zip";
+
+            return response()->download($tempFile, $zipFilename)->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to generate batch reports: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -194,7 +194,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.close') }}</button>
-                <a href="{{ route('admin.specialities') }}" class="btn btn-primary">{{ __('app.view_specialities') }}</a>
+                <a href="{{ route('admin.specialities.index') }}" class="btn btn-primary">{{ __('app.view_specialities') }}</a>
             </div>
         </div>
     </div>

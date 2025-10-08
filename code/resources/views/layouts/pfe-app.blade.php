@@ -229,6 +229,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.allocations*') ? 'active' : '' }}" href="{{ route('admin.allocations.index') }}">
+                                <i class="bi bi-diagram-3 me-2"></i>
+                                Allocations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.specialities*') ? 'active' : '' }}" href="{{ route('admin.specialities.index') }}">
+                                <i class="bi bi-mortarboard me-2"></i>
+                                Specialities
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.alerts*') ? 'active' : '' }}" href="{{ route('admin.alerts') }}">
                                 <i class="bi bi-bell me-2"></i>
                                 {{ __('app.student_alerts') }}

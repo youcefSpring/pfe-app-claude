@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Header -->
+    {{-- <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card bg-primary text-white">
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Action Buttons -->
     <div class="row mb-4">
@@ -88,6 +88,23 @@
                                         @error('room_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team Selection Row -->
+                            <div class="row" id="team-selection-row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="team_id" class="form-label">{{ __('app.team') }} <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('team_id') is-invalid @enderror"
+                                                id="team_id" name="team_id" required>
+                                            <option value="">{{ __('app.select_subject_first') }}</option>
+                                        </select>
+                                        @error('team_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <div class="form-text" id="team-info"></div>
                                     </div>
                                 </div>
                             </div>
@@ -425,12 +442,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const presidentSelect = document.getElementById('president_id');
     const examinerSelect = document.getElementById('examiner_id');
 
-    // Subject data for supervisor lookup
+    // Subject data for supervisor lookup and team management
     const subjectData = @json($subjects->map(function($subject) {
         return [
             'id' => $subject->id,
             'teacher_id' => $subject->teacher_id,
-            'teacher_name' => $subject->teacher->name ?? 'No Teacher'
+            'teacher_name' => $subject->teacher->name ?? 'No Teacher',
+            'has_project' => $subject->projects->count() > 0,
+            'assigned_team' => $subject->projects->count() > 0 ? [
+                'id' => $subject->projects->first()->team->id,
+                'name' => $subject->projects->first()->team->name,
+                'members' => $subject->projects->first()->team->members->map(function($member) {
+                    return $member->user->name;
+                })
+            ] : null
+        ];
+    }));
+
+    // Teams without defense data
+    const teamsWithoutDefense = @json($teamsWithoutDefense->map(function($team) {
+        return [
+            'id' => $team->id,
+            'name' => $team->name,
+            'members' => $team->members->map(function($member) {
+                return $member->user->name;
+            }),
+            'project_title' => $team->project ? $team->project->title : 'No Project'
         ];
     }));
 

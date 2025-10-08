@@ -368,7 +368,7 @@ class AdminController extends Controller
             $data['is_active'] = $request->boolean('is_active');
 
             Speciality::create($data);
-            return redirect()->route('admin.specialities')
+            return redirect()->route('admin.specialities.index')
                 ->with('success', 'Speciality created successfully!');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -405,7 +405,7 @@ class AdminController extends Controller
             $data['is_active'] = $request->boolean('is_active');
 
             $speciality->update($data);
-            return redirect()->route('admin.specialities')
+            return redirect()->route('admin.specialities.index')
                 ->with('success', 'Speciality updated successfully!');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -426,7 +426,7 @@ class AdminController extends Controller
             }
 
             $speciality->delete();
-            return redirect()->route('admin.specialities')
+            return redirect()->route('admin.specialities.index')
                 ->with('success', 'Speciality deleted successfully!');
         } catch (\Exception $e) {
             return redirect()->back()
