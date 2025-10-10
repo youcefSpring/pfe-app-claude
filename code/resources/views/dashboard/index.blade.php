@@ -2,6 +2,23 @@
 
 @section('page-title', __('app.dashboard'))
 
+@push('styles')
+<!-- Driver.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css">
+<style>
+.tour-trigger-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+</style>
+@endpush
+
 @section('content')
 <div class="row">
     <!-- Welcome Card -->
@@ -28,7 +45,7 @@
 <!-- Quick Actions -->
 <div class="row mt-3">
     <div class="col-12">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm" id="quick-actions-card">
             <div class="card-header bg-light py-2">
                 <h6 class="card-title mb-0 fw-bold">
                     <i class="bi bi-lightning me-2 text-warning"></i>{{ __('app.quick_actions') }}
@@ -145,31 +162,31 @@
                             @break
                         @case('admin')
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.users') }}" class="btn btn-outline-primary w-100 py-2">
+                                <a href="{{ route('admin.users') }}" class="btn btn-outline-primary w-100 py-2" id="users-btn">
                                     <i class="bi bi-people d-block mb-1" style="font-size: 1.2rem;"></i>
                                     <small>{{ __('app.manage_users') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-success w-100 py-2">
+                                <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-success w-100 py-2" id="specialities-btn">
                                     <i class="bi bi-mortarboard d-block mb-1" style="font-size: 1.2rem;"></i>
                                     <small>{{ __('app.specialities') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.rooms') }}" class="btn btn-outline-info w-100 py-2">
+                                <a href="{{ route('admin.rooms') }}" class="btn btn-outline-info w-100 py-2" id="rooms-btn">
                                     <i class="bi bi-building d-block mb-1" style="font-size: 1.2rem;"></i>
                                     <small>{{ __('app.manage_rooms') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100 py-2">
+                                <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100 py-2" id="reports-btn">
                                     <i class="bi bi-graph-up d-block mb-1" style="font-size: 1.2rem;"></i>
                                     <small>{{ __('app.reports_analytics') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.academic-years.index') }}" class="btn btn-outline-dark w-100 py-2">
+                                <a href="{{ route('admin.academic-years.index') }}" class="btn btn-outline-dark w-100 py-2" id="academic-years-btn">
                                     <i class="bi bi-calendar-range d-block mb-1" style="font-size: 1.2rem;"></i>
                                     <small>{{ __('app.academic_years_management') }}</small>
                                 </a>
