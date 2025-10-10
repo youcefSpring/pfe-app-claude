@@ -87,127 +87,124 @@
 
                     <div class="card-body">
                         @if($users->count() > 0)
-                            <!-- Results Summary -->
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="text-muted">
-                                    {{ __('app.showing_results', [
-                                        'from' => $users->firstItem() ?? 0,
-                                        'to' => $users->lastItem() ?? 0,
-                                        'total' => $users->total()
-                                    ]) }}
-                                </div>
-                                <div class="text-muted">
-                                    {{ __('app.per_page') }}: {{ $users->perPage() }}
-                                </div>
-                            </div>
-
-                            <!-- Users Table -->
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ __('app.name') }}</th>
-                                            <th>{{ __('app.email') }}</th>
-                                            <th>{{ __('app.role') }}</th>
-                                            <th>{{ __('app.speciality') }}</th>
-                                            <th>{{ __('app.created_at') }}</th>
-                                            <th>{{ __('app.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($users as $user)
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar-circle bg-primary text-white me-3">
-                                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                                    <!-- Results Summary -->
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <div class="text-muted">
+                                                            {{ __('app.showing_results', [
+                                'from' => $users->firstItem() ?? 0,
+                                'to' => $users->lastItem() ?? 0,
+                                'total' => $users->total()
+                            ]) }}
                                                         </div>
-                                                        <div>
-                                                            <h6 class="mb-1">{{ $user->name }}</h6>
-                                                            @if($user->matricule)
-                                                                <small class="text-muted">{{ $user->matricule }}</small>
-                                                            @endif
-                                                            @if($user->first_name && $user->last_name)
-                                                                <br><small class="text-info">{{ $user->first_name }} {{ $user->last_name }}</small>
-                                                            @endif
+                                                        <div class="text-muted">
+                                                            {{ __('app.per_page') }}: {{ $users->perPage() }}
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <div>
-                                                        {{ $user->email }}
-                                                        @if($user->email_verified_at)
-                                                            <i class="bi bi-check-circle-fill text-success ms-1" title="{{ __('app.verified') }}"></i>
-                                                        @else
-                                                            <i class="bi bi-exclamation-circle-fill text-warning ms-1" title="{{ __('app.unverified') }}"></i>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    @if($user->role === 'student')
-                                                        <span class="badge bg-primary">{{ __('app.student') }}</span>
-                                                    @elseif($user->role === 'teacher')
-                                                        <span class="badge bg-success">{{ __('app.teacher') }}</span>
-                                                    @elseif($user->role === 'department_head')
-                                                        <span class="badge bg-warning">{{ __('app.department_head') }}</span>
-                                                    @elseif($user->role === 'admin')
-                                                        <span class="badge bg-danger">{{ __('app.admin') }}</span>
-                                                    @else
-                                                        <span class="badge bg-secondary">{{ ucfirst($user->role) }}</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($user->speciality_id && $user->speciality)
-                                                        <span class="badge bg-info">{{ $user->speciality->name }}</span>
-                                                        <br><small class="text-muted">{{ $user->speciality->level }}</small>
-                                                    @else
-                                                        <span class="text-muted">—</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <small class="text-muted">
-                                                        {{ $user->created_at->format('d/m/Y') }}<br>
-                                                        {{ $user->created_at->format('H:i') }}
-                                                    </small>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        <a href="{{ route('admin.users.details', $user) }}"
-                                                           class="btn btn-sm btn-outline-info"
-                                                           title="{{ __('app.see_details') }}">
-                                                            <i class="bi bi-eye"></i>
-                                                        </a>
-                                                        <a href="{{ route('admin.users.edit', $user) }}"
-                                                           class="btn btn-sm btn-outline-primary"
-                                                           title="{{ __('app.edit') }}">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </a>
-                                                        @if($user->id !== auth()->id())
-                                                            <form action="{{ route('admin.users.destroy', $user) }}"
-                                                                  method="POST"
-                                                                  class="d-inline"
-                                                                  onsubmit="return confirm('{{ __('app.confirm_delete_user') }}')">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                        class="btn btn-sm btn-outline-danger"
-                                                                        title="{{ __('app.delete') }}">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
 
-                            <!-- Pagination -->
-                            <div class="d-flex justify-content-center mt-4">
-                                {{ $users->links() }}
-                            </div>
+                                                    <!-- Users Table -->
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>{{ __('app.name') }}</th>
+                                                                    <th>{{ __('app.email') }}</th>
+                                                                    <th>{{ __('app.role') }}</th>
+                                                                    <th>{{ __('app.speciality') }}</th>
+                                                                    <th>{{ __('app.created_at') }}</th>
+                                                                    <th>{{ __('app.actions') }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($users as $user)
+                                                                    <tr>
+                                                                        <td>
+                                                                            <div class="d-flex align-items-center">
+                                                                                <div class="avatar-circle bg-primary text-white me-3">
+                                                                                    {{ strtoupper(substr($user->name, 0, 2)) }}
+                                                                                </div>
+                                                                                <div>
+                                                                                    <h6 class="mb-1">{{ $user->name }}</h6>
+                                                                                    @if($user->matricule)
+                                                                                        <small class="text-muted">{{ $user->matricule }}</small>
+                                                                                    @endif
+                                                                                    @if($user->first_name && $user->last_name)
+                                                                                        <br><small class="text-info">{{ $user->first_name }} {{ $user->last_name }}</small>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div>
+                                                                                {{ $user->email }}
+                                                                                @if($user->email_verified_at)
+                                                                                    <i class="bi bi-check-circle-fill text-success ms-1" title="{{ __('app.verified') }}"></i>
+                                                                                @else
+                                                                                    <i class="bi bi-exclamation-circle-fill text-warning ms-1" title="{{ __('app.unverified') }}"></i>
+                                                                                @endif
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            @if($user->role === 'student')
+                                                                                <span class="badge bg-primary">{{ __('app.student') }}</span>
+                                                                            @elseif($user->role === 'teacher')
+                                                                                <span class="badge bg-success">{{ __('app.teacher') }}</span>
+                                                                            @elseif($user->role === 'department_head')
+                                                                                <span class="badge bg-warning">{{ __('app.department_head') }}</span>
+                                                                            @elseif($user->role === 'admin')
+                                                                                <span class="badge bg-danger">{{ __('app.admin') }}</span>
+                                                                            @else
+                                                                                <span class="badge bg-secondary">{{ ucfirst($user->role) }}</span>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>
+                                                                        <small class="text-muted">
+                                                                           {{ \App\Models\Speciality::where('id',$user->speciality_id)->first()->code ?? '-' }}
+                                                                        </small>
+                                                                        </td>
+                                                                        <td>
+                                                                            <small class="text-muted">
+                                                                                {{ $user->created_at->format('d/m/Y') }}<br>
+                                                                                {{ $user->created_at->format('H:i') }}
+                                                                            </small>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="btn-group" role="group">
+                                                                                <a href="{{ route('admin.users.details', $user) }}"
+                                                                                   class="btn btn-sm btn-outline-info"
+                                                                                   title="{{ __('app.see_details') }}">
+                                                                                    <i class="bi bi-eye"></i>
+                                                                                </a>
+                                                                                <a href="{{ route('admin.users.edit', $user) }}"
+                                                                                   class="btn btn-sm btn-outline-primary"
+                                                                                   title="{{ __('app.edit') }}">
+                                                                                    <i class="bi bi-pencil"></i>
+                                                                                </a>
+                                                                                @if($user->id !== auth()->id())
+                                                                                    <form action="{{ route('admin.users.destroy', $user) }}"
+                                                                                          method="POST"
+                                                                                          class="d-inline"
+                                                                                          onsubmit="return confirm('{{ __('app.confirm_delete_user') }}')">
+                                                                                        @csrf
+                                                                                        @method('DELETE')
+                                                                                        <button type="submit"
+                                                                                                class="btn btn-sm btn-outline-danger"
+                                                                                                title="{{ __('app.delete') }}">
+                                                                                            <i class="bi bi-trash"></i>
+                                                                                        </button>
+                                                                                    </form>
+                                                                                @endif
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                    <!-- Pagination -->
+                                                    <div class="d-flex justify-content-center mt-4">
+                                                        {{ $users->links() }}
+                                                    </div>
                         @else
                             <div class="text-center py-5">
                                 <i class="bi bi-people display-1 text-muted"></i>

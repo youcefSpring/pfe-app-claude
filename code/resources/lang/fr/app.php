@@ -1322,4 +1322,7 @@ return [
     'tour_specialities_card_desc' => 'Aperçu des spécialités académiques, programmes actifs et inscriptions d\'étudiants.',
     'system_overview' => 'Vue d\'ensemble du Système',
     'tour_system_overview_desc' => 'Métriques système complètes montrant la distribution par département et la répartition des rôles utilisateur.',
+
+    // Additional
+    'speciality_id' => 'ID de Spécialité',
 ];

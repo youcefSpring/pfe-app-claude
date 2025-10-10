@@ -121,7 +121,7 @@ class SubjectController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'keywords' => 'required|string|max:500',
-            'tools' => 'required|string|max:500',
+            'tools' => 'nullable|string|max:500',
             'plan' => 'required|string',
             'specialities' => 'required|array|min:1',
             'specialities.*' => 'exists:specialities,id',
@@ -162,6 +162,11 @@ class SubjectController extends Controller
         }
 
         $validated['status'] = 'draft';
+
+        // Ensure tools has a default value if not provided
+        if (empty($validated['tools'])) {
+            $validated['tools'] = '';
+        }
 
         // Remove specialities from validated data as it's handled separately
         $specialities = $validated['specialities'];
@@ -267,11 +272,16 @@ class SubjectController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'keywords' => 'required|string|max:500',
-            'tools' => 'required|string|max:500',
+            'tools' => 'nullable|string|max:500',
             'plan' => 'required|string',
             'specialities' => 'required|array|min:1',
             'specialities.*' => 'exists:specialities,id',
         ]);
+
+        // Ensure tools has a default value if not provided
+        if (empty($validated['tools'])) {
+            $validated['tools'] = '';
+        }
 
         // Handle specialities separately
         $specialities = $validated['specialities'];

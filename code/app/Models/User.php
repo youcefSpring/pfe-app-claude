@@ -78,7 +78,7 @@ class User extends Authenticatable
      */
     public function speciality(): BelongsTo
     {
-        return $this->belongsTo(Speciality::class);
+        return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
     // Relationships for Teachers

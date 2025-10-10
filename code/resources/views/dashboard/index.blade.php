@@ -16,6 +16,43 @@
     height: 56px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
+
+/* Dashboard Card Styles */
+.dashboard-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.dashboard-card .card-body {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-card .card-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(30px, -30px);
+}
 </style>
 @endpush
 
@@ -386,20 +423,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Manual tour trigger
-    document.getElementById('start-tour').addEventListener('click', function() {
-        driver.start();
-    });
+    const startTourBtn = document.getElementById('start-tour');
+    if (startTourBtn) {
+        startTourBtn.addEventListener('click', function() {
+            driver.start();
+        });
+    }
     @endif
-});
-</script>
-@endpush
 
-@push('scripts')
-<script>
-// Auto-refresh dashboard data every 5 minutes
-setInterval(function() {
-    // You can add AJAX calls here to refresh specific dashboard sections
-    console.log('Dashboard auto-refresh');
-}, 300000);
+    // Auto-refresh dashboard data every 5 minutes
+    setInterval(function() {
+        // You can add AJAX calls here to refresh specific dashboard sections
+        console.log('Dashboard auto-refresh');
+    }, 300000);
+});
 </script>
 @endpush

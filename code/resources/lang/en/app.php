@@ -2146,4 +2146,7 @@ return [
     'tour_specialities_card_desc' => 'Overview of academic specialities, active programs, and student enrollments.',
     'system_overview' => 'System Overview',
     'tour_system_overview_desc' => 'Comprehensive system metrics showing department distribution and user role breakdown.',
+
+    // Additional
+    'speciality_id' => 'Speciality ID',
 ];

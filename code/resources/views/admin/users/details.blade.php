@@ -62,10 +62,31 @@
                                     <td>{{ $user->department }}</td>
                                 </tr>
                                 @endif
-                                @if($user->speciality)
+                                @php
+                                    $speciality = $user->speciality;
+                                    if (!$speciality && $user->speciality_id) {
+                                        $speciality = \App\Models\Speciality::find($user->speciality_id);
+                                    }
+                                @endphp
+                                @if($speciality && is_object($speciality) && $speciality->name)
                                 <tr>
                                     <td><strong>{{ __('app.speciality') }}:</strong></td>
-                                    <td>{{ $user->speciality->name }} ({{ $user->speciality->level }})</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ $speciality->name }}</span>
+                                        @if($speciality->level)
+                                            <span class="badge bg-secondary ms-1">{{ $speciality->level }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @elseif($user->speciality && is_string($user->speciality) && !empty($user->speciality))
+                                <tr>
+                                    <td><strong>{{ __('app.speciality') }}:</strong></td>
+                                    <td><span class="badge bg-secondary">{{ $user->speciality }}</span></td>
+                                </tr>
+                                @elseif($user->speciality_id)
+                                <tr>
+                                    <td><strong>{{ __('app.speciality') }}:</strong></td>
+                                    <td><small class="text-muted">{{ __('app.speciality_id') }}: {{ $user->speciality_id }}</small></td>
                                 </tr>
                                 @endif
                                 <tr>

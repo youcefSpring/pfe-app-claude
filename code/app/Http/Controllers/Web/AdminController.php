@@ -31,7 +31,7 @@ class AdminController extends Controller
     /**
      * Display users management page
      */
-    public function users(Request $request): View
+    public function users(Request $request)
     {
         $query = User::query();
 
@@ -65,12 +65,13 @@ class AdminController extends Controller
 
         // Order by name and paginate
         $users = $query->orderBy('name')
-                      ->with('teamMember.team')
+                      ->with(['teamMember.team', 'speciality'])
                       ->paginate(20)
                       ->appends($request->all());
 
         $specialities = Speciality::active()->get();
 
+        // return $users->last()->speciality;
         // Get counts for each role
         $roleCounts = [
             'all' => User::count(),
@@ -113,6 +114,7 @@ class AdminController extends Controller
             'position' => 'nullable|string|max:255',
         ]);
 
+
         try {
             User::create([
                 'name' => $request->name,
@@ -144,6 +146,9 @@ class AdminController extends Controller
      */
     public function detailsUser(User $user): View
     {
+        // Load the speciality relationship
+        $user->load('speciality');
+
         $marks = StudentMark::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -185,6 +190,7 @@ class AdminController extends Controller
             'grade' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
         ]);
+        //  dd($request->all());
 
         try {
             $data = $request->only(['name', 'email', 'role', 'matricule', 'speciality_id', 'first_name', 'last_name', 'date_naissance', 'lieu_naissance', 'grade', 'position']);
@@ -567,8 +573,8 @@ public function processBulkImport(Request $request): RedirectResponse
 {
     $request->validate([
         'users_file' => 'required|file|mimes:xlsx,csv,xls',
-        'default_role' => 'nullable|string|in:student,teacher',
-        'default_department' => 'nullable|string',
+        'default_role' => 'nullable|string|in:student,teacher,department_head',
+        'speciality_id' => 'required|exists:specialities,id',
     ]);
 
     // try {
@@ -578,11 +584,7 @@ public function processBulkImport(Request $request): RedirectResponse
 
         $rows = $sheet->toArray(null, true, true, true);
 
-        // Get default master speciality
-        $masterSpeciality = Speciality::where('level', 'LIKE', '%master%')
-            ->orWhere('level', 'LIKE', '%M2%')
-            ->orWhere('level', 'LIKE', '%L5%')
-            ->first();
+        // Use selected speciality from form
 
         $created = 0;
         $updated = 0;
@@ -689,11 +691,13 @@ public function processBulkImport(Request $request): RedirectResponse
                     'name'          => $fullName,
                     'email'         => $email,
                     'role'          => $request->input('default_role', 'student'),
-                    'department'    => $request->input('default_department', 'Computer Science'),
-                    'speciality' => $speciality,
+                    'department'    => 'Computer Science', // Fixed department
+                    'speciality_id' => $request->speciality_id,
                     'password'      => bcrypt($password),
-                    'section'       => $section,
-                    'groupe'        => $groupe,
+                    'matricule'     => $matricule,
+                    // Additional fields for better data storage
+                    'first_name'    => $prenom,
+                    'last_name'     => $nom,
                 ];
 
                 if ($existingUser) {

@@ -24,7 +24,8 @@
                             <li><strong>{{ __('app.name_format') }}:</strong> {{ __('app.name_format_description') }}</li>
                             <li>{{ __('app.email_auto_generated') }}: <code>matricule@gmail.com</code></li>
                             <li>{{ __('app.password_set_to_matricule') }}</li>
-                            <li>{{ __('app.default_speciality_master') }}</li>
+                            <li>{{ __('app.default_department_computer_science') }}</li>
+                            <li>{{ __('app.speciality_selected_below') }}</li>
                             <li>{{ __('app.file_size_formats') }}</li>
                         </ul>
                     </div>
@@ -42,7 +43,7 @@
                                 <div class="mb-3">
                                     <label for="default_role" class="form-label">{{ __('app.default_role') }}</label>
                                     <select class="form-select" id="default_role" name="default_role">
-                                        <option value="student">{{ __('app.student') }}</option>
+                                        <option value="student" selected>{{ __('app.student') }}</option>
                                         <option value="teacher">{{ __('app.teacher') }}</option>
                                         <option value="department_head">{{ __('app.department_head') }}</option>
                                     </select>
@@ -50,9 +51,13 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="default_department" class="form-label">{{ __('app.default_department') }}</label>
-                                    <input type="text" class="form-control" id="default_department"
-                                           name="default_department" placeholder="e.g., Computer Science">
+                                    <label for="speciality_id" class="form-label">{{ __('app.default_speciality') }} <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="speciality_id" name="speciality_id" required>
+                                        <option value="">{{ __('app.select_speciality') }}</option>
+                                        @foreach(\App\Models\Speciality::active()->orderBy('name')->get() as $speciality)
+                                            <option value="{{ $speciality->id }}">{{ $speciality->name }} ({{ $speciality->level }})</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
