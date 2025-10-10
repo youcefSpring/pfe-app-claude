@@ -62,6 +62,32 @@ class SubjectController extends Controller
                           $subq->where('is_external', true)
                                ->where('student_id', $user->id);
                       });
+                })->where(function($q) use ($user) {
+                    // Filter by speciality: show subjects for user's speciality OR for their team members' specialities
+                    $userSpecialityIds = collect([$user->speciality_id])->filter();
+
+                    // Get team members' speciality IDs if user is in a team
+                    $teamMemberSpecialityIds = collect();
+                    $activeTeam = $user->activeTeam();
+                    if ($activeTeam) {
+                        $teamMemberSpecialityIds = $activeTeam->members()
+                            ->with('user')
+                            ->get()
+                            ->pluck('user.speciality_id')
+                            ->filter()
+                            ->unique();
+                    }
+
+                    $allSpecialityIds = $userSpecialityIds->merge($teamMemberSpecialityIds)->unique()->values();
+
+                    if ($allSpecialityIds->isNotEmpty()) {
+                        $q->whereHas('specialities', function($subq) use ($allSpecialityIds) {
+                            $subq->whereIn('specialities.id', $allSpecialityIds);
+                        });
+                    } else {
+                        // If no speciality, show all subjects (fallback)
+                        $q->whereRaw('1 = 1');
+                    }
                 });
                 break;
             // Admin sees all subjects (no filter)
@@ -78,7 +104,8 @@ class SubjectController extends Controller
     public function create(): View
     {
         //$this->authorize('create', Subject::class);
-        return view('subjects.create');
+        $specialities = \App\Models\Speciality::active()->get();
+        return view('subjects.create', compact('specialities'));
     }
 
     /**
@@ -96,6 +123,8 @@ class SubjectController extends Controller
             'keywords' => 'required|string|max:500',
             'tools' => 'required|string|max:500',
             'plan' => 'required|string',
+            'specialities' => 'required|array|min:1',
+            'specialities.*' => 'exists:specialities,id',
         ];
 
         // Add external subject validation for students
@@ -134,7 +163,14 @@ class SubjectController extends Controller
 
         $validated['status'] = 'draft';
 
+        // Remove specialities from validated data as it's handled separately
+        $specialities = $validated['specialities'];
+        unset($validated['specialities']);
+
         $subject = Subject::create($validated);
+
+        // Attach specialities to the subject
+        $subject->specialities()->attach($specialities);
 
         return redirect()->route('subjects.show', $subject)
             ->with('success', __('app.subject_created'));
@@ -215,7 +251,9 @@ class SubjectController extends Controller
     public function edit(Subject $subject): View
     {
         //$this->authorize('update', $subject);
-        return view('subjects.edit', compact('subject'));
+        $specialities = \App\Models\Speciality::active()->get();
+        $subject->load('specialities');
+        return view('subjects.edit', compact('subject', 'specialities'));
     }
 
     /**
@@ -231,9 +269,18 @@ class SubjectController extends Controller
             'keywords' => 'required|string|max:500',
             'tools' => 'required|string|max:500',
             'plan' => 'required|string',
+            'specialities' => 'required|array|min:1',
+            'specialities.*' => 'exists:specialities,id',
         ]);
 
+        // Handle specialities separately
+        $specialities = $validated['specialities'];
+        unset($validated['specialities']);
+
         $subject->update($validated);
+
+        // Sync specialities (add new ones, remove old ones)
+        $subject->specialities()->sync($specialities);
 
         return redirect()->route('subjects.show', $subject)
             ->with('success', __('app.subject_updated'));

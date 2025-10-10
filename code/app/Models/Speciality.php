@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Speciality extends Model
 {
@@ -84,5 +85,13 @@ class Speciality extends Model
     public function getStudentCountAttribute(): int
     {
         return $this->students()->count();
+    }
+
+    /**
+     * Get the subjects available for this speciality.
+     */
+    public function subjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'subject_specialities');
     }
 }

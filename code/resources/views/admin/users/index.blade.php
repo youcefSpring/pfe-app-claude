@@ -8,7 +8,6 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">{{ __('app.user_management') }}</h4>
                         <div class="btn-group" role="group">
                             <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
                                 <i class="bi bi-person-plus me-2"></i>{{ __('app.add_user') }}
@@ -173,6 +172,11 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group" role="group">
+                                                        <a href="{{ route('admin.users.details', $user) }}"
+                                                           class="btn btn-sm btn-outline-info"
+                                                           title="{{ __('app.see_details') }}">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
                                                         <a href="{{ route('admin.users.edit', $user) }}"
                                                            class="btn btn-sm btn-outline-primary"
                                                            title="{{ __('app.edit') }}">

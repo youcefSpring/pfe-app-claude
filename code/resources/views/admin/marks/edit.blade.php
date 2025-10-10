@@ -8,7 +8,6 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">{{ __('app.edit_student_mark') }}</h4>
                     <small class="text-muted">{{ __('app.edit_mark_description') }}</small>
                 </div>
                 <div class="card-body">

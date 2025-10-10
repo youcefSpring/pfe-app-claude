@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'System Maintenance')
+@section('page-title', __('app.system_maintenance'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,30 +8,30 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">System Maintenance</h4>
-                    <small class="text-muted">System maintenance and backup operations</small>
+                    <h4 class="card-title mb-0">{{ __('app.system_maintenance') }}</h4>
+                    <small class="text-muted">{{ __('app.maintenance_backup_operations') }}</small>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title mb-0">Database Maintenance</h5>
+                                    <h5 class="card-title mb-0">{{ __('app.database_maintenance') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
-                                        <h6>Database Optimization</h6>
-                                        <p class="text-muted">Optimize database tables and clean up unused data.</p>
+                                        <h6>{{ __('app.database_optimization') }}</h6>
+                                        <p class="text-muted">{{ __('app.optimize_database_desc') }}</p>
                                         <button type="button" class="btn btn-info btn-sm">
-                                            <i class="fas fa-database"></i> Optimize Database
+                                            <i class="fas fa-database"></i> {{ __('app.optimize_database') }}
                                         </button>
                                     </div>
 
                                     <div class="mb-3">
-                                        <h6>Clear Cache</h6>
-                                        <p class="text-muted">Clear application cache, routes, and configurations.</p>
+                                        <h6>{{ __('app.clear_cache') }}</h6>
+                                        <p class="text-muted">{{ __('app.clear_cache_desc') }}</p>
                                         <button type="button" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-broom"></i> Clear Cache
+                                            <i class="fas fa-broom"></i> {{ __('app.clear_cache') }}
                                         </button>
                                     </div>
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Subject extends Model
 {
@@ -33,6 +34,7 @@ class Subject extends Model
         'dataset_resources_link',
         'student_id',
         'external_supervisor_id',
+        'academic_year',
     ];
 
     /**
@@ -122,11 +124,27 @@ class Subject extends Model
     }
 
     /**
+     * Get the academic year this subject belongs to.
+     */
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year', 'year');
+    }
+
+    /**
      * Get the allocations for this subject.
      */
     public function allocations(): HasMany
     {
         return $this->hasMany(SubjectAllocation::class);
+    }
+
+    /**
+     * Get the specialities that this subject is available for.
+     */
+    public function specialities(): BelongsToMany
+    {
+        return $this->belongsToMany(Speciality::class, 'subject_specialities');
     }
 
     // Scopes
@@ -187,6 +205,43 @@ class Subject extends Model
     public function scopeByStudent($query, $studentId)
     {
         return $query->where('student_id', $studentId);
+    }
+
+    /**
+     * Scope to filter subjects by speciality.
+     */
+    public function scopeForSpeciality($query, $specialityId)
+    {
+        return $query->whereHas('specialities', function ($q) use ($specialityId) {
+            $q->where('specialities.id', $specialityId);
+        });
+    }
+
+    /**
+     * Scope to filter subjects by multiple specialities.
+     */
+    public function scopeForSpecialities($query, array $specialityIds)
+    {
+        return $query->whereHas('specialities', function ($q) use ($specialityIds) {
+            $q->whereIn('specialities.id', $specialityIds);
+        });
+    }
+
+    /**
+     * Boot method to automatically set academic year for new records.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($subject) {
+            if (empty($subject->academic_year)) {
+                $currentYear = AcademicYear::getCurrentYear();
+                if ($currentYear) {
+                    $subject->academic_year = $currentYear->year;
+                }
+            }
+        });
     }
 
     // Business Logic Methods

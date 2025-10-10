@@ -1,44 +1,44 @@
 <!-- Admin Dashboard Content -->
-<div class="col-md-3 mb-4">
-    <div class="card border-primary">
-        <div class="card-header bg-primary text-white">
-            <h6 class="card-title mb-0">
+<div class="col-md-3 mb-3">
+    <div class="card border-primary shadow-sm">
+        <div class="card-header bg-primary text-white py-2">
+            <h6 class="card-title mb-0 small">
                 <i class="bi bi-people me-2"></i>{{ __('app.users') }}
             </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body py-2">
             @php
                 $totalUsers = \App\Models\User::count();
                 $activeUsers = \App\Models\User::where('email_verified_at', '!=', null)->count();
                 $newUsersThisMonth = \App\Models\User::where('created_at', '>=', now()->startOfMonth())->count();
             @endphp
             <div class="row text-center">
-                <div class="col-12 mb-2">
-                    <h3 class="text-primary mb-1">{{ $totalUsers }}</h3>
+                <div class="col-12 mb-1">
+                    <h4 class="text-primary mb-0">{{ $totalUsers }}</h4>
                     <small class="text-muted">{{ __('app.total_users') }}</small>
                 </div>
                 <div class="col-6">
-                    <h5 class="text-success mb-1">{{ $activeUsers }}</h5>
-                    <small class="text-muted">{{ __('app.active') }}</small>
+                    <h6 class="text-success mb-0">{{ $activeUsers }}</h6>
+                    <small class="text-muted d-block">{{ __('app.active') }}</small>
                 </div>
                 <div class="col-6">
-                    <h5 class="text-info mb-1">{{ $newUsersThisMonth }}</h5>
-                    <small class="text-muted">{{ __('app.new_this_month') }}</small>
+                    <h6 class="text-info mb-0">{{ $newUsersThisMonth }}</h6>
+                    <small class="text-muted d-block">{{ __('app.new_this_month') }}</small>
                 </div>
             </div>
-            <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm w-100 mt-3">{{ __('app.manage_users') }}</a>
+            <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm w-100 mt-2">{{ __('app.manage_users') }}</a>
         </div>
     </div>
 </div>
 
-<div class="col-md-3 mb-4">
-    <div class="card border-success">
-        <div class="card-header bg-success text-white">
-            <h6 class="card-title mb-0">
+<div class="col-md-3 mb-3">
+    <div class="card border-success shadow-sm">
+        <div class="card-header bg-success text-white py-2">
+            <h6 class="card-title mb-0 small">
                 <i class="bi bi-journal-text me-2"></i>{{ __('app.subjects') }}
             </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body py-2">
             @php
                 $totalSubjects = \App\Models\Subject::count();
                 $validatedSubjects = \App\Models\Subject::where('status', 'validated')->count();
@@ -110,14 +110,14 @@
 </div>
 --}}
 
-<div class="col-md-3 mb-4">
-    <div class="card border-warning">
-        <div class="card-header bg-warning text-dark">
-            <h6 class="card-title mb-0">
-                <i class="bi bi-shield-check me-2"></i>Defenses
+<div class="col-md-3 mb-3">
+    <div class="card border-warning shadow-sm">
+        <div class="card-header bg-warning text-dark py-2">
+            <h6 class="card-title mb-0 small">
+                <i class="bi bi-shield-check me-2"></i>{{ __('app.defenses') }}
             </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body py-2">
             @php
                 $totalDefenses = \App\Models\Defense::count();
                 $scheduledDefenses = \App\Models\Defense::where('status', 'scheduled')->count();
@@ -126,30 +126,30 @@
             <div class="row text-center">
                 <div class="col-12 mb-2">
                     <h3 class="text-warning mb-1">{{ $totalDefenses }}</h3>
-                    <small class="text-muted">Total Defenses</small>
+                    <small class="text-muted">{{ __('app.total_defenses') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-primary mb-1">{{ $scheduledDefenses }}</h5>
-                    <small class="text-muted">Scheduled</small>
+                    <small class="text-muted">{{ __('app.scheduled') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-success mb-1">{{ $completedDefenses }}</h5>
-                    <small class="text-muted">Completed</small>
+                    <small class="text-muted">{{ __('app.completed') }}</small>
                 </div>
             </div>
-            <a href="{{ route('defenses.index') }}" class="btn btn-warning btn-sm w-100 mt-3">View Defenses</a>
+            <a href="{{ route('defenses.index') }}" class="btn btn-warning btn-sm w-100 mt-3">{{ __('app.view_defenses') }}</a>
         </div>
     </div>
 </div>
 
-<div class="col-md-3 mb-4">
-    <div class="card border-secondary">
-        <div class="card-header bg-secondary text-white">
-            <h6 class="card-title mb-0">
-                <i class="bi bi-mortarboard me-2"></i>Specialities
+<div class="col-md-3 mb-3">
+    <div class="card border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white py-2">
+            <h6 class="card-title mb-0 small">
+                <i class="bi bi-mortarboard me-2"></i>{{ __('app.specialities') }}
             </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body py-2">
             @php
                 $totalSpecialities = \App\Models\Speciality::count();
                 $activeSpecialities = \App\Models\Speciality::where('is_active', true)->count();
@@ -158,7 +158,7 @@
             <div class="row text-center">
                 <div class="col-12 mb-2">
                     <h3 class="text-secondary mb-1">{{ $totalSpecialities }}</h3>
-                    <small class="text-muted">Total Specialities</small>
+                    <small class="text-muted">{{ __('app.total_specialities') }}</small>
                 </div>
                 <div class="col-6">
                     <h5 class="text-success mb-1">{{ $activeSpecialities }}</h5>
@@ -166,10 +166,10 @@
                 </div>
                 <div class="col-6">
                     <h5 class="text-info mb-1">{{ $studentsEnrolled }}</h5>
-                    <small class="text-muted">Students</small>
+                    <small class="text-muted">{{ __('app.students') }}</small>
                 </div>
             </div>
-            <a href="{{ route('admin.specialities.index') }}" class="btn btn-secondary btn-sm w-100 mt-3">Manage Specialities</a>
+            <a href="{{ route('admin.specialities.index') }}" class="btn btn-secondary btn-sm w-100 mt-3">{{ __('app.manage_specialities') }}</a>
         </div>
     </div>
 </div>
@@ -408,7 +408,7 @@
                 </div>
                 <div class="col-4">
                     <h4 class="text-warning mb-1">{{ $thisMonthDefenses }}</h4>
-                    <small class="text-muted">Defenses This Month</small>
+                    <small class="text-muted">{{ __('app.defenses_this_month') }}</small>
                 </div>
             </div>
 

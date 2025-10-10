@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Subject Allocations')
+@section('title', __('app.subject_allocations'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,15 +8,15 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 class="h3 mb-0">Subject Allocations</h1>
-                    <p class="text-muted">Manage student subject allocations</p>
+                    <h1 class="h3 mb-0">{{ __('app.subject_allocations') }}</h1>
+                    <p class="text-muted">{{ __('app.manage_student_subject_allocations') }}</p>
                 </div>
                 <div>
                     <a href="{{ route('allocations.deadlines') }}" class="btn btn-outline-primary me-2">
-                        <i class="bi bi-calendar-event me-1"></i>Manage Deadlines
+                        <i class="bi bi-calendar-event me-1"></i>{{ __('app.manage_deadlines') }}
                     </a>
                     <a href="{{ route('allocations.results') }}" class="btn btn-primary">
-                        <i class="bi bi-graph-up me-1"></i>View Results
+                        <i class="bi bi-graph-up me-1"></i>{{ __('app.view_results') }}
                     </a>
                 </div>
             </div>
@@ -28,7 +28,7 @@
             <div class="card border-primary">
                 <div class="card-body text-center">
                     <h3 class="text-primary mb-1">{{ $allocations->total() }}</h3>
-                    <small class="text-muted">Total Allocations</small>
+                    <small class="text-muted">{{ __('app.total_allocations') }}</small>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@
             <div class="card border-success">
                 <div class="card-body text-center">
                     <h3 class="text-success mb-1">{{ $deadlines->where('status', 'active')->count() }}</h3>
-                    <small class="text-muted">Active Deadlines</small>
+                    <small class="text-muted">{{ __('app.active_deadlines') }}</small>
                 </div>
             </div>
         </div>
@@ -44,7 +44,7 @@
             <div class="card border-info">
                 <div class="card-body text-center">
                     <h3 class="text-info mb-1">{{ $deadlines->where('status', 'completed')->count() }}</h3>
-                    <small class="text-muted">Completed Periods</small>
+                    <small class="text-muted">{{ __('app.completed_periods') }}</small>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-list-check me-2"></i>Recent Allocations
+                        <i class="bi bi-list-check me-2"></i>{{ __('app.recent_allocations') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -64,13 +64,13 @@
                             <table class="table table-hover">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Student</th>
-                                        <th>Subject</th>
-                                        <th>Preference</th>
-                                        <th>Average</th>
-                                        <th>Status</th>
-                                        <th>Deadline</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('app.student') }}</th>
+                                        <th>{{ __('app.subject') }}</th>
+                                        <th>{{ __('app.preference') }}</th>
+                                        <th>{{ __('app.average') }}</th>
+                                        <th>{{ __('app.status') }}</th>
+                                        <th>{{ __('app.deadline') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -94,7 +94,7 @@
                                                 @if($allocation->student_preference_order)
                                                     <span class="badge bg-info">{{ $allocation->getPreferenceLabel() }}</span>
                                                 @else
-                                                    <span class="badge bg-secondary">Not Preferred</span>
+                                                    <span class="badge bg-secondary">{{ __('app.not_preferred') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -110,7 +110,7 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-outline-secondary btn-sm" title="View Details">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm" title="{{ __('app.view_details') }}">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
                                                 </div>
@@ -122,17 +122,17 @@
                         </div>
 
                         <div class="d-flex justify-content-center mt-4">
-                            <nav aria-label="Allocations pagination">
+                            <nav aria-label="{{ __('app.allocations_pagination') }}">
                                 {{ $allocations->links('pagination::bootstrap-4') }}
                             </nav>
                         </div>
                     @else
                         <div class="text-center py-5">
                             <i class="bi bi-inbox display-1 text-muted"></i>
-                            <h4 class="text-muted mt-3">No Allocations Found</h4>
-                            <p class="text-muted">No subject allocations have been created yet.</p>
+                            <h4 class="text-muted mt-3">{{ __('app.no_allocations_found') }}</h4>
+                            <p class="text-muted">{{ __('app.no_allocations_created') }}</p>
                             <a href="{{ route('allocations.deadlines') }}" class="btn btn-primary">
-                                <i class="bi bi-calendar-event me-1"></i>Create Allocation Deadline
+                                <i class="bi bi-calendar-event me-1"></i>{{ __('app.create_allocation_deadline') }}
                             </a>
                         </div>
                     @endif

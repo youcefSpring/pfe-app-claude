@@ -231,13 +231,13 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.allocations*') ? 'active' : '' }}" href="{{ route('admin.allocations.index') }}">
                                 <i class="bi bi-diagram-3 me-2"></i>
-                                Allocations
+                                {{ __('app.allocations') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.specialities*') ? 'active' : '' }}" href="{{ route('admin.specialities.index') }}">
                                 <i class="bi bi-mortarboard me-2"></i>
-                                Specialities
+                                {{ __('app.specialities') }}
                             </a>
                         </li>
                         <li class="nav-item">
@@ -318,7 +318,7 @@
                             <div class="dropdown">
                                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-person-circle"></i>
-                                    {{ auth()->user()?->name ?? 'Guest' }}
+                                    {{ auth()->user()?->name ?? __('app.guest') }}
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="{{ route('profile.show') }}">
@@ -340,30 +340,8 @@
                 </div>
                 @endauth
 
-                <!-- Flash Messages -->
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-circle me-2"></i>
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if(session('warning'))
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        {{ session('warning') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
+                <!-- Flash Messages Component -->
+                @include('components.flash-messages')
 
                 <!-- Page Content -->
                 @yield('content')
@@ -384,5 +362,9 @@
     </script>
 
     @stack('scripts')
+
+    <!-- Confirmation Modal Components -->
+    <x-confirmation-modal />
+    <x-delete-confirmation-modal />
 </body>
 </html>

@@ -24,8 +24,7 @@ class SubjectPreferenceController extends Controller
 
         $currentDeadline = AllocationDeadline::active()->first();
         $canModifyPreferences = $currentDeadline &&
-                               $currentDeadline->status === 'active' &&
-                               $currentDeadline->deadline->isFuture();
+                               $currentDeadline->canStudentsChoose();
 
         return view('preferences.index', compact('preferences', 'currentDeadline', 'canModifyPreferences'));
     }
@@ -34,7 +33,7 @@ class SubjectPreferenceController extends Controller
     {
         $currentDeadline = AllocationDeadline::active()->first();
 
-        if (!$currentDeadline || $currentDeadline->status !== 'active' || $currentDeadline->deadline->isPast()) {
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
             return redirect()->route('preferences.index')
                 ->with('error', 'Preference selection period has ended.');
         }
@@ -54,7 +53,7 @@ class SubjectPreferenceController extends Controller
         $user = Auth::user();
         $currentDeadline = AllocationDeadline::active()->first();
 
-        if (!$currentDeadline || $currentDeadline->status !== 'active' || $currentDeadline->deadline->isPast()) {
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
             return redirect()->route('preferences.index')
                 ->with('error', 'Preference selection period has ended.');
         }
@@ -95,7 +94,7 @@ class SubjectPreferenceController extends Controller
         $user = Auth::user();
         $currentDeadline = AllocationDeadline::active()->first();
 
-        if (!$currentDeadline || $currentDeadline->status !== 'active' || $currentDeadline->deadline->isPast()) {
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
             return redirect()->route('preferences.index')
                 ->with('error', 'Preference selection period has ended.');
         }
@@ -136,7 +135,7 @@ class SubjectPreferenceController extends Controller
         $user = Auth::user();
         $currentDeadline = AllocationDeadline::active()->first();
 
-        if (!$currentDeadline || $currentDeadline->status !== 'active' || $currentDeadline->deadline->isPast()) {
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
             return redirect()->route('preferences.index')
                 ->with('error', 'Preference selection period has ended.');
         }
@@ -152,7 +151,7 @@ class SubjectPreferenceController extends Controller
         $user = Auth::user();
         $currentDeadline = AllocationDeadline::active()->first();
 
-        if (!$currentDeadline || $currentDeadline->status !== 'active' || $currentDeadline->deadline->isPast()) {
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
             return redirect()->route('preferences.index')
                 ->with('error', 'Preference selection period has ended.');
         }

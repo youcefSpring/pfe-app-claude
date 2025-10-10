@@ -1,18 +1,18 @@
 @extends('layouts.pfe-app')
 
-@section('title', 'Defense Calendar')
+@section('title', __('app.defense_calendar'))
 
 @section('content')
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Defense Calendar</h1>
+        <h1 class="h3 mb-0">{{ __('app.defense_calendar') }}</h1>
         <div class="btn-group">
             <a href="{{ route('defenses.index') }}" class="btn btn-outline-primary">
-                <i class="bi bi-list"></i> List View
+                <i class="bi bi-list"></i> {{ __('app.list_view') }}
             </a>
             @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
                 <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
-                    <i class="bi bi-calendar-plus"></i> Schedule Defense
+                    <i class="bi bi-calendar-plus"></i> {{ __('app.schedule_defense') }}
                 </a>
             @endif
         </div>
@@ -35,10 +35,10 @@
                 </div>
                 <div class="col-md-6 text-end">
                     <div class="d-flex justify-content-end align-items-center">
-                        <span class="badge bg-primary me-2">Scheduled</span>
-                        <span class="badge bg-warning text-dark me-2">In Progress</span>
-                        <span class="badge bg-success me-2">Completed</span>
-                        <span class="badge bg-danger">Cancelled</span>
+                        <span class="badge bg-primary me-2">{{ __('app.scheduled') }}</span>
+                        <span class="badge bg-warning text-dark me-2">{{ __('app.in_progress') }}</span>
+                        <span class="badge bg-success me-2">{{ __('app.completed') }}</span>
+                        <span class="badge bg-danger">{{ __('app.cancelled') }}</span>
                     </div>
                 </div>
             </div>
@@ -52,13 +52,13 @@
                 <table class="table table-bordered mb-0" id="calendar">
                     <thead class="bg-light">
                         <tr>
-                            <th class="text-center p-3">Sunday</th>
-                            <th class="text-center p-3">Monday</th>
-                            <th class="text-center p-3">Tuesday</th>
-                            <th class="text-center p-3">Wednesday</th>
-                            <th class="text-center p-3">Thursday</th>
-                            <th class="text-center p-3">Friday</th>
-                            <th class="text-center p-3">Saturday</th>
+                            <th class="text-center p-3">{{ __('app.sunday') }}</th>
+                            <th class="text-center p-3">{{ __('app.monday') }}</th>
+                            <th class="text-center p-3">{{ __('app.tuesday') }}</th>
+                            <th class="text-center p-3">{{ __('app.wednesday') }}</th>
+                            <th class="text-center p-3">{{ __('app.thursday') }}</th>
+                            <th class="text-center p-3">{{ __('app.friday') }}</th>
+                            <th class="text-center p-3">{{ __('app.saturday') }}</th>
                         </tr>
                     </thead>
                     <tbody id="calendarBody">

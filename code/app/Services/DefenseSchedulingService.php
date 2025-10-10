@@ -144,6 +144,18 @@ class DefenseSchedulingService
     {
         $project = $defense->project;
 
+        // Check if supervisor is available at this time
+        $supervisorConflict = DefenseJury::where('teacher_id', $project->supervisor_id)
+            ->whereHas('defense', function ($q) use ($defense) {
+                $q->where('defense_date', $defense->defense_date)
+                  ->where('defense_time', $defense->defense_time)
+                  ->where('id', '!=', $defense->id); // Exclude current defense
+            })->exists();
+
+        if ($supervisorConflict) {
+            throw new \Exception('Supervisor is not available at the selected time - already assigned to another defense.');
+        }
+
         // Assign supervisor as jury member
         DefenseJury::create([
             'defense_id' => $defense->id,

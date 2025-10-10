@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Allocation Results')
+@section('title', __('app.allocation_results'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,12 +8,12 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 class="h3 mb-0">Subject Allocation Results</h1>
-                    <p class="text-muted">Review and manage subject allocation outcomes</p>
+                    <h1 class="h3 mb-0">{{ __('app.subject_allocation_results') }}</h1>
+                    <p class="text-muted">{{ __('app.review_manage_allocation_outcomes') }}</p>
                 </div>
                 <div>
                     <a href="{{ route('allocations.index') }}" class="btn btn-outline-secondary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Allocations
+                        <i class="bi bi-arrow-left me-1"></i>{{ __('app.back_to_allocations') }}
                     </a>
                     <a href="{{ route('allocations.deadlines') }}" class="btn btn-primary">
                         <i class="bi bi-calendar-event me-1"></i>Manage Deadlines
@@ -29,7 +29,7 @@
             <div class="card border-primary">
                 <div class="card-body text-center">
                     <h3 class="text-primary mb-1">{{ $stats['total_allocations'] }}</h3>
-                    <small class="text-muted">Total Allocations</small>
+                    <small class="text-muted">{{ __('app.total_allocations') }}</small>
                 </div>
             </div>
         </div>
@@ -37,7 +37,7 @@
             <div class="card border-success">
                 <div class="card-body text-center">
                     <h3 class="text-success mb-1">{{ $stats['confirmed_allocations'] }}</h3>
-                    <small class="text-muted">Confirmed</small>
+                    <small class="text-muted">{{ __('app.confirmed') }}</small>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
             <div class="card border-warning">
                 <div class="card-body text-center">
                     <h3 class="text-warning mb-1">{{ $stats['total_allocations'] - $stats['confirmed_allocations'] }}</h3>
-                    <small class="text-muted">Pending</small>
+                    <small class="text-muted">{{ __('app.pending') }}</small>
                 </div>
             </div>
         </div>
@@ -127,16 +127,16 @@
                                             <div class="btn-group" role="group">
                                                 <form action="{{ route('allocations.confirm', $allocation) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm" title="Confirm Allocation">
+                                                    <button type="submit" class="btn btn-success btn-sm" title="{{ __('app.confirm_allocation') }}">
                                                         <i class="bi bi-check-circle"></i>
                                                     </button>
                                                 </form>
-                                                <button type="button" class="btn btn-danger btn-sm" onclick="rejectAllocation({{ $allocation->id }})" title="Reject Allocation">
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="rejectAllocation({{ $allocation->id }})" title="{{ __('app.reject_allocation') }}">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
                                             </div>
                                         @else
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="viewAllocationDetails({{ $allocation->id }})" title="View Details">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="viewAllocationDetails({{ $allocation->id }})" title="{{ __('app.view_details') }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                         @endif
@@ -149,7 +149,7 @@
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4">
-                    <nav aria-label="Allocation results pagination">
+                    <nav aria-label="{{ __('app.allocation_results_pagination') }}">
                         {{ $allocations->links('pagination::bootstrap-4') }}
                     </nav>
                 </div>

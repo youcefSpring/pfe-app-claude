@@ -14,6 +14,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\StudentUploadController;
 use App\Http\Controllers\Admin\AllocationController as AdminAllocationController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SpecialityController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -85,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     // SUBJECT MANAGEMENT ROUTES
     // =====================================================================
 
-    Route::prefix('subjects')->name('subjects.')->group(function () {
+    Route::prefix('subjects')->name('subjects.')->middleware('current_year_data')->group(function () {
         // Static routes first
         Route::get('/', [SubjectController::class, 'index'])->name('index');
         Route::get('/available/{grade?}', [SubjectController::class, 'available'])->name('available');
@@ -125,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
     // TEAM MANAGEMENT ROUTES
     // =====================================================================
 
-    Route::prefix('teams')->name('teams.')->group(function () {
+    Route::prefix('teams')->name('teams.')->middleware('current_year_data')->group(function () {
         // All users can view teams
         Route::get('/', [TeamController::class, 'index'])->name('index');
 
@@ -170,7 +171,7 @@ Route::middleware(['auth'])->group(function () {
     // PROJECT MANAGEMENT ROUTES
     // =====================================================================
 
-    Route::prefix('projects')->name('projects.')->group(function () {
+    Route::prefix('projects')->name('projects.')->middleware('current_year_data')->group(function () {
         // Static routes first
         Route::get('/', [ProjectController::class, 'index'])->name('index');
 
@@ -227,7 +228,7 @@ Route::middleware(['auth'])->group(function () {
     // DEFENSE MANAGEMENT ROUTES
     // =====================================================================
 
-    Route::prefix('defenses')->name('defenses.')->group(function () {
+    Route::prefix('defenses')->name('defenses.')->middleware('current_year_data')->group(function () {
         // Teachers, department heads, and admins can view defenses
         Route::middleware('role:teacher,department_head,admin')->group(function () {
             Route::get('/', [DefenseController::class, 'index'])->name('index');
@@ -255,6 +256,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{defense}/cancel', [DefenseController::class, 'cancel'])->name('cancel');
             Route::delete('/{defense}', [DefenseController::class, 'destroy'])->name('destroy');
             Route::post('/{defense}/complete', [DefenseController::class, 'complete'])->name('complete');
+            Route::post('/{defense}/add-pv-notes', [DefenseController::class, 'addPvNotes'])->name('add-pv-notes');
             Route::get('/{defense}/report', [DefenseController::class, 'generateReport'])->name('generate-report');
             Route::get('/{defense}/report/pdf', [DefenseController::class, 'downloadReportPdf'])->name('download-report-pdf');
             Route::get('/{defense}/student/{student}/report/pdf', [DefenseController::class, 'downloadStudentReportPdf'])->name('download-student-report-pdf');
@@ -287,6 +289,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
         Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+        Route::get('/users/{user}/details', [AdminController::class, 'detailsUser'])->name('users.details');
         Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
         Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
@@ -435,6 +438,26 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{allocation}/reject', [AllocationController::class, 'reject'])->name('reject');
         });
     });
+
+    // =====================================================================
+    // SPECIALITY MANAGEMENT ROUTES
+    // =====================================================================
+
+    Route::prefix('specialities')->name('specialities.')->group(function () {
+        // All authenticated users can view specialities
+        Route::get('/', [SpecialityController::class, 'index'])->name('index');
+        Route::get('/{speciality}', [SpecialityController::class, 'show'])->name('show');
+
+        // Admins and department heads can manage specialities
+        Route::middleware('role:admin,department_head')->group(function () {
+            Route::get('/create', [SpecialityController::class, 'create'])->name('create');
+            Route::post('/', [SpecialityController::class, 'store'])->name('store');
+            Route::get('/{speciality}/edit', [SpecialityController::class, 'edit'])->name('edit');
+            Route::put('/{speciality}', [SpecialityController::class, 'update'])->name('update');
+            Route::delete('/{speciality}', [SpecialityController::class, 'destroy'])->name('destroy');
+            Route::patch('/{speciality}/toggle-active', [SpecialityController::class, 'toggleActive'])->name('toggleActive');
+        });
+    });
 });
 
 // =========================================================================
@@ -471,6 +494,21 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/students/{user}/marks/{semester}', [AdminController::class, 'studentMarksBySemester'])->name('students.marks.semester');
         Route::get('/students/{user}/marks-summary', [AdminController::class, 'studentMarksSummary'])->name('students.marks.summary');
+
+        // Academic Year Management
+        Route::prefix('academic-years')->name('academic-years.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AcademicYearController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\AcademicYearController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\AcademicYearController::class, 'store'])->name('store');
+            Route::get('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'show'])->name('show');
+            Route::get('/{academicYear}/edit', [\App\Http\Controllers\Admin\AcademicYearController::class, 'edit'])->name('edit');
+            Route::put('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'update'])->name('update');
+            Route::post('/{academicYear}/activate', [\App\Http\Controllers\Admin\AcademicYearController::class, 'activate'])->name('activate');
+            Route::post('/{academicYear}/end', [\App\Http\Controllers\Admin\AcademicYearController::class, 'end'])->name('end');
+            Route::delete('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'destroy'])->name('destroy');
+            Route::get('/history/completed', [\App\Http\Controllers\Admin\AcademicYearController::class, 'history'])->name('history');
+            Route::get('/{academicYear}/statistics', [\App\Http\Controllers\Admin\AcademicYearController::class, 'statistics'])->name('statistics');
+        });
 
         // Student Alerts Management
         Route::get('/alerts', [AdminController::class, 'alerts'])->name('alerts');

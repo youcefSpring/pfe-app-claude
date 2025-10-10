@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Allocation Management')
+@section('page-title', __('app.allocation_management'))
 
 @section('content')
 <div class="container-fluid">
@@ -9,19 +9,19 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">
-                        <i class="fas fa-tasks text-primary"></i> Allocation Management
+                        <i class="fas fa-tasks text-primary"></i> {{ __('app.allocation_management') }}
                     </h4>
                     <a href="{{ route('admin.allocations.index') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-sync"></i> Refresh
+                        <i class="fas fa-sync"></i> {{ __('app.refresh') }}
                     </a>
                 </div>
                 <div class="card-body">
                     <!-- Filter Section -->
                     <form method="GET" class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <label for="academic_year" class="form-label">Academic Year</label>
+                            <label for="academic_year" class="form-label">{{ __('app.academic_year') }}</label>
                             <select class="form-select" name="academic_year" id="academic_year">
-                                <option value="">All Years</option>
+                                <option value="">{{ __('app.all_years') }}</option>
                                 @foreach($academicYears as $year)
                                     <option value="{{ $year }}" {{ request('academic_year') == $year ? 'selected' : '' }}>
                                         {{ $year }}
@@ -30,9 +30,9 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="level" class="form-label">Level</label>
+                            <label for="level" class="form-label">{{ __('app.level') }}</label>
                             <select class="form-select" name="level" id="level">
-                                <option value="">All Levels</option>
+                                <option value="">{{ __('app.all_levels') }}</option>
                                 @foreach($levels as $level)
                                     <option value="{{ $level }}" {{ request('level') == $level ? 'selected' : '' }}>
                                         {{ $level }}
@@ -42,10 +42,10 @@
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary me-2">
-                                <i class="fas fa-filter"></i> Filter
+                                <i class="fas fa-filter"></i> {{ __('app.filter') }}
                             </button>
                             <a href="{{ route('admin.allocations.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> Clear
+                                <i class="fas fa-times"></i> {{ __('app.clear') }}
                             </a>
                         </div>
                     </form>
@@ -76,19 +76,19 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                            <small class="text-muted d-block">Academic Year & Level</small>
+                                            <small class="text-muted d-block">{{ __('app.academic_year_level') }}</small>
                                             <strong>{{ $deadline->academic_year }} - {{ $deadline->level }}</strong>
                                         </div>
 
                                         <div class="mb-3">
-                                            <small class="text-muted d-block">Preferences Deadline</small>
+                                            <small class="text-muted d-block">{{ __('app.preferences_deadline') }}</small>
                                             <strong>{{ $deadline->preferences_deadline->format('d/m/Y H:i') }}</strong>
                                         </div>
 
                                         @if($deadline->auto_allocation_completed)
                                             <div class="mb-3">
                                                 <small class="text-success">
-                                                    <i class="fas fa-check-circle"></i> Auto-allocation completed
+                                                    <i class="fas fa-check-circle"></i> {{ __('app.auto_allocation_completed') }}
                                                 </small>
                                             </div>
                                         @endif
@@ -96,7 +96,7 @@
                                         @if($deadline->second_round_needed)
                                             <div class="mb-3">
                                                 <small class="text-warning">
-                                                    <i class="fas fa-clock"></i> Second round needed
+                                                    <i class="fas fa-clock"></i> {{ __('app.second_round_needed') }}
                                                 </small>
                                                 @if($deadline->second_round_start && $deadline->second_round_deadline)
                                                     <br>
@@ -110,11 +110,11 @@
 
                                         <div class="d-flex justify-content-between align-items-center">
                                             <small class="text-muted">
-                                                Created by {{ $deadline->creator->name ?? 'System' }}
+                                                {{ __('app.created_by_user', ['name' => $deadline->creator->name ?? __('app.system')]) }}
                                             </small>
                                             <a href="{{ route('admin.allocations.show', $deadline) }}"
                                                class="btn btn-sm btn-primary">
-                                                <i class="fas fa-cog"></i> Manage
+                                                <i class="fas fa-cog"></i> {{ __('app.manage') }}
                                             </a>
                                         </div>
                                     </div>
@@ -124,8 +124,8 @@
                             <div class="col-12">
                                 <div class="text-center py-5">
                                     <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
-                                    <h5 class="text-muted">No allocation deadlines found</h5>
-                                    <p class="text-muted">Create allocation deadlines in the allocation management section.</p>
+                                    <h5 class="text-muted">{{ __('app.no_allocation_deadlines_found') }}</h5>
+                                    <p class="text-muted">{{ __('app.create_deadlines_message') }}</p>
                                 </div>
                             </div>
                         @endforelse

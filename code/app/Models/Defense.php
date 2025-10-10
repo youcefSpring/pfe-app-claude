@@ -21,9 +21,12 @@ class Defense extends Model
         'duration',
         'status',
         'notes',
+        'pv_notes',
         'final_grade',
         'scheduled_by',
         'scheduled_at',
+        'academic_year',
+        'session',
     ];
 
     protected function casts(): array
@@ -65,6 +68,14 @@ class Defense extends Model
         return $this->hasOne(DefenseReport::class);
     }
 
+    /**
+     * Get the academic year this defense belongs to.
+     */
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year', 'year');
+    }
+
     public function scopeScheduled($query)
     {
         return $query->where('status', 'scheduled');
@@ -98,5 +109,27 @@ class Defense extends Model
     public function hasJuryMember(User $teacher): bool
     {
         return $this->jury()->where('teacher_id', $teacher->id)->exists();
+    }
+
+    /**
+     * Boot method to automatically set academic year and session for new records.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($defense) {
+            $currentYear = AcademicYear::getCurrentYear();
+
+            if (empty($defense->academic_year) && $currentYear) {
+                $defense->academic_year = $currentYear->year;
+            }
+
+            // Determine session based on defense date vs academic year end date
+            if (empty($defense->session) && $currentYear && $defense->defense_date) {
+                $defenseDate = \Carbon\Carbon::parse($defense->defense_date);
+                $defense->session = $defenseDate->gt($currentYear->end_date) ? 'session_2' : 'session_1';
+            }
+        });
     }
 }

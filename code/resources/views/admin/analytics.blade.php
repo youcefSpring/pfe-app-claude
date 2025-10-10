@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Analytics')
+@section('page-title', __('app.analytics'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,14 +8,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">System Analytics</h4>
-                    <small class="text-muted">Advanced analytics and insights</small>
+                    <h4 class="card-title mb-0">{{ __('app.system_analytics') }}</h4>
+                    <small class="text-muted">{{ __('app.advanced_analytics_insights') }}</small>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="alert alert-info">
-                                <h6><i class="fas fa-chart-line"></i> Analytics Dashboard</h6>
+                                <h6><i class="fas fa-chart-line"></i> {{ __('app.analytics_dashboard') }}</h6>
                                 <p class="mb-0">Advanced analytics functionality will be implemented here. This includes charts, graphs, and detailed insights about system usage and performance.</p>
                             </div>
                         </div>
@@ -25,7 +25,7 @@
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title mb-0">Usage Statistics</h5>
+                                    <h5 class="card-title mb-0">{{ __('app.usage_statistics') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="text-center py-4">
@@ -39,7 +39,7 @@
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title mb-0">Performance Metrics</h5>
+                                    <h5 class="card-title mb-0">{{ __('app.performance_metrics') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="text-center py-4">
@@ -85,10 +85,10 @@
 
                     <div class="mt-4 text-center">
                         <a href="{{ route('admin.reports') }}" class="btn btn-primary">
-                            <i class="fas fa-file-alt"></i> View Reports
+                            <i class="fas fa-file-alt"></i> {{ __('app.view_reports') }}
                         </a>
                         <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            <i class="fas fa-arrow-left"></i> {{ __('app.back_to_dashboard') }}
                         </a>
                     </div>
                 </div>

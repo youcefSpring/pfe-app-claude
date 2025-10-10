@@ -76,10 +76,10 @@ class User extends Authenticatable
     /**
      * Get the speciality that the user belongs to.
      */
-    // public function speciality(): BelongsTo
-    // {
-    //     return $this->belongsTo(Speciality::class);
-    // }
+    public function speciality(): BelongsTo
+    {
+        return $this->belongsTo(Speciality::class);
+    }
 
     // Relationships for Teachers
     /**

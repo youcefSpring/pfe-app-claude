@@ -8,20 +8,11 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">{{ __('app.add_marks_all_students') }}</h4>
                     <small class="text-muted">{{ __('app.add_marks_all_students_description') }}</small>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.marks.bulk-all-store') }}" method="POST" id="bulk-all-marks-form">
                         @csrf
-
-                        <!-- Simplified Header - Only Filter -->
-                        <div class="row mb-4 p-3 bg-light rounded">
-                            <div class="col-12">
-                                <h5 class="mb-3">{{ __('app.marks') }}</h5>
-                                <p class="text-muted small">{{ __('app.add_marks_all_students_simple_description') }}</p>
-                            </div>
-                        </div>
 
                         <!-- Students Table -->
                         <div class="table-responsive">
@@ -31,19 +22,18 @@
                                         <th style="width: 5%;">
                                             <input type="checkbox" id="select-all" class="form-check-input">
                                         </th>
-                                        <th style="width: 20%;">{{ __('app.student') }}</th>
-                                        <th style="width: 10%;">{{ __('app.matricule') }}</th>
-                                        <th style="width: 8%;">{{ __('app.mark') }} 1</th>
-                                        <th style="width: 8%;">{{ __('app.mark') }} 2</th>
-                                        <th style="width: 8%;">{{ __('app.mark') }} 3</th>
-                                        <th style="width: 8%;">{{ __('app.mark') }} 4</th>
-                                        <th style="width: 8%;">{{ __('app.mark') }} 5</th>
+                                        <th style="width: 25%;">{{ __('app.student') }}</th>
+                                        <th style="width: 15%;">{{ __('app.department') }}</th>
+                                        <th style="width: 11%;">{{ __('app.mark') }} 1</th>
+                                        <th style="width: 11%;">{{ __('app.mark') }} 2</th>
+                                        <th style="width: 11%;">{{ __('app.mark') }} 3</th>
+                                        <th style="width: 11%;">{{ __('app.mark') }} 4</th>
+                                        <th style="width: 11%;">{{ __('app.mark') }} 5</th>
                                         <th style="width: 10%;">{{ __('app.average') }}</th>
-                                        <th style="width: 15%;">{{ __('app.speciality') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($students as $index => $student)
+                                    @foreach($students as $student)
                                         <tr class="student-row">
                                             <td>
                                                 <input type="checkbox" name="selected_students[]" value="{{ $student->id }}"
@@ -52,7 +42,7 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                                                        <i class="fas fa-user text-primary"></i>
+                                                        <i class="bi bi-person-fill text-primary"></i>
                                                     </div>
                                                     <div>
                                                         <h6 class="mb-1">{{ $student->name }}</h6>
@@ -61,7 +51,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary">{{ $student->matricule ?? '-' }}</span>
+                                                <span class="badge bg-light text-dark">{{ $student->department ?? 'N/A' }}</span>
                                             </td>
                                             <td>
                                                 <input type="number" step="0.01" min="0" max="20"
@@ -106,9 +96,6 @@
                                             <td>
                                                 <input type="text" class="form-control form-control-sm fw-bold text-center average-display"
                                                        data-student-id="{{ $student->id }}" readonly>
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">{{ $student->speciality ?? '-' }}</small>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -273,8 +260,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.student-checkbox:checked').forEach(checkbox => {
             const studentId = checkbox.value;
             const markInput = document.querySelector(`input[name="mark_${markNum}[${studentId}]"]`);
-            markInput.value = value;
-            calculateAverage(studentId);
+            if (markInput) {
+                markInput.value = value;
+                calculateAverage(studentId);
+            }
         });
     };
 

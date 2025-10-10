@@ -266,20 +266,8 @@
         </div>
     </nav>
 
-    <!-- Flash Messages -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 80px; right: 20px; z-index: 1050; max-width: 300px;">
-            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 80px; right: 20px; z-index: 1050; max-width: 300px;">
-            <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    <!-- Flash Messages Component -->
+    @include('components.flash-messages')
 
     <!-- Main Content -->
     <main>

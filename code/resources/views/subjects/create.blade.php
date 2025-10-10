@@ -7,9 +7,6 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_new_subject') }}
-                </h5>
             </div>
             <div class="card-body">
                 <form id="createSubjectForm" method="POST" action="{{ route('subjects.store') }}">
@@ -124,24 +121,30 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="max_teams" class="form-label required">{{ __('app.max_teams') }}</label>
-                                <input type="number"
-                                       class="form-control @error('max_teams') is-invalid @enderror"
-                                       id="max_teams"
-                                       name="max_teams"
-                                       value="{{ old('max_teams', 1) }}"
-                                       min="1"
-                                       max="10"
-                                       required>
-                                @error('max_teams')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <div class="form-text">
-                                    {{ __('app.max_teams_help_text') }}
-                                </div>
-                            </div>
+                        <!-- Max Teams Hidden Field - Fixed to 1 -->
+                        <input type="hidden" name="max_teams" value="1">
+                    </div>
+
+                    <!-- Specialities Selection -->
+                    <div class="mb-3">
+                        <label for="specialities" class="form-label required">{{ __('app.target_specialities') }}</label>
+                        <select class="form-select @error('specialities') is-invalid @enderror"
+                                id="specialities"
+                                name="specialities[]"
+                                multiple
+                                required>
+                            @foreach($specialities as $speciality)
+                                <option value="{{ $speciality->id }}"
+                                    {{ in_array($speciality->id, old('specialities', [])) ? 'selected' : '' }}>
+                                    {{ $speciality->name }} ({{ $speciality->level }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('specialities')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">
+                            {{ __('app.select_specialities_can_work_on_subject') }}
                         </div>
                     </div>
 
@@ -313,6 +316,29 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Specialities Selection for Students -->
+                    <div class="mb-3">
+                        <label for="specialities_student" class="form-label required">{{ __('app.target_specialities') }}</label>
+                        <select class="form-select @error('specialities') is-invalid @enderror"
+                                id="specialities_student"
+                                name="specialities[]"
+                                multiple
+                                required>
+                            @foreach($specialities as $speciality)
+                                <option value="{{ $speciality->id }}"
+                                    {{ in_array($speciality->id, old('specialities', [])) ? 'selected' : '' }}>
+                                    {{ $speciality->name }} ({{ $speciality->level }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('specialities')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">
+                            {{ __('app.select_specialities_can_work_on_subject') }}
                         </div>
                     </div>
                     @endif

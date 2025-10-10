@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Allocation Details - ' . $deadline->name)
+@section('page-title', __('app.allocation_details') . ' - ' . $deadline->name)
 
 @section('content')
 <div class="container-fluid">
@@ -19,7 +19,7 @@
                                 {{ ucfirst(str_replace('_', ' ', $deadline->status)) }}
                             </span>
                             <a href="{{ route('admin.allocations.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> Back
+                                <i class="fas fa-arrow-left"></i> {{ __('app.back') }}
                             </a>
                         </div>
                     </div>
@@ -29,25 +29,25 @@
                         <div class="col-md-3">
                             <div class="stat-card text-center">
                                 <div class="stat-number text-primary">{{ $stats['total_teams'] }}</div>
-                                <div class="stat-label">Total Teams</div>
+                                <div class="stat-label">{{ __('app.total_teams') }}</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stat-card text-center">
                                 <div class="stat-number text-info">{{ $stats['teams_with_preferences'] }}</div>
-                                <div class="stat-label">Teams with Preferences</div>
+                                <div class="stat-label">{{ __('app.teams_with_preferences') }}</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stat-card text-center">
                                 <div class="stat-number text-success">{{ $stats['allocated_teams'] }}</div>
-                                <div class="stat-label">Allocated Teams</div>
+                                <div class="stat-label">{{ __('app.allocated_teams') }}</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stat-card text-center">
                                 <div class="stat-number text-warning">{{ $stats['available_subjects'] }}</div>
-                                <div class="stat-label">Available Subjects</div>
+                                <div class="stat-label">{{ __('app.available_subjects') }}</div>
                             </div>
                         </div>
                     </div>
@@ -65,25 +65,25 @@
                         @if($deadline->canPerformAutoAllocation())
                             <form action="{{ route('admin.allocations.auto-allocation', $deadline) }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to perform auto-allocation? This action cannot be undone.')">
-                                    <i class="fas fa-magic"></i> Perform Auto-Allocation
+                                <button type="submit" class="btn btn-primary" onclick="return confirm('{{ __('app.confirm_auto_allocation') }}')">
+                                    <i class="fas fa-magic"></i> {{ __('app.perform_auto_allocation') }}
                                 </button>
                             </form>
                         @else
                             <button class="btn btn-secondary" disabled>
-                                <i class="fas fa-magic"></i> Auto-Allocation Completed
+                                <i class="fas fa-magic"></i> {{ __('app.auto_allocation_completed') }}
                             </button>
                         @endif
 
                         @if(!$deadline->second_round_needed && $unallocatedTeams->count() > 0)
                             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#secondRoundModal">
-                                <i class="fas fa-redo"></i> Initialize Second Round
+                                <i class="fas fa-redo"></i> {{ __('app.initialize_second_round') }}
                             </button>
                         @endif
 
                         @if($deadline->isSecondRoundActive())
                             <span class="badge bg-primary fs-6 align-self-center">
-                                <i class="fas fa-clock"></i> Second Round Active
+                                <i class="fas fa-clock"></i> {{ __('app.second_round_active') }}
                             </span>
                         @endif
                     </div>
@@ -99,7 +99,7 @@
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-users text-warning"></i>
-                        Unallocated Teams ({{ $unallocatedTeams->count() }})
+                        {{ __('app.unallocated_teams') }} ({{ $unallocatedTeams->count() }})
                     </h5>
                 </div>
                 <div class="card-body">
@@ -112,18 +112,18 @@
                                         data-bs-target="#manualAssignModal"
                                         data-team-id="{{ $team->id }}"
                                         data-team-name="{{ $team->name }}">
-                                    <i class="fas fa-hand-point-right"></i> Assign
+                                    <i class="fas fa-hand-point-right"></i> {{ __('app.assign') }}
                                 </button>
                             </div>
 
                             <div class="mb-2">
-                                <small class="text-muted">Members:</small>
+                                <small class="text-muted">{{ __('app.members') }}:</small>
                                 <div class="small">
                                     @foreach($team->members as $member)
                                         <span class="badge bg-light text-dark me-1">
                                             {{ $member->user->name }}
                                             @if($member->is_leader)
-                                                <i class="fas fa-crown text-warning" title="Team Leader"></i>
+                                                <i class="fas fa-crown text-warning" title="{{ __('app.team_leader') }}"></i>
                                             @endif
                                         </span>
                                     @endforeach
@@ -132,7 +132,7 @@
 
                             @if($team->preferences->count() > 0)
                                 <div>
-                                    <small class="text-muted">Preferences:</small>
+                                    <small class="text-muted">{{ __('app.preferences') }}:</small>
                                     <div class="small">
                                         @foreach($team->preferences->take(3) as $preference)
                                             <div class="text-truncate">
@@ -142,13 +142,13 @@
                                     </div>
                                 </div>
                             @else
-                                <small class="text-danger">No preferences submitted</small>
+                                <small class="text-danger">{{ __('app.no_preferences_submitted') }}</small>
                             @endif
                         </div>
                     @empty
                         <div class="text-center py-4">
                             <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h6 class="text-success">All teams have been allocated!</h6>
+                            <h6 class="text-success">{{ __('app.all_teams_allocated') }}</h6>
                         </div>
                     @endforelse
                 </div>
@@ -161,7 +161,7 @@
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-book text-success"></i>
-                        Available Subjects ({{ $availableSubjects->count() }})
+                        {{ __('app.available_subjects') }} ({{ $availableSubjects->count() }})
                     </h5>
                 </div>
                 <div class="card-body">
@@ -169,8 +169,8 @@
                         <div class="border rounded p-3 mb-3">
                             <h6 class="mb-1">{{ $subject->title }}</h6>
                             <div class="mb-2">
-                                <small class="text-muted">Supervisor:</small>
-                                <span class="fw-semibold">{{ $subject->teacher->name ?? 'Not assigned' }}</span>
+                                <small class="text-muted">{{ __('app.supervisor') }}:</small>
+                                <span class="fw-semibold">{{ $subject->teacher->name ?? __('app.not_assigned') }}</span>
                             </div>
                             @if($subject->description)
                                 <div class="small text-muted mb-2">
@@ -179,7 +179,7 @@
                             @endif
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="badge bg-{{ $subject->is_external ? 'info' : 'primary' }}">
-                                    {{ $subject->is_external ? 'External' : 'Internal' }}
+                                    {{ $subject->is_external ? __('app.external') : __('app.internal') }}
                                 </span>
                                 <button type="button" class="btn btn-sm btn-outline-success"
                                         data-bs-toggle="modal"
@@ -193,7 +193,7 @@
                     @empty
                         <div class="text-center py-4">
                             <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h6 class="text-success">All subjects have been allocated!</h6>
+                            <h6 class="text-success">{{ __('app.all_subjects_allocated') }}</h6>
                         </div>
                     @endforelse
                 </div>
@@ -210,23 +210,23 @@
                 @csrf
                 <input type="hidden" name="deadline_id" value="{{ $deadline->id }}">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="manualAssignModalLabel">Manual Assignment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="manualAssignModalLabel">{{ __('app.manual_assignment') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('app.close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="team_id" class="form-label">Select Team</label>
+                        <label for="team_id" class="form-label">{{ __('app.select_team') }}</label>
                         <select class="form-select" name="team_id" id="team_id" required>
-                            <option value="">Choose team...</option>
+                            <option value="">{{ __('app.choose_team') }}</option>
                             @foreach($unallocatedTeams as $team)
                                 <option value="{{ $team->id }}">{{ $team->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="subject_id" class="form-label">Select Subject</label>
+                        <label for="subject_id" class="form-label">{{ __('app.select_subject') }}</label>
                         <select class="form-select" name="subject_id" id="subject_id" required>
-                            <option value="">Choose subject...</option>
+                            <option value="">{{ __('app.choose_subject') }}</option>
                             @foreach($availableSubjects as $subject)
                                 <option value="{{ $subject->id }}">{{ $subject->title }}</option>
                             @endforeach
@@ -234,8 +234,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Assign Subject</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('app.assign_subject') }}</button>
                 </div>
             </form>
         </div>
@@ -249,26 +249,26 @@
             <form action="{{ route('admin.allocations.second-round', $deadline) }}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="secondRoundModalLabel">Initialize Second Round</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="secondRoundModalLabel">{{ __('app.initialize_second_round') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('app.close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        This will create a second chance period for teams without subjects to make new choices.
+                        {{ __('app.second_round_info') }}
                     </div>
                     <div class="mb-3">
-                        <label for="second_round_start" class="form-label">Second Round Start Date</label>
+                        <label for="second_round_start" class="form-label">{{ __('app.second_round_start_date') }}</label>
                         <input type="datetime-local" class="form-control" name="second_round_start" id="second_round_start" required>
                     </div>
                     <div class="mb-3">
-                        <label for="second_round_deadline" class="form-label">Second Round Deadline</label>
+                        <label for="second_round_deadline" class="form-label">{{ __('app.second_round_deadline') }}</label>
                         <input type="datetime-local" class="form-control" name="second_round_deadline" id="second_round_deadline" required>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Initialize Second Round</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.cancel') }}</button>
+                    <button type="submit" class="btn btn-warning">{{ __('app.initialize_second_round') }}</button>
                 </div>
             </form>
         </div>

@@ -293,5 +293,9 @@
     <script src="{{ asset('js/app.js') }}"></script>
 
     @yield('scripts')
+
+    <!-- Confirmation Modal Components -->
+    <x-confirmation-modal />
+    <x-delete-confirmation-modal />
 </body>
 </html>

@@ -6,12 +6,27 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">{{ __('app.teams') }}</h1>
-        @if(auth()->user()?->role === 'student')
+        @if(auth()->user()?->role === 'student' && isset($canModifyTeams) && $canModifyTeams)
             <a href="{{ route('teams.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus"></i> {{ __('app.create_team') }}
             </a>
         @endif
     </div>
+
+    <!-- Deadline Information -->
+    @if(isset($currentDeadline) && $currentDeadline)
+        <div class="alert {{ $canModifyTeams ? 'alert-info' : 'alert-warning' }} mb-4">
+            <i class="bi bi-{{ $canModifyTeams ? 'info-circle' : 'exclamation-triangle' }}"></i>
+            @if($canModifyTeams)
+                <strong>{{ __('app.team_formation_active') }}</strong>
+                <br>{{ __('app.deadline') }}: {{ $currentDeadline->preferences_deadline->format('M d, Y \\a\\t g:i A') }}
+                <br><small>{{ $currentDeadline->getRemainingTimeForPreferences() }}</small>
+            @else
+                <strong>{{ __('app.team_formation_ended') }}</strong>
+                <br><small>{{ __('app.deadline_was') }}: {{ $currentDeadline->preferences_deadline->format('M d, Y \\a\\t g:i A') }}</small>
+            @endif
+        </div>
+    @endif
 
     <!-- Filters -->
     <div class="card mb-4">
@@ -64,7 +79,7 @@
                             <tr>
                                 <th>{{ __('app.team_name') }}</th>
                                 <th>{{ __('app.members') }}</th>
-                                <th>Leader & Created</th>
+                                <th>{{ __('app.leader_and_created') }}</th>
                                 <th>{{ __('app.status') }}</th>
                                 <th>{{ __('app.subject') }}</th>
                                 <th>{{ __('app.actions') }}</th>
@@ -112,7 +127,7 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $team->status === 'active' ? 'success' : ($team->status === 'complete' ? 'primary' : 'warning') }}">
-                                            {{ ucfirst($team->status) }}
+                                            {{ __('app.team_status_' . $team->status) }}
                                         </span>
                                     </td>
                                     <td>
@@ -134,7 +149,7 @@
                                         <div class="btn-group btn-group-sm">
                                             <a href="{{ route('teams.show', $team) }}"
                                                class="btn btn-outline-primary btn-sm"
-                                               title="View Details">
+                                               title="{{ __('app.view_details') }}">
                                                 <i class="bi bi-eye"></i>
                                             </a>
 
@@ -154,7 +169,7 @@
                                                         <button type="submit"
                                                                 class="btn btn-outline-danger btn-sm"
                                                                 title="{{ __('app.leave_team') }}"
-                                                                onclick="return confirm('{{ __('app.confirm_leave_team') }}')">
+                                                                onclick="return confirmLeave('{{ __('app.confirm_leave_team') }}', null, this.form)">
                                                             <i class="bi bi-person-dash"></i>
                                                         </button>
                                                     </form>
@@ -177,7 +192,7 @@
                                                         <button type="submit"
                                                                 class="btn btn-outline-danger btn-sm"
                                                                 title="{{ __('app.leave_team') }}"
-                                                                onclick="return confirm('{{ __('app.confirm_leave_team_leader') }}')">
+                                                                onclick="return confirmLeave('{{ __('app.confirm_leave_team_leader') }}', null, this.form)">
                                                             <i class="bi bi-person-dash"></i>
                                                         </button>
                                                     </form>
@@ -193,17 +208,17 @@
             @else
                 <div class="text-center py-5">
                     <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
-                    <h4 class="mt-3">No Teams Found</h4>
+                    <h4 class="mt-3">{{ __('app.no_teams_found') }}</h4>
                     <p class="text-muted">
                         @if(request()->hasAny(['search', 'status']))
-                            No teams match your current filters. Try adjusting your search criteria.
+                            {{ __('app.no_teams_match_filters') }}
                         @elseif(auth()->user()?->role === 'teacher')
-                            No teams have selected your subjects yet. Teams will appear here once they choose your subjects.
+                            {{ __('app.no_teams_selected_subjects') }}
                         @else
-                            There are no teams available at the moment.
+                            {{ __('app.no_teams_available') }}
                         @endif
                     </p>
-                    @if(auth()->user()?->role === 'student')
+                    @if(auth()->user()?->role === 'student' && isset($canModifyTeams) && $canModifyTeams)
                         <a href="{{ route('teams.create') }}" class="btn btn-primary">
                             <i class="bi bi-plus"></i> {{ __('app.create_first_team') }}
                         </a>

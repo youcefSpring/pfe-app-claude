@@ -50,11 +50,9 @@
                                     <select class="form-select @error('level') is-invalid @enderror"
                                             id="level" name="level" required>
                                         <option value="">Select Level</option>
-                                        <option value="L2 ING" {{ old('level') == 'L2 ING' ? 'selected' : '' }}>L2 ING (2nd Year Engineering)</option>
-                                        <option value="L3 LMD" {{ old('level') == 'L3 LMD' ? 'selected' : '' }}>L3 LMD (3rd Year License LMD)</option>
-                                        <option value="L4 ING" {{ old('level') == 'L4 ING' ? 'selected' : '' }}>L4 ING (4th Year Engineering)</option>
-                                        <option value="L5 ING" {{ old('level') == 'L5 ING' ? 'selected' : '' }}>L5 ING (5th Year Engineering)</option>
-                                        <option value="M2 LMD" {{ old('level') == 'M2 LMD' ? 'selected' : '' }}>M2 LMD (2nd Year Master LMD)</option>
+                                        <option value="licence" {{ old('level') == 'licence' ? 'selected' : '' }}>Licence</option>
+                                        <option value="master" {{ old('level') == 'master' ? 'selected' : '' }}>Master</option>
+                                        <option value="ingenieur" {{ old('level') == 'ingenieur' ? 'selected' : '' }}>Ingénieur</option>
                                     </select>
                                     @error('level')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -65,11 +63,12 @@
                                 <div class="mb-3">
                                     <label for="academic_year" class="form-label">Academic Year <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('academic_year') is-invalid @enderror"
-                                           id="academic_year" name="academic_year" value="{{ old('academic_year', '2024-2025') }}" required
-                                           placeholder="2024-2025">
+                                           id="academic_year" name="academic_year" value="{{ old('academic_year', '2024/2025') }}" required
+                                           placeholder="2024/2025" readonly>
                                     @error('academic_year')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <small class="form-text text-muted">Format: YYYY/YYYY (automatically set)</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -187,12 +186,19 @@ document.addEventListener('DOMContentLoaded', function() {
         this.value = this.value.toUpperCase();
     });
 
-    // Set current academic year if empty
+    // Set current academic year if empty (use correct format YYYY/YYYY)
     const yearInput = document.getElementById('academic_year');
     if (!yearInput.value) {
-        const currentYear = new Date().getFullYear();
-        const nextYear = currentYear + 1;
-        yearInput.value = `${currentYear}-${nextYear}`;
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+
+        // Academic year starts in September (month 9)
+        if (currentMonth >= 9) {
+            yearInput.value = `${currentYear}/${currentYear + 1}`;
+        } else {
+            yearInput.value = `${currentYear - 1}/${currentYear}`;
+        }
     }
 });
 </script>

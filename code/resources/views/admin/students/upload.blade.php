@@ -42,15 +42,15 @@
 
                 <!-- Instructions -->
                 <div class="alert alert-info">
-                    <h6><i class="bi bi-info-circle me-2"></i>Instructions d'importation</h6>
+                    <h6><i class="bi bi-info-circle me-2"></i>{{ __('app.import_instructions') }}</h6>
                     <ul class="mb-0">
-                        <li><strong>Structure du fichier:</strong> Les données d'étudiants commencent à la <strong>ligne 5</strong> (ligne 4 = en-têtes)</li>
-                        <li><strong>Métadonnées:</strong> Les 3 premières lignes contiennent: Nom du programme, Semestre, Année académique</li>
-                        <li><strong>Colonnes requises:</strong> <code>Numero Inscription</code>, <code>Annee Bac</code>, <code>Matricule</code>, <code>Nom</code>, <code>Prenom</code>, <code>Section</code>, <code>Groupe</code></li>
-                        <li><strong>Champs obligatoires:</strong> <code>Matricule</code>, <code>Nom</code>, et <code>Prenom</code></li>
-                        <li><strong>Email automatique:</strong> <code>matricule@student.university.edu</code></li>
-                        <li><strong>Mot de passe par défaut:</strong> <code>student123</code></li>
-                        <li><strong>Taille maximale:</strong> 10MB | <strong>Formats:</strong> .xlsx, .xls, .csv</li>
+                        <li><strong>{{ __('app.file_structure') }}:</strong> {{ __('app.student_data_starts_line_5') }}</li>
+                        <li><strong>{{ __('app.metadata') }}:</strong> {{ __('app.first_three_lines_contain') }}</li>
+                        <li><strong>{{ __('app.required_columns') }}:</strong> <code>Numero Inscription</code>, <code>Annee Bac</code>, <code>Matricule</code>, <code>Nom</code>, <code>Prenom</code>, <code>Section</code>, <code>Groupe</code></li>
+                        <li><strong>{{ __('app.required_fields') }}:</strong> {{ __('app.required_fields_matricule_name') }}</li>
+                        <li><strong>{{ __('app.automatic_email') }}:</strong> <code>{{ __('app.email_format_matricule') }}</code></li>
+                        <li><strong>{{ __('app.default_password') }}:</strong> <code>student123</code></li>
+                        <li><strong>{{ __('app.max_size') }}:</strong> 10MB | <strong>{{ __('app.formats') }}:</strong> .xlsx, .xls, .csv</li>
                     </ul>
                 </div>
 

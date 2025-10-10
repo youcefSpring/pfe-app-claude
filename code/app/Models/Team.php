@@ -24,6 +24,7 @@ class Team extends Model
         'subject_id',
         'supervisor_id',
         'external_supervisor',
+        'academic_year',
     ];
 
     // Relationships
@@ -41,6 +42,14 @@ class Team extends Model
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    /**
+     * Get the academic year this team belongs to.
+     */
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year', 'year');
     }
 
     /**
@@ -378,5 +387,22 @@ class Team extends Model
             ->where('id', '!=', $this->id)
             ->with(['members.user'])
             ->get();
+    }
+
+    /**
+     * Boot method to automatically set academic year for new records.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($team) {
+            if (empty($team->academic_year)) {
+                $currentYear = AcademicYear::getCurrentYear();
+                if ($currentYear) {
+                    $team->academic_year = $currentYear->year;
+                }
+            }
+        });
     }
 }

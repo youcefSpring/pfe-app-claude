@@ -24,7 +24,7 @@ class ScheduleDefenseRequest extends FormRequest
     {
         return [
             'project_id' => 'required|exists:projects,id',
-            'defense_date' => 'required|date|after:today|before:' . now()->addMonths(6)->format('Y-m-d'),
+            'defense_date' => 'required|date|after_or_equal:today|before:' . now()->addMonths(6)->format('Y-m-d'),
             'defense_time' => 'required|date_format:H:i',
             'room_id' => 'required|exists:rooms,id',
             'duration' => 'required|integer|min:30|max:120',
@@ -45,7 +45,7 @@ class ScheduleDefenseRequest extends FormRequest
             'project_id.required' => 'Project selection is required',
             'project_id.exists' => 'Selected project does not exist',
             'defense_date.required' => 'Defense date is required',
-            'defense_date.after' => 'Defense must be scheduled for a future date',
+            'defense_date.after_or_equal' => 'Defense cannot be scheduled for past dates',
             'defense_date.before' => 'Defense cannot be scheduled more than 6 months in advance',
             'defense_time.required' => 'Defense time is required',
             'defense_time.date_format' => 'Please provide time in HH:MM format',

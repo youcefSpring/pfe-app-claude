@@ -73,7 +73,6 @@ class SpecialityController extends Controller
             'academic_year' => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'],
             'semester' => ['nullable', 'string', 'max:10'],
             'description' => ['nullable', 'string'],
-            'is_active' => ['boolean'],
         ], [
             'name.required' => 'Le nom de la spécialité est obligatoire.',
             'level.required' => 'Le niveau est obligatoire.',
@@ -81,6 +80,9 @@ class SpecialityController extends Controller
             'academic_year.required' => 'L\'année académique est obligatoire.',
             'academic_year.regex' => 'L\'année académique doit être au format YYYY/YYYY.',
         ]);
+
+        // Handle checkbox (is_active)
+        $validated['is_active'] = $request->has('is_active');
 
         // Check for uniqueness
         $exists = Speciality::where('name', $validated['name'])
@@ -93,8 +95,6 @@ class SpecialityController extends Controller
                 'name' => 'Cette spécialité existe déjà pour ce niveau et cette année académique.'
             ])->withInput();
         }
-
-        $validated['is_active'] = $request->has('is_active');
 
         Speciality::create($validated);
 
@@ -133,7 +133,6 @@ class SpecialityController extends Controller
             'academic_year' => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'],
             'semester' => ['nullable', 'string', 'max:10'],
             'description' => ['nullable', 'string'],
-            'is_active' => ['boolean'],
         ], [
             'name.required' => 'Le nom de la spécialité est obligatoire.',
             'level.required' => 'Le niveau est obligatoire.',
@@ -141,6 +140,9 @@ class SpecialityController extends Controller
             'academic_year.required' => 'L\'année académique est obligatoire.',
             'academic_year.regex' => 'L\'année académique doit être au format YYYY/YYYY.',
         ]);
+
+        // Handle checkbox (is_active)
+        $validated['is_active'] = $request->has('is_active');
 
         // Check for uniqueness (excluding current record)
         $exists = Speciality::where('name', $validated['name'])
@@ -154,8 +156,6 @@ class SpecialityController extends Controller
                 'name' => 'Cette spécialité existe déjà pour ce niveau et cette année académique.'
             ])->withInput();
         }
-
-        $validated['is_active'] = $request->has('is_active');
 
         $speciality->update($validated);
 

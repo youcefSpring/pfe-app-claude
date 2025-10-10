@@ -27,6 +27,7 @@ class Project extends Model
         'status',
         'started_at',
         'submitted_at',
+        'academic_year',
     ];
 
     /**
@@ -81,6 +82,14 @@ class Project extends Model
     public function coSupervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'co_supervisor_id');
+    }
+
+    /**
+     * Get the academic year this project belongs to.
+     */
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year', 'year');
     }
 
     /**

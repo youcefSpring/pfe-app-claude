@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RoomSeeder::class,
             SubjectSeeder::class,
             TeamSeeder::class,
+            AlgerianTestDataSeeder::class,
         ]);
     }
 }

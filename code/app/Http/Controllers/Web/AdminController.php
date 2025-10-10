@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Speciality;
 use App\Models\Room;
 use App\Models\Subject;
+use App\Models\Team;
 use App\Models\StudentMark;
 use App\Models\StudentAlert;
 use App\Services\StudentImportService;
@@ -136,6 +137,23 @@ class AdminController extends Controller
                 ->with('error', 'Failed to create user: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Show user details with marks
+     */
+    public function detailsUser(User $user): View
+    {
+        $marks = StudentMark::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $students = User::where('role', 'student')
+            ->where('id', '!=', $user->id)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.users.details', compact('user', 'marks', 'students'));
     }
 
     /**
@@ -996,6 +1014,20 @@ public function processBulkImport(Request $request): RedirectResponse
         ]);
 
         try {
+            $academicYear = date('Y') . '-' . (date('Y') + 1);
+
+            // Check if student already has marks for current academic year
+            $existingMark = StudentMark::where('user_id', $request->user_id)
+                ->where('subject_name', 'General Assessment')
+                ->where('academic_year', $academicYear)
+                ->first();
+
+            if ($existingMark) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', __('app.student_already_has_marks_this_year'));
+            }
+
             // Calculate simple average of entered marks
             $marks = array_filter([
                 $request->mark_1,
@@ -1126,62 +1158,76 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'semester' => 'required|string',
-            'academic_year' => 'required|string',
-            'marks' => 'required|array|min:1',
-            'marks.*.subject_name' => 'required|string|max:255',
-            'marks.*.mark' => 'required|numeric|min:0',
-            'marks.*.max_mark' => 'required|numeric|min:0.01',
-            'notes' => 'nullable|string|max:1000',
+            // Required marks
+            'mark_1' => 'required|numeric|min:0|max:20',
+            'mark_2' => 'required|numeric|min:0|max:20',
+            // Optional marks
+            'mark_3' => 'nullable|numeric|min:0|max:20',
+            'mark_4' => 'nullable|numeric|min:0|max:20',
+            'mark_5' => 'nullable|numeric|min:0|max:20',
         ]);
-
-        // Validate that mark doesn't exceed max_mark
-        foreach ($request->marks as $markData) {
-            if ($markData['mark'] > $markData['max_mark']) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', __('app.mark_cannot_exceed_max_mark') . ': ' . $markData['subject_name']);
-            }
-        }
 
         try {
             $user = User::findOrFail($request->user_id);
-            $createdMarks = 0;
 
-            foreach ($request->marks as $markData) {
-                // Check if mark already exists for this student, subject, and semester
-                $existingMark = StudentMark::where([
-                    'user_id' => $user->id,
-                    'subject_name' => $markData['subject_name'],
-                    'semester' => $request->semester,
-                    'academic_year' => $request->academic_year,
-                ])->first();
+            // Calculate simple average of entered marks
+            $marks = array_filter([
+                $request->mark_1,
+                $request->mark_2,
+                $request->mark_3,
+                $request->mark_4,
+                $request->mark_5
+            ], function($mark) {
+                return $mark !== null && $mark !== '';
+            });
+            $averageMark = count($marks) > 0 ? array_sum($marks) / count($marks) : 0;
 
-                if ($existingMark) {
-                    // Update existing mark
-                    $existingMark->update([
-                        'mark' => $markData['mark'],
-                        'max_mark' => $markData['max_mark'],
-                        'notes' => $request->notes,
-                    ]);
-                } else {
-                    // Create new mark
-                    StudentMark::create([
-                        'user_id' => $user->id,
-                        'subject_name' => $markData['subject_name'],
-                        'mark' => $markData['mark'],
-                        'max_mark' => $markData['max_mark'],
-                        'semester' => $request->semester,
-                        'academic_year' => $request->academic_year,
-                        'notes' => $request->notes,
-                    ]);
-                    $createdMarks++;
-                }
+            $academicYear = date('Y') . '-' . (date('Y') + 1);
+
+            // Check if student already has marks for current academic year
+            $existingMark = StudentMark::where('user_id', $user->id)
+                ->where('subject_name', 'General Assessment')
+                ->where('academic_year', $academicYear)
+                ->first();
+
+            $markData = [
+                'user_id' => $user->id,
+                'subject_name' => 'General Assessment', // Default subject name
+                'mark' => $averageMark, // Average of all marks
+                'max_mark' => 20, // Standard max mark
+                'semester' => null, // Not used anymore
+                'academic_year' => $academicYear, // Current academic year
+                'notes' => null, // Not used anymore
+                'created_by' => Auth::id(),
+                // Individual marks
+                'mark_1' => $request->mark_1,
+                'mark_2' => $request->mark_2,
+                'mark_3' => $request->mark_3,
+                'mark_4' => $request->mark_4,
+                'mark_5' => $request->mark_5,
+                // Max marks (all 20)
+                'max_mark_1' => 20,
+                'max_mark_2' => 20,
+                'max_mark_3' => 20,
+                'max_mark_4' => 20,
+                'max_mark_5' => 20,
+                // Equal weights
+                'weight_1' => 20,
+                'weight_2' => 20,
+                'weight_3' => 20,
+                'weight_4' => 20,
+                'weight_5' => 20,
+            ];
+
+            if ($existingMark) {
+                // Update existing mark
+                $existingMark->update($markData);
+                $message = __('app.marks_updated_successfully', ['student' => $user->name]);
+            } else {
+                // Create new mark
+                StudentMark::create($markData);
+                $message = __('app.marks_saved_successfully', ['count' => 1, 'student' => $user->name]);
             }
-
-            $message = $createdMarks > 0
-                ? __('app.marks_saved_successfully', ['count' => $createdMarks, 'student' => $user->name])
-                : __('app.marks_updated_successfully', ['student' => $user->name]);
 
             return redirect()->route('admin.marks')
                 ->with('success', $message);
@@ -1230,6 +1276,7 @@ public function processBulkImport(Request $request): RedirectResponse
      */
     public function bulkAllStudentsCreate(): View
     {
+        // Get all students
         $students = User::where('role', 'student')
             ->orderBy('name')
             ->get();
@@ -1261,21 +1308,55 @@ public function processBulkImport(Request $request): RedirectResponse
             $processedStudents = 0;
 
             foreach ($request->selected_students as $studentId) {
-                // Check if student already has marks (enforce one record per student)
-                $existingMark = StudentMark::where('user_id', $studentId)->first();
-
-                $markData = [
-                    'user_id' => $studentId,
-                    'mark_1' => $request->mark_1[$studentId] ?? null,
-                    'mark_2' => $request->mark_2[$studentId] ?? null,
-                    'mark_3' => $request->mark_3[$studentId] ?? null,
-                    'mark_4' => $request->mark_4[$studentId] ?? null,
-                    'mark_5' => $request->mark_5[$studentId] ?? null,
-                    'created_by' => Auth::id(),
-                ];
-
                 // Only process if mark_1 and mark_2 are provided (required)
-                if (!empty($markData['mark_1']) && !empty($markData['mark_2'])) {
+                if (!empty($request->mark_1[$studentId]) && !empty($request->mark_2[$studentId])) {
+
+                    // Check if student already has marks for current academic year
+                    $academicYear = date('Y') . '-' . (date('Y') + 1);
+                    $existingMark = StudentMark::where('user_id', $studentId)
+                        ->where('subject_name', 'General Assessment')
+                        ->where('academic_year', $academicYear)
+                        ->first();
+
+                    // Calculate average of all provided marks
+                    $marks = array_filter([
+                        $request->mark_1[$studentId],
+                        $request->mark_2[$studentId],
+                        $request->mark_3[$studentId] ?? null,
+                        $request->mark_4[$studentId] ?? null,
+                        $request->mark_5[$studentId] ?? null
+                    ], function($mark) {
+                        return $mark !== null && $mark !== '';
+                    });
+                    $averageMark = count($marks) > 0 ? array_sum($marks) / count($marks) : 0;
+
+                    $markData = [
+                        'user_id' => $studentId,
+                        'subject_name' => 'General Assessment', // Default since no subject selection
+                        'semester' => null,
+                        'academic_year' => $academicYear,
+                        'mark' => $averageMark, // Required average mark field
+                        'max_mark' => 20, // Standard max mark
+                        'mark_1' => $request->mark_1[$studentId],
+                        'mark_2' => $request->mark_2[$studentId],
+                        'mark_3' => $request->mark_3[$studentId] ?? null,
+                        'mark_4' => $request->mark_4[$studentId] ?? null,
+                        'mark_5' => $request->mark_5[$studentId] ?? null,
+                        // Set max marks (all 20)
+                        'max_mark_1' => 20,
+                        'max_mark_2' => 20,
+                        'max_mark_3' => 20,
+                        'max_mark_4' => 20,
+                        'max_mark_5' => 20,
+                        // Set equal weights (20% each)
+                        'weight_1' => 20,
+                        'weight_2' => 20,
+                        'weight_3' => 20,
+                        'weight_4' => 20,
+                        'weight_5' => 20,
+                        'created_by' => Auth::id(),
+                    ];
+
                     if ($existingMark) {
                         // Update existing record
                         $existingMark->update($markData);
@@ -1283,6 +1364,7 @@ public function processBulkImport(Request $request): RedirectResponse
                         // Create new record
                         StudentMark::create($markData);
                     }
+
                     $processedStudents++;
                 }
             }

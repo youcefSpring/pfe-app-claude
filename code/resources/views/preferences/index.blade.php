@@ -12,9 +12,15 @@
     </div>
 
     @if($currentDeadline)
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i>
-            Preference submission deadline: {{ $currentDeadline->format('M d, Y \\a\\t g:i A') }}
+        <div class="alert {{ $currentDeadline->canStudentsChoose() ? 'alert-info' : 'alert-warning' }}">
+            <i class="bi bi-{{ $currentDeadline->canStudentsChoose() ? 'info-circle' : 'exclamation-triangle' }}"></i>
+            @if($currentDeadline->canStudentsChoose())
+                Preference submission deadline: {{ $currentDeadline->preferences_deadline->format('M d, Y \\a\\t g:i A') }}
+                <br><small>{{ $currentDeadline->getRemainingTimeForPreferences() }}</small>
+            @else
+                <strong>Preference submission period has ended.</strong>
+                <br><small>Deadline was: {{ $currentDeadline->preferences_deadline->format('M d, Y \\a\\t g:i A') }}</small>
+            @endif
         </div>
     @endif
 
@@ -55,6 +61,10 @@
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
+                                        @else
+                                            <small class="text-muted">
+                                                <i class="bi bi-lock"></i> {{ __('app.read_only') }}
+                                            </small>
                                         @endif
                                     </td>
                                 </tr>

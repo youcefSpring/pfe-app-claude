@@ -8,7 +8,6 @@
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">{{ __('app.add_student_marks_bulk') }}</h4>
                     <small class="text-muted">{{ __('app.add_multiple_marks_description') }}</small>
                 </div>
                 <div class="card-body">
@@ -16,7 +15,7 @@
                         @csrf
 
                         <div class="row mb-4">
-                            <div class="col-md-4">
+                            <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="user_id" class="form-label">{{ __('app.student') }} <span class="text-danger">*</span></label>
                                     <select class="form-select @error('user_id') is-invalid @enderror"
@@ -33,66 +32,82 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="semester" class="form-label">{{ __('app.semester') }} <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('semester') is-invalid @enderror"
-                                            id="semester" name="semester" required>
-                                        <option value="">{{ __('app.select_semester') }}</option>
-                                        <option value="S1" {{ old('semester') === 'S1' ? 'selected' : '' }}>S1</option>
-                                        <option value="S2" {{ old('semester') === 'S2' ? 'selected' : '' }}>S2</option>
-                                        <option value="S3" {{ old('semester') === 'S3' ? 'selected' : '' }}>S3</option>
-                                        <option value="S4" {{ old('semester') === 'S4' ? 'selected' : '' }}>S4</option>
-                                        <option value="S5" {{ old('semester') === 'S5' ? 'selected' : '' }}>S5</option>
-                                        <option value="S6" {{ old('semester') === 'S6' ? 'selected' : '' }}>S6</option>
-                                    </select>
-                                    @error('semester')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="academic_year" class="form-label">{{ __('app.academic_year') }} <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('academic_year') is-invalid @enderror"
-                                           id="academic_year" name="academic_year" value="{{ old('academic_year', '2024-2025') }}"
-                                           placeholder="{{ __('app.enter_academic_year') }}" required>
-                                    @error('academic_year')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
                         </div>
 
+                        <!-- Simple Marks Section -->
                         <div class="row">
                             <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5>{{ __('app.subjects_marks') }}</h5>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" id="add-subject">
-                                        <i class="bi bi-plus-circle"></i> {{ __('app.add_subject') }}
-                                    </button>
-                                </div>
-
-                                <div id="subjects-container">
-                                    <!-- Dynamic subject entries will be added here -->
-                                </div>
-
-                                @error('marks')
-                                    <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                @enderror
+                                <h5 class="mb-3">{{ __('app.marks') }}</h5>
+                                <p class="text-muted small">{{ __('app.marks_simple_description') }}</p>
                             </div>
                         </div>
 
-                        <div class="row mt-4">
-                            <div class="col-12">
+                        <!-- 5 Simple Mark Inputs in One Row -->
+                        <div class="row mb-3">
+                            <div class="col-md-2">
                                 <div class="mb-3">
-                                    <label for="notes" class="form-label">{{ __('app.notes') }}</label>
-                                    <textarea class="form-control @error('notes') is-invalid @enderror"
-                                              id="notes" name="notes" rows="3"
-                                              placeholder="{{ __('app.enter_notes_optional') }}">{{ old('notes') }}</textarea>
-                                    @error('notes')
+                                    <label for="mark_1" class="form-label">{{ __('app.mark') }} 1 <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" max="20"
+                                           class="form-control @error('mark_1') is-invalid @enderror"
+                                           id="mark_1" name="mark_1" value="{{ old('mark_1') }}"
+                                           placeholder="0.00" required>
+                                    @error('mark_1')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label for="mark_2" class="form-label">{{ __('app.mark') }} 2 <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" max="20"
+                                           class="form-control @error('mark_2') is-invalid @enderror"
+                                           id="mark_2" name="mark_2" value="{{ old('mark_2') }}"
+                                           placeholder="0.00" required>
+                                    @error('mark_2')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label for="mark_3" class="form-label">{{ __('app.mark') }} 3</label>
+                                    <input type="number" step="0.01" min="0" max="20"
+                                           class="form-control @error('mark_3') is-invalid @enderror"
+                                           id="mark_3" name="mark_3" value="{{ old('mark_3') }}"
+                                           placeholder="0.00">
+                                    @error('mark_3')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label for="mark_4" class="form-label">{{ __('app.mark') }} 4</label>
+                                    <input type="number" step="0.01" min="0" max="20"
+                                           class="form-control @error('mark_4') is-invalid @enderror"
+                                           id="mark_4" name="mark_4" value="{{ old('mark_4') }}"
+                                           placeholder="0.00">
+                                    @error('mark_4')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label for="mark_5" class="form-label">{{ __('app.mark') }} 5</label>
+                                    <input type="number" step="0.01" min="0" max="20"
+                                           class="form-control @error('mark_5') is-invalid @enderror"
+                                           id="mark_5" name="mark_5" value="{{ old('mark_5') }}"
+                                           placeholder="0.00">
+                                    @error('mark_5')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">{{ __('app.average') }}</label>
+                                    <input type="text" class="form-control fw-bold text-center" id="average_display" readonly>
                                 </div>
                             </div>
                         </div>
@@ -112,144 +127,58 @@
     </div>
 </div>
 
-<!-- Subject Row Template -->
-<template id="subject-template">
-    <div class="row subject-row mb-3 p-3 border rounded">
-        <div class="col-md-4">
-            <div class="mb-3">
-                <label class="form-label">{{ __('app.subject_name') }} <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="marks[INDEX][subject_name]"
-                       placeholder="{{ __('app.enter_subject_name') }}" required>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="mb-3">
-                <label class="form-label">{{ __('app.mark') }} <span class="text-danger">*</span></label>
-                <input type="number" step="0.01" min="0" class="form-control mark-input"
-                       name="marks[INDEX][mark]" placeholder="0.00" required>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="mb-3">
-                <label class="form-label">{{ __('app.max_mark') }} <span class="text-danger">*</span></label>
-                <input type="number" step="0.01" min="0.01" class="form-control max-mark-input"
-                       name="marks[INDEX][max_mark]" value="20" required>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="mb-3">
-                <label class="form-label">{{ __('app.percentage') }}</label>
-                <div class="input-group">
-                    <input type="text" class="form-control percentage-display" readonly>
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-1">
-            <div class="mb-3">
-                <label class="form-label">&nbsp;</label>
-                <button type="button" class="btn btn-danger btn-sm remove-subject d-block">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
 @endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let subjectIndex = 0;
-    const subjectsContainer = document.getElementById('subjects-container');
-    const addSubjectBtn = document.getElementById('add-subject');
-    const template = document.getElementById('subject-template');
+    // Calculate simple average of the 5 marks
+    function calculateAverage() {
+        let total = 0;
+        let count = 0;
 
-    // Add initial subject row
-    addSubjectRow();
-
-    // Add subject button click
-    addSubjectBtn.addEventListener('click', function() {
-        addSubjectRow();
-    });
-
-    function addSubjectRow() {
-        const templateContent = template.content.cloneNode(true);
-        const row = templateContent.querySelector('.subject-row');
-
-        // Replace INDEX with actual index
-        row.innerHTML = row.innerHTML.replace(/INDEX/g, subjectIndex);
-
-        // Add event listeners
-        const markInput = row.querySelector('.mark-input');
-        const maxMarkInput = row.querySelector('.max-mark-input');
-        const percentageDisplay = row.querySelector('.percentage-display');
-        const removeBtn = row.querySelector('.remove-subject');
-
-        // Calculate percentage on input
-        function calculatePercentage() {
-            const mark = parseFloat(markInput.value) || 0;
-            const maxMark = parseFloat(maxMarkInput.value) || 1;
-
-            if (maxMark > 0) {
-                const percentage = ((mark / maxMark) * 100).toFixed(2);
-                percentageDisplay.value = percentage;
-
-                // Color coding
-                if (percentage >= 80) {
-                    percentageDisplay.className = 'form-control percentage-display text-success fw-bold';
-                } else if (percentage >= 60) {
-                    percentageDisplay.className = 'form-control percentage-display text-warning fw-bold';
-                } else {
-                    percentageDisplay.className = 'form-control percentage-display text-danger fw-bold';
+        for (let i = 1; i <= 5; i++) {
+            const markInput = document.getElementById(`mark_${i}`);
+            if (markInput) {
+                const mark = parseFloat(markInput.value) || 0;
+                if (mark > 0) {
+                    total += mark;
+                    count++;
                 }
             }
         }
 
-        markInput.addEventListener('input', calculatePercentage);
-        maxMarkInput.addEventListener('input', calculatePercentage);
+        const averageDisplay = document.getElementById('average_display');
+        if (count > 0) {
+            const average = (total / count).toFixed(2);
+            averageDisplay.value = average;
 
-        // Remove button
-        removeBtn.addEventListener('click', function() {
-            if (subjectsContainer.children.length > 1) {
-                row.remove();
+            // Color coding
+            if (average >= 16) {
+                averageDisplay.className = 'form-control fw-bold text-center text-success';
+            } else if (average >= 12) {
+                averageDisplay.className = 'form-control fw-bold text-center text-warning';
+            } else if (average >= 10) {
+                averageDisplay.className = 'form-control fw-bold text-center text-primary';
             } else {
-                alert('{{ __('app.at_least_one_subject_required') }}');
+                averageDisplay.className = 'form-control fw-bold text-center text-danger';
             }
-        });
-
-        subjectsContainer.appendChild(row);
-        subjectIndex++;
-
-        // Calculate initial percentage if values exist
-        calculatePercentage();
+        } else {
+            averageDisplay.value = '';
+            averageDisplay.className = 'form-control fw-bold text-center';
+        }
     }
 
-    // Form validation
-    document.getElementById('bulk-marks-form').addEventListener('submit', function(e) {
-        const subjects = document.querySelectorAll('.subject-row');
-        let hasErrors = false;
-
-        subjects.forEach(function(subject) {
-            const subjectName = subject.querySelector('input[name*="[subject_name]"]').value.trim();
-            const mark = subject.querySelector('input[name*="[mark]"]').value;
-            const maxMark = subject.querySelector('input[name*="[max_mark]"]').value;
-
-            if (!subjectName || !mark || !maxMark) {
-                hasErrors = true;
-            }
-
-            if (parseFloat(mark) > parseFloat(maxMark)) {
-                hasErrors = true;
-                alert('{{ __('app.mark_cannot_exceed_max_mark') }}');
-            }
-        });
-
-        if (hasErrors) {
-            e.preventDefault();
-            alert('{{ __('app.please_fill_all_required_fields') }}');
+    // Add event listeners to all mark inputs
+    for (let i = 1; i <= 5; i++) {
+        const markInput = document.getElementById(`mark_${i}`);
+        if (markInput) {
+            markInput.addEventListener('input', calculateAverage);
         }
-    });
+    }
+
+    // Initial calculation
+    calculateAverage();
 });
 </script>
 @endpush

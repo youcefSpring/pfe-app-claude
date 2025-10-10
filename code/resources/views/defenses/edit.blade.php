@@ -275,7 +275,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Set minimum date to today
+    // Set minimum date to today (allow scheduling for today)
     const dateInput = document.getElementById('defense_date');
     const today = new Date().toISOString().split('T')[0];
     dateInput.min = today;

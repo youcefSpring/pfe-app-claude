@@ -8,7 +8,6 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">{{ __('app.student_marks_management') }}</h4>
                     <div class="btn-group" role="group">
                         <a href="{{ route('admin.marks.create') }}" class="btn btn-primary">
                             <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_mark') }}

@@ -213,30 +213,30 @@
                 <div class="card">
                     <div class="card-header">
                         <h6 class="card-title mb-0">
-                            <i class="bi bi-info-circle me-2"></i>Scheduling Guidelines
+                            <i class="bi bi-info-circle me-2"></i>{{ __('app.scheduling_guidelines') }}
                         </h6>
                     </div>
                     <div class="card-body">
                         <div class="list-group list-group-flush">
                             <div class="list-group-item px-0">
-                                <strong>Jury Composition:</strong>
-                                <span class="text-muted">Supervisor + President + Examiner</span>
+                                <strong>{{ __('app.jury_composition') }}:</strong>
+                                <span class="text-muted">{{ __('app.supervisor_president_examiner') }}</span>
                             </div>
                             <div class="list-group-item px-0">
-                                <strong>Project Requirement:</strong>
-                                <span class="text-muted">Subject must have an associated project</span>
+                                <strong>{{ __('app.project_requirement') }}:</strong>
+                                <span class="text-muted">{{ __('app.subject_must_have_project') }}</span>
                             </div>
                             <div class="list-group-item px-0">
-                                <strong>Defense Duration:</strong>
-                                <span class="text-muted">90 minutes</span>
+                                <strong>{{ __('app.defense_duration') }}:</strong>
+                                <span class="text-muted">{{ __('app.ninety_minutes') }}</span>
                             </div>
                             <div class="list-group-item px-0">
-                                <strong>Buffer Time:</strong>
-                                <span class="text-muted">30 minutes between defenses</span>
+                                <strong>{{ __('app.buffer_time') }}:</strong>
+                                <span class="text-muted">{{ __('app.thirty_minutes_between_defenses') }}</span>
                             </div>
                             <div class="list-group-item px-0">
-                                <strong>Working Hours:</strong>
-                                <span class="text-muted">8:00 AM - 6:00 PM</span>
+                                <strong>{{ __('app.working_hours') }}:</strong>
+                                <span class="text-muted">{{ __('app.eight_am_to_six_pm') }}</span>
                             </div>
                         </div>
                     </div>

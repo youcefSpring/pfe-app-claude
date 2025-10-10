@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\AllocationDeadline;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -27,8 +28,7 @@ class TeamController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -66,7 +66,11 @@ class TeamController extends Controller
 
         $teams = $query->latest()->paginate(12)->appends($request->query());
 
-        return view('teams.index', compact('teams'));
+        // Check deadline restrictions
+        $currentDeadline = AllocationDeadline::active()->first();
+        $canModifyTeams = $currentDeadline && $currentDeadline->canStudentsChoose();
+
+        return view('teams.index', compact('teams', 'currentDeadline', 'canModifyTeams'));
     }
 
     /**
@@ -79,11 +83,14 @@ class TeamController extends Controller
 
         if (!$teamMember) {
             // Student is not in a team, show option to create or join one
+            $availableTeams = Team::withCount('members')
+                ->having('members_count', '<', 2)
+                ->with(['members.user'])
+                ->get();
+
             return view('teams.my-team', [
                 'team' => null,
-                'availableTeams' => Team::whereHas('members', function($query) {
-                    $query->havingRaw('COUNT(*) < 2'); // Teams with less than 2 members
-                })->with(['members.user'])->get()
+                'availableTeams' => $availableTeams
             ]);
         }
 
@@ -95,11 +102,18 @@ class TeamController extends Controller
     /**
      * Show the form for creating a new team
      */
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
         //$this->authorize('create', Team::class);
 
         $user = Auth::user();
+
+        // Check deadline restrictions
+        $currentDeadline = AllocationDeadline::active()->first();
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
+            return redirect()->route('teams.index')
+                ->with('error', __('app.team_creation_period_ended'));
+        }
 
         // Check if user is already in a team
         if ($user->teamMember) {
@@ -213,6 +227,12 @@ class TeamController extends Controller
         if ($team->project) {
             return redirect()->back()
                 ->with('error', __('app.cannot_delete_team_with_project'));
+        }
+
+        // Check if there are other members in the team
+        if ($team->members->count() > 1) {
+            return redirect()->back()
+                ->with('error', __('app.cannot_delete_team_with_other_members'));
         }
 
         $team->delete();
@@ -332,7 +352,7 @@ class TeamController extends Controller
     /**
      * Show form for external project submission
      */
-    public function externalProjectForm(Team $team): View
+    public function externalProjectForm(Team $team): View|RedirectResponse
     {
         //$this->authorize('selectSubject', $team);
 

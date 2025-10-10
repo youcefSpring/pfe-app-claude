@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'System Administration')
+@section('page-title', __('app.system_administration'))
 
 @section('content')
 {{-- <div class="row">
@@ -10,7 +10,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h4 class="card-title mb-2">System Administration Dashboard</h4>
+                        <h4 class="card-title mb-2">{{ __('app.system_administration_dashboard') }}</h4>
                         <p class="card-text mb-0">
                             <strong>{{ auth()->user()->name }}</strong> - System Administrator
                             | Academic Year: {{ now()->format('Y') }}/{{ now()->addYear()->format('Y') }}

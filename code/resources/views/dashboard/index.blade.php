@@ -26,16 +26,16 @@
     </div> --}}
 
 <!-- Quick Actions -->
-<div class="row mt-4">
+<div class="row mt-3">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-lightning me-2"></i>{{ __('app.quick_actions') }}
-                </h5>
+        <div class="card shadow-sm">
+            <div class="card-header bg-light py-2">
+                <h6 class="card-title mb-0 fw-bold">
+                    <i class="bi bi-lightning me-2 text-warning"></i>{{ __('app.quick_actions') }}
+                </h6>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
+            <div class="card-body py-3">
+                <div class="row g-2">
                     @switch(auth()->user()->role)
                         @case('student')
                             @php
@@ -44,24 +44,24 @@
                             @endphp
 
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('subjects.available') }}" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-journal-text d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.available_subjects') }}
+                                <a href="{{ route('subjects.available') }}" class="btn btn-outline-primary w-100 py-2">
+                                    <i class="bi bi-journal-text d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.available_subjects') }}</small>
                                 </a>
                             </div>
 
                             @if($hasTeam)
                                 <div class="col-md-6 col-lg-3">
-                                    <a href="{{ route('teams.show', $userTeam) }}" class="btn btn-outline-success w-100">
-                                        <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                        {{ __('app.my_team') }}
+                                    <a href="{{ route('teams.show', $userTeam) }}" class="btn btn-outline-success w-100 py-2">
+                                        <i class="bi bi-people d-block mb-1" style="font-size: 1.2rem;"></i>
+                                        <small>{{ __('app.my_team') }}</small>
                                     </a>
                                 </div>
                             @else
                                 <div class="col-md-6 col-lg-3">
-                                    <a href="{{ route('teams.index') }}" class="btn btn-outline-success w-100">
-                                        <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                        {{ __('app.join_team') }}
+                                    <a href="{{ route('teams.index') }}" class="btn btn-outline-success w-100 py-2">
+                                        <i class="bi bi-people d-block mb-1" style="font-size: 1.2rem;"></i>
+                                        <small>{{ __('app.join_team') }}</small>
                                     </a>
                                 </div>
                             @endif
@@ -76,23 +76,23 @@
                             </div>
                             --}}
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('subjects.create') }}" class="btn btn-outline-info w-100">
-                                    <i class="bi bi-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.propose_external_subject') }}
+                                <a href="{{ route('subjects.create') }}" class="btn btn-outline-info w-100 py-2">
+                                    <i class="bi bi-plus-circle d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.propose_external_subject') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('defenses.index') }}" class="btn btn-outline-warning w-100">
-                                    <i class="bi bi-shield-check d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.defense_schedule') }}
+                                <a href="{{ route('defenses.index') }}" class="btn btn-outline-warning w-100 py-2">
+                                    <i class="bi bi-shield-check d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.defense_schedule') }}</small>
                                 </a>
                             </div>
                             @break
                         @case('teacher')
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('subjects.create') }}" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.add_subject') }}
+                                <a href="{{ route('subjects.create') }}" class="btn btn-outline-primary w-100 py-2">
+                                    <i class="bi bi-plus-circle d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.add_subject') }}</small>
                                 </a>
                             </div>
                             {{-- Supervised Projects temporarily removed --}}
@@ -105,67 +105,79 @@
                             </div>
                             --}}
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('defenses.jury-assignments') }}" class="btn btn-outline-info w-100">
-                                    <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.jury_assignments') }}
+                                <a href="{{ route('defenses.jury-assignments') }}" class="btn btn-outline-info w-100 py-2">
+                                    <i class="bi bi-people d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.jury_assignments') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('subjects.index') }}" class="btn btn-outline-warning w-100">
-                                    <i class="bi bi-journal-text d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.my_subjects') }}
+                                <a href="{{ route('subjects.index') }}" class="btn btn-outline-warning w-100 py-2">
+                                    <i class="bi bi-journal-text d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.my_subjects') }}</small>
                                 </a>
                             </div>
                             @break
                         @case('department_head')
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('subjects.pending-validation') }}" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-check-circle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.validate_subjects') }}
+                                <a href="{{ route('subjects.pending-validation') }}" class="btn btn-outline-primary w-100 py-2">
+                                    <i class="bi bi-check-circle d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.validate_subjects') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('defenses.schedule-form') }}" class="btn btn-outline-success w-100">
-                                    <i class="bi bi-calendar-plus d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.schedule_defense') }}
+                                <a href="{{ route('defenses.schedule-form') }}" class="btn btn-outline-success w-100 py-2">
+                                    <i class="bi bi-calendar-plus d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.schedule_defense') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('conflicts.index') }}" class="btn btn-outline-warning w-100">
-                                    <i class="bi bi-exclamation-triangle d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.resolve_conflicts') }}
+                                <a href="{{ route('conflicts.index') }}" class="btn btn-outline-warning w-100 py-2">
+                                    <i class="bi bi-exclamation-triangle d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.resolve_conflicts') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.reports') }}" class="btn btn-outline-info w-100">
-                                    <i class="bi bi-graph-up d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.reports') }}
+                                <a href="{{ route('admin.reports') }}" class="btn btn-outline-info w-100 py-2">
+                                    <i class="bi bi-graph-up d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.reports') }}</small>
                                 </a>
                             </div>
                             @break
                         @case('admin')
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.users') }}" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.manage_users') }}
+                                <a href="{{ route('admin.users') }}" class="btn btn-outline-primary w-100 py-2">
+                                    <i class="bi bi-people d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.manage_users') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-success w-100">
-                                    <i class="bi bi-mortarboard d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.specialities') }}
+                                <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-success w-100 py-2">
+                                    <i class="bi bi-mortarboard d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.specialities') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.rooms') }}" class="btn btn-outline-info w-100">
-                                    <i class="bi bi-building d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.manage_rooms') }}
+                                <a href="{{ route('admin.rooms') }}" class="btn btn-outline-info w-100 py-2">
+                                    <i class="bi bi-building d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.manage_rooms') }}</small>
                                 </a>
                             </div>
                             <div class="col-md-6 col-lg-3">
-                                <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100">
-                                    <i class="bi bi-graph-up d-block mb-2" style="font-size: 1.5rem;"></i>
-                                    {{ __('app.reports_analytics') }}
+                                <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100 py-2">
+                                    <i class="bi bi-graph-up d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.reports_analytics') }}</small>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="{{ route('admin.academic-years.index') }}" class="btn btn-outline-dark w-100 py-2">
+                                    <i class="bi bi-calendar-range d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.academic_years_management') }}</small>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="{{ route('admin.settings') }}" class="btn btn-outline-secondary w-100 py-2">
+                                    <i class="bi bi-gear d-block mb-1" style="font-size: 1.2rem;"></i>
+                                    <small>{{ __('app.system_settings') }}</small>
                                 </a>
                             </div>
                             @break
@@ -203,25 +215,35 @@
 
 @if(isset($workflowStatus) && $workflowStatus)
 <!-- Workflow Status -->
-<div class="row mt-4">
+<div class="row mt-3">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-diagram-3 me-2"></i>{{ __('app.current_status') }}
-                </h5>
+        <div class="card shadow-sm">
+            <div class="card-header bg-light py-2">
+                <h6 class="card-title mb-0 fw-bold">
+                    <i class="bi bi-diagram-3 me-2 text-info"></i>{{ __('app.current_status') }}
+                </h6>
             </div>
-            <div class="card-body">
-                <p class="mb-2"><strong>{{ __('app.current_phase') }}:</strong> {{ $workflowStatus['current_phase'] ?? __('app.getting_started') }}</p>
-                <p class="mb-2"><strong>{{ __('app.status') }}:</strong> {{ $workflowStatus['status'] ?? __('app.in_progress') }}</p>
-                @if(isset($workflowStatus['next_actions']) && count($workflowStatus['next_actions']) > 0)
-                    <p class="mb-2"><strong>{{ __('app.next_actions') }}:</strong></p>
-                    <ul class="mb-0">
-                        @foreach($workflowStatus['next_actions'] as $action)
-                            <li>{{ $action }}</li>
-                        @endforeach
-                    </ul>
-                @endif
+            <div class="card-body py-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <small class="text-muted">{{ __('app.current_phase') }}</small>
+                        <div class="fw-bold">{{ $workflowStatus['current_phase'] ?? __('app.getting_started') }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">{{ __('app.status') }}</small>
+                        <div class="fw-bold">{{ $workflowStatus['status'] ?? __('app.in_progress') }}</div>
+                    </div>
+                    @if(isset($workflowStatus['next_actions']) && count($workflowStatus['next_actions']) > 0)
+                        <div class="col-md-4">
+                            <small class="text-muted">{{ __('app.next_actions') }}</small>
+                            <ul class="mb-0 small">
+                                @foreach($workflowStatus['next_actions'] as $action)
+                                    <li>{{ $action }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

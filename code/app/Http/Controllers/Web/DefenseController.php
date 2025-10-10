@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\AllocationDeadline;
 use App\Services\ReportService;
 use App\Services\AutoAllocationService;
+use App\Services\DefenseSchedulingService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -377,11 +378,13 @@ class DefenseController extends Controller
             ->whereHas('defense', function($q) use ($validated) {
                 $q->where('defense_date', $validated['defense_date'])
                   ->where('defense_time', $validated['defense_time']);
-            })->first();
+            })->with('teacher', 'defense.subject')->first();
 
         if ($conflictingJury) {
+            $teacherName = $conflictingJury->teacher->name ?? 'Unknown Teacher';
+            $conflictSubject = $conflictingJury->defense->subject->title ?? 'Unknown Subject';
             return redirect()->back()
-                ->with('error', 'One or more jury members are not available at the selected time.');
+                ->with('error', "Teacher {$teacherName} is already assigned to another defense at this time (Subject: {$conflictSubject}). Please choose a different time or jury member.");
         }
 
         // Create or update project if needed
@@ -458,170 +461,36 @@ class DefenseController extends Controller
             'balance_room_usage' => 'boolean'
         ]);
 
-        // Get unscheduled projects
-        $projects = Project::with(['team.members.user', 'subject'])
-            ->where('status', 'active')
-            ->whereDoesntHave('defense')
-            ->get();
-
-        if ($projects->isEmpty()) {
-            return redirect()->back()
-                ->with('info', 'No unscheduled projects found.');
-        }
-
-        // Check if deadline for subject choice has passed for any project
-        foreach ($projects as $project) {
-            $deadline = AllocationDeadline::where('academic_year', $project->subject->academic_year)
-                ->where('level', $project->subject->level)
-                ->where('status', '!=', 'draft')
-                ->first();
-
-            if ($deadline && !$deadline->canScheduleDefenses()) {
-                return redirect()->back()
-                    ->with('error', 'La soutenance auto ne peut pas être exécutée car la date limite de choix des sujets n\'est pas encore dépassée pour tous les projets. Veuillez attendre après le ' . ($deadline->defense_scheduling_allowed_after?->format('d/m/Y H:i') ?? $deadline->preferences_deadline->format('d/m/Y H:i')) . '.');
-            }
-        }
-
-        $rooms = Room::orderBy('name')->get();
-        $teachers = User::where('role', 'teacher')->orderBy('name')->get();
-
-        if ($rooms->isEmpty() || $teachers->count() < 3) {
-            return redirect()->back()
-                ->with('error', 'Insufficient resources: Need at least 1 room and 3 teachers for scheduling.');
-        }
-
-        $scheduled = 0;
-        $errors = [];
-        $currentDate = new \DateTime($validated['start_date']);
-        $endDate = new \DateTime($validated['end_date']);
-        $timeSlots = ['08:00', '10:00', '12:00', '14:00', '16:00']; // 2-hour intervals
-        $dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-        DB::beginTransaction();
         try {
-            foreach ($projects as $project) {
-                $projectScheduled = false;
-                $attempts = 0;
-                $maxAttempts = 50; // Prevent infinite loops
+            $defenseSchedulingService = new DefenseSchedulingService();
 
-                while (!$projectScheduled && $attempts < $maxAttempts && $currentDate <= $endDate) {
-                    $dayName = strtolower($dayNames[$currentDate->format('w')]);
+            $constraints = [
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'duration' => 90,
+                'include_weekends' => in_array('saturday', $validated['working_days']) || in_array('sunday', $validated['working_days'])
+            ];
 
-                    // Check if this day is a working day
-                    if (!in_array($dayName, $validated['working_days'])) {
-                        $currentDate->modify('+1 day');
-                        $attempts++;
-                        continue;
-                    }
+            $result = $defenseSchedulingService->autoScheduleDefenses($constraints);
 
-                    // Check daily defense limit
-                    $defensesToday = Defense::whereDate('defense_date', $currentDate->format('Y-m-d'))->count();
-                    if ($defensesToday >= $validated['daily_limit']) {
-                        $currentDate->modify('+1 day');
-                        $attempts++;
-                        continue;
-                    }
-
-                    // Try each time slot for this day
-                    foreach ($timeSlots as $timeSlot) {
-                        $defenseDateTime = $currentDate->format('Y-m-d') . ' ' . $timeSlot;
-
-                        // Find available room
-                        $availableRoom = null;
-                        foreach ($rooms as $room) {
-                            $conflictingDefense = Defense::where('room_id', $room->id)
-                                ->where('defense_date', $defenseDateTime)
-                                ->first();
-
-                            if (!$conflictingDefense) {
-                                $availableRoom = $room;
-                                break;
-                            }
-                        }
-
-                        if (!$availableRoom) {
-                            continue; // No room available at this time slot
-                        }
-
-                        // Find available jury members (need at least 3)
-                        $availableTeachers = [];
-                        foreach ($teachers as $teacher) {
-                            $isAvailable = !DefenseJury::whereHas('defense', function($q) use ($defenseDateTime) {
-                                $q->where('defense_date', $defenseDateTime);
-                            })->where('teacher_id', $teacher->id)->exists();
-
-                            if ($isAvailable) {
-                                $availableTeachers[] = $teacher;
-                            }
-
-                            if (count($availableTeachers) >= 3) {
-                                break; // We have enough jury members
-                            }
-                        }
-
-                        if (count($availableTeachers) < 3) {
-                            continue; // Not enough jury members available
-                        }
-
-                        // Schedule the defense
-                        $defense = Defense::create([
-                            'project_id' => $project->id,
-                            'defense_date' => $defenseDateTime,
-                            'room_id' => $availableRoom->id,
-                            'duration' => 90,
-                            'status' => 'scheduled',
-                            'notes' => 'Auto-scheduled by system',
-                            'scheduled_by' => Auth::id(),
-                            'scheduled_at' => now()
-                        ]);
-
-                        // Assign jury members
-                        $roles = ['president', 'examiner', 'supervisor'];
-                        for ($i = 0; $i < 3; $i++) {
-                            DefenseJury::create([
-                                'defense_id' => $defense->id,
-                                'teacher_id' => $availableTeachers[$i]->id,
-                                'role' => $roles[$i]
-                            ]);
-                        }
-
-                        $scheduled++;
-                        $projectScheduled = true;
-                        break; // Move to next project
-                    }
-
-                    if (!$projectScheduled) {
-                        $currentDate->modify('+1 day');
-                        $attempts++;
-                    }
-                }
-
-                if (!$projectScheduled) {
-                    $errors[] = "Could not schedule defense for project: {$project->subject->title}";
-                }
-
-                // Reset date for next project but advance slightly for distribution
-                $currentDate = new \DateTime($validated['start_date']);
-                if ($scheduled > 0) {
-                    $currentDate->modify('+' . ($scheduled % 7) . ' days'); // Distribute across days
-                }
+            if (empty($result['scheduled'])) {
+                return redirect()->back()
+                    ->with('warning', 'No defenses could be scheduled. ' . ($result['message'] ?? 'Please check available resources and constraints.'));
             }
 
-            DB::commit();
+            $scheduled = count($result['scheduled']);
+            $failed = count($result['failed'] ?? []);
 
             $message = "Auto-scheduling completed! Scheduled {$scheduled} defenses.";
-            if (!empty($errors)) {
-                $message .= " " . count($errors) . " projects could not be scheduled.";
+            if ($failed > 0) {
+                $message .= " {$failed} defenses could not be scheduled due to conflicts or resource constraints.";
             }
 
-            return redirect()->route('defenses.schedule-form')
-                ->with('success', $message)
-                ->with('scheduling_errors', $errors);
+            return redirect()->back()->with('success', $message);
 
         } catch (\Exception $e) {
-            DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Auto-scheduling failed: ' . $e->getMessage());
+                ->with('error', 'Failed to auto-schedule defenses: ' . $e->getMessage());
         }
     }
 
@@ -989,5 +858,36 @@ class DefenseController extends Controller
             return redirect()->back()
                 ->with('error', __('app.defense_delete_failed'));
         }
+    }
+
+    /**
+     * Add PV de soutenance notes (for defense president)
+     */
+    public function addPvNotes(Request $request, Defense $defense): RedirectResponse
+    {
+        // Check if user is the defense president
+        $isPresident = $defense->juries->where('teacher_id', auth()->id())->where('role', 'president')->count() > 0;
+
+        if (!$isPresident) {
+            return redirect()->back()
+                ->with('error', __('app.only_president_can_add_pv_notes'));
+        }
+
+        // Validate that defense is in progress
+        if ($defense->status !== 'in_progress') {
+            return redirect()->back()
+                ->with('error', __('app.can_only_add_pv_notes_during_defense'));
+        }
+
+        $request->validate([
+            'pv_notes' => 'required|string|max:2000',
+        ]);
+
+        $defense->update([
+            'pv_notes' => $request->pv_notes,
+        ]);
+
+        return redirect()->back()
+            ->with('success', __('app.pv_notes_saved_successfully'));
     }
 }
