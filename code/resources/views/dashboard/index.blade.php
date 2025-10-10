@@ -207,28 +207,37 @@
 
 <!-- Role-specific Dashboard Content -->
 <div class="row">
-    @switch(auth()->user()->role)
-        @case('student')
-            @include('dashboard.partials.student-content')
-            @break
-        @case('teacher')
-            @include('dashboard.partials.teacher-content')
-            @break
-        @case('department_head')
-            @include('dashboard.partials.department-head-content')
-            @break
-        @case('admin')
-            @include('dashboard.partials.admin-content')
-            @break
-        @default
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    {{ __('app.dashboard_setup_message') }}
+    <div id="dashboard-content">
+        @switch(auth()->user()->role)
+            @case('student')
+                @include('dashboard.partials.student-content')
+                @break
+            @case('teacher')
+                @include('dashboard.partials.teacher-content')
+                @break
+            @case('department_head')
+                @include('dashboard.partials.department-head-content')
+                @break
+            @case('admin')
+                @include('dashboard.partials.admin-content')
+                @break
+            @default
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        {{ __('app.dashboard_setup_message') }}
+                    </div>
                 </div>
-            </div>
-    @endswitch
+        @endswitch
+    </div>
 </div>
+
+@if(auth()->user()->role === 'admin')
+<!-- Tour Trigger Button -->
+<button type="button" class="btn btn-primary tour-trigger-btn" id="start-tour" title="{{ __('app.start_dashboard_tour') }}">
+    <i class="fas fa-question"></i>
+</button>
+@endif
 
 @if(isset($workflowStatus) && $workflowStatus)
 <!-- Workflow Status -->
@@ -267,6 +276,123 @@
 </div>
 @endif
 @endsection
+
+@push('scripts')
+<!-- Driver.js JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    @if(auth()->user()->role === 'admin')
+    // Initialize Driver.js for admin dashboard tour
+    const driver = new Driver({
+        showProgress: true,
+        showButtons: ['next', 'previous', 'close'],
+        closeBtnText: '{{ __("app.close") }}',
+        nextBtnText: '{{ __("app.next") }}',
+        prevBtnText: '{{ __("app.previous") }}',
+        steps: [
+            {
+                element: '#quick-actions-card',
+                popover: {
+                    title: '{{ __("app.quick_actions") }}',
+                    description: '{{ __("app.tour_quick_actions_desc") }}',
+                    position: 'bottom'
+                }
+            },
+            {
+                element: '#users-btn',
+                popover: {
+                    title: '{{ __("app.manage_users") }}',
+                    description: '{{ __("app.tour_users_btn_desc") }}',
+                    position: 'bottom'
+                }
+            },
+            {
+                element: '#specialities-btn',
+                popover: {
+                    title: '{{ __("app.specialities") }}',
+                    description: '{{ __("app.tour_specialities_btn_desc") }}',
+                    position: 'bottom'
+                }
+            },
+            {
+                element: '#reports-btn',
+                popover: {
+                    title: '{{ __("app.reports_analytics") }}',
+                    description: '{{ __("app.tour_reports_btn_desc") }}',
+                    position: 'bottom'
+                }
+            },
+            {
+                element: '#academic-years-btn',
+                popover: {
+                    title: '{{ __("app.academic_years_management") }}',
+                    description: '{{ __("app.tour_academic_years_btn_desc") }}',
+                    position: 'bottom'
+                }
+            },
+            {
+                element: '#users-card',
+                popover: {
+                    title: '{{ __("app.users_statistics") }}',
+                    description: '{{ __("app.tour_users_card_desc") }}',
+                    position: 'right'
+                }
+            },
+            {
+                element: '#subjects-card',
+                popover: {
+                    title: '{{ __("app.subjects_statistics") }}',
+                    description: '{{ __("app.tour_subjects_card_desc") }}',
+                    position: 'right'
+                }
+            },
+            {
+                element: '#defenses-card',
+                popover: {
+                    title: '{{ __("app.defenses_statistics") }}',
+                    description: '{{ __("app.tour_defenses_card_desc") }}',
+                    position: 'right'
+                }
+            },
+            {
+                element: '#specialities-card',
+                popover: {
+                    title: '{{ __("app.specialities_statistics") }}',
+                    description: '{{ __("app.tour_specialities_card_desc") }}',
+                    position: 'right'
+                }
+            },
+            {
+                element: '#system-overview-card',
+                popover: {
+                    title: '{{ __("app.system_overview") }}',
+                    description: '{{ __("app.tour_system_overview_desc") }}',
+                    position: 'top'
+                }
+            }
+        ]
+    });
+
+    // Check if user has seen the tour before
+    const tourSeen = localStorage.getItem('admin_dashboard_tour_seen');
+
+    // Auto-start tour for new admins
+    if (!tourSeen) {
+        setTimeout(() => {
+            driver.start();
+            localStorage.setItem('admin_dashboard_tour_seen', 'true');
+        }, 1000);
+    }
+
+    // Manual tour trigger
+    document.getElementById('start-tour').addEventListener('click', function() {
+        driver.start();
+    });
+    @endif
+});
+</script>
+@endpush
 
 @push('scripts')
 <script>

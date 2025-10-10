@@ -1301,4 +1301,25 @@ return [
     // Specialities
     'target_specialities' => 'Spécialités Cibles',
     'select_specialities_can_work_on_subject' => 'Sélectionnez les spécialités qui peuvent travailler sur ce sujet.',
+
+    // Dashboard Tour
+    'start_dashboard_tour' => 'Commencer la Visite du Tableau de Bord',
+    'close' => 'Fermer',
+    'next' => 'Suivant',
+    'previous' => 'Précédent',
+    'tour_quick_actions_desc' => 'Boutons d\'accès rapide pour les tâches administratives courantes. Utilisez ces raccourcis pour naviguer vers les zones de gestion clés.',
+    'tour_users_btn_desc' => 'Gérer tous les utilisateurs du système incluant étudiants, enseignants et administrateurs. Ajouter, modifier et surveiller les comptes utilisateur.',
+    'tour_specialities_btn_desc' => 'Configurer les spécialités académiques et programmes. Configurer les départements et structures de cours.',
+    'tour_reports_btn_desc' => 'Accéder aux rapports complets et analyses sur l\'utilisation du système, activités utilisateur et progrès académique.',
+    'tour_academic_years_btn_desc' => 'Gérer les années académiques, semestres et configurations de session. Contrôler le calendrier académique.',
+    'users_statistics' => 'Statistiques des Utilisateurs',
+    'tour_users_card_desc' => 'Voir le total des utilisateurs, comptes actifs et nouvelles inscriptions. Surveiller l\'engagement et la croissance des utilisateurs.',
+    'subjects_statistics' => 'Statistiques des Sujets',
+    'tour_subjects_card_desc' => 'Suivre les soumissions de sujets, statut de validation et révisions en attente. Gérer le processus d\'approbation des sujets.',
+    'defenses_statistics' => 'Statistiques des Soutenances',
+    'tour_defenses_card_desc' => 'Surveiller les horaires de soutenance, présentations terminées et sessions de soutenance à venir.',
+    'specialities_statistics' => 'Statistiques des Spécialités',
+    'tour_specialities_card_desc' => 'Aperçu des spécialités académiques, programmes actifs et inscriptions d\'étudiants.',
+    'system_overview' => 'Vue d\'ensemble du Système',
+    'tour_system_overview_desc' => 'Métriques système complètes montrant la distribution par département et la répartition des rôles utilisateur.',
 ];

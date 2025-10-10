@@ -2125,4 +2125,25 @@ return [
     // Specialities
     'target_specialities' => 'Target Specialities',
     'select_specialities_can_work_on_subject' => 'Select the specialities that can work on this subject.',
+
+    // Dashboard Tour
+    'start_dashboard_tour' => 'Start Dashboard Tour',
+    'close' => 'Close',
+    'next' => 'Next',
+    'previous' => 'Previous',
+    'tour_quick_actions_desc' => 'Quick access buttons for common administrative tasks. Use these shortcuts to navigate to key management areas.',
+    'tour_users_btn_desc' => 'Manage all system users including students, teachers, and administrators. Add, edit, and monitor user accounts.',
+    'tour_specialities_btn_desc' => 'Configure academic specialities and programs. Set up departments and course structures.',
+    'tour_reports_btn_desc' => 'Access comprehensive reports and analytics about system usage, user activities, and academic progress.',
+    'tour_academic_years_btn_desc' => 'Manage academic years, semesters, and session configurations. Control the academic calendar.',
+    'users_statistics' => 'Users Statistics',
+    'tour_users_card_desc' => 'View total users, active accounts, and new registrations. Monitor user engagement and growth.',
+    'subjects_statistics' => 'Subjects Statistics',
+    'tour_subjects_card_desc' => 'Track subject submissions, validation status, and pending reviews. Manage the subject approval process.',
+    'defenses_statistics' => 'Defenses Statistics',
+    'tour_defenses_card_desc' => 'Monitor defense schedules, completed presentations, and upcoming defense sessions.',
+    'specialities_statistics' => 'Specialities Statistics',
+    'tour_specialities_card_desc' => 'Overview of academic specialities, active programs, and student enrollments.',
+    'system_overview' => 'System Overview',
+    'tour_system_overview_desc' => 'Comprehensive system metrics showing department distribution and user role breakdown.',
 ];

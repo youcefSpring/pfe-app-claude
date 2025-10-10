@@ -1,6 +1,6 @@
 <!-- Admin Dashboard Content -->
 <div class="col-md-3 mb-3">
-    <div class="card border-primary shadow-sm">
+    <div class="card border-primary shadow-sm" id="users-card">
         <div class="card-header bg-primary text-white py-2">
             <h6 class="card-title mb-0 small">
                 <i class="bi bi-people me-2"></i>{{ __('app.users') }}
@@ -32,7 +32,7 @@
 </div>
 
 <div class="col-md-3 mb-3">
-    <div class="card border-success shadow-sm">
+    <div class="card border-success shadow-sm" id="subjects-card">
         <div class="card-header bg-success text-white py-2">
             <h6 class="card-title mb-0 small">
                 <i class="bi bi-journal-text me-2"></i>{{ __('app.subjects') }}
@@ -111,7 +111,7 @@
 --}}
 
 <div class="col-md-3 mb-3">
-    <div class="card border-warning shadow-sm">
+    <div class="card border-warning shadow-sm" id="defenses-card">
         <div class="card-header bg-warning text-dark py-2">
             <h6 class="card-title mb-0 small">
                 <i class="bi bi-shield-check me-2"></i>{{ __('app.defenses') }}
@@ -143,7 +143,7 @@
 </div>
 
 <div class="col-md-3 mb-3">
-    <div class="card border-secondary shadow-sm">
+    <div class="card border-secondary shadow-sm" id="specialities-card">
         <div class="card-header bg-secondary text-white py-2">
             <h6 class="card-title mb-0 small">
                 <i class="bi bi-mortarboard me-2"></i>{{ __('app.specialities') }}
@@ -250,7 +250,7 @@
 
 <!-- System Overview Chart -->
 <div class="col-md-8 mb-4">
-    <div class="card">
+    <div class="card" id="system-overview-card">
         <div class="card-header">
             <h6 class="card-title mb-0">
                 <i class="bi bi-graph-up me-2"></i>System Overview

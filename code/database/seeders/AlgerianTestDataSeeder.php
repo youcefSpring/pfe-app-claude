@@ -206,6 +206,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Système de Reconnaissance Faciale avec IA',
                 'description' => 'Développement d\'un système de reconnaissance faciale utilisant les réseaux de neurones convolutifs',
                 'type' => 'research',
+                'tools' => 'Python, TensorFlow, OpenCV',
                 'teacher_id' => $createdTeachers[0]->id, // Dr. Ahmed Benali (IA)
                 'level' => 'M2',
                 'academic_year' => '2024-2025'
@@ -214,6 +215,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Plateforme E-learning Sécurisée',
                 'description' => 'Conception et développement d\'une plateforme d\'apprentissage en ligne avec authentification multi-facteurs',
                 'type' => 'development',
+                'tools' => 'Laravel, Vue.js, MySQL',
                 'teacher_id' => $createdTeachers[1]->id, // Dr. Fatima Boudjadar (Réseaux)
                 'level' => 'M1',
                 'academic_year' => '2024-2025'
@@ -222,6 +224,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Application Mobile de Gestion Universitaire',
                 'description' => 'Développement d\'une application mobile pour la gestion des notes et emplois du temps universitaires',
                 'type' => 'development',
+                'tools' => 'Flutter, Firebase',
                 'teacher_id' => $createdTeachers[2]->id, // Dr. Mohamed Cherif (Génie Logiciel)
                 'level' => 'L3',
                 'academic_year' => '2024-2025'
@@ -230,6 +233,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Système de Gestion Hospitalière',
                 'description' => 'Base de données distribuée pour la gestion des dossiers médicaux et rendez-vous',
                 'type' => 'database',
+                'tools' => 'PostgreSQL, Redis',
                 'teacher_id' => $createdTeachers[3]->id, // Dr. Amina Kaddour (BDD)
                 'level' => 'M2',
                 'academic_year' => '2024-2025'
@@ -238,6 +242,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Système IoT pour Agriculture Intelligente',
                 'description' => 'Conception d\'un système IoT pour surveiller et optimiser l\'irrigation agricole',
                 'type' => 'hardware',
+                'tools' => 'Arduino, MQTT, Node-RED',
                 'teacher_id' => $createdTeachers[4]->id, // Dr. Youcef Mammeri (Embarqué)
                 'level' => 'M1',
                 'academic_year' => '2024-2025'
@@ -246,6 +251,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Détection de Fraude par Vision Artificielle',
                 'description' => 'Système de détection automatique de fraude dans les examens utilisant la vision par ordinateur',
                 'type' => 'research',
+                'tools' => 'Python, Keras, OpenCV',
                 'teacher_id' => $createdTeachers[5]->id, // Dr. Samira Brahimi (Traitement Images)
                 'level' => 'M2',
                 'academic_year' => '2024-2025'
@@ -254,6 +260,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Optimisation des Algorithmes Cryptographiques',
                 'description' => 'Étude et optimisation des algorithmes de chiffrement pour les applications mobiles',
                 'type' => 'research',
+                'tools' => 'C++, OpenSSL',
                 'teacher_id' => $createdTeachers[6]->id, // Dr. Karim Belhadj (Math)
                 'level' => 'L3',
                 'academic_year' => '2024-2025'
@@ -262,6 +269,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Interface Vocale pour Personnes Malvoyantes',
                 'description' => 'Développement d\'une interface utilisateur vocale accessible pour applications web',
                 'type' => 'accessibility',
+                'tools' => 'JavaScript, Web Speech API',
                 'teacher_id' => $createdTeachers[7]->id, // Dr. Nabila Chettab (IHM)
                 'level' => 'M1',
                 'academic_year' => '2024-2025'
@@ -270,6 +278,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Migration vers le Cloud AWS',
                 'description' => 'Étude de cas : migration d\'une infrastructure on-premise vers Amazon Web Services',
                 'type' => 'infrastructure',
+                'tools' => 'AWS EC2, S3, RDS',
                 'teacher_id' => $createdTeachers[8]->id, // Dr. Omar Zenati (Cloud)
                 'level' => 'M2',
                 'academic_year' => '2024-2025'
@@ -278,6 +287,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => 'Analyse Prédictive des Ventes E-commerce',
                 'description' => 'Modèle de machine learning pour prédire les tendances de vente en ligne',
                 'type' => 'analytics',
+                'tools' => 'Python, Scikit-learn, Pandas',
                 'teacher_id' => $createdTeachers[9]->id, // Dr. Leila Mokrani (Data Science)
                 'level' => 'M1',
                 'academic_year' => '2024-2025'
