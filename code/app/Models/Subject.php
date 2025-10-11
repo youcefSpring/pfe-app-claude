@@ -25,6 +25,7 @@ class Subject extends Model
         'tools',
         'plan',
         'teacher_id',
+        'co_supervisor_name',
         'status',
         'validation_feedback',
         'validated_at',

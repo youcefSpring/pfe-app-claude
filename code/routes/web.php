@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\GradeController;
 use App\Http\Controllers\Web\SubjectPreferenceController;
 use App\Http\Controllers\Web\AllocationController;
+use App\Http\Controllers\Web\ContactController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\StudentUploadController;
 use App\Http\Controllers\Admin\AllocationController as AdminAllocationController;
@@ -39,6 +40,13 @@ Route::get('/', function () {
 
 // Language switching routes
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
+
+// Contact routes
+Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
+// About route
+Route::get('/about', [ContactController::class, 'about'])->name('about');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {

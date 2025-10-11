@@ -300,11 +300,14 @@ class AlgerianTestDataSeeder extends Seeder
                 'title' => $subjectData['title'],
                 'description' => $subjectData['description'],
                 'keywords' => $subjectData['type'],
+                'tools' => $subjectData['tools'],
+                'plan' => 'Plan détaillé du projet sera défini avec les étudiants lors de la première réunion.',
                 'teacher_id' => $subjectData['teacher_id'],
-                'status' => 'approved',
+                'status' => 'validated',
                 'is_external' => false,
                 'validated_by' => 1, // Assuming admin user exists
-                'validated_at' => now()
+                'validated_at' => now(),
+                'academic_year' => $subjectData['academic_year']
             ]);
             $createdSubjects[] = $subject;
         }
@@ -323,9 +326,7 @@ class AlgerianTestDataSeeder extends Seeder
             $team = Team::create([
                 'name' => $teamNames[$i],
                 'academic_year' => '2024-2025',
-                'status' => 'complete',
-                'max_members' => 2,
-                'created_by' => $createdStudents[$i * 2]->id
+                'status' => 'complete'
             ]);
 
             // Add team members
@@ -348,11 +349,10 @@ class AlgerianTestDataSeeder extends Seeder
                 'team_id' => $team->id,
                 'subject_id' => $createdSubjects[$i * 2]->id,
                 'supervisor_id' => $createdSubjects[$i * 2]->teacher_id,
-                'title' => $createdSubjects[$i * 2]->title,
-                'description' => $createdSubjects[$i * 2]->description,
+                'type' => 'internal',
                 'status' => 'in_progress',
                 'academic_year' => '2024-2025',
-                'start_date' => now()->subMonths(3),
+                'started_at' => now()->subMonths(3),
                 'created_at' => now()->subMonths(3)
             ]);
         }
@@ -372,7 +372,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'capacity' => $roomData['capacity'],
                 'location' => $roomData['location'],
                 'equipment' => 'Projecteur, Tableau blanc, Système audio, Wifi',
-                'status' => 'available'
+                'is_available' => true
             ]);
         }
 

@@ -393,6 +393,7 @@ class DefenseController extends Controller
             'subject_id' => $validated['subject_id'],
         ], [
             'supervisor_id' => $subject->teacher_id,
+            'academic_year' => $subject->academic_year ?? '2024-2025',
             'type' => $subject->is_external ? 'external' : 'internal',
             'status' => 'assigned',
             'started_at' => now(),

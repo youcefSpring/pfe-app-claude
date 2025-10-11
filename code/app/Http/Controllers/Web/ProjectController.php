@@ -90,7 +90,21 @@ class ProjectController extends Controller
         $isTeamMember = $project->team->members->contains('student_id', $user->id);
         $isSupervisor = $project->supervisor_id === $user->id;
 
-        return view('projects.show', compact('project', 'isTeamMember', 'isSupervisor'));
+        // Get related projects (same supervisor or same subject type)
+        $relatedProjects = Project::where('id', '!=', $project->id)
+            ->where(function($query) use ($project) {
+                $query->where('supervisor_id', $project->supervisor_id)
+                      ->orWhereHas('subject', function($q) use ($project) {
+                          if ($project->subject) {
+                              $q->where('type', $project->subject->type);
+                          }
+                      });
+            })
+            ->with(['team.members.user', 'subject.teacher', 'supervisor'])
+            ->limit(6)
+            ->get();
+
+        return view('projects.show', compact('project', 'isTeamMember', 'isSupervisor', 'relatedProjects'));
     }
 
     /**

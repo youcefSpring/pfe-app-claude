@@ -17,8 +17,12 @@ class DefenseSchedulingService
      */
     public function autoScheduleDefenses(array $constraints = []): array
     {
-        $readyProjects = Project::readyForDefense()
-            ->with(['team.members.student', 'supervisor'])
+        // Get projects that are ready for defense (with validated subjects, no existing defenses)
+        $readyProjects = Project::with(['subject', 'team.members.user', 'supervisor'])
+            ->whereHas('subject', function($q) {
+                $q->where('status', 'validated');
+            })
+            ->whereDoesntHave('defense')
             ->get();
 
         if ($readyProjects->isEmpty()) {
@@ -56,11 +60,6 @@ class DefenseSchedulingService
      */
     public function scheduleDefense(Project $project, array $constraints = []): Defense
     {
-        // Validate project is ready
-        if (!$project->isReadyForDefense()) {
-            throw new \Exception('Project is not ready for defense');
-        }
-
         // Check if already scheduled
         if ($project->defense) {
             throw new \Exception('Defense already scheduled for this project');
@@ -75,14 +74,17 @@ class DefenseSchedulingService
         // Create defense
         $defense = Defense::create([
             'project_id' => $project->id,
-            'room_id' => $slot['room']->id,
+            'subject_id' => $project->subject_id,
             'defense_date' => $slot['date'],
             'defense_time' => $slot['time'],
-            'duration' => $constraints['duration'] ?? 60,
+            'room_id' => $slot['room']->id,
+            'duration' => $constraints['duration'] ?? 90,
             'status' => 'scheduled',
+            'scheduled_by' => auth()->id() ?? 1,
+            'scheduled_at' => now()
         ]);
 
-        // Assign jury
+        // Assign jury with tag-based matching
         $this->assignJury($defense, $constraints);
 
         return $defense;
@@ -126,15 +128,51 @@ class DefenseSchedulingService
      */
     public function findAvailableRoom(Carbon $date, string $time, int $duration = 60): ?Room
     {
-        $availableRooms = Room::available()->get();
+        $availableRooms = Room::where('is_available', true)->get();
 
         foreach ($availableRooms as $room) {
-            if ($room->isAvailableAt($date->format('Y-m-d'), $time, $duration)) {
+            if ($this->isRoomAvailableAt($room, $date->format('Y-m-d'), $time, $duration)) {
                 return $room;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Check if room is available at specific date and time.
+     */
+    private function isRoomAvailableAt(Room $room, string $date, string $time, int $duration): bool
+    {
+        $startTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time);
+        $endTime = $startTime->copy()->addMinutes($duration);
+
+        // Check for conflicts with existing defenses
+        $conflicts = Defense::where('room_id', $room->id)
+            ->where('defense_date', $date)
+            ->where(function($query) use ($time, $duration) {
+                $startTime = Carbon::createFromFormat('H:i', $time);
+                $endTime = $startTime->copy()->addMinutes($duration);
+
+                $query->where(function($q) use ($startTime, $endTime) {
+                    // Defense starts during our slot
+                    $q->whereBetween('defense_time', [$startTime->format('H:i:s'), $endTime->format('H:i:s')])
+                    // OR defense ends during our slot
+                    ->orWhere(function($subQ) use ($startTime, $endTime) {
+                        $subQ->whereRaw('ADDTIME(defense_time, MAKETIME(?, 0, 0)) BETWEEN ? AND ?',
+                            [90, $startTime->format('H:i:s'), $endTime->format('H:i:s')]);
+                    })
+                    // OR our slot is completely inside their defense
+                    ->orWhere(function($subQ) use ($startTime, $endTime) {
+                        $subQ->where('defense_time', '<=', $startTime->format('H:i:s'))
+                             ->whereRaw('ADDTIME(defense_time, MAKETIME(?, 0, 0)) >= ?',
+                                [90, $endTime->format('H:i:s')]);
+                    });
+                });
+            })
+            ->exists();
+
+        return !$conflicts;
     }
 
     /**
@@ -185,11 +223,13 @@ class DefenseSchedulingService
     }
 
     /**
-     * Find suitable jury president.
+     * Find suitable jury president with tag-based matching.
      */
     private function findJuryPresident(Defense $defense, array $constraints = []): ?User
     {
-        // Prefer department heads
+        $subjectKeywords = $defense->subject ? strtolower($defense->subject->keywords) : '';
+
+        // Prefer department heads with matching speciality
         $president = User::where('role', 'department_head')
             ->where('id', '!=', $defense->project->supervisor_id)
             ->whereDoesntHave('juryParticipations', function ($q) use ($defense) {
@@ -198,9 +238,13 @@ class DefenseSchedulingService
                         ->where('defense_time', $defense->defense_time);
                 });
             })
+            ->get()
+            ->sortByDesc(function($teacher) use ($subjectKeywords) {
+                return $this->calculateSpecialityMatch($teacher->speciality, $subjectKeywords);
+            })
             ->first();
 
-        // Fallback to senior teachers
+        // Fallback to teachers with matching speciality
         if (!$president) {
             $president = User::where('role', 'teacher')
                 ->where('id', '!=', $defense->project->supervisor_id)
@@ -210,6 +254,10 @@ class DefenseSchedulingService
                             ->where('defense_time', $defense->defense_time);
                     });
                 })
+                ->get()
+                ->sortByDesc(function($teacher) use ($subjectKeywords) {
+                    return $this->calculateSpecialityMatch($teacher->speciality, $subjectKeywords);
+                })
                 ->first();
         }
 
@@ -217,10 +265,12 @@ class DefenseSchedulingService
     }
 
     /**
-     * Find suitable jury examiner.
+     * Find suitable jury examiner with tag-based matching.
      */
     private function findJuryExaminer(Defense $defense, array $constraints = []): ?User
     {
+        $subjectKeywords = $defense->subject ? strtolower($defense->subject->keywords) : '';
+
         return User::where('role', 'teacher')
             ->where('id', '!=', $defense->project->supervisor_id)
             ->whereDoesntHave('juryParticipations', function ($q) use ($defense) {
@@ -232,7 +282,79 @@ class DefenseSchedulingService
             ->whereDoesntHave('juryParticipations', function ($q) use ($defense) {
                 $q->where('defense_id', $defense->id);
             })
+            ->get()
+            ->sortByDesc(function($teacher) use ($subjectKeywords) {
+                return $this->calculateSpecialityMatch($teacher->speciality, $subjectKeywords);
+            })
             ->first();
+    }
+
+    /**
+     * Calculate how well a teacher's speciality matches subject keywords.
+     */
+    private function calculateSpecialityMatch(?string $teacherSpeciality, string $subjectKeywords): float
+    {
+        if (empty($teacherSpeciality) || empty($subjectKeywords)) {
+            return 0.0;
+        }
+
+        $teacherSpeciality = strtolower($teacherSpeciality);
+        $subjectKeywords = strtolower($subjectKeywords);
+
+        // Define keyword mappings for better matching
+        $keywordMappings = [
+            'ai' => ['intelligence artificielle', 'artificial intelligence', 'machine learning', 'deep learning', 'research', 'reconnaissance'],
+            'mobile' => ['application mobile', 'mobile app', 'android', 'ios', 'development', 'développement'],
+            'web' => ['développement web', 'web development', 'site web', 'application web', 'development', 'génie logiciel'],
+            'iot' => ['internet des objets', 'internet of things', 'capteurs', 'sensors', 'hardware', 'systèmes embarqués'],
+            'crypto' => ['cryptographie', 'cryptographic', 'sécurité', 'security', 'mathématiques appliquées', 'algorithmes'],
+            'cloud' => ['cloud computing', 'aws', 'azure', 'nuage', 'infrastructure'],
+            'database' => ['base de données', 'sql', 'nosql', 'données', 'database'],
+            'network' => ['réseau', 'networking', 'tcp', 'protocole', 'réseaux et sécurité'],
+            'image' => ['traitement d\'images', 'image processing', 'vision', 'opencv', 'research', 'traitement'],
+            'hmi' => ['interface homme-machine', 'human computer interaction', 'ui', 'ux', 'accessibility'],
+            'data' => ['data science', 'analyse de données', 'big data', 'analytics', 'analyse prédictive'],
+            'software' => ['génie logiciel', 'software engineering', 'development', 'développement'],
+            'hardware' => ['systèmes embarqués', 'embedded systems', 'hardware', 'électronique'],
+            'math' => ['mathématiques appliquées', 'applied mathematics', 'algorithmes', 'optimization']
+        ];
+
+        $score = 0.0;
+
+        // Direct word matching
+        $teacherWords = explode(' ', $teacherSpeciality);
+        $subjectWords = explode(' ', $subjectKeywords);
+
+        foreach ($teacherWords as $teacherWord) {
+            if (strlen($teacherWord) > 3) { // Skip very short words
+                foreach ($subjectWords as $subjectWord) {
+                    if (strlen($subjectWord) > 3 && strpos($subjectWord, $teacherWord) !== false) {
+                        $score += 2.0; // Direct match
+                    }
+                }
+            }
+        }
+
+        // Keyword mapping matching
+        foreach ($keywordMappings as $category => $keywords) {
+            $teacherMatches = false;
+            $subjectMatches = false;
+
+            foreach ($keywords as $keyword) {
+                if (strpos($teacherSpeciality, $keyword) !== false) {
+                    $teacherMatches = true;
+                }
+                if (strpos($subjectKeywords, $keyword) !== false) {
+                    $subjectMatches = true;
+                }
+            }
+
+            if ($teacherMatches && $subjectMatches) {
+                $score += 3.0; // Category match
+            }
+        }
+
+        return $score;
     }
 
     /**
@@ -325,10 +447,13 @@ class DefenseSchedulingService
                 $calendar[$date] = [];
             }
 
+            // Calculate end time properly
+            $startTime = Carbon::createFromFormat('H:i:s', $defense->defense_time);
+            $endTime = $startTime->copy()->addMinutes($defense->duration);
+
             $calendar[$date][] = [
                 'defense' => $defense,
-                'time_slot' => $defense->defense_time->format('H:i') . ' - ' .
-                    $defense->defense_time->addMinutes($defense->duration)->format('H:i'),
+                'time_slot' => $startTime->format('H:i') . ' - ' . $endTime->format('H:i'),
                 'team' => $defense->project->team->name,
                 'room' => $defense->room->name,
                 'jury_count' => $defense->jury->count(),

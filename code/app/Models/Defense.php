@@ -33,7 +33,8 @@ class Defense extends Model
     {
         return [
             'defense_date' => 'date',
-            'defense_time' => 'datetime:H:i',
+            'defense_time' => 'time',
+            'scheduled_at' => 'datetime',
             'final_grade' => 'decimal:2',
         ];
     }

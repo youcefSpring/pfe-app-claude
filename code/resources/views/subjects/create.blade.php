@@ -121,6 +121,23 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="co_supervisor_name" class="form-label">{{ __('app.co_supervisor') }} ({{ __('app.optional') }})</label>
+                                <input type="text"
+                                       class="form-control @error('co_supervisor_name') is-invalid @enderror"
+                                       id="co_supervisor_name"
+                                       name="co_supervisor_name"
+                                       value="{{ old('co_supervisor_name') }}"
+                                       placeholder="{{ __('app.enter_co_supervisor_name') }}">
+                                @error('co_supervisor_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">
+                                    {{ __('app.co_supervisor_help_text') }}
+                                </div>
+                            </div>
+                        </div>
                         <!-- Max Teams Hidden Field - Fixed to 1 -->
                         <input type="hidden" name="max_teams" value="1">
                     </div>

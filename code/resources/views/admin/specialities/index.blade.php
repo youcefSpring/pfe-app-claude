@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('title', 'Gestion des Spécialités')
+@section('title', __('app.specialities_management'))
 
 @section('content')
 <div class="container-fluid">
@@ -9,10 +9,10 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">
-                        <i class="bi bi-mortarboard me-2"></i>Gestion des Spécialités
+                        <i class="bi bi-mortarboard me-2"></i>{{ __('app.specialities_management') }}
                     </h4>
                     <a href="{{ route('admin.specialities.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-lg me-1"></i>Nouvelle Spécialité
+                        <i class="bi bi-plus-lg me-1"></i>{{ __('app.new_speciality') }}
                     </a>
                 </div>
 
@@ -22,7 +22,7 @@
                         <div class="row g-3">
                             <!-- Search -->
                             <div class="col-md-4">
-                                <label for="search" class="form-label">Rechercher</label>
+                                <label for="search" class="form-label">{{ __('app.search') }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                                     <input type="text"
@@ -30,15 +30,15 @@
                                            id="search"
                                            name="search"
                                            value="{{ request('search') }}"
-                                           placeholder="Nom, code ou niveau...">
+                                           placeholder="{{ __('app.search_specialities_placeholder') }}">
                                 </div>
                             </div>
 
                             <!-- Level Filter -->
                             <div class="col-md-2">
-                                <label for="level" class="form-label">Niveau</label>
+                                <label for="level" class="form-label">{{ __('app.level') }}</label>
                                 <select class="form-select" id="level" name="level">
-                                    <option value="">Tous les niveaux</option>
+                                    <option value="">{{ __('app.all_levels') }}</option>
                                     @foreach(\App\Models\Speciality::LEVELS as $key => $label)
                                         <option value="{{ $key }}" {{ request('level') === $key ? 'selected' : '' }}>
                                             {{ $label }}
@@ -49,9 +49,9 @@
 
                             <!-- Academic Year Filter -->
                             <div class="col-md-2">
-                                <label for="academic_year" class="form-label">Année Académique</label>
+                                <label for="academic_year" class="form-label">{{ __('app.academic_year') }}</label>
                                 <select class="form-select" id="academic_year" name="academic_year">
-                                    <option value="">Toutes les années</option>
+                                    <option value="">{{ __('app.all_years') }}</option>
                                     @foreach($academicYears ?? [] as $year)
                                         <option value="{{ $year }}" {{ request('academic_year') === $year ? 'selected' : '' }}>
                                             {{ $year }}
@@ -62,11 +62,11 @@
 
                             <!-- Status Filter -->
                             <div class="col-md-2">
-                                <label for="status" class="form-label">Statut</label>
+                                <label for="status" class="form-label">{{ __('app.status') }}</label>
                                 <select class="form-select" id="status" name="status">
-                                    <option value="">Tous les statuts</option>
-                                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
-                                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
+                                    <option value="">{{ __('app.all_statuses') }}</option>
+                                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('app.active') }}</option>
+                                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>{{ __('app.inactive') }}</option>
                                 </select>
                             </div>
 
@@ -75,7 +75,7 @@
                                 <label class="form-label">&nbsp;</label>
                                 <div class="d-grid">
                                     <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-clockwise me-1"></i>Effacer
+                                        <i class="bi bi-arrow-clockwise me-1"></i>{{ __('app.clear') }}
                                     </a>
                                 </div>
                             </div>
@@ -117,11 +117,11 @@
                                             </td>
                                             <td>
                                                 @if($speciality->level === 'license')
-                                                    <span class="badge bg-primary">License</span>
+                                                    <span class="badge bg-primary">{{ __('app.license') }}</span>
                                                 @elseif($speciality->level === 'master')
-                                                    <span class="badge bg-success">Master</span>
+                                                    <span class="badge bg-success">{{ __('app.master') }}</span>
                                                 @elseif($speciality->level === 'doctorate')
-                                                    <span class="badge bg-warning">Doctorate</span>
+                                                    <span class="badge bg-warning">{{ __('app.doctorate') }}</span>
                                                 @else
                                                     <span class="badge bg-secondary">{{ ucfirst($speciality->level) }}</span>
                                                 @endif
@@ -130,7 +130,7 @@
                                                 <div>
                                                     <div>{{ $speciality->academic_year }}</div>
                                                     @if($speciality->semester)
-                                                        <small class="text-muted">Semester {{ $speciality->semester }}</small>
+                                                        <small class="text-muted">{{ __('app.semester') }} {{ $speciality->semester }}</small>
                                                     @endif
                                                 </div>
                                             </td>
@@ -139,24 +139,24 @@
                                             </td>
                                             <td>
                                                 @if($speciality->is_active)
-                                                    <span class="badge bg-success">Active</span>
+                                                    <span class="badge bg-success">{{ __('app.active') }}</span>
                                                 @else
-                                                    <span class="badge bg-danger">Inactive</span>
+                                                    <span class="badge bg-danger">{{ __('app.inactive') }}</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('admin.specialities.edit', $speciality) }}"
-                                                       class="btn btn-outline-primary btn-sm" title="Edit">
+                                                       class="btn btn-outline-primary btn-sm" title="{{ __('app.edit') }}">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     @if($speciality->students_count == 0)
                                                         <button type="button" class="btn btn-outline-danger btn-sm"
-                                                                onclick="deleteSpeciality({{ $speciality->id }}, '{{ $speciality->name }}')" title="Delete">
+                                                                onclick="deleteSpeciality({{ $speciality->id }}, '{{ $speciality->name }}')" title="{{ __('app.delete') }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     @else
-                                                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Cannot delete - has students">
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="{{ __('app.cannot_delete_has_students') }}">
                                                             <i class="fas fa-lock"></i>
                                                         </button>
                                                     @endif
@@ -176,10 +176,10 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Specialities Found</h5>
-                            <p class="text-muted">Start by adding specialities to organize students by their field of study.</p>
+                            <h5 class="text-muted">{{ __('app.no_specialities_found') }}</h5>
+                            <p class="text-muted">{{ __('app.add_specialities_instruction') }}</p>
                             <a href="{{ route('admin.specialities.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Add First Speciality
+                                <i class="fas fa-plus"></i> {{ __('app.add_first_speciality') }}
                             </a>
                         </div>
                     @endif
@@ -195,7 +195,7 @@
             <div class="card bg-primary text-white">
                 <div class="card-body text-center">
                     <h4>{{ $specialities->total() }}</h4>
-                    <small>Total Specialities</small>
+                    <small>{{ __('app.total_specialities') }}</small>
                 </div>
             </div>
         </div>
@@ -203,7 +203,7 @@
             <div class="card bg-success text-white">
                 <div class="card-body text-center">
                     <h4>{{ $specialities->where('is_active', true)->count() }}</h4>
-                    <small>Active</small>
+                    <small>{{ __('app.active') }}</small>
                 </div>
             </div>
         </div>
@@ -211,7 +211,7 @@
             <div class="card bg-info text-white">
                 <div class="card-body text-center">
                     <h4>{{ $specialities->where('level', 'license')->count() }}</h4>
-                    <small>License Programs</small>
+                    <small>{{ __('app.licence_programs') }}</small>
                 </div>
             </div>
         </div>
@@ -219,7 +219,7 @@
             <div class="card bg-warning text-dark">
                 <div class="card-body text-center">
                     <h4>{{ $specialities->where('level', 'master')->count() }}</h4>
-                    <small>Master Programs</small>
+                    <small>{{ __('app.master_programs') }}</small>
                 </div>
             </div>
         </div>
@@ -232,23 +232,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete Speciality</h5>
+                <h5 class="modal-title">{{ __('app.delete_speciality') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger">
-                    <h6>⚠️ This action cannot be undone!</h6>
-                    <p class="mb-0">Deleting this speciality will remove all associated data.</p>
+                    <h6>⚠️ {{ __('app.action_cannot_be_undone') }}</h6>
+                    <p class="mb-0">{{ __('app.delete_speciality_warning') }}</p>
                 </div>
-                <p>Are you sure you want to delete speciality <strong id="deleteSpecialityName"></strong>?</p>
+                <p>{{ __('app.confirm_delete_speciality') }} <strong id="deleteSpecialityName"></strong>?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.cancel') }}</button>
                 <form id="deleteSpecialityForm" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Delete Speciality
+                        <i class="fas fa-trash"></i> {{ __('app.delete_speciality') }}
                     </button>
                 </form>
             </div>
