@@ -1265,6 +1265,9 @@ return [
     'leave_team_failed' => 'Failed to leave team: :message',
     'member_not_in_team' => 'Selected member is not part of this team.',
     'transfer_leadership_failed' => 'Failed to transfer leadership.',
+    'team_size_invalid_for_selection' => 'Your team must have :min-:max members to request subjects. Current size: :current members.',
+    'already_requested_this_subject' => 'Your team has already requested this subject.',
+    'max_approved_requests_reached' => 'Your team has reached the maximum number of approved requests.',
 
     // Subject Management Messages
     'subject_created' => 'Subject created successfully!',

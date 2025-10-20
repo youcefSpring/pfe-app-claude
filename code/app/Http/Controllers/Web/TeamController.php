@@ -8,6 +8,8 @@ use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Subject;
 use App\Models\AllocationDeadline;
+use App\Models\TeamSubjectPreference;
+use App\Models\SubjectRequest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -224,15 +226,28 @@ class TeamController extends Controller
     {
         //$this->authorize('delete', $team);
 
-        if ($team->project) {
-            return redirect()->back()
-                ->with('error', __('app.cannot_delete_team_with_project'));
+        $user = Auth::user();
+
+        // Only allow team deletion by admin or the sole team member
+        if ($user->role !== 'admin') {
+            $member = $team->members->where('student_id', $user->id)->first();
+
+            if (!$member) {
+                return redirect()->back()
+                    ->with('error', __('app.not_authorized_to_delete_team'));
+            }
+
+            // Check if user is the only member and is the leader
+            if ($team->members->count() > 1 || $member->role !== 'leader') {
+                return redirect()->back()
+                    ->with('error', __('app.cannot_delete_team_with_members'));
+            }
         }
 
-        // Check if there are other members in the team
-        if ($team->members->count() > 1) {
+        // Check if team can be deleted
+        if (!$team->canBeDeleted()) {
             return redirect()->back()
-                ->with('error', __('app.cannot_delete_team_with_other_members'));
+                ->with('error', __('app.cannot_delete_team'));
         }
 
         $team->delete();
@@ -347,6 +362,129 @@ class TeamController extends Controller
 
         return redirect()->back()
             ->with('success', __('app.subject_selected_project_created'));
+    }
+
+    /**
+     * Show subject preferences management page
+     */
+    public function subjectPreferences(Team $team): View
+    {
+        $user = Auth::user();
+        $isMember = $team->hasMember($user);
+
+        if (!$isMember && $user->role !== 'admin') {
+            abort(403, __('app.not_authorized'));
+        }
+
+        $team->load(['subjectPreferences.subject.teacher', 'members.user']);
+
+        $availableSubjects = Subject::where('status', 'validated')
+            ->whereNotIn('id', $team->subjectPreferences->pluck('subject_id'))
+            ->with('teacher')
+            ->get();
+
+        $canManage = $team->canManagePreferences();
+
+        return view('teams.subject-preferences', compact('team', 'availableSubjects', 'canManage'));
+    }
+
+    /**
+     * Add a subject to team preferences
+     */
+    public function addSubjectPreference(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check authorization
+        if (!$team->hasMember($user) && $user->role !== 'admin') {
+            return redirect()->back()
+                ->with('error', __('app.not_authorized'));
+        }
+
+        // Check if team can manage preferences
+        if (!$team->canManagePreferences()) {
+            return redirect()->back()
+                ->with('error', __('app.cannot_manage_preferences'));
+        }
+
+        $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'preference_order' => 'nullable|integer|min:1|max:10'
+        ]);
+
+        $subject = Subject::find($request->subject_id);
+
+        // Determine preference order
+        $order = $request->preference_order ?? ($team->subjectPreferences()->count() + 1);
+
+        if ($team->addSubjectPreference($subject, $order, $user)) {
+            return redirect()->back()
+                ->with('success', __('app.subject_added_to_preferences'));
+        }
+
+        return redirect()->back()
+            ->with('error', __('app.failed_to_add_subject'));
+    }
+
+    /**
+     * Remove a subject from team preferences
+     */
+    public function removeSubjectPreference(Team $team, Subject $subject): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check authorization
+        if (!$team->hasMember($user) && $user->role !== 'admin') {
+            return redirect()->back()
+                ->with('error', __('app.not_authorized'));
+        }
+
+        // Check if team can manage preferences
+        if (!$team->canManagePreferences()) {
+            return redirect()->back()
+                ->with('error', __('app.cannot_manage_preferences'));
+        }
+
+        if ($team->removeSubjectPreference($subject)) {
+            return redirect()->back()
+                ->with('success', __('app.subject_removed_from_preferences'));
+        }
+
+        return redirect()->back()
+            ->with('error', __('app.failed_to_remove_subject'));
+    }
+
+    /**
+     * Update preference order
+     */
+    public function updatePreferenceOrder(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check authorization
+        if (!$team->hasMember($user) && $user->role !== 'admin') {
+            return redirect()->back()
+                ->with('error', __('app.not_authorized'));
+        }
+
+        // Check if team can manage preferences
+        if (!$team->canManagePreferences()) {
+            return redirect()->back()
+                ->with('error', __('app.cannot_manage_preferences'));
+        }
+
+        $request->validate([
+            'subject_ids' => 'required|array|max:10',
+            'subject_ids.*' => 'exists:subjects,id'
+        ]);
+
+        if ($team->updatePreferenceOrder($request->subject_ids)) {
+            return redirect()->back()
+                ->with('success', __('app.preference_order_updated'));
+        }
+
+        return redirect()->back()
+            ->with('error', __('app.failed_to_update_order'));
     }
 
     /**
@@ -541,5 +679,218 @@ class TeamController extends Controller
         }
 
         return $teamName;
+    }
+
+    /**
+     * Request a subject for the team
+     */
+    public function requestSubject(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check if user is team leader
+        $member = $team->members->where('student_id', $user->id)->first();
+        if (!$member || $member->role !== 'leader') {
+            return redirect()->back()
+                ->with('error', __('app.only_team_leader_can_request_subjects'));
+        }
+
+        // Check deadline restrictions
+        $currentDeadline = AllocationDeadline::active()->first();
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
+            return redirect()->back()
+                ->with('error', __('app.subject_request_period_ended'));
+        }
+
+        // Check if team can select subjects (size validation)
+        if (!$team->canSelectSubject()) {
+            $minSize = config('team.sizes.licence.min', 2);
+            $maxSize = config('team.sizes.licence.max', 3);
+            $currentSize = $team->members->count();
+
+            return redirect()->back()
+                ->with('error', __('app.team_size_invalid_for_selection', [
+                    'min' => $minSize,
+                    'max' => $maxSize,
+                    'current' => $currentSize
+                ]));
+        }
+
+        $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'request_message' => 'nullable|string|max:1000'
+        ]);
+
+        $subject = Subject::find($request->subject_id);
+
+        // Check if subject is available
+        if ($subject->status !== 'validated') {
+            return redirect()->back()
+                ->with('error', __('app.subject_not_available_for_request'));
+        }
+
+        // Check if team already has a pending request for this subject
+        $existingRequest = $team->subjectRequests()
+            ->where('subject_id', $subject->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return redirect()->back()
+                ->with('error', __('app.already_requested_this_subject'));
+        }
+
+        // Check if team already has approved requests (limit to reasonable number)
+        $approvedRequests = $team->subjectRequests()->where('status', 'approved')->count();
+        if ($approvedRequests >= 3) {
+            return redirect()->back()
+                ->with('error', __('app.max_approved_requests_reached'));
+        }
+
+        // Get next priority order for this team
+        $nextOrder = $team->subjectRequests()->max('priority_order') + 1;
+
+        // Create the request
+        SubjectRequest::create([
+            'team_id' => $team->id,
+            'subject_id' => $subject->id,
+            'requested_by' => $user->id,
+            'priority_order' => $nextOrder,
+            'request_message' => $request->request_message,
+            'requested_at' => now(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', __('app.subject_request_submitted', ['subject' => $subject->title]));
+    }
+
+    /**
+     * Show team's subject requests
+     */
+    public function subjectRequests(Team $team): View
+    {
+        $user = Auth::user();
+
+        // Check if user is team member
+        if (!$team->hasMember($user) && $user->role !== 'admin') {
+            abort(403, __('app.not_authorized'));
+        }
+
+        $team->load(['subjectRequests.subject.teacher', 'subjectRequests.requestedBy', 'subjectRequests.respondedBy']);
+
+        return view('teams.subject-requests', compact('team'));
+    }
+
+    /**
+     * Cancel a pending subject request
+     */
+    public function cancelSubjectRequest(Team $team, SubjectRequest $subjectRequest): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check if user is team leader
+        $member = $team->members->where('student_id', $user->id)->first();
+        if (!$member || $member->role !== 'leader') {
+            return redirect()->back()
+                ->with('error', __('app.only_team_leader_can_cancel_requests'));
+        }
+
+        // Check if request belongs to this team
+        if ($subjectRequest->team_id !== $team->id) {
+            abort(403);
+        }
+
+        // Only pending requests can be cancelled
+        if (!$subjectRequest->isPending()) {
+            return redirect()->back()
+                ->with('error', __('app.can_only_cancel_pending_requests'));
+        }
+
+        $subjectRequest->delete();
+
+        return redirect()->back()
+            ->with('success', __('app.subject_request_cancelled'));
+    }
+
+    /**
+     * Update the order of subject requests for a team
+     */
+    public function updateSubjectRequestOrder(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check if user is team leader
+        $member = $team->members->where('student_id', $user->id)->first();
+        if (!$member || $member->role !== 'leader') {
+            return redirect()->back()
+                ->with('error', __('app.only_team_leader_can_reorder_requests'));
+        }
+
+        $request->validate([
+            'request_ids' => 'required|array',
+            'request_ids.*' => 'exists:subject_requests,id'
+        ]);
+
+        // Verify all requests belong to this team
+        $requestIds = $request->request_ids;
+        $teamRequests = $team->subjectRequests()->whereIn('id', $requestIds)->pluck('id')->toArray();
+
+        if (count($requestIds) !== count($teamRequests)) {
+            return redirect()->back()
+                ->with('error', __('app.invalid_request_ids'));
+        }
+
+        // Update priority order
+        foreach ($requestIds as $index => $requestId) {
+            SubjectRequest::where('id', $requestId)
+                ->where('team_id', $team->id)
+                ->update(['priority_order' => $index + 1]);
+        }
+
+        return redirect()->back()
+            ->with('success', __('app.request_order_updated'));
+    }
+
+    /**
+     * Show all subject requests ordered by date
+     */
+    public function allSubjectRequests(): View
+    {
+        $user = Auth::user();
+
+        // Build base query
+        $query = SubjectRequest::with(['team.members.user', 'subject.teacher', 'requestedBy', 'respondedBy']);
+
+        // Filter based on user role
+        switch ($user->role) {
+            case 'student':
+                // Students only see requests from their team
+                $teamMember = $user->teamMember;
+                if (!$teamMember) {
+                    // Student not in a team, show empty results
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('team_id', $teamMember->team_id);
+                }
+                break;
+            case 'teacher':
+                // Teachers see requests for their subjects
+                $query->whereHas('subject', function($q) use ($user) {
+                    $q->where('teacher_id', $user->id);
+                });
+                break;
+            case 'admin':
+            case 'department_head':
+                // Admins and department heads see all requests
+                break;
+            default:
+                // Other roles see nothing
+                $query->whereRaw('1 = 0');
+        }
+
+        // Order by requested date ascending (oldest first)
+        $subjectRequests = $query->orderBy('requested_at', 'asc')->paginate(20);
+
+        return view('subject-requests.index', compact('subjectRequests'));
     }
 }

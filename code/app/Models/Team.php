@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\TeamSubjectPreference;
+use App\Models\SubjectRequest;
 
 class Team extends Model
 {
@@ -102,6 +104,22 @@ class Team extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Get the team's subject preferences.
+     */
+    public function subjectPreferences(): HasMany
+    {
+        return $this->hasMany(TeamSubjectPreference::class)->orderBy('preference_order');
+    }
+
+    /**
+     * Get the team's subject requests.
+     */
+    public function subjectRequests(): HasMany
+    {
+        return $this->hasMany(SubjectRequest::class);
+    }
+
     // Scopes
     /**
      * Scope to get active teams.
@@ -153,7 +171,16 @@ class Team extends Model
      */
     public function canSelectSubject(): bool
     {
-        return $this->isComplete() && $this->status === 'complete' && !$this->subject_id;
+        // Auto-update status if team is complete but still forming
+        if ($this->isComplete() && $this->status === 'forming') {
+            $this->update(['status' => 'complete']);
+            $this->refresh();
+        }
+
+        // Allow teams that are complete in size and don't have a subject
+        return $this->isComplete() &&
+               in_array($this->status, ['forming', 'complete']) &&
+               !$this->subject_id;
     }
 
     /**
@@ -387,6 +414,153 @@ class Team extends Model
             ->where('id', '!=', $this->id)
             ->with(['members.user'])
             ->get();
+    }
+
+    /**
+     * Add a subject to team preferences.
+     */
+    public function addSubjectPreference(Subject $subject, int $order, User $addedBy): bool
+    {
+        // Check if team already has 10 preferences
+        if ($this->subjectPreferences()->count() >= TeamSubjectPreference::MAX_PREFERENCES) {
+            return false;
+        }
+
+        // Check if order is valid (1-10)
+        if ($order < 1 || $order > TeamSubjectPreference::MAX_PREFERENCES) {
+            return false;
+        }
+
+        // Check if subject is already in preferences
+        if ($this->subjectPreferences()->where('subject_id', $subject->id)->exists()) {
+            return false;
+        }
+
+        // Check if order position is already taken
+        if ($this->subjectPreferences()->where('preference_order', $order)->exists()) {
+            // Shift other preferences down
+            $this->subjectPreferences()
+                ->where('preference_order', '>=', $order)
+                ->increment('preference_order');
+        }
+
+        // Create the preference
+        $this->subjectPreferences()->create([
+            'subject_id' => $subject->id,
+            'preference_order' => $order,
+            'selected_at' => now(),
+            'selected_by' => $addedBy->id,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Remove a subject from team preferences.
+     */
+    public function removeSubjectPreference(Subject $subject): bool
+    {
+        $preference = $this->subjectPreferences()->where('subject_id', $subject->id)->first();
+
+        if (!$preference) {
+            return false;
+        }
+
+        // Don't allow removal if already allocated
+        if ($preference->is_allocated) {
+            return false;
+        }
+
+        $order = $preference->preference_order;
+        $preference->delete();
+
+        // Reorder remaining preferences
+        $this->subjectPreferences()
+            ->where('preference_order', '>', $order)
+            ->decrement('preference_order');
+
+        return true;
+    }
+
+    /**
+     * Update preference order for subjects.
+     */
+    public function updatePreferenceOrder(array $subjectIds): bool
+    {
+        // Validate count doesn't exceed max
+        if (count($subjectIds) > TeamSubjectPreference::MAX_PREFERENCES) {
+            return false;
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($subjectIds as $order => $subjectId) {
+                $this->subjectPreferences()
+                    ->where('subject_id', $subjectId)
+                    ->update(['preference_order' => $order + 1]);
+            }
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * Get allocated subject from preferences.
+     */
+    public function getAllocatedSubject(): ?Subject
+    {
+        $allocated = $this->subjectPreferences()->allocated()->first();
+        return $allocated ? $allocated->subject : null;
+    }
+
+    /**
+     * Check if team can manage preferences.
+     */
+    public function canManagePreferences(): bool
+    {
+        // Team must be complete
+        if (!$this->isComplete()) {
+            return false;
+        }
+
+        // Check if allocation deadline has not passed
+        $deadline = AllocationDeadline::active()->first();
+        if (!$deadline || !$deadline->canStudentsChoose()) {
+            return false;
+        }
+
+        // Check if no subject has been allocated yet
+        if ($this->subjectPreferences()->allocated()->exists()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Prevent team deletion if it has members or subjects.
+     */
+    public function canBeDeleted(): bool
+    {
+        // Teams with more than one member cannot be deleted
+        if ($this->members()->count() > 1) {
+            return false;
+        }
+
+        // Teams with allocated subjects cannot be deleted
+        if ($this->subjectPreferences()->allocated()->exists()) {
+            return false;
+        }
+
+        // Teams with projects cannot be deleted
+        if ($this->project()->exists()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

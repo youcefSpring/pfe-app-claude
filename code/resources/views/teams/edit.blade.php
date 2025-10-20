@@ -97,7 +97,7 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-save"></i> Update Team
                                     </button>
-                                    @if(!$team->project)
+                                    @if(!$team->project && $team->members->count() === 1)
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteTeamModal">
                                             <i class="fas fa-trash"></i> Delete Team
                                         </button>
@@ -113,7 +113,7 @@
 </div>
 
 <!-- Delete Team Modal -->
-@if(!$team->project)
+@if(!$team->project && $team->members->count() === 1)
 <div class="modal fade" id="deleteTeamModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

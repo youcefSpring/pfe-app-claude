@@ -10,6 +10,7 @@ use App\Models\Subject;
 use App\Models\Team;
 use App\Models\StudentMark;
 use App\Models\StudentAlert;
+use App\Models\SubjectRequest;
 use App\Services\StudentImportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -1423,5 +1424,57 @@ public function processBulkImport(Request $request): RedirectResponse
 
         return redirect()->route('admin.alerts')
             ->with('success', __('app.response_sent_successfully'));
+    }
+
+    /**
+     * Show pending subject requests
+     */
+    public function subjectRequests(): View
+    {
+        $subjectRequests = SubjectRequest::with(['team.members.user', 'subject.teacher', 'requestedBy'])
+            ->orderBy('requested_at', 'asc')
+            ->paginate(20);
+
+        return view('admin.subject-requests.index', compact('subjectRequests'));
+    }
+
+    /**
+     * Approve a subject request
+     */
+    public function approveSubjectRequest(Request $request, SubjectRequest $subjectRequest): RedirectResponse
+    {
+        $request->validate([
+            'admin_response' => 'nullable|string|max:1000'
+        ]);
+
+        if (!$subjectRequest->isPending()) {
+            return redirect()->back()
+                ->with('error', __('app.request_already_processed'));
+        }
+
+        $subjectRequest->approve(Auth::user(), $request->admin_response);
+
+        return redirect()->back()
+            ->with('success', __('app.subject_request_approved'));
+    }
+
+    /**
+     * Reject a subject request
+     */
+    public function rejectSubjectRequest(Request $request, SubjectRequest $subjectRequest): RedirectResponse
+    {
+        $request->validate([
+            'admin_response' => 'required|string|max:1000'
+        ]);
+
+        if (!$subjectRequest->isPending()) {
+            return redirect()->back()
+                ->with('error', __('app.request_already_processed'));
+        }
+
+        $subjectRequest->reject(Auth::user(), $request->admin_response);
+
+        return redirect()->back()
+            ->with('success', __('app.subject_request_rejected'));
     }
 }

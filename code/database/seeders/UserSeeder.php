@@ -53,7 +53,11 @@ class UserSeeder extends Seeder
         // Create Computer Science Students (License level)
         $students = [
             ['name' => 'Medjdene Imade ddine', 'email' => 'medjdene.imade.ddine@student.university.edu'],
-            ['name' => 'Alice dubois', 'email' => 'alice.dubois@student.university.edu']
+            ['name' => 'ayoub dubois', 'email' => 'ayoub@student.university.edu'],
+            ['name' => 'omar dubois', 'email' => 'omar@student.university.edu'],
+            ['name' => 'anfel dubois', 'email' => 'anfel@student.university.edu'],
+            ['name' => 'Ahlem dubois', 'email' => 'ahlem@student.university.edu'],
+            ['name' => 'saida', 'email' => 'saida@student.university.edu'],
         ];
 
         foreach ($students as $student) {

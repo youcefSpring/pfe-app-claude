@@ -156,6 +156,18 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{team}/select-subject', [TeamController::class, 'selectSubjectForm'])->name('select-subject-form');
             Route::post('/{team}/select-subject', [TeamController::class, 'selectSubject'])->name('select-subject');
 
+            // Subject preferences management (up to 10 subjects)
+            Route::get('/{team}/subject-preferences', [TeamController::class, 'subjectPreferences'])->name('subject-preferences');
+            Route::post('/{team}/subject-preferences', [TeamController::class, 'addSubjectPreference'])->name('add-subject-preference');
+            Route::delete('/{team}/subject-preferences/{subject}', [TeamController::class, 'removeSubjectPreference'])->name('remove-subject-preference');
+            Route::put('/{team}/subject-preferences/order', [TeamController::class, 'updatePreferenceOrder'])->name('update-preference-order');
+
+            // Subject requests management
+            Route::get('/{team}/subject-requests', [TeamController::class, 'subjectRequests'])->name('subject-requests');
+            Route::post('/{team}/request-subject', [TeamController::class, 'requestSubject'])->name('request-subject');
+            Route::put('/{team}/subject-requests/order', [TeamController::class, 'updateSubjectRequestOrder'])->name('update-subject-request-order');
+            Route::delete('/{team}/subject-requests/{subjectRequest}', [TeamController::class, 'cancelSubjectRequest'])->name('cancel-subject-request');
+
             // External project submission
             Route::get('/{team}/external-project', [TeamController::class, 'externalProjectForm'])->name('external-project-form');
             Route::post('/{team}/external-project', [TeamController::class, 'submitExternalProject'])->name('external-project');
@@ -341,6 +353,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/subjects/{subject}/reject', [AdminController::class, 'rejectSubject'])->name('subjects.reject');
         Route::get('/subjects/all', [AdminController::class, 'allSubjects'])->name('subjects.all');
 
+        // Subject Request Management
+        Route::get('/subject-requests', [AdminController::class, 'subjectRequests'])->name('subject-requests');
+        Route::post('/subject-requests/{subjectRequest}/approve', [AdminController::class, 'approveSubjectRequest'])->name('subject-requests.approve');
+        Route::post('/subject-requests/{subjectRequest}/reject', [AdminController::class, 'rejectSubjectRequest'])->name('subject-requests.reject');
+
         // System Configuration
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
@@ -410,6 +427,12 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/{grade}', [GradeController::class, 'show'])->name('show');
     });
+
+    // =====================================================================
+    // SUBJECT REQUESTS ROUTES
+    // =====================================================================
+
+    Route::get('/subject-requests', [TeamController::class, 'allSubjectRequests'])->name('subject-requests.all');
 
     // =====================================================================
     // SUBJECT PREFERENCES ROUTES

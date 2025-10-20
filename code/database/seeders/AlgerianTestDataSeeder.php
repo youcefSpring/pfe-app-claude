@@ -9,7 +9,10 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\Project;
 use App\Models\Room;
+use App\Models\AllocationDeadline;
+use App\Models\StudentMark;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class AlgerianTestDataSeeder extends Seeder
 {
@@ -198,6 +201,24 @@ class AlgerianTestDataSeeder extends Seeder
             ]);
 
             $createdStudents[] = $student;
+
+            // Create student marks for calculating average_percentage
+            $subjects_for_marks = ['Programmation', 'Base de Données', 'Réseaux', 'Système', 'Math'];
+            foreach ($subjects_for_marks as $subject) {
+                $baseAverage = $studentData['average'];
+                $mark = $baseAverage + rand(-2, 2); // Variance around their average
+                $mark = max(0, min(20, $mark)); // Ensure between 0-20
+
+                StudentMark::create([
+                    'user_id' => $student->id,
+                    'subject_name' => $subject,
+                    'mark' => $mark,
+                    'max_mark' => 20.0,
+                    'semester' => 'S' . rand(1, 6),
+                    'academic_year' => '2023-2024',
+                    'created_by' => 1, // Admin
+                ]);
+            }
         }
 
         // Create diverse subjects for different specialties
@@ -344,18 +365,25 @@ class AlgerianTestDataSeeder extends Seeder
                 'joined_at' => now()
             ]);
 
-            // Create project with assigned subject
-            Project::create([
-                'team_id' => $team->id,
-                'subject_id' => $createdSubjects[$i * 2]->id,
-                'supervisor_id' => $createdSubjects[$i * 2]->teacher_id,
-                'type' => 'internal',
-                'status' => 'in_progress',
-                'academic_year' => '2024-2025',
-                'started_at' => now()->subMonths(3),
-                'created_at' => now()->subMonths(3)
-            ]);
+            // Teams will be created without any subject preferences or assignments
+            // This allows testing of the subject request system
         }
+
+        // Create allocation deadline (extended to allow subject requests)
+        AllocationDeadline::create([
+            'name' => 'Allocation PFE 2024-2025',
+            'academic_year' => '2024-2025',
+            'level' => 'L3',
+            'preferences_start' => now()->subDays(30),
+            'preferences_deadline' => Carbon::create(2026, 1, 10), // January 10, 2026
+            'grades_verification_deadline' => Carbon::create(2026, 1, 10),
+            'allocation_date' => now(),
+            'status' => 'active',
+            'description' => 'Période d\'allocation des sujets PFE pour l\'année 2024-2025',
+            'created_by' => 1, // Admin user
+            'auto_allocation_completed' => false,
+            'second_round_needed' => false,
+        ]);
 
         // Create some defense rooms
         $rooms = [
@@ -379,8 +407,8 @@ class AlgerianTestDataSeeder extends Seeder
         $this->command->info('✓ Created 10 Algerian teachers with different specialties');
         $this->command->info('✓ Created 10 Algerian students with different levels (L3, M1, M2)');
         $this->command->info('✓ Created 10 diverse subjects across different domains');
-        $this->command->info('✓ Created 5 complete teams with projects ready for defense');
+        $this->command->info('✓ Created 5 complete teams WITHOUT subject assignments');
         $this->command->info('✓ Created 5 defense rooms with different capacities');
-        $this->command->info('🎯 Test data is ready for defense scheduling and conflict testing!');
+        $this->command->info('🎯 Teams are ready for subject request testing!');
     }
 }

@@ -143,6 +143,14 @@
                             </a>
                         </li>
 
+                        <!-- Subject Requests -->
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('subject-requests*') ? 'active' : '' }}" href="{{ route('subject-requests.all') }}">
+                                <i class="bi bi-envelope-paper me-2"></i>
+                                Subject Requests
+                            </a>
+                        </li>
+
                         <!-- Teams (not for students) -->
                         @if(in_array(auth()->user()?->role, ['teacher', 'department_head', 'admin']))
                         <li class="nav-item">
@@ -232,6 +240,12 @@
                             <a class="nav-link {{ request()->routeIs('admin.allocations*') ? 'active' : '' }}" href="{{ route('admin.allocations.index') }}">
                                 <i class="bi bi-diagram-3 me-2"></i>
                                 {{ __('app.allocations') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.subject-requests*') ? 'active' : '' }}" href="{{ route('admin.subject-requests') }}">
+                                <i class="bi bi-envelope-paper me-2"></i>
+                                Subject Requests
                             </a>
                         </li>
                         <li class="nav-item">

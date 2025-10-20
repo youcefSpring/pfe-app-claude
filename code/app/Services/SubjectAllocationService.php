@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Models\Subject;
 use App\Models\Team;
 use App\Models\SubjectConflict;
+use App\Models\TeamSubjectPreference;
+use App\Models\AllocationDeadline;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SubjectAllocationService
 {
@@ -259,5 +262,149 @@ class SubjectAllocationService
                 }
             }
         }
+    }
+
+    /**
+     * Run automatic allocation based on team preferences after deadline.
+     */
+    public function runPreferenceBasedAllocation(): array
+    {
+        $results = [
+            'total_teams' => 0,
+            'allocated_teams' => 0,
+            'conflicts_resolved' => 0,
+            'allocations' => [],
+            'unallocated_teams' => [],
+            'errors' => []
+        ];
+
+        DB::beginTransaction();
+        try {
+            // Get all teams that need allocation (complete teams with preferences)
+            $teams = Team::where('status', 'complete')
+                ->whereHas('subjectPreferences')
+                ->whereDoesntHave('subjectPreferences', function($query) {
+                    $query->where('is_allocated', true);
+                })
+                ->with(['subjectPreferences.subject', 'members.user'])
+                ->get();
+
+            $results['total_teams'] = $teams->count();
+
+            // Track allocated subjects to avoid conflicts
+            $allocatedSubjects = [];
+
+            // Sort teams by their best average (highest first for priority)
+            $sortedTeams = $teams->sortByDesc(function($team) {
+                return $team->average_marks;
+            });
+
+            foreach ($sortedTeams as $team) {
+                $allocation = $this->allocateTeamFirstAvailableChoice($team, $allocatedSubjects);
+
+                if ($allocation['success']) {
+                    $results['allocated_teams']++;
+                    $results['allocations'][] = $allocation;
+                    $allocatedSubjects[] = $allocation['subject_id'];
+                } else {
+                    $results['unallocated_teams'][] = [
+                        'team' => $team,
+                        'reason' => $allocation['reason']
+                    ];
+                }
+            }
+
+            // Mark deadline as completed
+            $deadline = AllocationDeadline::active()->first();
+            if ($deadline) {
+                $deadline->markAutoAllocationCompleted();
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $results['errors'][] = $e->getMessage();
+        }
+
+        return $results;
+    }
+
+    /**
+     * Allocate team's first available choice from their preferences.
+     */
+    private function allocateTeamFirstAvailableChoice(Team $team, array $allocatedSubjects): array
+    {
+        // Get team preferences ordered by preference_order
+        $preferences = $team->subjectPreferences()
+            ->with('subject')
+            ->orderBy('preference_order')
+            ->get();
+
+        foreach ($preferences as $preference) {
+            $subject = $preference->subject;
+
+            // Skip if subject is already allocated
+            if (in_array($subject->id, $allocatedSubjects)) {
+                continue;
+            }
+
+            // Skip if subject is not validated
+            if ($subject->status !== 'validated') {
+                continue;
+            }
+
+            // Allocate this subject to the team
+            $preference->update(['is_allocated' => true]);
+
+            // Update team status
+            $team->update(['status' => 'assigned']);
+
+            return [
+                'success' => true,
+                'team_id' => $team->id,
+                'team_name' => $team->name,
+                'subject_id' => $subject->id,
+                'subject_title' => $subject->title,
+                'preference_order' => $preference->preference_order,
+                'team_average' => $team->average_marks
+            ];
+        }
+
+        return [
+            'success' => false,
+            'team_id' => $team->id,
+            'team_name' => $team->name,
+            'reason' => 'No available subjects from preferences'
+        ];
+    }
+
+    /**
+     * Check if automatic allocation can be performed.
+     */
+    public function canPerformAllocation(): bool
+    {
+        $deadline = AllocationDeadline::active()->first();
+
+        return $deadline &&
+               $deadline->canPerformAutoAllocation() &&
+               !$deadline->auto_allocation_completed;
+    }
+
+    /**
+     * Get allocation statistics.
+     */
+    public function getAllocationStatistics(): array
+    {
+        $totalTeams = Team::where('status', 'complete')->count();
+        $allocatedTeams = TeamSubjectPreference::where('is_allocated', true)->distinct('team_id')->count();
+        $unallocatedTeams = $totalTeams - $allocatedTeams;
+
+        return [
+            'total_teams' => $totalTeams,
+            'allocated_teams' => $allocatedTeams,
+            'unallocated_teams' => $unallocatedTeams,
+            'allocation_percentage' => $totalTeams > 0 ? round(($allocatedTeams / $totalTeams) * 100, 2) : 0
+        ];
     }
 }

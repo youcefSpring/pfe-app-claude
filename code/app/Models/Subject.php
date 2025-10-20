@@ -141,6 +141,14 @@ class Subject extends Model
     }
 
     /**
+     * Get the subject requests for this subject.
+     */
+    public function subjectRequests(): HasMany
+    {
+        return $this->hasMany(SubjectRequest::class);
+    }
+
+    /**
      * Get the specialities that this subject is available for.
      */
     public function specialities(): BelongsToMany

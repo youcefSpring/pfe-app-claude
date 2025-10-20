@@ -126,10 +126,19 @@
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="d-flex gap-2 mb-3">
-                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#selectSubjectModal">
-                                                        <i class="fas fa-book"></i> Select from Available Subjects
+                                                    <a href="{{ route('teams.subject-preferences', $team) }}" class="btn btn-primary">
+                                                        <i class="fas fa-list-ol"></i> Manage Subject Preferences (Max 10)
+                                                    </a>
+                                                    <a href="{{ route('teams.subject-requests', $team) }}" class="btn btn-success">
+                                                        <i class="fas fa-hand-paper"></i> Subject Requests
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#selectSubjectModal">
+                                                        <i class="fas fa-book"></i> Quick Select Subject
                                                     </button>
-                                                    <a href="{{ route('teams.external-project-form', $team) }}" class="btn btn-outline-primary">
+                                                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#requestSubjectModal">
+                                                        <i class="fas fa-paper-plane"></i> Request Subject
+                                                    </button>
+                                                    <a href="{{ route('teams.external-project-form', $team) }}" class="btn btn-outline-secondary">
                                                         <i class="fas fa-external-link-alt"></i> Submit External Project
                                                     </a>
                                                 </div>
@@ -216,6 +225,25 @@
                                     </div>
                                 </div>
                             @endif
+
+                            @if($isLeader && $team->members->count() === 1)
+                                <div class="mt-3">
+                                    <div class="card border-danger">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-danger">Delete Team</h6>
+                                            <p class="small text-muted">Permanently delete this team since you're the only member.</p>
+                                            <form action="{{ route('teams.destroy', $team) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are you sure you want to delete this team? This action cannot be undone.')">
+                                                    <i class="fas fa-trash"></i> Delete Team
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -262,6 +290,62 @@
                     @endforeach
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+@endif
+
+<!-- Request Subject Modal -->
+@if($isLeader && !$team->project)
+<div class="modal fade" id="requestSubjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Request Subject for Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('teams.request-subject', $team) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="subject_id" class="form-label">Select Subject</label>
+                        @if($availableSubjects && $availableSubjects->count() > 0)
+                            <select name="subject_id" id="subject_id" class="form-select" required>
+                                <option value="">Choose a subject...</option>
+                                @foreach($availableSubjects as $subject)
+                                    <option value="{{ $subject->id }}">
+                                        {{ $subject->title }} - {{ $subject->teacher->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @else
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                No subjects are currently available for request. All subjects may already be assigned or there are no validated subjects.
+                            </div>
+                            <select name="subject_id" id="subject_id" class="form-select" disabled>
+                                <option value="">No subjects available</option>
+                            </select>
+                        @endif
+                    </div>
+                    <div class="mb-3">
+                        <label for="request_message" class="form-label">Request Message (Optional)</label>
+                        <textarea name="request_message" id="request_message" class="form-control" rows="4"
+                                  placeholder="Why does your team want this subject? (Optional)"></textarea>
+                        <small class="form-text text-muted">Explain why your team is interested in this subject and how it aligns with your goals.</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> Subject requests need admin approval. You'll be notified when your request is processed.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning" @if(!$availableSubjects || $availableSubjects->count() == 0) disabled @endif>
+                        <i class="fas fa-paper-plane"></i> Submit Request
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

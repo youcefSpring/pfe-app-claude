@@ -228,12 +228,46 @@
                                         <h6>Available for Selection</h6>
                                         <p class="mb-2">This subject is available for team selection.</p>
                                         @if(auth()->user()->teamMember?->team)
-                                            <a href="{{ route('teams.show', auth()->user()->teamMember->team) }}" class="btn btn-success btn-sm">
-                                                View My Team
-                                            </a>
+                                            @php
+                                                $userTeam = auth()->user()->teamMember->team;
+                                                $isLeader = auth()->user()->teamMember->role === 'leader';
+                                                $hasActiveDeadline = App\Models\AllocationDeadline::active()->first()?->canStudentsChoose() ?? false;
+                                                $teamCanSelect = $userTeam->canSelectSubject();
+                                            @endphp
+
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <a href="{{ route('teams.show', $userTeam) }}" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-users"></i> View My Team
+                                                </a>
+
+                                                @if($isLeader && $hasActiveDeadline && $teamCanSelect)
+                                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#requestSubjectModal">
+                                                        <i class="fas fa-paper-plane"></i> Request This Subject
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            @if(!$hasActiveDeadline)
+                                                <small class="text-muted d-block mt-2">
+                                                    <i class="fas fa-clock"></i> Subject request period has ended
+                                                </small>
+                                            @elseif(!$isLeader)
+                                                <small class="text-muted d-block mt-2">
+                                                    <i class="fas fa-info-circle"></i> Only team leaders can request subjects
+                                                </small>
+                                            @elseif(!$teamCanSelect)
+                                                <small class="text-muted d-block mt-2">
+                                                    <i class="fas fa-users"></i> Your team must have {{ config('team.sizes.licence.min', 2) }}-{{ config('team.sizes.licence.max', 4) }} members to request subjects
+                                                    @if($userTeam->members->count() < config('team.sizes.licence.min', 2))
+                                                        ({{ $userTeam->members->count() }}/{{ config('team.sizes.licence.min', 2) }} members)
+                                                    @elseif($userTeam->members->count() > config('team.sizes.licence.max', 4))
+                                                        ({{ $userTeam->members->count() }} members - too many)
+                                                    @endif
+                                                </small>
+                                            @endif
                                         @else
                                             <a href="{{ route('teams.create') }}" class="btn btn-primary btn-sm">
-                                                Create Team First
+                                                <i class="fas fa-plus"></i> Create Team First
                                             </a>
                                         @endif
                                     </div>
@@ -246,4 +280,60 @@
         </div>
     </div>
 </div>
+
+<!-- Request Subject Modal -->
+@auth
+    @if(auth()->user()->role === 'student' && auth()->user()->teamMember?->team)
+        @php
+            $userTeam = auth()->user()->teamMember->team;
+            $isLeader = auth()->user()->teamMember->role === 'leader';
+        @endphp
+
+        @if($isLeader)
+        <div class="modal fade" id="requestSubjectModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Request Subject: {{ $subject->title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ route('teams.request-subject', $userTeam) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="subject_id" value="{{ $subject->id }}">
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Subject Details</h6>
+                                <p><strong>Title:</strong> {{ $subject->title }}</p>
+                                <p><strong>Teacher:</strong> {{ $subject->teacher->name }}</p>
+                                <p class="mb-0"><strong>Team:</strong> {{ $userTeam->name }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="request_message" class="form-label">Request Message</label>
+                                <textarea name="request_message" id="request_message" class="form-control" rows="4"
+                                          placeholder="Explain why your team wants this subject and how it aligns with your goals..."></textarea>
+                                <small class="form-text text-muted">
+                                    Tell the administration why your team is interested in this specific subject.
+                                </small>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Note:</strong> This request needs admin approval. You'll be notified when your request is processed.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
+@endauth
+
 @endsection
