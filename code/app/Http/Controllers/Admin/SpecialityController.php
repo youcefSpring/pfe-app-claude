@@ -100,7 +100,7 @@ class SpecialityController extends Controller
 
         return redirect()
             ->route('admin.specialities.index')
-            ->with('success', 'Spécialité créée avec succès.');
+            ->with('success', __('app.speciality_created_successfully'));
     }
 
     /**
@@ -161,7 +161,7 @@ class SpecialityController extends Controller
 
         return redirect()
             ->route('admin.specialities.index')
-            ->with('success', 'Spécialité mise à jour avec succès.');
+            ->with('success', __('app.speciality_updated_successfully'));
     }
 
     /**
@@ -171,14 +171,14 @@ class SpecialityController extends Controller
     {
         // Check if speciality has students
         if ($speciality->students()->count() > 0) {
-            return back()->with('error', 'Impossible de supprimer cette spécialité car elle contient des étudiants.');
+            return back()->with('error', __('app.cannot_delete_speciality_with_students'));
         }
 
         $speciality->delete();
 
         return redirect()
             ->route('admin.specialities.index')
-            ->with('success', 'Spécialité supprimée avec succès.');
+            ->with('success', __('app.speciality_deleted_successfully'));
     }
 
     /**
@@ -190,7 +190,7 @@ class SpecialityController extends Controller
 
         $status = $speciality->is_active ? 'activée' : 'désactivée';
 
-        return back()->with('success', "Spécialité {$status} avec succès.");
+        return back()->with('success', __('app.speciality_status_updated_successfully', ['status' => $status]));
     }
 
     /**

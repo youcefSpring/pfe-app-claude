@@ -62,7 +62,12 @@ class SubjectController extends Controller
                           $subq->where('is_external', true)
                                ->where('student_id', $user->id);
                       });
-                })->where(function($q) use ($user) {
+                });
+
+                // Apply speciality filter only if speciality relationships exist
+                $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+
+                if ($hasSpecialityRelationships) {
                     // Filter by speciality: show subjects for user's speciality OR for their team members' specialities
                     $userSpecialityIds = collect([$user->speciality_id])->filter();
 
@@ -81,14 +86,13 @@ class SubjectController extends Controller
                     $allSpecialityIds = $userSpecialityIds->merge($teamMemberSpecialityIds)->unique()->values();
 
                     if ($allSpecialityIds->isNotEmpty()) {
-                        $q->whereHas('specialities', function($subq) use ($allSpecialityIds) {
+                        $query->whereHas('specialities', function($subq) use ($allSpecialityIds) {
                             $subq->whereIn('specialities.id', $allSpecialityIds);
                         });
-                    } else {
-                        // If no speciality, show all subjects (fallback)
-                        $q->whereRaw('1 = 1');
                     }
-                });
+                    // If user has no speciality but relationships exist, don't show any subjects
+                }
+                // If no speciality relationships exist, show all validated subjects (no additional filter)
                 break;
             // Admin sees all subjects (no filter)
         }

@@ -58,7 +58,11 @@
                                                                             @csrf
                                                                             @method('DELETE')
                                                                             <button type="submit" class="dropdown-item text-danger"
-                                                                                    onclick="return confirm('Remove this member from the team?')">
+                                                                                    onclick="return showDeleteConfirmation({
+                                                                                        itemName: '{{ $member->name }}',
+                                                                                        message: '{{ __('app.confirm_remove_member') }}',
+                                                                                        form: this.closest('form')
+                                                                                    })">
                                                                                 Remove from Team
                                                                             </button>
                                                                         </form>
@@ -143,10 +147,47 @@
                                                             Subject selection period is not active.
                                                         </div>
                                                     @elseif(!$team->canSelectSubject())
-                                                        <div class="alert alert-info mb-3">
+                                                        @php
+                                                            // Get team leader's academic level to determine appropriate team size limits
+                                                            $leader = $team->members->where('role', 'leader')->first();
+                                                            $academicLevel = 'licence'; // default
+
+                                                            if ($leader && $leader->student) {
+                                                                $academicLevel = match($leader->student->student_level) {
+                                                                    'licence_3' => 'licence',
+                                                                    'master_1', 'master_2' => 'master',
+                                                                    default => 'licence'
+                                                                };
+                                                            }
+
+                                                            $minSize = config("team.sizes.{$academicLevel}.min", 1);
+                                                            $maxSize = config("team.sizes.{$academicLevel}.max", 4);
+                                                            $currentSize = $team->members->count();
+                                                        @endphp
+                                                        <div class="alert alert-warning mb-3">
                                                             <i class="fas fa-users"></i>
-                                                            Your team needs {{ config('team.sizes.licence.min', 2) }}-{{ config('team.sizes.licence.max', 4) }} members to select subjects.
-                                                            (Current: {{ $team->members->count() }} members)
+                                                            <strong>Cannot select subjects yet.</strong><br>
+                                                            @if($currentSize < $minSize)
+                                                                Your team needs {{ $minSize }}-{{ $maxSize }} members to select subjects.
+                                                                (Current: {{ $currentSize }} members)
+                                                            @elseif($currentSize > $maxSize)
+                                                                Your team has too many members ({{ $currentSize }}/{{ $maxSize }} max).
+                                                            @elseif($team->subject_id)
+                                                                Your team already has a subject assigned.
+                                                            @else
+                                                                @php
+                                                                    $debugInfo = $team->getSubjectSelectionDebugInfo();
+                                                                @endphp
+                                                                Team cannot select subjects. Debug info:<br>
+                                                                <small>
+                                                                    • Status: {{ $debugInfo['status'] }}<br>
+                                                                    • Is Complete: {{ $debugInfo['isComplete'] ? 'Yes' : 'No' }}<br>
+                                                                    • Has Valid Status: {{ $debugInfo['hasValidStatus'] ? 'Yes' : 'No' }}<br>
+                                                                    • Has Subject: {{ $debugInfo['hasSubject'] ? 'Yes' : 'No' }}<br>
+                                                                    • Member Count: {{ $debugInfo['memberCount'] }}<br>
+                                                                    • Can Select: {{ $debugInfo['canSelect'] ? 'Yes' : 'No' }}
+                                                                </small>
+                                                            @endif
                                                         </div>
                                                     @endif
                                                 @endif
@@ -247,7 +288,13 @@
                                             <form action="{{ route('teams.leave', $team) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" class="btn btn-warning btn-sm"
-                                                        onclick="return confirm('Are you sure you want to leave this team?')">
+                                                        onclick="return showConfirmation({
+                                                            title: '{{ __('app.confirm_leave') }}',
+                                                            message: '{{ __('app.confirm_leave_team') }}',
+                                                            confirmText: '{{ __('app.leave') }}',
+                                                            confirmClass: 'btn-warning',
+                                                            form: this.closest('form')
+                                                        })">
                                                     <i class="fas fa-sign-out-alt"></i> Leave Team
                                                 </button>
                                             </form>
@@ -266,7 +313,11 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm"
-                                                        onclick="return confirm('Are you sure you want to delete this team? This action cannot be undone.')">
+                                                        onclick="return showDeleteConfirmation({
+                                                            itemName: '{{ $team->name }}',
+                                                            message: '{{ __('app.confirm_delete_team') }}',
+                                                            form: this.closest('form')
+                                                        })">
                                                     <i class="fas fa-trash"></i> Delete Team
                                                 </button>
                                             </form>
@@ -435,26 +486,32 @@
 @push('scripts')
 <script>
 function selectSubject(subjectId, subjectTitle) {
-    if (confirm(`Are you sure you want to select "${subjectTitle}" for your team?`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("teams.select-subject", $team) }}';
+    showConfirmation({
+        title: '{{ __('app.confirm_subject_selection') }}',
+        message: `{{ __('app.confirm_select_subject_message') }}`.replace(':subject', subjectTitle),
+        confirmText: '{{ __('app.select') }}',
+        confirmClass: 'btn-primary',
+        onConfirm: function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("teams.select-subject", $team) }}';
 
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
 
-        const subjectInput = document.createElement('input');
-        subjectInput.type = 'hidden';
-        subjectInput.name = 'subject_id';
-        subjectInput.value = subjectId;
+            const subjectInput = document.createElement('input');
+            subjectInput.type = 'hidden';
+            subjectInput.name = 'subject_id';
+            subjectInput.value = subjectId;
 
-        form.appendChild(csrfToken);
-        form.appendChild(subjectInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
+            form.appendChild(csrfToken);
+            form.appendChild(subjectInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
 }
 
 function transferLeadership(userId, userName) {

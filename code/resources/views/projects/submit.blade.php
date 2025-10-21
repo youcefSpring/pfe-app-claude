@@ -35,9 +35,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
+                            <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
                             <textarea class="form-control @error('description') is-invalid @enderror"
-                                      id="description" name="description" rows="4"
+                                      id="description" name="description" rows="4" required
                                       placeholder="Describe what you're submitting, what you've accomplished, and any notes for your supervisor...">{{ old('description') }}</textarea>
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -196,13 +196,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (hasOversizedFile) {
-            alert('One or more files exceed the 20MB limit. Please compress or reduce file sizes.');
+            showAlert('{{ __('app.file_size_error') }}', '{{ __('app.files_exceed_limit') }}', 'warning');
             this.value = '';
             return;
         }
 
         if (totalSize > 100 * 1024 * 1024) { // 100MB total limit
-            alert('Total file size exceeds 100MB. Please reduce the number or size of files.');
+            showAlert('{{ __('app.file_size_error') }}', '{{ __('app.total_size_exceeds_limit') }}', 'warning');
             this.value = '';
             return;
         }

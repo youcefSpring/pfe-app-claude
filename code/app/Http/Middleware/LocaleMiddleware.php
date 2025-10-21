@@ -20,29 +20,20 @@ class LocaleMiddleware
         // Get available locales from config
         $availableLocales = array_keys(config('app.available_locales', ['en']));
 
-        // Check if locale is in URL
-        $locale = $request->segment(1);
+        // Get locale from session, user preference, or default
+        $sessionLocale = Session::get('locale');
+        $userLocale = auth()->check() ? auth()->user()->locale ?? null : null;
+        $defaultLocale = config('app.locale', 'en');
 
-        if (in_array($locale, $availableLocales)) {
-            // Set the locale from URL
-            App::setLocale($locale);
-            Session::put('locale', $locale);
-        } else {
-            // Get locale from session, user preference, or default
-            $sessionLocale = Session::get('locale');
-            $userLocale = auth()->check() ? auth()->user()->locale ?? null : null;
-            $defaultLocale = config('app.locale', 'en');
+        // Priority: session locale first (for language switching), then user preference, then default
+        $preferredLocale = $sessionLocale ?: $userLocale ?: $defaultLocale;
 
-            $preferredLocale = $sessionLocale ?: $userLocale ?: $defaultLocale;
-
-            // Ensure the preferred locale is available
-            if (!in_array($preferredLocale, $availableLocales)) {
-                $preferredLocale = $defaultLocale;
-            }
-
-            App::setLocale($preferredLocale);
-            Session::put('locale', $preferredLocale);
+        // Ensure the preferred locale is available
+        if (!in_array($preferredLocale, $availableLocales)) {
+            $preferredLocale = $defaultLocale;
         }
+
+        App::setLocale($preferredLocale);
 
         return $next($request);
     }

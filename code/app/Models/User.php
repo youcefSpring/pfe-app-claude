@@ -146,6 +146,28 @@ class User extends Authenticatable
     }
 
     /**
+     * Safely get the user's team, handling orphaned team members.
+     */
+    public function getTeam(): ?Team
+    {
+        $teamMember = $this->teamMember;
+
+        if (!$teamMember) {
+            return null;
+        }
+
+        $team = $teamMember->team;
+
+        // If team member exists but team is null (orphaned record), clean it up
+        if (!$team) {
+            $teamMember->delete();
+            return null;
+        }
+
+        return $team;
+    }
+
+    /**
      * Get display role including team membership status.
      */
     public function getDisplayRole(): string

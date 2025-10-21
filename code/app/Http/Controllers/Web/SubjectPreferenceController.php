@@ -86,7 +86,7 @@ class SubjectPreferenceController extends Controller
         });
 
         return redirect()->route('preferences.index')
-            ->with('success', 'Subject preferences saved successfully!');
+            ->with('success', __('app.subject_preferences_saved'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -127,7 +127,7 @@ class SubjectPreferenceController extends Controller
         });
 
         return redirect()->route('preferences.index')
-            ->with('success', 'Subject preferences updated successfully!');
+            ->with('success', __('app.subject_preferences_updated'));
     }
 
     public function destroy(): RedirectResponse
@@ -143,7 +143,7 @@ class SubjectPreferenceController extends Controller
         $user->subjectPreferences()->delete();
 
         return redirect()->route('preferences.index')
-            ->with('success', 'All preferences cleared successfully!');
+            ->with('success', __('app.all_preferences_cleared'));
     }
 
     public function submit(Request $request): RedirectResponse
@@ -169,6 +169,6 @@ class SubjectPreferenceController extends Controller
         ]);
 
         return redirect()->route('preferences.index')
-            ->with('success', 'Subject preferences submitted successfully! You can no longer modify them.');
+            ->with('success', __('app.preferences_submitted_final'));
     }
 }

@@ -342,4 +342,21 @@ class Project extends Model
             default => 0,
         };
     }
+
+    /**
+     * Boot method to automatically set academic year for new records.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($project) {
+            if (empty($project->academic_year)) {
+                $currentYear = AcademicYear::getCurrentYear();
+                if ($currentYear) {
+                    $project->academic_year = $currentYear->year;
+                }
+            }
+        });
+    }
 }

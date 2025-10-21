@@ -191,10 +191,28 @@ class Team extends Model
             $this->refresh();
         }
 
+        // Check individual conditions
+        $isComplete = $this->isComplete();
+        $hasValidStatus = in_array($this->status, ['forming', 'complete']);
+        $hasNoSubject = !$this->subject_id;
+
         // Allow teams that are complete in size and don't have a subject
-        return $this->isComplete() &&
-               in_array($this->status, ['forming', 'complete']) &&
-               !$this->subject_id;
+        return $isComplete && $hasValidStatus && $hasNoSubject;
+    }
+
+    /**
+     * Get debug information about why team cannot select subject
+     */
+    public function getSubjectSelectionDebugInfo(): array
+    {
+        return [
+            'isComplete' => $this->isComplete(),
+            'status' => $this->status,
+            'hasValidStatus' => in_array($this->status, ['forming', 'complete']),
+            'hasSubject' => !empty($this->subject_id),
+            'memberCount' => $this->members()->count(),
+            'canSelect' => $this->canSelectSubject()
+        ];
     }
 
     /**

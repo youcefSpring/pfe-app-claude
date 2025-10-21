@@ -1,186 +1,468 @@
-@extends('layouts.app')
+@extends('layouts.pfe-app')
 
-@section('title', __('app.subject_preferences'))
+@section('page-title', __('app.subject_preferences'))
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-7xl mx-auto">
-        <!-- Team Info -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold text-gray-900">{{ __('app.subject_preferences_for_team') }}: {{ $team->name }}</h1>
-                <a href="{{ route('teams.show', $team) }}" class="text-blue-600 hover:text-blue-800">
-                    <i class="fas fa-arrow-left mr-1"></i> {{ __('app.back_to_team') }}
-                </a>
-            </div>
-
-            <!-- Team Members -->
-            <div class="flex items-center text-sm text-gray-600">
-                <i class="fas fa-users mr-2"></i>
-                <span>{{ __('app.members') }}:</span>
-                @foreach($team->members as $member)
-                    <span class="ml-2 font-medium">
-                        {{ $member->user->name }}
-                        @if($member->role === 'leader')
-                            <span class="text-xs text-blue-600">({{ __('app.leader') }})</span>
-                        @endif
-                    </span>
-                @endforeach
-            </div>
-
-            @if(!$canManage)
-                <div class="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-                    <p class="text-sm">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        {{ __('app.cannot_modify_preferences_reason') }}
-                    </p>
+<div class="container-fluid">
+    <!-- Team Info Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="card-title mb-1">
+                                <i class="fas fa-list-ol"></i> {{ __('app.subject_preferences_for_team') }}: {{ $team->name }}
+                            </h4>
+                            <small class="text-muted">{{ __('app.manage_your_team_subject_preferences') }}</small>
+                        </div>
+                        <a href="{{ route('teams.my-team') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> {{ __('app.back_to_team') }}
+                        </a>
+                    </div>
                 </div>
-            @endif
+                <div class="card-body">
+                    <!-- Team Members -->
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-users me-2 text-primary"></i>
+                        <span class="fw-semibold me-2">{{ __('app.members') }}:</span>
+                        @foreach($team->members as $member)
+                            <span class="badge bg-light text-dark me-2">
+                                {{ $member->user->name }}
+                                @if($member->role === 'leader')
+                                    <span class="text-primary">({{ __('app.leader') }})</span>
+                                @endif
+                            </span>
+                        @endforeach
+                    </div>
+
+                    @php
+                        $canManage = $team->canManagePreferences() &&
+                                   auth()->user()->teamMember &&
+                                   auth()->user()->teamMember->team_id === $team->id;
+                    @endphp
+
+                    @if(!$canManage)
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-1"></i>
+                            {{ __('app.cannot_modify_preferences_reason') }}
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Current Preferences -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                    {{ __('app.selected_subjects') }}
-                    <span class="text-sm text-gray-500">({{ $team->subjectPreferences->count() }}/10)</span>
-                </h2>
-
-                @if($team->subjectPreferences->isEmpty())
-                    <p class="text-gray-500 text-center py-8">
-                        {{ __('app.no_subjects_selected_yet') }}
-                    </p>
-                @else
-                    <div class="space-y-2" id="preference-list">
-                        @foreach($team->subjectPreferences as $preference)
-                            <div class="border rounded-lg p-3 flex justify-between items-center preference-item"
-                                 data-subject-id="{{ $preference->subject_id }}"
-                                 @if($preference->is_allocated) style="background-color: #f0fdf4;" @endif>
-                                <div class="flex-1">
-                                    <div class="flex items-center">
-                                        <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-bold rounded-full
-                                            @if($preference->is_allocated) bg-green-500 text-white @else bg-gray-200 text-gray-700 @endif mr-3">
-                                            {{ $preference->preference_order }}
-                                        </span>
-                                        <div>
-                                            <p class="font-medium text-gray-900">{{ $preference->subject->title }}</p>
-                                            <p class="text-sm text-gray-500">
-                                                {{ __('app.teacher') }}: {{ $preference->subject->teacher->name ?? __('app.not_assigned') }}
-                                            </p>
-                                            @if($preference->is_allocated)
-                                                <span class="inline-block mt-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded">
-                                                    {{ __('app.allocated') }}
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Current Preferences Column -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> {{ __('app.selected_subjects') }}
+                        @php
+                            $currentCount = isset($currentPreferences) ? $currentPreferences->count() : 0;
+                            $maxSubjects = 10;
+                            $percentage = ($currentCount / $maxSubjects) * 100;
+                        @endphp
+                        <span class="badge @if($currentCount >= $maxSubjects) bg-success @elseif($currentCount >= 7) bg-warning @else bg-primary @endif">
+                            {{ $currentCount }}/{{ $maxSubjects }}
+                        </span>
+                    </h5>
+                    <div class="mb-2">
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar @if($currentCount >= $maxSubjects) bg-success @elseif($currentCount >= 7) bg-warning @else bg-primary @endif"
+                                 role="progressbar" style="width: {{ $percentage }}%"
+                                 aria-valuenow="{{ $currentCount }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="{{ $maxSubjects }}"></div>
+                        </div>
+                        <small class="text-muted">{{ __('app.subjects_selected_progress', ['current' => $currentCount, 'max' => $maxSubjects]) }}</small>
+                    </div>
+                    <small class="text-muted">{{ __('app.ordered_by_preference_order') }}</small>
+                </div>
+                <div class="card-body">
+                    @if(!isset($currentPreferences) || $currentPreferences->isEmpty())
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">{{ __('app.no_subjects_selected_yet') }}</h6>
+                            <p class="text-muted small">{{ __('app.start_by_adding_subjects_from_available_list') }}</p>
+                        </div>
+                    @else
+                        <div id="preference-list">
+                            @foreach($currentPreferences as $preference)
+                                <div class="card mb-2 preference-item @if($preference->is_allocated) border-success @endif"
+                                     data-subject-id="{{ $preference->subject_id }}">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="d-flex align-items-start flex-grow-1">
+                                                @php
+                                                    $badgeClass = 'bg-secondary';
+                                                    if ($preference->is_allocated) {
+                                                        $badgeClass = 'bg-success';
+                                                    } elseif ($preference->preference_order <= 3) {
+                                                        $badgeClass = 'bg-success'; // Green for top 3
+                                                    } elseif ($preference->preference_order >= 8) {
+                                                        $badgeClass = 'bg-warning'; // Orange for bottom 3
+                                                    } else {
+                                                        $badgeClass = 'bg-primary'; // Blue for middle
+                                                    }
+                                                @endphp
+                                                <span class="badge {{ $badgeClass }} me-3 fs-6" style="width: 30px; height: 30px; line-height: 30px;">
+                                                    {{ $preference->preference_order }}
                                                 </span>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">{{ $preference->subject->title }}</h6>
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-chalkboard-teacher"></i>
+                                                        {{ __('app.teacher') }}: {{ $preference->subject->teacher->name ?? __('app.not_assigned') }}
+                                                    </small>
+                                                    <small class="text-info d-block">
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                        {{ __('app.submitted_on') }}: {{ $preference->selected_at ? $preference->selected_at->format('d/m/Y H:i') : __('app.not_available') }}
+                                                    </small>
+                                                    @if($preference->is_allocated)
+                                                        <span class="badge bg-success mt-1">
+                                                            <i class="fas fa-check"></i> {{ __('app.allocated') }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            @if($canManage && !$preference->is_allocated)
+                                                <div class="btn-group shadow-sm">
+                                                    <div class="btn-group-vertical me-2">
+                                                        <button class="btn btn-primary btn-sm fw-bold btn-enhanced move-up @if($loop->first) disabled @endif"
+                                                                type="button" @if($loop->first) disabled @endif
+                                                                title="{{ __('app.move_up') }}"
+                                                                style="min-width: 45px; padding: 8px;">
+                                                            <i class="fas fa-chevron-up text-white"></i>
+                                                        </button>
+                                                        <button class="btn btn-primary btn-sm fw-bold btn-enhanced move-down @if($loop->last) disabled @endif"
+                                                                type="button" @if($loop->last) disabled @endif
+                                                                title="{{ __('app.move_down') }}"
+                                                                style="min-width: 45px; padding: 8px;">
+                                                            <i class="fas fa-chevron-down text-white"></i>
+                                                        </button>
+                                                    </div>
+                                                    <form action="{{ route('teams.remove-subject-preference', [$team, $preference->subject]) }}"
+                                                          method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger fw-bold btn-enhanced"
+                                                                onclick="return showDeleteConfirmation({
+                                                                    itemName: '{{ $preference->subject->title }}',
+                                                                    message: '{{ __('app.confirm_remove_preference') }}',
+                                                                    form: this.closest('form')
+                                                                })"
+                                                                title="{{ __('app.remove_preference') }}"
+                                                                style="min-width: 40px; padding: 8px;">
+                                                            <i class="fas fa-trash text-white"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
                                 </div>
+                            @endforeach
+                        </div>
 
-                                @if($canManage && !$preference->is_allocated)
-                                    <div class="flex items-center space-x-2">
-                                        <button class="move-up text-gray-400 hover:text-gray-600"
-                                                @if($loop->first) disabled @endif>
-                                            <i class="fas fa-chevron-up"></i>
-                                        </button>
-                                        <button class="move-down text-gray-400 hover:text-gray-600"
-                                                @if($loop->last) disabled @endif>
-                                            <i class="fas fa-chevron-down"></i>
-                                        </button>
-                                        <form action="{{ route('teams.remove-subject-preference', [$team, $preference->subject]) }}"
-                                              method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:text-red-700">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                        @if($canManage && isset($currentPreferences) && $currentPreferences->where('is_allocated', false)->count() > 1)
+                            <form id="update-order-form" action="{{ route('teams.update-preference-order', $team) }}" method="POST" class="mt-3">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="subject_ids" id="subject-ids-input">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary fw-bold shadow btn-enhanced">
+                                        <i class="fas fa-save text-white"></i> {{ __('app.save_preference_order') }}
+                                    </button>
+                                </div>
+                            </form>
+                        @endif
 
-                    @if($canManage && $team->subjectPreferences->where('is_allocated', false)->count() > 1)
-                        <form id="update-order-form" action="{{ route('teams.update-preference-order', $team) }}" method="POST" class="mt-4">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="subject_ids" id="subject-ids-input">
-                            <button type="submit" class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition-colors">
-                                {{ __('app.save_preference_order') }}
-                            </button>
-                        </form>
-                    @endif
-                @endif
-            </div>
-
-            <!-- Available Subjects -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('app.available_subjects') }}</h2>
-
-                @if($canManage && $team->subjectPreferences->count() < 10)
-                    <!-- Search Filter -->
-                    <div class="mb-4">
-                        <input type="text" id="subject-search"
-                               placeholder="{{ __('app.search_subjects') }}..."
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <div class="space-y-2 max-h-96 overflow-y-auto" id="available-subjects">
-                        @foreach($availableSubjects as $subject)
-                            <div class="border rounded-lg p-3 hover:bg-gray-50 subject-item">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <p class="font-medium text-gray-900 subject-title">{{ $subject->title }}</p>
-                                        <p class="text-sm text-gray-500">
-                                            {{ __('app.teacher') }}: {{ $subject->teacher->name ?? __('app.not_assigned') }}
-                                        </p>
-                                        @if($subject->description)
-                                            <p class="text-sm text-gray-600 mt-1">{{ Str::limit($subject->description, 100) }}</p>
-                                        @endif
-                                    </div>
-
-                                    <form action="{{ route('teams.add-subject-preference', $team) }}" method="POST" class="ml-2">
-                                        @csrf
-                                        <input type="hidden" name="subject_id" value="{{ $subject->id }}">
-                                        <button type="submit" class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
-                                            <i class="fas fa-plus mr-1"></i> {{ __('app.add') }}
-                                        </button>
-                                    </form>
+                        @if($canManage && isset($currentPreferences) && $currentPreferences->count() > 0)
+                            <div class="mt-3">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-warning text-dark fw-bold btn-enhanced" onclick="showDeleteConfirmation({
+                                        itemName: '{{ __('app.all_preferences') }}',
+                                        message: '{{ __('app.confirm_clear_all_preferences') }}',
+                                        onConfirm: clearAllPreferences
+                                    })">
+                                        <i class="fas fa-trash-alt"></i> {{ __('app.clear_all_preferences') }}
+                                    </button>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-
-                    @if($availableSubjects->isEmpty())
-                        <p class="text-gray-500 text-center py-8">
-                            {{ __('app.no_available_subjects') }}
-                        </p>
+                        @endif
                     @endif
-                @else
-                    @if($team->subjectPreferences->count() >= 10)
-                        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
-                            <p class="text-sm">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                {{ __('app.maximum_subjects_reached') }}
-                            </p>
-                        </div>
-                    @endif
-                @endif
+                </div>
             </div>
         </div>
 
-        <!-- Instructions -->
-        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 class="font-semibold text-blue-900 mb-2">{{ __('app.instructions') }}</h3>
-            <ul class="text-sm text-blue-700 space-y-1">
-                <li><i class="fas fa-check mr-1"></i> {{ __('app.select_up_to_10_subjects') }}</li>
-                <li><i class="fas fa-check mr-1"></i> {{ __('app.order_by_preference') }}</li>
-                <li><i class="fas fa-check mr-1"></i> {{ __('app.subject_allocation_based_on_preference') }}</li>
-                <li><i class="fas fa-check mr-1"></i> {{ __('app.cannot_change_after_allocation') }}</li>
-            </ul>
+        <!-- Available Subjects Column -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle"></i> {{ __('app.available_subjects') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if($canManage && (!isset($currentPreferences) || $currentPreferences->count() < 10))
+                        <!-- Search Filter -->
+                        <div class="mb-3">
+                            <input type="text" id="subject-search" class="form-control"
+                                   placeholder="{{ __('app.search_subjects') }}...">
+                        </div>
+
+                        <div style="max-height: 500px; overflow-y: auto;" id="available-subjects">
+                            @foreach($availableSubjects as $subject)
+                                <div class="card mb-2 subject-item">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 subject-title">{{ $subject->title }}</h6>
+                                                <small class="text-muted d-block">
+                                                    <i class="fas fa-chalkboard-teacher"></i>
+                                                    {{ __('app.teacher') }}: {{ $subject->teacher->name ?? __('app.not_assigned') }}
+                                                </small>
+                                                @if($subject->description)
+                                                    <small class="text-muted d-block mt-1">{{ Str::limit($subject->description, 120) }}</small>
+                                                @endif
+                                                <small class="text-info d-block mt-1">
+                                                    <i class="fas fa-graduation-cap"></i>
+                                                    {{ ucfirst($subject->target_grade) }}
+                                                </small>
+                                            </div>
+
+                                            <form action="{{ route('teams.add-subject-preference', $team) }}" method="POST" class="ms-2">
+                                                @csrf
+                                                <input type="hidden" name="subject_id" value="{{ $subject->id }}">
+                                                <button type="submit" class="btn btn-success fw-bold btn-enhanced">
+                                                    <i class="fas fa-plus text-white"></i> {{ __('app.add') }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        @if($availableSubjects->isEmpty())
+                            <div class="text-center py-5">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">{{ __('app.no_available_subjects') }}</h6>
+                                <p class="text-muted small">{{ __('app.all_subjects_already_selected') }}</p>
+                            </div>
+                        @endif
+                    @else
+                        @if(isset($currentPreferences) && $currentPreferences->count() >= 10)
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ __('app.maximum_subjects_reached') }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> {{ __('app.instructions') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {{ __('app.select_up_to_10_subjects') }}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {{ __('app.order_by_preference') }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {{ __('app.subject_allocation_based_on_preference') }}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {{ __('app.cannot_change_after_allocation') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+/* Ensure Font Awesome loads properly */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+
+.btn-enhanced {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-enhanced:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #28a745, #1e7e34) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #dc3545, #c82333) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, #ffc107, #e0a800) !important;
+    border: none !important;
+    color: #212529 !important;
+}
+
+/* Fallback for Font Awesome icons */
+.fa-chevron-up::before {
+    content: "↑";
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+
+.fa-chevron-down::before {
+    content: "↓";
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+
+.fa-trash::before {
+    content: "🗑";
+    font-family: Arial, sans-serif;
+}
+
+.fa-plus::before {
+    content: "+";
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.fa-save::before {
+    content: "💾";
+    font-family: Arial, sans-serif;
+}
+
+.fa-trash-alt::before {
+    content: "🗑";
+    font-family: Arial, sans-serif;
+}
+
+.fa-list-ol::before {
+    content: "📋";
+    font-family: Arial, sans-serif;
+}
+
+.fa-arrow-left::before {
+    content: "←";
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+
+.fa-users::before {
+    content: "👥";
+    font-family: Arial, sans-serif;
+}
+
+.fa-info-circle::before {
+    content: "ℹ";
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+
+.fa-list::before {
+    content: "📄";
+    font-family: Arial, sans-serif;
+}
+
+.fa-inbox::before {
+    content: "📥";
+    font-family: Arial, sans-serif;
+}
+
+.fa-chalkboard-teacher::before {
+    content: "👨‍🏫";
+    font-family: Arial, sans-serif;
+}
+
+.fa-calendar-alt::before {
+    content: "📅";
+    font-family: Arial, sans-serif;
+}
+
+.fa-check::before {
+    content: "✓";
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    color: green;
+}
+
+.fa-plus-circle::before {
+    content: "➕";
+    font-family: Arial, sans-serif;
+}
+
+.fa-graduation-cap::before {
+    content: "🎓";
+    font-family: Arial, sans-serif;
+}
+
+.fa-search::before {
+    content: "🔍";
+    font-family: Arial, sans-serif;
+}
+
+/* Force content visibility */
+.card-body, .card-header, .btn {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.preference-item {
+    transition: all 0.3s ease;
+}
+
+.preference-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.subject-item {
+    transition: all 0.3s ease;
+}
+
+.subject-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>
@@ -230,8 +512,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateOrderNumbers() {
         const items = document.querySelectorAll('.preference-item');
         items.forEach((item, index) => {
-            const orderBadge = item.querySelector('.rounded-full');
-            if (orderBadge) {
+            const orderBadge = item.querySelector('.badge');
+            if (orderBadge && !orderBadge.classList.contains('bg-success')) {
                 orderBadge.textContent = index + 1;
             }
         });
@@ -243,8 +525,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const upBtn = item.querySelector('.move-up');
             const downBtn = item.querySelector('.move-down');
 
-            if (upBtn) upBtn.disabled = index === 0;
-            if (downBtn) downBtn.disabled = index === items.length - 1;
+            if (upBtn) {
+                upBtn.disabled = index === 0;
+                upBtn.classList.toggle('disabled', index === 0);
+            }
+            if (downBtn) {
+                downBtn.disabled = index === items.length - 1;
+                downBtn.classList.toggle('disabled', index === items.length - 1);
+            }
         });
     }
 
@@ -264,7 +552,36 @@ document.addEventListener('DOMContentLoaded', function() {
             subjectIdsInput.value = JSON.stringify(subjectIds);
         });
     }
+
+    // Initialize button states
+    updateButtons();
 });
+
+// Clear all preferences function
+function clearAllPreferences() {
+    // Create a form to submit DELETE request to preferences.destroy route
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route('preferences.destroy') }}';
+
+    // Add CSRF token
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+
+    // Add method override for DELETE
+    const methodInput = document.createElement('input');
+    methodInput.type = 'hidden';
+    methodInput.name = '_method';
+    methodInput.value = 'DELETE';
+    form.appendChild(methodInput);
+
+    // Append form to body and submit
+    document.body.appendChild(form);
+    form.submit();
+}
 </script>
 @endpush
 @endsection

@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Subject Requests')
+@section('page-title', __('app.subject_requests'))
 
 @section('content')
 <div class="container-fluid">
@@ -9,16 +9,16 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title mb-0">
-                        <i class="fas fa-paper-plane"></i> Subject Requests
+                        <i class="fas fa-paper-plane"></i> {{ __('app.subject_requests') }}
                     </h4>
                     <p class="text-muted mb-0">
                         @auth
                             @if(auth()->user()->role === 'student')
-                                Your team's subject requests ordered by submission date
+                                {{ __('app.your_team_subject_requests_ordered') }}
                             @elseif(auth()->user()->role === 'teacher')
-                                Subject requests for your supervised subjects
+                                {{ __('app.subject_requests_for_supervised') }}
                             @else
-                                All subject requests in the system
+                                {{ __('app.all_subject_requests_system') }}
                             @endif
                         @endauth
                     </p>
@@ -27,22 +27,22 @@
                     @if($subjectRequests->isEmpty())
                         <div class="text-center py-5">
                             <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Subject Requests</h5>
+                            <h5 class="text-muted">{{ __('app.no_subject_requests') }}</h5>
                             <p class="text-muted">
                                 @auth
                                     @if(auth()->user()->role === 'student')
-                                        Your team hasn't submitted any subject requests yet.
+                                        {{ __('app.team_no_requests_yet') }}
                                     @elseif(auth()->user()->role === 'teacher')
-                                        No teams have requested your subjects yet.
+                                        {{ __('app.no_teams_requested_subjects') }}
                                     @else
-                                        No subject requests have been submitted yet.
+                                        {{ __('app.no_requests_submitted_yet') }}
                                     @endif
                                 @endauth
                             </p>
                             @auth
                                 @if(auth()->user()->role === 'student')
                                     <a href="{{ route('teams.my-team') }}" class="btn btn-primary">
-                                        <i class="fas fa-users"></i> Go to My Team
+                                        <i class="fas fa-users"></i> {{ __('app.go_to_my_team') }}
                                     </a>
                                 @endif
                             @endauth
@@ -54,7 +54,7 @@
                                 <div class="card bg-warning text-white">
                                     <div class="card-body text-center">
                                         <h4>{{ $subjectRequests->where('status', 'pending')->count() }}</h4>
-                                        <small>Pending</small>
+                                        <small>{{ __('app.pending') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -62,7 +62,7 @@
                                 <div class="card bg-success text-white">
                                     <div class="card-body text-center">
                                         <h4>{{ $subjectRequests->where('status', 'approved')->count() }}</h4>
-                                        <small>Approved</small>
+                                        <small>{{ __('app.approved') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -70,7 +70,7 @@
                                 <div class="card bg-danger text-white">
                                     <div class="card-body text-center">
                                         <h4>{{ $subjectRequests->where('status', 'rejected')->count() }}</h4>
-                                        <small>Rejected</small>
+                                        <small>{{ __('app.rejected') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@
                                 <div class="card bg-primary text-white">
                                     <div class="card-body text-center">
                                         <h4>{{ $subjectRequests->count() }}</h4>
-                                        <small>Total</small>
+                                        <small>{{ __('app.total') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -90,15 +90,16 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>
-                                            <i class="fas fa-calendar"></i> Request Date
-                                            <small class="text-muted d-block">Oldest First</small>
+                                            <i class="fas fa-calendar"></i> {{ __('app.request_date') }}
+                                            <small class="text-muted d-block">{{ __('app.oldest_first') }}</small>
                                         </th>
-                                        <th><i class="fas fa-users"></i> Team</th>
-                                        <th><i class="fas fa-book"></i> Subject</th>
-                                        <th><i class="fas fa-user-tie"></i> Teacher</th>
-                                        <th><i class="fas fa-user"></i> Requested By</th>
-                                        <th><i class="fas fa-info-circle"></i> Status</th>
-                                        <th><i class="fas fa-cog"></i> Actions</th>
+                                        <th><i class="fas fa-users"></i> {{ __('app.team') }}</th>
+                                        <th><i class="fas fa-list-ol"></i> {{ __('app.team_preferences') }}</th>
+                                        <th><i class="fas fa-book"></i> {{ __('app.subject') }}</th>
+                                        <th><i class="fas fa-user-tie"></i> {{ __('app.teacher') }}</th>
+                                        <th><i class="fas fa-user"></i> {{ __('app.requested_by') }}</th>
+                                        <th><i class="fas fa-info-circle"></i> {{ __('app.status') }}</th>
+                                        <th><i class="fas fa-cog"></i> {{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -124,10 +125,47 @@
                                                         <strong>{{ $request->team->name }}</strong>
                                                         <br>
                                                         <small class="text-muted">
-                                                            {{ $request->team->members->count() }} member(s)
+                                                            {{ $request->team->members->count() }} {{ __('app.members_lowercase') }}
                                                         </small>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $teamPreferences = $request->team->subjectPreferences()
+                                                        ->with('subject')
+                                                        ->orderBy('preference_order')
+                                                        ->take(5)
+                                                        ->get();
+                                                @endphp
+                                                @if($teamPreferences->count() > 0)
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @foreach($teamPreferences as $pref)
+                                                            @php
+                                                                $badgeClass = 'bg-secondary';
+                                                                if ($pref->is_allocated) {
+                                                                    $badgeClass = 'bg-success';
+                                                                } elseif ($pref->preference_order <= 3) {
+                                                                    $badgeClass = 'bg-success'; // Green for top 3
+                                                                } elseif ($pref->preference_order >= 8) {
+                                                                    $badgeClass = 'bg-warning'; // Orange for bottom 3
+                                                                } else {
+                                                                    $badgeClass = 'bg-primary'; // Blue for middle
+                                                                }
+                                                            @endphp
+                                                            <span class="badge {{ $badgeClass }} small"
+                                                                  title="{{ $pref->subject->title }}"
+                                                                  style="font-size: 0.7rem;">
+                                                                {{ $pref->preference_order }}
+                                                            </span>
+                                                        @endforeach
+                                                        @if($teamPreferences->count() >= 5 && $request->team->subjectPreferences()->count() > 5)
+                                                            <span class="badge bg-light text-dark small" style="font-size: 0.7rem;">+{{ $request->team->subjectPreferences()->count() - 5 }}</span>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <small class="text-muted">{{ __('app.no_preferences_set') }}</small>
+                                                @endif
                                             </td>
                                             <td>
                                                 <strong>{{ $request->subject->title }}</strong>
@@ -143,16 +181,16 @@
                                             <td>
                                                 {{ $request->requestedBy->name }}
                                                 <br>
-                                                <small class="text-muted">Team Leader</small>
+                                                <small class="text-muted">{{ __('app.team_leader') }}</small>
                                             </td>
                                             <td>
                                                 <span class="badge {{ $request->getStatusBadgeClass() }}">
                                                     @if($request->isPending())
-                                                        <i class="fas fa-clock"></i> Pending
+                                                        <i class="fas fa-clock"></i> {{ __('app.pending') }}
                                                     @elseif($request->isApproved())
-                                                        <i class="fas fa-check"></i> Approved
+                                                        <i class="fas fa-check"></i> {{ __('app.approved') }}
                                                     @else
-                                                        <i class="fas fa-times"></i> Rejected
+                                                        <i class="fas fa-times"></i> {{ __('app.rejected') }}
                                                     @endif
                                                 </span>
                                                 @if($request->responded_at)
@@ -168,7 +206,7 @@
                                                     <button type="button" class="btn btn-outline-info btn-sm"
                                                             data-bs-toggle="collapse"
                                                             data-bs-target="#details-{{ $request->id }}">
-                                                        <i class="fas fa-eye"></i> Details
+                                                        <i class="fas fa-eye"></i> {{ __('app.details') }}
                                                     </button>
 
                                                     @auth
@@ -176,22 +214,22 @@
                                                             <!-- Admin Actions -->
                                                             <a href="{{ route('admin.subject-requests') }}"
                                                                class="btn btn-primary btn-sm">
-                                                                <i class="fas fa-cog"></i> Manage
+                                                                <i class="fas fa-cog"></i> {{ __('app.manage') }}
                                                             </a>
                                                         @elseif(auth()->user()->role === 'student' && $request->isPending())
-                                                            <!-- Team Leader can cancel -->
+                                                            <!-- Team members can cancel -->
                                                             @php
                                                                 $member = $request->team->members->where('student_id', auth()->id())->first();
-                                                                $isLeader = $member && $member->role === 'leader';
+                                                                $isMember = $member !== null;
                                                             @endphp
-                                                            @if($isLeader)
+                                                            @if($isMember)
                                                                 <form action="{{ route('teams.cancel-subject-request', [$request->team, $request]) }}"
                                                                       method="POST" class="d-inline">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                                            onclick="return confirm('Cancel this request?')">
-                                                                        <i class="fas fa-times"></i> Cancel
+                                                                            onclick="return confirm('{{ __('app.confirm_cancel_request') }}')">
+                                                                        <i class="fas fa-times"></i> {{ __('app.cancel') }}
                                                                     </button>
                                                                 </form>
                                                             @endif
@@ -207,47 +245,47 @@
                                                     <div class="card card-body border-0 bg-light">
                                                         <div class="row">
                                                             <div class="col-md-6">
-                                                                <h6><i class="fas fa-info-circle"></i> Request Details</h6>
+                                                                <h6><i class="fas fa-info-circle"></i> {{ __('app.request_details') }}</h6>
                                                                 @if($request->request_message)
-                                                                    <p><strong>Team Message:</strong></p>
+                                                                    <p><strong>{{ __('app.team_message') }}:</strong></p>
                                                                     <div class="alert alert-info">
                                                                         {{ $request->request_message }}
                                                                     </div>
                                                                 @else
-                                                                    <p class="text-muted">No message provided by the team.</p>
+                                                                    <p class="text-muted">{{ __('app.no_message_provided') }}</p>
                                                                 @endif
 
-                                                                <p><strong>Team Members:</strong></p>
+                                                                <p><strong>{{ __('app.team_members') }}:</strong></p>
                                                                 <ul class="list-unstyled">
                                                                     @foreach($request->team->members as $member)
                                                                         <li class="mb-1">
                                                                             <i class="fas fa-user"></i>
                                                                             {{ $member->user->name }}
                                                                             @if($member->role === 'leader')
-                                                                                <span class="badge bg-primary">Leader</span>
+                                                                                <span class="badge bg-primary">{{ __('app.leader') }}</span>
                                                                             @endif
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <h6><i class="fas fa-book"></i> Subject Information</h6>
-                                                                <p><strong>Title:</strong> {{ $request->subject->title }}</p>
-                                                                <p><strong>Teacher:</strong> {{ $request->subject->teacher->name }}</p>
+                                                                <h6><i class="fas fa-book"></i> {{ __('app.subject_information') }}</h6>
+                                                                <p><strong>{{ __('app.title') }}:</strong> {{ $request->subject->title }}</p>
+                                                                <p><strong>{{ __('app.teacher') }}:</strong> {{ $request->subject->teacher->name }}</p>
                                                                 @if($request->subject->description)
-                                                                    <p><strong>Description:</strong></p>
+                                                                    <p><strong>{{ __('app.description') }}:</strong></p>
                                                                     <p class="text-muted">{{ Str::limit($request->subject->description, 200) }}</p>
                                                                 @endif
 
                                                                 @if($request->admin_response)
-                                                                    <h6 class="mt-3"><i class="fas fa-reply"></i> Admin Response</h6>
+                                                                    <h6 class="mt-3"><i class="fas fa-reply"></i> {{ __('app.admin_response') }}</h6>
                                                                     <div class="alert alert-{{ $request->isApproved() ? 'success' : 'danger' }}">
                                                                         {{ $request->admin_response }}
                                                                     </div>
                                                                     <small class="text-muted">
                                                                         <i class="fas fa-user-shield"></i>
-                                                                        Responded by {{ $request->respondedBy->name ?? 'Admin' }}
-                                                                        on {{ $request->responded_at->format('M d, Y \a\t H:i') }}
+                                                                        {{ __('app.responded_by') }} {{ $request->respondedBy->name ?? __('app.admin') }}
+                                                                        {{ __('app.on') }} {{ $request->responded_at->format('M d, Y \a\t H:i') }}
                                                                     </small>
                                                                 @endif
                                                             </div>

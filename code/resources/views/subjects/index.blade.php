@@ -157,7 +157,11 @@
                                                         <button type="submit"
                                                                 class="btn btn-outline-danger btn-sm"
                                                                 title="{{ __('app.delete') }}"
-                                                                onclick="return confirm('{{ __('app.confirm_delete_subject') }}')">
+                                                                onclick="return showDeleteConfirmation({
+                                                                    itemName: '{{ $subject->title }}',
+                                                                    message: '{{ __('app.confirm_delete_subject') }}',
+                                                                    form: this.closest('form')
+                                                                })">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>

@@ -230,7 +230,7 @@ class TeamService
     public function getTeamSizeConfig(string $grade): array
     {
         return match ($grade) {
-            'master' => ['min' => 1, 'max' => 2],
+            'master' => ['min' => 1, 'max' => 4], // Updated to match config
             'phd' => ['min' => 1, 'max' => 1],
             default => ['min' => 1, 'max' => 4], // licence - updated to allow single member teams
         };

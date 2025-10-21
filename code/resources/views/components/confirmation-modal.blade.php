@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } = options;
 
         // Update modal content
-        document.getElementById('confirmationTitle').textContent = title;
-        document.getElementById('confirmationMessage').textContent = message;
+        document.getElementById('confirmationTitle').innerHTML = title;
+        document.getElementById('confirmationMessage').innerHTML = message;
 
         // Update confirm button
-        confirmBtn.textContent = confirmText;
+        confirmBtn.innerHTML = confirmText;
         confirmBtn.className = `btn ${confirmClass}`;
 
         // Store the action to perform
@@ -122,6 +122,26 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmClass: 'btn-warning',
             onConfirm: onConfirm,
             form: form
+        });
+    };
+
+    // Simple alert function for informational messages
+    window.showAlert = function(title, message, type = 'info') {
+        const alertClass = {
+            'info': 'btn-primary',
+            'warning': 'btn-warning',
+            'danger': 'btn-danger',
+            'success': 'btn-success'
+        }[type] || 'btn-primary';
+
+        return showConfirmation({
+            title: title,
+            message: message,
+            confirmText: '{{ __('app.ok') }}',
+            confirmClass: alertClass,
+            onConfirm: function() {
+                // Just close the modal, no action needed
+            }
         });
     };
 });

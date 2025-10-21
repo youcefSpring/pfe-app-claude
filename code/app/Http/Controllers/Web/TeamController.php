@@ -81,9 +81,9 @@ class TeamController extends Controller
     public function myTeam(): View
     {
         $user = Auth::user();
-        $teamMember = $user->teamMember;
+        $team = $user->getTeam();
 
-        if (!$teamMember) {
+        if (!$team) {
             // Student is not in a team, show option to create or join one
             $availableTeams = Team::withCount('members')
                 ->having('members_count', '<', 2)
@@ -96,7 +96,7 @@ class TeamController extends Controller
             ]);
         }
 
-        $team = $teamMember->team->load(['members.user', 'subject.teacher', 'project.supervisor']);
+        $team->load(['members.user', 'subject.teacher', 'project.supervisor']);
 
         return view('teams.my-team', compact('team'));
     }
@@ -186,9 +186,31 @@ class TeamController extends Controller
         $isMember = $team->members->contains('student_id', $user->id);
         $isLeader = $team->members->where('student_id', $user->id)->where('role', 'leader')->isNotEmpty();
 
-        $availableSubjects = Subject::where('status', 'validated')
-            ->whereDoesntHave('projects')
-            ->get();
+        $subjectsQuery = Subject::where('status', 'validated')
+            ->whereDoesntHave('projects');
+
+        // Apply speciality filter only if speciality relationships exist
+        $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+
+        if ($hasSpecialityRelationships) {
+            // Get all team members' speciality IDs
+            $teamSpecialityIds = $team->members()
+                ->with('user')
+                ->get()
+                ->pluck('user.speciality_id')
+                ->filter()
+                ->unique();
+
+            if ($teamSpecialityIds->isNotEmpty()) {
+                $subjectsQuery->whereHas('specialities', function($q) use ($teamSpecialityIds) {
+                    $q->whereIn('specialities.id', $teamSpecialityIds);
+                });
+            }
+            // If team has no specialities but relationships exist, don't show any subjects
+        }
+        // If no speciality relationships exist, show all validated subjects
+
+        $availableSubjects = $subjectsQuery->get();
 
         return view('teams.show', compact('team', 'isMember', 'isLeader', 'availableSubjects'));
     }
@@ -323,16 +345,16 @@ class TeamController extends Controller
     }
 
     /**
-     * Show the form for selecting a subject for the team
+     * Show the form for managing subject preferences for the team
      */
     public function selectSubjectForm(Team $team): View
     {
         $user = Auth::user();
 
-        // Check if user is team leader
+        // Check if user is team member
         $member = $team->members->where('student_id', $user->id)->first();
-        if (!$member || $member->role !== 'leader') {
-            abort(403, __('app.only_team_leader_can_select_subjects'));
+        if (!$member) {
+            abort(403, __('app.only_team_members_can_select_subjects'));
         }
 
         // Check deadline restrictions
@@ -342,8 +364,8 @@ class TeamController extends Controller
                 ->with('error', __('app.subject_selection_period_ended'));
         }
 
-        // Check if team can select subjects (size validation)
-        if (!$team->canSelectSubject()) {
+        // Check if team can manage preferences
+        if (!$team->canManagePreferences()) {
             // Get team leader's academic level to determine appropriate team size limits
             $leader = $team->members->where('role', 'leader')->first();
             $academicLevel = 'licence'; // default
@@ -368,85 +390,63 @@ class TeamController extends Controller
                 ]));
         }
 
-        // Get available validated subjects
-        $availableSubjects = Subject::where('status', 'validated')
-            ->whereDoesntHave('projects')
-            ->with('teacher')
-            ->paginate(12);
+        // Get available validated subjects for the team's academic level
+        $leader = $team->members->where('role', 'leader')->first();
+        $targetGrade = 'license'; // default
 
-        return view('teams.select-subject', compact('team', 'availableSubjects', 'currentDeadline'));
+        if ($leader && $leader->student) {
+            $targetGrade = match($leader->student->student_level) {
+                'licence_3' => 'license',
+                'master_1', 'master_2' => 'master',
+                default => 'license'
+            };
+        }
+
+        $subjectsQuery = Subject::where('status', 'validated')
+            ->where('target_grade', $targetGrade);
+
+        // Apply speciality filter only if speciality relationships exist
+        $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+
+        if ($hasSpecialityRelationships) {
+            // Get all team members' speciality IDs
+            $teamSpecialityIds = $team->members()
+                ->with('user')
+                ->get()
+                ->pluck('user.speciality_id')
+                ->filter()
+                ->unique();
+
+            if ($teamSpecialityIds->isNotEmpty()) {
+                $subjectsQuery->whereHas('specialities', function($q) use ($teamSpecialityIds) {
+                    $q->whereIn('specialities.id', $teamSpecialityIds);
+                });
+            }
+            // If team has no specialities but relationships exist, don't show any subjects
+        }
+        // If no speciality relationships exist, show all validated subjects with matching grade
+
+        $availableSubjects = $subjectsQuery->with('teacher')->get();
+
+        // Load team with preferences and order by submission date
+        $team->load(['subjectPreferences.subject.teacher']);
+        $currentPreferences = $team->subjectPreferences ?? collect();
+        if ($currentPreferences->isNotEmpty()) {
+            $currentPreferences = $currentPreferences->sortByDesc('selected_at');
+        }
+
+        return view('teams.subject-preferences', compact('team', 'availableSubjects', 'currentPreferences', 'currentDeadline'));
     }
 
     /**
-     * Select a subject for the team
+     * Redirect old subject selection to preferences system
+     * @deprecated Use preference system instead
      */
     public function selectSubject(Request $request, Team $team): RedirectResponse
     {
-        //$this->authorize('selectSubject', $team);
-
-        $user = Auth::user();
-
-        // Check if user is team leader
-        $member = $team->members->where('student_id', $user->id)->first();
-        if (!$member || $member->role !== 'leader') {
-            return redirect()->back()
-                ->with('error', __('app.only_team_leader_can_select_subjects'));
-        }
-
-        // Check deadline restrictions
-        $currentDeadline = AllocationDeadline::active()->first();
-        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
-            return redirect()->back()
-                ->with('error', __('app.subject_selection_period_ended'));
-        }
-
-        // Check if team can select subjects (size validation)
-        if (!$team->canSelectSubject()) {
-            $minSize = config('team.sizes.licence.min', 2);
-            $maxSize = config('team.sizes.licence.max', 4);
-            $currentSize = $team->members->count();
-
-            return redirect()->back()
-                ->with('error', __('app.team_size_invalid_for_selection', [
-                    'min' => $minSize,
-                    'max' => $maxSize,
-                    'current' => $currentSize
-                ]));
-        }
-
-        $request->validate([
-            'subject_id' => 'required|exists:subjects,id'
-        ]);
-
-        $subject = Subject::find($request->subject_id);
-
-        if ($subject->status !== 'validated') {
-            return redirect()->back()
-                ->with('error', __('app.subject_not_validated'));
-        }
-
-        if ($subject->projects()->exists()) {
-            return redirect()->back()
-                ->with('error', __('app.subject_already_taken'));
-        }
-
-        if ($team->project) {
-            return redirect()->back()
-                ->with('error', __('app.team_already_has_project'));
-        }
-
-        // Create project for the team
-        $team->project()->create([
-            'subject_id' => $subject->id,
-            'supervisor_id' => $subject->teacher_id,
-            'status' => 'active',
-            'start_date' => now(),
-        ]);
-
-        $team->update(['status' => 'active']);
-
-        return redirect()->route('teams.show', $team)
-            ->with('success', __('app.subject_selected_project_created'));
+        // Redirect to the preference management system
+        return redirect()->route('teams.subject-preferences', $team)
+            ->with('info', __('app.use_preference_system_instead'));
     }
 
     /**
@@ -463,14 +463,41 @@ class TeamController extends Controller
 
         $team->load(['subjectPreferences.subject.teacher', 'members.user']);
 
-        $availableSubjects = Subject::where('status', 'validated')
-            ->whereNotIn('id', $team->subjectPreferences->pluck('subject_id'))
-            ->with('teacher')
-            ->get();
+        // Order preferences by preference order (1 to 10)
+        $currentPreferences = $team->subjectPreferences ?? collect();
+        if ($currentPreferences->isNotEmpty()) {
+            $currentPreferences = $currentPreferences->sortBy('preference_order');
+        }
+
+        $subjectsQuery = Subject::where('status', 'validated')
+            ->whereNotIn('id', $currentPreferences->pluck('subject_id'));
+
+        // Apply speciality filter only if speciality relationships exist
+        $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+
+        if ($hasSpecialityRelationships) {
+            // Get all team members' speciality IDs
+            $teamSpecialityIds = $team->members()
+                ->with('user')
+                ->get()
+                ->pluck('user.speciality_id')
+                ->filter()
+                ->unique();
+
+            if ($teamSpecialityIds->isNotEmpty()) {
+                $subjectsQuery->whereHas('specialities', function($q) use ($teamSpecialityIds) {
+                    $q->whereIn('specialities.id', $teamSpecialityIds);
+                });
+            }
+            // If team has no specialities but relationships exist, don't show any subjects
+        }
+        // If no speciality relationships exist, show all validated subjects
+
+        $availableSubjects = $subjectsQuery->with('teacher')->get();
 
         $canManage = $team->canManagePreferences();
 
-        return view('teams.subject-preferences', compact('team', 'availableSubjects', 'canManage'));
+        return view('teams.subject-preferences', compact('team', 'availableSubjects', 'currentPreferences', 'canManage'));
     }
 
     /**
@@ -773,11 +800,11 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user is team leader
+        // Check if user is team member
         $member = $team->members->where('student_id', $user->id)->first();
-        if (!$member || $member->role !== 'leader') {
+        if (!$member) {
             return redirect()->back()
-                ->with('error', __('app.only_team_leader_can_request_subjects'));
+                ->with('error', __('app.only_team_members_can_request_subjects'));
         }
 
         // Check deadline restrictions
@@ -873,11 +900,11 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user is team leader
+        // Check if user is team member
         $member = $team->members->where('student_id', $user->id)->first();
-        if (!$member || $member->role !== 'leader') {
+        if (!$member) {
             return redirect()->back()
-                ->with('error', __('app.only_team_leader_can_cancel_requests'));
+                ->with('error', __('app.only_team_members_can_cancel_requests'));
         }
 
         // Check if request belongs to this team
@@ -904,11 +931,11 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user is team leader
+        // Check if user is team member
         $member = $team->members->where('student_id', $user->id)->first();
-        if (!$member || $member->role !== 'leader') {
+        if (!$member) {
             return redirect()->back()
-                ->with('error', __('app.only_team_leader_can_reorder_requests'));
+                ->with('error', __('app.only_team_members_can_reorder_requests'));
         }
 
         $request->validate([

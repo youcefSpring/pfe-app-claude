@@ -19,19 +19,18 @@ class LanguageController extends Controller
 
         // Validate the locale
         if (!in_array($locale, $availableLocales)) {
-            return redirect()->back()->with('error', 'Language not supported.');
+            return redirect()->back()->with('error', __('app.language_not_supported'));
         }
 
-        // Set the locale in session
+        // Set the locale in session (this will be picked up by middleware on next request)
         Session::put('locale', $locale);
-        App::setLocale($locale);
 
         // If user is authenticated, update their locale preference
         if (auth()->check()) {
             auth()->user()->update(['locale' => $locale]);
         }
 
-        return redirect()->back()->with('success', __('app.language') . ' ' . __('app.updated'));
+        return redirect()->back();
     }
 
     /**

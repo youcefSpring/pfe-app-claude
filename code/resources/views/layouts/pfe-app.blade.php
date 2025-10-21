@@ -14,6 +14,7 @@
     <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -147,7 +148,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('subject-requests*') ? 'active' : '' }}" href="{{ route('subject-requests.all') }}">
                                 <i class="bi bi-envelope-paper me-2"></i>
-                                Subject Requests
+                                {{ __('app.subject_requests') }}
                             </a>
                         </li>
 
@@ -245,7 +246,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.subject-requests*') ? 'active' : '' }}" href="{{ route('admin.subject-requests') }}">
                                 <i class="bi bi-envelope-paper me-2"></i>
-                                Subject Requests
+                                {{ __('app.subject_requests') }}
                             </a>
                         </li>
                         <li class="nav-item">

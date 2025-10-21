@@ -18,7 +18,7 @@ return [
         ],
         'master' => [
             'min' => 1,
-            'max' => 2,
+            'max' => 4, // Increased from 2 to 4 to allow larger master teams
         ],
         'doctorat' => [
             'min' => 1,

@@ -126,6 +126,11 @@ Route::middleware(['auth'])->group(function () {
         // Dynamic route for team requests
         Route::get('/{subject}/requests', [SubjectController::class, 'requests'])->name('requests');
 
+        // Individual subject request route for students without teams
+        Route::post('/request-individual', [SubjectController::class, 'requestIndividual'])
+            ->name('request-individual')
+            ->middleware('role:student');
+
         // Dynamic route for viewing specific subjects (must be after static routes)
         Route::get('/{subject}', [SubjectController::class, 'show'])->name('show');
 

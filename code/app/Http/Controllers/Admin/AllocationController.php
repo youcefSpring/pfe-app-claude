@@ -9,6 +9,7 @@ use App\Models\Team;
 use App\Models\SubjectAllocation;
 use App\Models\Project;
 use App\Services\AutoAllocationService;
+use App\Services\SubjectAllocationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,8 @@ use Illuminate\Support\Facades\DB;
 class AllocationController extends Controller
 {
     public function __construct(
-        private AutoAllocationService $autoAllocationService
+        private AutoAllocationService $autoAllocationService,
+        private SubjectAllocationService $subjectAllocationService
     ) {}
 
     /**
@@ -202,7 +204,7 @@ class AllocationController extends Controller
             DB::commit();
 
             return redirect()->back()
-                ->with('success', "Subject '{$subject->title}' has been manually assigned to team '{$team->name}'.");
+                ->with('success', __('app.subject_manually_assigned', ['subject' => $subject->title, 'team' => $team->name]));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -228,7 +230,7 @@ class AllocationController extends Controller
             );
 
             return redirect()->back()
-                ->with('success', 'Second round has been initialized for teams without subjects.');
+                ->with('success', __('app.second_round_initialized'));
 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -263,12 +265,72 @@ class AllocationController extends Controller
             DB::commit();
 
             return redirect()->back()
-                ->with('success', 'Allocation has been removed successfully.');
+                ->with('success', __('app.allocation_removed_successfully'));
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
                 ->with('error', 'Failed to remove allocation: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Run preference-based subject allocation
+     */
+    public function runPreferenceAllocation(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'academic_year' => 'required|string'
+        ]);
+
+        try {
+            $results = $this->subjectAllocationService->allocateSubjects($validated['academic_year']);
+            $summary = $this->subjectAllocationService->getAllocationSummary($results);
+            $report = $this->subjectAllocationService->generateAllocationReport($results);
+
+            // Store the report in session for display
+            session()->flash('allocation_report', $report);
+
+            return redirect()->back()
+                ->with('success', __('app.allocation_completed_summary', ['allocated' => $summary['allocated_teams'], 'resolved' => $summary['conflicts_resolved']]))
+                ->with('allocation_summary', $summary);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Preference allocation failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show preference allocation preview
+     */
+    public function previewPreferenceAllocation(Request $request): View
+    {
+        $validated = $request->validate([
+            'academic_year' => 'required|string'
+        ]);
+
+        $academicYear = $validated['academic_year'];
+
+        // Get teams with preferences
+        $teamsWithPreferences = Team::where('academic_year', $academicYear)
+            ->whereHas('subjectPreferences')
+            ->with([
+                'subjectPreferences.subject',
+                'members.user'
+            ])
+            ->get();
+
+        // Get available subjects
+        $availableSubjects = Subject::where('status', 'validated')
+            ->where('academic_year', $academicYear)
+            ->whereDoesntHave('projects')
+            ->get();
+
+        return view('admin.allocations.preview-preference', compact(
+            'teamsWithPreferences',
+            'availableSubjects',
+            'academicYear'
+        ));
     }
 }

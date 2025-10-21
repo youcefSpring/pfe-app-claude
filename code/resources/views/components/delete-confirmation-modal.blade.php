@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (itemName) {
             displayMessage = '{{ __('app.confirm_delete_item_message') }}'.replace(':item', itemName);
         }
-        document.getElementById('deleteMessage').textContent = displayMessage;
+        document.getElementById('deleteMessage').innerHTML = displayMessage;
 
         // Store the action to perform
         pendingDeleteAction = { onConfirm, form };

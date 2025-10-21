@@ -61,7 +61,7 @@ class StudentUploadController extends Controller
             ];
 
             return redirect()->back()
-                ->with('success', "✅ Import réussi! {$importedCount} étudiants ont été importés pour la spécialité '{$speciality->name}'.")
+                ->with('success', __('app.import_successful_message', ['count' => $importedCount, 'name' => $speciality->name]))
                 ->with('import_details', $importDetails);
 
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {

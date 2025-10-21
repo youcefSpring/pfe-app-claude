@@ -163,7 +163,7 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'submission_type' => 'required|in:document,prototype,report,final',
+            'submission_type' => 'required|in:progress,deliverable,final,revision,other',
             'files.*' => 'required|file|max:20480', // 20MB max per file
             'notes' => 'nullable|string|max:500'
         ]);
@@ -186,11 +186,9 @@ class ProjectController extends Controller
         $submission = $project->submissions()->create([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'submission_type' => $validated['submission_type'],
-            'files' => json_encode($files),
-            'notes' => $validated['notes'],
-            'submitted_by' => Auth::id(),
-            'submitted_at' => now(),
+            'type' => $validated['submission_type'],
+            'file_path' => json_encode($files),
+            'submission_date' => now(),
             'status' => 'submitted'
         ]);
 
@@ -395,9 +393,11 @@ class ProjectController extends Controller
                 ->with('error', 'Supervisor must be a teacher.');
         }
 
+        $currentYear = \App\Models\AcademicYear::getCurrentYear();
         $project = Project::create($validated + [
             'status' => 'active',
-            'created_by' => Auth::id()
+            'created_by' => Auth::id(),
+            'academic_year' => $currentYear ? $currentYear->year : date('Y') . '-' . (date('Y') + 1),
         ]);
 
         $team->update(['status' => 'active']);

@@ -89,9 +89,34 @@
                         @endif
 
                         <div class="mt-4">
-                            <a href="{{ route('teams.edit', $team) }}" class="btn btn-primary">
-                                <i class="fas fa-edit"></i> {{ __('app.edit_team') }}
-                            </a>
+                            @php
+                                $user = auth()->user();
+                                $isLeader = $team->members->where('student_id', $user->id)->where('role', 'leader')->first();
+                                $currentDeadline = \App\Models\AllocationDeadline::active()->first();
+                                $canManagePreferences = $isLeader &&
+                                                      $currentDeadline &&
+                                                      $currentDeadline->canStudentsChoose() &&
+                                                      $team->canManagePreferences();
+                                $hasProject = $team->project()->exists();
+                            @endphp
+
+                            @if($canManagePreferences && !$hasProject)
+                                <a href="{{ route('teams.subject-preferences', $team) }}" class="btn btn-success me-2">
+                                    <i class="fas fa-list"></i> {{ __('app.manage_preferences') }}
+                                </a>
+                            @endif
+
+                            @if($isLeader)
+                                <a href="{{ route('teams.edit', $team) }}" class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> {{ __('app.edit_team') }}
+                                </a>
+                            @endif
+
+                            @if($hasProject && $isLeader)
+                                <a href="{{ route('projects.show', $team->project) }}" class="btn btn-info ms-2">
+                                    <i class="fas fa-project-diagram"></i> {{ __('app.view_project') }}
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>

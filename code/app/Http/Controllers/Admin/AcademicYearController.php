@@ -40,7 +40,11 @@ class AcademicYearController extends Controller
                 ->withInput();
         }
 
-        if ($request->has('is_current') && $request->is_current) {
+        // Handle is_current checkbox properly
+        $isCurrent = $request->has('is_current') && $request->is_current;
+
+        if ($isCurrent) {
+            // If setting this year as current, unset all other years as current
             AcademicYear::where('is_current', true)->update(['is_current' => false]);
         }
 
@@ -50,7 +54,7 @@ class AcademicYearController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'description' => $request->description,
-            'is_current' => $request->has('is_current') ? $request->is_current : false,
+            'is_current' => $isCurrent,
             'status' => 'draft',
         ]);
 
@@ -98,7 +102,24 @@ class AcademicYearController extends Controller
                 ->withInput();
         }
 
-        if ($request->has('is_current') && $request->is_current) {
+        // Handle is_current checkbox properly
+        $isCurrent = $request->has('is_current') && $request->is_current;
+
+        // Check if trying to unset current year when it's the only current year
+        if (!$isCurrent && $academicYear->is_current) {
+            $otherCurrentYears = AcademicYear::where('is_current', true)
+                ->where('id', '!=', $academicYear->id)
+                ->count();
+
+            if ($otherCurrentYears === 0) {
+                return redirect()->back()
+                    ->with('error', __('app.cannot_unset_only_current_year'))
+                    ->withInput();
+            }
+        }
+
+        if ($isCurrent) {
+            // If setting this year as current, unset all other years as current
             AcademicYear::where('is_current', true)->where('id', '!=', $academicYear->id)
                 ->update(['is_current' => false]);
         }
@@ -109,7 +130,7 @@ class AcademicYearController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'description' => $request->description,
-            'is_current' => $request->has('is_current') ? $request->is_current : $academicYear->is_current,
+            'is_current' => $isCurrent,
         ]);
 
         return redirect()->route('admin.academic-years.index')

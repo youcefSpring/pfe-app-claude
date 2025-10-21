@@ -36,6 +36,7 @@ class ProjectService
         // Auto-assign supervisor
         $supervisor = $this->assignBestSupervisor($team, $subject, $externalProject);
 
+        $currentYear = AcademicYear::getCurrentYear();
         $project = Project::create([
             'team_id' => $team->id,
             'subject_id' => $subject?->id,
@@ -43,6 +44,7 @@ class ProjectService
             'supervisor_id' => $supervisor->id,
             'type' => $type,
             'status' => 'assigned',
+            'academic_year' => $currentYear ? $currentYear->year : date('Y') . '-' . (date('Y') + 1),
         ]);
 
         // Update team status
