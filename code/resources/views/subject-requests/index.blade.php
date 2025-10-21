@@ -25,28 +25,89 @@
                 </div>
                 <div class="card-body">
                     @if($subjectRequests->isEmpty())
-                        <div class="text-center py-5">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">{{ __('app.no_subject_requests') }}</h5>
-                            <p class="text-muted">
+                        @if(isset($teamPreferences) && $teamPreferences->isNotEmpty())
+                            <!-- Show team preferences even when no subject requests exist -->
+                            <div class="alert alert-info mb-4">
+                                <h5><i class="fas fa-list-ol"></i> {{ __('app.your_team_preferences') }}</h5>
+                                <p class="mb-0">{{ __('app.no_subject_requests_but_preferences_exist') }}</p>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>{{ __('app.preference_order') }}</th>
+                                            <th>{{ __('app.subject') }}</th>
+                                            <th>{{ __('app.teacher') }}</th>
+                                            <th>{{ __('app.status') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($teamPreferences as $preference)
+                                            <tr>
+                                                <td>
+                                                    @php
+                                                        $badgeClass = 'bg-secondary';
+                                                        if ($preference->preference_order <= 3) {
+                                                            $badgeClass = 'bg-success'; // Green for top 3
+                                                        } elseif ($preference->preference_order >= 8) {
+                                                            $badgeClass = 'bg-warning'; // Orange for bottom 3
+                                                        } else {
+                                                            $badgeClass = 'bg-primary'; // Blue for middle
+                                                        }
+                                                    @endphp
+                                                    <span class="badge {{ $badgeClass }} me-2">{{ $preference->preference_order }}</span>
+                                                </td>
+                                                <td>
+                                                    <a href="#" class="text-decoration-none" onclick="showSubjectModal({{ $preference->subject->id }})">
+                                                        <strong>{{ $preference->subject->title }}</strong>
+                                                    </a>
+                                                    @if($preference->subject->description)
+                                                        <br>
+                                                        <small class="text-muted">{{ Str::limit($preference->subject->description, 80) }}</small>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($preference->subject->teacher)
+                                                        <span class="badge bg-light text-dark">
+                                                            {{ $preference->subject->teacher->name }}
+                                                        </span>
+                                                    @else
+                                                        <small class="text-muted">{{ __('app.no_teacher_assigned') }}</small>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ __('app.preference') }}</span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">{{ __('app.no_subject_requests') }}</h5>
+                                <p class="text-muted">
+                                    @auth
+                                        @if(auth()->user()->role === 'student')
+                                            {{ __('app.team_no_requests_yet') }}
+                                        @elseif(auth()->user()->role === 'teacher')
+                                            {{ __('app.no_teams_requested_subjects') }}
+                                        @else
+                                            {{ __('app.no_requests_submitted_yet') }}
+                                        @endif
+                                    @endauth
+                                </p>
                                 @auth
                                     @if(auth()->user()->role === 'student')
-                                        {{ __('app.team_no_requests_yet') }}
-                                    @elseif(auth()->user()->role === 'teacher')
-                                        {{ __('app.no_teams_requested_subjects') }}
-                                    @else
-                                        {{ __('app.no_requests_submitted_yet') }}
+                                        <a href="{{ route('teams.my-team') }}" class="btn btn-primary">
+                                            <i class="fas fa-users"></i> {{ __('app.go_to_my_team') }}
+                                        </a>
                                     @endif
                                 @endauth
-                            </p>
-                            @auth
-                                @if(auth()->user()->role === 'student')
-                                    <a href="{{ route('teams.my-team') }}" class="btn btn-primary">
-                                        <i class="fas fa-users"></i> {{ __('app.go_to_my_team') }}
-                                    </a>
-                                @endif
-                            @endauth
-                        </div>
+                            </div>
+                        @endif
                     @else
                         <!-- Stats Summary -->
                         <div class="row mb-4">
@@ -168,7 +229,9 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <strong>{{ $request->subject->title }}</strong>
+                                                <a href="#" class="text-decoration-none" onclick="showSubjectModal({{ $request->subject->id }})">
+                                                    <strong>{{ $request->subject->title }}</strong>
+                                                </a>
                                                 @if($request->request_message)
                                                     <br>
                                                     <small class="text-muted">
@@ -309,6 +372,27 @@
         </div>
     </div>
 </div>
+
+<!-- Subject Details Modal -->
+<div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subjectModalLabel">{{ __('app.subject_details') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="subjectModalContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
@@ -323,4 +407,40 @@
     --bs-table-bg: #f8d7da;
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+function showSubjectModal(subjectId) {
+    const modal = new bootstrap.Modal(document.getElementById('subjectModal'));
+    const modalContent = document.getElementById('subjectModalContent');
+
+    // Show loading spinner
+    modalContent.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+
+    // Show the modal
+    modal.show();
+
+    // Fetch subject details
+    fetch(`/subjects/${subjectId}/modal`)
+        .then(response => response.text())
+        .then(html => {
+            modalContent.innerHTML = html;
+        })
+        .catch(error => {
+            modalContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Error loading subject details. Please try again.
+                </div>
+            `;
+        });
+}
+</script>
 @endpush

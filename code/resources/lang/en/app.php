@@ -232,6 +232,10 @@ return [
 
     // Student Setup Wizard
     'hello' => 'Hello',
+    'your_team_preferences' => 'Your Team Preferences',
+    'no_subject_requests_but_preferences_exist' => 'Your team has no subject requests, but here are your team\'s subject preferences.',
+    'preference_order' => 'Order',
+    'preference' => 'Preference',
     'welcome_to_setup' => 'Welcome to Setup',
     'welcome_to_profile_setup' => 'Welcome to Profile Setup',
     'complete_profile_setup_description' => 'Please complete your profile setup to access all features of the system.',

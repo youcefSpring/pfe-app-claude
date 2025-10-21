@@ -107,7 +107,7 @@ class AllocationController extends Controller
                 ->with('error', 'No active deadline found for allocation.');
         }
 
-        if ($currentDeadline->deadline->isFuture()) {
+        if ($currentDeadline->preferences_deadline->isFuture()) {
             return redirect()->route('allocations.index')
                 ->with('error', 'Cannot run allocation before deadline expires.');
         }

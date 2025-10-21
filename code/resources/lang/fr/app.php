@@ -235,6 +235,10 @@ return [
 
     // Student Setup Wizard
     'hello' => 'Bonjour',
+    'your_team_preferences' => 'Préférences de Votre Équipe',
+    'no_subject_requests_but_preferences_exist' => 'Votre équipe n\'a aucune demande de sujet, mais voici les préférences de sujets de votre équipe.',
+    'preference_order' => 'Ordre',
+    'preference' => 'Préférence',
     'welcome_to_setup' => 'Bienvenue dans la Configuration',
     'welcome_to_profile_setup' => 'Bienvenue dans la Configuration du Profil',
     'complete_profile_setup_description' => 'Veuillez compléter la configuration de votre profil pour accéder à toutes les fonctionnalités du système.',

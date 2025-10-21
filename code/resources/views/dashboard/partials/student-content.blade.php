@@ -175,7 +175,7 @@
                         <small class="text-info">{{ $allocation->getPreferenceLabel() }} - {{ ucfirst($allocation->status) }}</small>
                     </div>
                 </div>
-            @elseif($currentDeadline && $currentDeadline->deadline->isFuture())
+            @elseif($currentDeadline && $currentDeadline->preferences_deadline->isFuture())
                 <div class="d-flex align-items-center">
                     <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
                         <i class="bi bi-clock text-warning"></i>
@@ -184,7 +184,7 @@
                         <h6 class="mb-1">Preferences Open</h6>
                         <small class="text-muted">{{ $preferences }} preferences selected</small>
                         <br>
-                        <small class="text-warning">Deadline: {{ $currentDeadline->deadline->format('M d, Y H:i') }}</small>
+                        <small class="text-warning">Deadline: {{ $currentDeadline->preferences_deadline->format('M d, Y H:i') }}</small>
                     </div>
                 </div>
                 <div class="mt-3">
@@ -225,8 +225,8 @@
                             <h6 class="mb-1">{{ $currentDeadline->title }}</h6>
                             <small class="text-muted">{{ $currentDeadline->description }}</small>
                             <br>
-                            @if($currentDeadline->deadline->isFuture())
-                                <span class="badge bg-warning">{{ $currentDeadline->deadline->diffForHumans() }}</span>
+                            @if($currentDeadline->preferences_deadline->isFuture())
+                                <span class="badge bg-warning">{{ $currentDeadline->preferences_deadline->diffForHumans() }}</span>
                             @else
                                 <span class="badge bg-info">Deadline passed</span>
                             @endif

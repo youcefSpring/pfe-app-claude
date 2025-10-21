@@ -1246,6 +1246,10 @@ return [
 
     // Student Setup Wizard
     'hello' => 'مرحباً',
+    'your_team_preferences' => 'تفضيلات فريقك',
+    'no_subject_requests_but_preferences_exist' => 'فريقك ليس لديه طلبات مواضيع، ولكن إليك تفضيلات المواضيع لفريقك.',
+    'preference_order' => 'الترتيب',
+    'preference' => 'تفضيل',
     'welcome_to_setup' => 'مرحباً بك في الإعداد',
     'welcome_to_profile_setup' => 'مرحباً بك في إعداد الملف الشخصي',
     'complete_profile_setup_description' => 'يرجى إكمال إعداد ملفك الشخصي للوصول إلى جميع ميزات النظام.',

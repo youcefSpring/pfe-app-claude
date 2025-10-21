@@ -66,14 +66,14 @@
                                     <td>{{ $deadline->semester }}</td>
                                     <td>
                                         <div>
-                                            <strong>{{ $deadline->deadline->format('M d, Y') }}</strong>
+                                            <strong>{{ $deadline->preferences_deadline->format('M d, Y') }}</strong>
                                             <br>
-                                            <small class="text-muted">{{ $deadline->deadline->format('H:i') }}</small>
+                                            <small class="text-muted">{{ $deadline->preferences_deadline->format('H:i') }}</small>
                                             <br>
-                                            @if($deadline->deadline->isFuture())
-                                                <small class="text-info">{{ $deadline->deadline->diffForHumans() }}</small>
+                                            @if($deadline->preferences_deadline->isFuture())
+                                                <small class="text-info">{{ $deadline->preferences_deadline->diffForHumans() }}</small>
                                             @else
-                                                <small class="text-muted">{{ $deadline->deadline->diffForHumans() }}</small>
+                                                <small class="text-muted">{{ $deadline->preferences_deadline->diffForHumans() }}</small>
                                             @endif
                                         </div>
                                     </td>
@@ -94,7 +94,7 @@
                                             <button type="button" class="btn btn-sm btn-outline-warning rounded-pill" onclick="editDeadline({{ $deadline->id }})" title="{{ __('app.edit') }}" data-bs-toggle="tooltip">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            @if($deadline->deadline->isPast() && $deadline->status === 'active')
+                                            @if($deadline->preferences_deadline->isPast() && $deadline->status === 'active')
                                                 <form action="{{ route('allocations.run-allocation') }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-success rounded-pill" onclick="return confirm('{{ __('app.run_allocation_algorithm') }}')" title="{{ __('app.run_allocation') }}" data-bs-toggle="tooltip">

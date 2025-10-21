@@ -970,19 +970,28 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // Build base query
+        // Build base query for SubjectRequests
         $query = SubjectRequest::with(['team.members.user', 'subject.teacher', 'requestedBy', 'respondedBy']);
+
+        // Get team preferences for students to show their ranked subjects
+        $teamPreferences = collect();
 
         // Filter based on user role
         switch ($user->role) {
             case 'student':
-                // Students only see requests from their team
+                // Students see requests from their team + their team's preferences
                 $teamMember = $user->teamMember;
                 if (!$teamMember) {
                     // Student not in a team, show empty results
                     $query->whereRaw('1 = 0');
                 } else {
                     $query->where('team_id', $teamMember->team_id);
+
+                    // Also get the team's subject preferences to show their ranked choices
+                    $teamPreferences = $teamMember->team->subjectPreferences()
+                        ->with(['subject.teacher'])
+                        ->orderBy('preference_order', 'asc')
+                        ->get();
                 }
                 break;
             case 'teacher':
@@ -1003,6 +1012,6 @@ class TeamController extends Controller
         // Order by requested date ascending (oldest first)
         $subjectRequests = $query->orderBy('requested_at', 'asc')->paginate(20);
 
-        return view('subject-requests.index', compact('subjectRequests'));
+        return view('subject-requests.index', compact('subjectRequests', 'teamPreferences'));
     }
 }

@@ -53,7 +53,7 @@
                     </ul>
                     @if($currentDeadline)
                         <div class="alert alert-warning mt-3">
-                            <small>Deadline: {{ $currentDeadline->format('M d, Y') }}</small>
+                            <small>Deadline: {{ $currentDeadline->preferences_deadline->format('M d, Y') }}</small>
                         </div>
                     @endif
                 </div>
