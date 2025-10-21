@@ -476,4 +476,67 @@ class SubjectController extends Controller
 
         return $user;
     }
+
+    /**
+     * Handle individual subject request from students without teams
+     */
+    public function requestIndividual(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Validate user is a student without a team
+        if ($user->role !== 'student') {
+            return redirect()->back()->with('error', __('app.only_students_can_request_subjects'));
+        }
+
+        if ($user->teamMember) {
+            return redirect()->back()->with('error', __('app.team_members_cannot_request_individually'));
+        }
+
+        $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'request_message' => 'required|string|max:1000',
+            'work_preference' => 'required|in:individual,open_to_team',
+        ]);
+
+        $subject = Subject::findOrFail($request->subject_id);
+
+        // Check if subject is available
+        if ($subject->status !== 'validated') {
+            return redirect()->back()->with('error', __('app.subject_not_available'));
+        }
+
+        if ($subject->projects()->exists()) {
+            return redirect()->back()->with('error', __('app.subject_already_assigned'));
+        }
+
+        // Check deadline restrictions
+        $currentDeadline = \App\Models\AllocationDeadline::active()->first();
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
+            return redirect()->back()->with('error', __('app.subject_request_period_ended'));
+        }
+
+        // Check if user already has a pending request for this subject
+        $existingRequest = \App\Models\SubjectRequest::where('subject_id', $subject->id)
+            ->where('requested_by', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return redirect()->back()->with('error', __('app.subject_request_already_exists'));
+        }
+
+        // Create individual subject request
+        \App\Models\SubjectRequest::create([
+            'subject_id' => $subject->id,
+            'requested_by' => $user->id,
+            'team_id' => null, // Individual request
+            'request_message' => $request->request_message,
+            'work_preference' => $request->work_preference,
+            'status' => 'pending',
+            'requested_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', __('app.individual_subject_request_submitted'));
+    }
 }

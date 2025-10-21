@@ -15,6 +15,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\StudentUploadController;
 use App\Http\Controllers\Admin\AllocationController as AdminAllocationController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentSetupController;
 use App\Http\Controllers\SpecialityController;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,20 @@ Route::middleware('auth')->group(function () {
 // =========================================================================
 
 Route::middleware(['auth'])->group(function () {
+
+    // =====================================================================
+    // STUDENT SETUP WIZARD (no middleware needed - handled by StudentProfileSetup middleware)
+    // =====================================================================
+
+    Route::prefix('student/setup')->name('student.setup.')->group(function () {
+        Route::get('/welcome', [StudentSetupController::class, 'welcome'])->name('welcome');
+        Route::get('/personal-info', [StudentSetupController::class, 'personalInfo'])->name('personal-info');
+        Route::post('/personal-info', [StudentSetupController::class, 'storePersonalInfo'])->name('store-personal-info');
+        Route::get('/marks', [StudentSetupController::class, 'marks'])->name('marks');
+        Route::post('/marks', [StudentSetupController::class, 'storeMarks'])->name('store-marks');
+        Route::get('/complete', [StudentSetupController::class, 'complete'])->name('complete');
+        Route::post('/finish', [StudentSetupController::class, 'finish'])->name('finish');
+    });
 
     // =====================================================================
     // DASHBOARD ROUTES
@@ -506,6 +521,11 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
         Route::get('/users/bulk-import', [AdminController::class, 'bulkImport'])->name('users.bulk-import');
         Route::post('/users/bulk-import', [AdminController::class, 'processBulkImport'])->name('users.bulk-import.process');
+
+        // Birth certificate management
+        Route::get('/birth-certificates', [AdminController::class, 'birthCertificates'])->name('birth-certificates');
+        Route::post('/birth-certificates/{user}/approve', [AdminController::class, 'approveBirthCertificate'])->name('birth-certificates.approve');
+        Route::post('/birth-certificates/{user}/reject', [AdminController::class, 'rejectBirthCertificate'])->name('birth-certificates.reject');
 
         // Student marks management
         Route::get('/marks', [AdminController::class, 'marks'])->name('marks');

@@ -1477,4 +1477,72 @@ public function processBulkImport(Request $request): RedirectResponse
         return redirect()->back()
             ->with('success', __('app.subject_request_rejected'));
     }
+
+    /**
+     * Show birth certificates pending approval
+     */
+    public function birthCertificates(Request $request): View
+    {
+        $query = User::where('role', 'student')
+            ->whereNotNull('birth_certificate_path');
+
+        // Filter by status
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('birth_certificate_status', $request->status);
+        }
+
+        // Search by name or email
+        if ($request->has('search') && $request->search !== '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('matricule', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        return view('admin.birth-certificates.index', compact('students'));
+    }
+
+    /**
+     * Approve a birth certificate
+     */
+    public function approveBirthCertificate(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'notes' => 'nullable|string|max:1000'
+        ]);
+
+        $user->update([
+            'birth_certificate_status' => 'approved',
+            'birth_certificate_approved_at' => now(),
+            'birth_certificate_approved_by' => Auth::id(),
+            'birth_certificate_notes' => $request->notes,
+        ]);
+
+        return redirect()->back()
+            ->with('success', __('app.birth_certificate_approved', ['name' => $user->name]));
+    }
+
+    /**
+     * Reject a birth certificate
+     */
+    public function rejectBirthCertificate(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'notes' => 'required|string|max:1000'
+        ]);
+
+        $user->update([
+            'birth_certificate_status' => 'rejected',
+            'birth_certificate_approved_at' => now(),
+            'birth_certificate_approved_by' => Auth::id(),
+            'birth_certificate_notes' => $request->notes,
+        ]);
+
+        return redirect()->back()
+            ->with('success', __('app.birth_certificate_rejected', ['name' => $user->name]));
+    }
 }

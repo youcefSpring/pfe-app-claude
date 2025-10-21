@@ -45,6 +45,12 @@ class User extends Authenticatable
         'academic_year',
         'profile_completed',
         'email_verified_at',
+        'birth_certificate_path',
+        'birth_certificate_status',
+        'birth_certificate_notes',
+        'birth_certificate_approved_at',
+        'birth_certificate_approved_by',
+        'student_level',
     ];
 
     /**
@@ -343,5 +349,64 @@ class User extends Authenticatable
         // Simple text similarity - in real implementation, use more sophisticated matching
         similar_text(strtolower($this->speciality), strtolower($domain), $percent);
         return $percent / 100;
+    }
+
+    /**
+     * Check if student needs to complete profile setup.
+     */
+    public function needsProfileSetup(): bool
+    {
+        if ($this->role !== 'student') {
+            return false;
+        }
+
+        return !$this->profile_completed ||
+               !$this->date_naissance ||
+               !$this->lieu_naissance ||
+               !$this->student_level ||
+               !$this->birth_certificate_path;
+    }
+
+    /**
+     * Check if student profile is complete.
+     */
+    public function isProfileComplete(): bool
+    {
+        return !$this->needsProfileSetup();
+    }
+
+    /**
+     * Get required number of previous semester marks based on student level.
+     */
+    public function getRequiredPreviousMarks(): int
+    {
+        return match($this->student_level) {
+            'licence_3' => 4, // S1, S2, S3, S4
+            'master_1', 'master_2' => 2, // Previous year S1, S2
+            default => 0
+        };
+    }
+
+    /**
+     * Check if student has uploaded all required previous marks.
+     */
+    public function hasRequiredMarks(): bool
+    {
+        $required = $this->getRequiredPreviousMarks();
+        if ($required === 0) return true;
+
+        $marksCount = $this->studentMarks()
+            ->where('academic_year', '<', now()->year)
+            ->count();
+
+        return $marksCount >= $required;
+    }
+
+    /**
+     * Get birth certificate approver.
+     */
+    public function birthCertificateApprover()
+    {
+        return $this->belongsTo(User::class, 'birth_certificate_approved_by');
     }
 }

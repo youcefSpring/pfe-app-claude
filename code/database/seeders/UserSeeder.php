@@ -58,6 +58,7 @@ class UserSeeder extends Seeder
             ['name' => 'anfel dubois', 'email' => 'anfel@student.university.edu'],
             ['name' => 'Ahlem dubois', 'email' => 'ahlem@student.university.edu'],
             ['name' => 'saida', 'email' => 'saida@student.university.edu'],
+            ['name' => 'yasmine', 'email' => 'alice.dubois@student.university.edu']
         ];
 
         foreach ($students as $student) {

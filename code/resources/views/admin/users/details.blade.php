@@ -202,14 +202,31 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if($mark->mark)
+                                                    @php
+                                                        // Calculate average based on individual marks
+                                                        $marks = collect([
+                                                            $mark->mark_1,
+                                                            $mark->mark_2,
+                                                            $mark->mark_3,
+                                                            $mark->mark_4,
+                                                            $mark->mark_5
+                                                        ])->filter(function($value) {
+                                                            return !is_null($value) && $value > 0;
+                                                        });
+
+                                                        $average = $marks->count() > 0 ? $marks->avg() : $mark->mark;
+                                                    @endphp
+
+                                                    @if($average)
                                                         @php
-                                                            $average = $mark->mark;
                                                             $badgeClass = $average >= 16 ? 'bg-success' :
                                                                          ($average >= 12 ? 'bg-warning' :
                                                                          ($average >= 10 ? 'bg-info' : 'bg-danger'));
                                                         @endphp
                                                         <span class="badge {{ $badgeClass }}">{{ number_format($average, 2) }}</span>
+                                                        @if($marks->count() > 0)
+                                                            <small class="text-muted d-block">{{ __('app.calculated_from') }} {{ $marks->count() }} {{ __('app.marks') }}</small>
+                                                        @endif
                                                     @else
                                                         <span class="text-muted">-</span>
                                                     @endif

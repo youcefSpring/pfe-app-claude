@@ -270,8 +270,8 @@
                                 $totalAllocations = \App\Models\SubjectAllocation::count();
                                 $confirmedAllocations = \App\Models\SubjectAllocation::where('status', 'confirmed')->count();
                             @endphp
-                            @if($activeDeadline)
-                                <h2 class="fw-bold text-dark mb-0">{{ $activeDeadline->deadline->diffInDays() }}</h2>
+                            @if($activeDeadline && $activeDeadline->preferences_deadline)
+                                <h2 class="fw-bold text-dark mb-0">{{ now()->diffInDays($activeDeadline->preferences_deadline, false) }}</h2>
                                 <p class="text-muted mb-0 small">{{ __('app.days_until_deadline') }}</p>
                             @else
                                 <h2 class="fw-bold text-muted mb-0">-</h2>

@@ -125,19 +125,49 @@
                                     @elseif($isLeader)
                                         <div class="row">
                                             <div class="col-12">
-                                                <div class="d-flex gap-2 mb-3">
+                                                @php
+                                                    $currentDeadline = App\Models\AllocationDeadline::active()->first();
+                                                    $canSelectSubjects = $currentDeadline && $currentDeadline->canStudentsChoose() && $team->canSelectSubject();
+                                                @endphp
+
+                                                @if($canSelectSubjects)
+                                                    <div class="alert alert-success mb-3">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <strong>Ready to Select!</strong> Your team can now choose a subject.
+                                                        <small class="d-block">Deadline: {{ $currentDeadline->preferences_deadline->format('M d, Y H:i') }}</small>
+                                                    </div>
+                                                @else
+                                                    @if(!$currentDeadline || !$currentDeadline->canStudentsChoose())
+                                                        <div class="alert alert-warning mb-3">
+                                                            <i class="fas fa-clock"></i>
+                                                            Subject selection period is not active.
+                                                        </div>
+                                                    @elseif(!$team->canSelectSubject())
+                                                        <div class="alert alert-info mb-3">
+                                                            <i class="fas fa-users"></i>
+                                                            Your team needs {{ config('team.sizes.licence.min', 2) }}-{{ config('team.sizes.licence.max', 4) }} members to select subjects.
+                                                            (Current: {{ $team->members->count() }} members)
+                                                        </div>
+                                                    @endif
+                                                @endif
+
+                                                <div class="d-flex gap-2 mb-3 flex-wrap">
+                                                    @if($canSelectSubjects)
+                                                        <a href="{{ route('teams.select-subject-form', $team) }}" class="btn btn-success">
+                                                            <i class="fas fa-book"></i> Select Subject
+                                                        </a>
+                                                    @endif
                                                     <a href="{{ route('teams.subject-preferences', $team) }}" class="btn btn-primary">
                                                         <i class="fas fa-list-ol"></i> Manage Subject Preferences (Max 10)
                                                     </a>
-                                                    <a href="{{ route('teams.subject-requests', $team) }}" class="btn btn-success">
+                                                    <a href="{{ route('teams.subject-requests', $team) }}" class="btn btn-outline-success">
                                                         <i class="fas fa-hand-paper"></i> Subject Requests
                                                     </a>
-                                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#selectSubjectModal">
-                                                        <i class="fas fa-book"></i> Quick Select Subject
-                                                    </button>
-                                                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#requestSubjectModal">
-                                                        <i class="fas fa-paper-plane"></i> Request Subject
-                                                    </button>
+                                                    @if($canSelectSubjects)
+                                                        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#requestSubjectModal">
+                                                            <i class="fas fa-paper-plane"></i> Request Subject
+                                                        </button>
+                                                    @endif
                                                     <a href="{{ route('teams.external-project-form', $team) }}" class="btn btn-outline-secondary">
                                                         <i class="fas fa-external-link-alt"></i> Submit External Project
                                                     </a>

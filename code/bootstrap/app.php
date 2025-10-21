@@ -17,11 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'locale' => \App\Http\Middleware\LocaleMiddleware::class,
             'current_year_data' => \App\Http\Middleware\CurrentAcademicYearData::class,
+            'student_setup' => \App\Http\Middleware\StudentProfileSetup::class,
         ]);
 
         // Global middleware
         $middleware->web(append: [
             \App\Http\Middleware\LocaleMiddleware::class,
+            \App\Http\Middleware\StudentProfileSetup::class,
         ]);
 
         // API middleware configuration - Sanctum for API authentication

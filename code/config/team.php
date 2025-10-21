@@ -13,7 +13,7 @@ return [
 
     'sizes' => [
         'licence' => [
-            'min' => 2,
+            'min' => 1, // Changed from 2 to 1 to allow single member teams
             'max' => 4, // Increased from 3 to 4
         ],
         'master' => [

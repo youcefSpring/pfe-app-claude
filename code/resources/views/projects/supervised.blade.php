@@ -105,7 +105,7 @@
                                             Due: {{ $project->end_date->format('M d, Y') }}
                                             @if($project->end_date->isPast() && $project->status !== 'completed')
                                                 <span class="badge bg-danger ms-1">Overdue</span>
-                                            @elseif($project->end_date->diffInDays(now()) <= 7 && $project->status !== 'completed')
+                                            @elseif($project->end_date && $project->end_date->diffInDays(now()) <= 7 && $project->status !== 'completed')
                                                 <span class="badge bg-warning ms-1">Due Soon</span>
                                             @endif
                                         </p>

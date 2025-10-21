@@ -232,7 +232,7 @@ class TeamService
         return match ($grade) {
             'master' => ['min' => 1, 'max' => 2],
             'phd' => ['min' => 1, 'max' => 1],
-            default => ['min' => 2, 'max' => 3], // licence
+            default => ['min' => 1, 'max' => 4], // licence - updated to allow single member teams
         };
     }
 

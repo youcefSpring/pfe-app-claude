@@ -266,9 +266,31 @@
                                                 </small>
                                             @endif
                                         @else
-                                            <a href="{{ route('teams.create') }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-plus"></i> Create Team First
-                                            </a>
+                                            @php
+                                                $hasActiveDeadline = App\Models\AllocationDeadline::active()->first()?->canStudentsChoose() ?? false;
+                                            @endphp
+
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <a href="{{ route('teams.create') }}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-plus"></i> Create Team First
+                                                </a>
+
+                                                @if($hasActiveDeadline)
+                                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#requestSubjectIndividualModal">
+                                                        <i class="fas fa-paper-plane"></i> Request Subject
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            @if(!$hasActiveDeadline)
+                                                <small class="text-muted d-block mt-2">
+                                                    <i class="fas fa-clock"></i> Subject request period has ended
+                                                </small>
+                                            @else
+                                                <small class="text-muted d-block mt-2">
+                                                    <i class="fas fa-info-circle"></i> You can request this subject individually or create a team first
+                                                </small>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>
@@ -333,6 +355,68 @@
             </div>
         </div>
         @endif
+    @endif
+@endauth
+
+<!-- Individual Subject Request Modal for users without teams -->
+@auth
+    @if(auth()->user()->role === 'student' && !auth()->user()->teamMember)
+        <div class="modal fade" id="requestSubjectIndividualModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Request Subject: {{ $subject->title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ route('subjects.request-individual') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="subject_id" value="{{ $subject->id }}">
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Subject Details</h6>
+                                <p><strong>Title:</strong> {{ $subject->title }}</p>
+                                <p><strong>Teacher:</strong> {{ $subject->teacher->name }}</p>
+                                <p class="mb-0"><strong>Requesting as:</strong> Individual Student</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="individual_request_message" class="form-label">Request Message</label>
+                                <textarea name="request_message" id="individual_request_message" class="form-control" rows="4"
+                                          placeholder="Explain why you want this subject and how it aligns with your goals..."
+                                          required></textarea>
+                                <small class="form-text text-muted">
+                                    Tell the administration why you are interested in this specific subject and your qualifications.
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="work_preference" class="form-label">Work Preference</label>
+                                <select name="work_preference" id="work_preference" class="form-select" required>
+                                    <option value="">Select your preference...</option>
+                                    <option value="individual">Work individually</option>
+                                    <option value="open_to_team">Open to joining/forming a team later</option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Let us know if you prefer to work alone or are open to team collaboration.
+                                </small>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Note:</strong> This request needs admin approval. You'll be notified when your request is processed.
+                                Individual requests may be matched with other students or you may be asked to form a team.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     @endif
 @endauth
 

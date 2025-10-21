@@ -323,11 +323,96 @@ class TeamController extends Controller
     }
 
     /**
+     * Show the form for selecting a subject for the team
+     */
+    public function selectSubjectForm(Team $team): View
+    {
+        $user = Auth::user();
+
+        // Check if user is team leader
+        $member = $team->members->where('student_id', $user->id)->first();
+        if (!$member || $member->role !== 'leader') {
+            abort(403, __('app.only_team_leader_can_select_subjects'));
+        }
+
+        // Check deadline restrictions
+        $currentDeadline = AllocationDeadline::active()->first();
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
+            return redirect()->route('teams.show', $team)
+                ->with('error', __('app.subject_selection_period_ended'));
+        }
+
+        // Check if team can select subjects (size validation)
+        if (!$team->canSelectSubject()) {
+            // Get team leader's academic level to determine appropriate team size limits
+            $leader = $team->members->where('role', 'leader')->first();
+            $academicLevel = 'licence'; // default
+
+            if ($leader && $leader->student) {
+                $academicLevel = match($leader->student->student_level) {
+                    'licence_3' => 'licence',
+                    'master_1', 'master_2' => 'master',
+                    default => 'licence'
+                };
+            }
+
+            $minSize = config("team.sizes.{$academicLevel}.min", 1);
+            $maxSize = config("team.sizes.{$academicLevel}.max", 4);
+            $currentSize = $team->members->count();
+
+            return redirect()->route('teams.show', $team)
+                ->with('error', __('app.team_size_invalid_for_selection', [
+                    'min' => $minSize,
+                    'max' => $maxSize,
+                    'current' => $currentSize
+                ]));
+        }
+
+        // Get available validated subjects
+        $availableSubjects = Subject::where('status', 'validated')
+            ->whereDoesntHave('projects')
+            ->with('teacher')
+            ->paginate(12);
+
+        return view('teams.select-subject', compact('team', 'availableSubjects', 'currentDeadline'));
+    }
+
+    /**
      * Select a subject for the team
      */
     public function selectSubject(Request $request, Team $team): RedirectResponse
     {
         //$this->authorize('selectSubject', $team);
+
+        $user = Auth::user();
+
+        // Check if user is team leader
+        $member = $team->members->where('student_id', $user->id)->first();
+        if (!$member || $member->role !== 'leader') {
+            return redirect()->back()
+                ->with('error', __('app.only_team_leader_can_select_subjects'));
+        }
+
+        // Check deadline restrictions
+        $currentDeadline = AllocationDeadline::active()->first();
+        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
+            return redirect()->back()
+                ->with('error', __('app.subject_selection_period_ended'));
+        }
+
+        // Check if team can select subjects (size validation)
+        if (!$team->canSelectSubject()) {
+            $minSize = config('team.sizes.licence.min', 2);
+            $maxSize = config('team.sizes.licence.max', 4);
+            $currentSize = $team->members->count();
+
+            return redirect()->back()
+                ->with('error', __('app.team_size_invalid_for_selection', [
+                    'min' => $minSize,
+                    'max' => $maxSize,
+                    'current' => $currentSize
+                ]));
+        }
 
         $request->validate([
             'subject_id' => 'required|exists:subjects,id'
@@ -360,7 +445,7 @@ class TeamController extends Controller
 
         $team->update(['status' => 'active']);
 
-        return redirect()->back()
+        return redirect()->route('teams.show', $team)
             ->with('success', __('app.subject_selected_project_created'));
     }
 

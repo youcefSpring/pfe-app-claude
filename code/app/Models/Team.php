@@ -160,8 +160,22 @@ class Team extends Model
     public function isComplete(): bool
     {
         $memberCount = $this->members()->count();
-        $minSize = config('team.sizes.licence.min', 2); // Default minimum
-        $maxSize = config('team.sizes.licence.max', 3); // Default maximum
+
+        // Get team leader's academic level to determine appropriate team size limits
+        $leader = $this->members()->where('role', 'leader')->first();
+        if (!$leader || !$leader->student) {
+            // Fall back to licence defaults if no leader found
+            $academicLevel = 'licence';
+        } else {
+            $academicLevel = match($leader->student->student_level) {
+                'licence_3' => 'licence',
+                'master_1', 'master_2' => 'master',
+                default => 'licence'
+            };
+        }
+
+        $minSize = config("team.sizes.{$academicLevel}.min", 1);
+        $maxSize = config("team.sizes.{$academicLevel}.max", 4);
 
         return $memberCount >= $minSize && $memberCount <= $maxSize;
     }

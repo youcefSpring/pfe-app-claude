@@ -17,6 +17,7 @@ class SubjectRequest extends Model
         'status',
         'priority_order',
         'request_message',
+        'work_preference',
         'admin_response',
         'requested_at',
         'responded_at',
