@@ -88,13 +88,13 @@ foreach ($teams as $team) {
 
     // Check 3: Subject allocation check
     echo "3. Subject Allocation Check:\n";
-    $hasAllocatedSubject = $team->subjectPreferences()->whereNotNull('allocated_at')->exists();
+    $hasAllocatedSubject = $team->subjectPreferences()->where('is_allocated', true)->exists();
     echo "   Has Allocated Subject: " . ($hasAllocatedSubject ? '❌ YES (blocking)' : '✅ NO (good)') . "\n";
 
     if ($hasAllocatedSubject) {
-        $allocatedPref = $team->subjectPreferences()->whereNotNull('allocated_at')->first();
+        $allocatedPref = $team->subjectPreferences()->where('is_allocated', true)->first();
         echo "   Allocated Subject: " . $allocatedPref->subject->title . "\n";
-        echo "   Allocated At: " . $allocatedPref->allocated_at . "\n";
+        echo "   Allocated At: " . ($allocatedPref->updated_at ?? 'Unknown') . "\n";
     }
 
     // Final result
