@@ -11,6 +11,7 @@ use App\Models\Team;
 use App\Models\StudentMark;
 use App\Models\StudentAlert;
 use App\Models\SubjectRequest;
+use App\Models\AllocationDeadline;
 use App\Services\StudentImportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -1681,5 +1682,57 @@ public function processBulkImport(Request $request): RedirectResponse
             'subjects' => $availableSubjects,
             'count' => $availableSubjects->count()
         ]);
+    }
+
+    /**
+     * Debug subject preferences issues
+     */
+    public function debugPreferences()
+    {
+        $teams = Team::with(['members.user', 'subjectPreferences.subject'])->get();
+        $deadline = AllocationDeadline::active()->first();
+
+        $debugInfo = [
+            'current_time' => now()->format('Y-m-d H:i:s'),
+            'timezone' => config('app.timezone'),
+            'teams_count' => $teams->count(),
+            'deadline' => null,
+            'teams' => []
+        ];
+
+        if ($deadline) {
+            $debugInfo['deadline'] = [
+                'id' => $deadline->id,
+                'title' => $deadline->title,
+                'status' => $deadline->status,
+                'preferences_start' => $deadline->preferences_start->format('Y-m-d H:i:s'),
+                'preferences_deadline' => $deadline->preferences_deadline->format('Y-m-d H:i:s'),
+                'is_active' => $deadline->isActive(),
+                'can_students_choose' => $deadline->canStudentsChoose(),
+                'current_time_between_dates' => now()->between($deadline->preferences_start, $deadline->preferences_deadline)
+            ];
+        }
+
+        foreach ($teams as $team) {
+            $hasAllocatedSubject = $team->subjectPreferences()->whereNotNull('allocated_at')->exists();
+            $allocatedSubject = $team->subjectPreferences()->whereNotNull('allocated_at')->first();
+
+            $debugInfo['teams'][] = [
+                'id' => $team->id,
+                'name' => $team->name,
+                'status' => $team->status,
+                'member_count' => $team->members->count(),
+                'is_complete' => $team->isComplete(),
+                'has_allocated_subject' => $hasAllocatedSubject,
+                'allocated_subject' => $allocatedSubject ? [
+                    'subject_title' => $allocatedSubject->subject->title,
+                    'allocated_at' => $allocatedSubject->allocated_at->format('Y-m-d H:i:s')
+                ] : null,
+                'can_manage_preferences' => $team->canManagePreferences(),
+                'preferences_count' => $team->subjectPreferences->count()
+            ];
+        }
+
+        return response()->json($debugInfo, 200, [], JSON_PRETTY_PRINT);
     }
 }

@@ -1362,9 +1362,6 @@ return [
     'move_up' => 'Monter',
     'move_down' => 'Descendre',
     'remove_preference' => 'Supprimer la préférence',
-    'clear_all_preferences' => 'Effacer Toutes les Préférences',
-    'confirm_clear_all_preferences' => 'Êtes-vous sûr de vouloir effacer toutes les préférences de sujets ? Cette action ne peut pas être annulée.',
-    'all_preferences' => 'Toutes les Préférences',
     'subjects_selected_progress' => ':current sur :max sujets sélectionnés',
     'confirm_remove_member' => 'Êtes-vous sûr de vouloir supprimer ce membre de l\'équipe ?',
     'confirm_subject_selection' => 'Confirmer la Sélection du Sujet',
@@ -1420,7 +1417,6 @@ return [
     'subject_preferences_saved' => 'Préférences de sujets sauvegardées avec succès!',
     'subject_preferences_updated' => 'Préférences de sujets mises à jour avec succès!',
     'subject_added_to_preferences' => 'Sujet ajouté aux préférences avec succès!',
-    'all_preferences_cleared' => 'Toutes les préférences ont été effacées avec succès!',
 
     // Subject Requests page translations
     'your_team_subject_requests_ordered' => 'Les demandes de sujets de votre équipe triées par date de soumission',

@@ -1882,9 +1882,6 @@ return [
     'move_up' => 'Move up',
     'move_down' => 'Move down',
     'remove_preference' => 'Remove preference',
-    'clear_all_preferences' => 'Clear All Preferences',
-    'confirm_clear_all_preferences' => 'Are you sure you want to clear all subject preferences? This action cannot be undone.',
-    'all_preferences' => 'All Preferences',
     'subjects_selected_progress' => ':current of :max subjects selected',
     'confirm_remove_member' => 'Are you sure you want to remove this member from the team?',
     'confirm_subject_selection' => 'Confirm Subject Selection',
@@ -1904,7 +1901,6 @@ return [
     'subject_preferences_saved' => 'Subject preferences saved successfully!',
     'subject_preferences_updated' => 'Subject preferences updated successfully!',
     'subject_added_to_preferences' => 'Subject added to preferences successfully!',
-    'all_preferences_cleared' => 'All preferences cleared successfully!',
 
     // Subject Requests page translations
     'your_team_subject_requests_ordered' => 'Your team\'s subject requests ordered by submission date',

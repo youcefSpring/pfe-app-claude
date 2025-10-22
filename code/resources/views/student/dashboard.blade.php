@@ -68,76 +68,83 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
+                                        <th>{{ __('app.subject_name') }}</th>
+                                        <th>{{ __('app.semester') }}</th>
+                                        <th>{{ __('app.academic_year') }}</th>
+                                        <th>{{ __('app.mark') }}</th>
+                                        <th>{{ __('app.percentage') }}</th>
+                                        <th>{{ __('app.letter_grade') }}</th>
                                         <th>{{ __('app.date') }}</th>
-                                        <th>{{ __('app.mark') }} 1</th>
-                                        <th>{{ __('app.mark') }} 2</th>
-                                        <th>{{ __('app.mark') }} 3</th>
-                                        <th>{{ __('app.mark') }} 4</th>
-                                        <th>{{ __('app.mark') }} 5</th>
-                                        <th>{{ __('app.average') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($marks as $mark)
                                         <tr>
-                                            <td>{{ $mark->created_at->format('d/m/Y') }}</td>
                                             <td>
-                                                @if($mark->mark_1)
-                                                    <span class="badge bg-primary">{{ $mark->mark_1 }}/20</span>
+                                                <strong>{{ $mark->subject_name ?: __('app.general_assessment') }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ $mark->semester ?: __('app.general') }}</span>
+                                            </td>
+                                            <td>{{ $mark->academic_year }}</td>
+                                            <td>
+                                                @if($mark->mark)
+                                                    <span class="badge bg-primary">{{ $mark->mark }}/{{ $mark->max_mark ?: 20 }}</span>
                                                 @else
-                                                    <span class="text-muted">-</span>
+                                                    @php
+                                                        $hasMarks = false;
+                                                        $marksList = [];
+                                                        for ($i = 1; $i <= 5; $i++) {
+                                                            $markField = "mark_$i";
+                                                            if ($mark->$markField) {
+                                                                $marksList[] = $mark->$markField;
+                                                                $hasMarks = true;
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @if($hasMarks)
+                                                        <small class="text-muted">{{ implode(', ', $marksList) }}/20</small>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($mark->mark_2)
-                                                    <span class="badge bg-primary">{{ $mark->mark_2 }}/20</span>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($mark->mark_3)
-                                                    <span class="badge bg-primary">{{ $mark->mark_3 }}/20</span>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($mark->mark_4)
-                                                    <span class="badge bg-primary">{{ $mark->mark_4 }}/20</span>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($mark->mark_5)
-                                                    <span class="badge bg-primary">{{ $mark->mark_5 }}/20</span>
+                                                @php
+                                                    $percentage = $mark->final_percentage ?: $mark->percentage;
+                                                @endphp
+                                                @if($percentage > 0)
+                                                    @if($percentage >= 85)
+                                                        <span class="badge bg-success">{{ $percentage }}%</span>
+                                                    @elseif($percentage >= 70)
+                                                        <span class="badge bg-warning">{{ $percentage }}%</span>
+                                                    @elseif($percentage >= 50)
+                                                        <span class="badge bg-info">{{ $percentage }}%</span>
+                                                    @else
+                                                        <span class="badge bg-danger">{{ $percentage }}%</span>
+                                                    @endif
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 @php
-                                                    $total = 0;
-                                                    $count = 0;
-                                                    for ($i = 1; $i <= 5; $i++) {
-                                                        $markField = "mark_$i";
-                                                        if ($mark->$markField) {
-                                                            $total += $mark->$markField;
-                                                            $count++;
-                                                        }
-                                                    }
-                                                    $average = $count > 0 ? round($total / $count, 2) : 0;
+                                                    $letterGrade = $mark->final_letter_grade ?: $mark->letter_grade;
                                                 @endphp
-                                                @if($average >= 16)
-                                                    <span class="badge bg-success">{{ $average }}/20</span>
-                                                @elseif($average >= 12)
-                                                    <span class="badge bg-warning">{{ $average }}/20</span>
-                                                @elseif($average >= 10)
-                                                    <span class="badge bg-info">{{ $average }}/20</span>
+                                                @if($letterGrade && $letterGrade !== 'F')
+                                                    <span class="badge bg-{{
+                                                        in_array($letterGrade, ['A+', 'A', 'A-']) ? 'success' :
+                                                        (in_array($letterGrade, ['B+', 'B', 'B-']) ? 'warning' :
+                                                        (in_array($letterGrade, ['C+', 'C', 'C-']) ? 'info' : 'danger'))
+                                                    }}">{{ $letterGrade }}</span>
+                                                @elseif($letterGrade === 'F')
+                                                    <span class="badge bg-danger">{{ $letterGrade }}</span>
                                                 @else
-                                                    <span class="badge bg-danger">{{ $average }}/20</span>
+                                                    <span class="text-muted">-</span>
                                                 @endif
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">{{ $mark->created_at->format('d/m/Y') }}</small>
                                             </td>
                                         </tr>
                                     @endforeach

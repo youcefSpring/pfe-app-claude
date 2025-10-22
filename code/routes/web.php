@@ -413,6 +413,11 @@ Route::middleware(['auth'])->group(function () {
         // Backup and Maintenance
         Route::get('/maintenance', [AdminController::class, 'maintenance'])->name('maintenance');
         Route::post('/backup', [AdminController::class, 'backup'])->name('backup');
+
+        // Debug Routes (only in development)
+        if (app()->environment(['local', 'testing'])) {
+            Route::get('/debug/preferences', [AdminController::class, 'debugPreferences'])->name('debug.preferences');
+        }
     });
 
     // =====================================================================
@@ -473,7 +478,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create', [SubjectPreferenceController::class, 'create'])->name('create');
         Route::post('/', [SubjectPreferenceController::class, 'store'])->name('store');
         Route::put('/', [SubjectPreferenceController::class, 'update'])->name('update');
-        Route::delete('/', [SubjectPreferenceController::class, 'destroy'])->name('destroy');
         Route::post('/submit', [SubjectPreferenceController::class, 'submit'])->name('submit');
     });
 

@@ -130,21 +130,6 @@ class SubjectPreferenceController extends Controller
             ->with('success', __('app.subject_preferences_updated'));
     }
 
-    public function destroy(): RedirectResponse
-    {
-        $user = Auth::user();
-        $currentDeadline = AllocationDeadline::active()->first();
-
-        if (!$currentDeadline || !$currentDeadline->canStudentsChoose()) {
-            return redirect()->route('preferences.index')
-                ->with('error', 'Preference selection period has ended.');
-        }
-
-        $user->subjectPreferences()->delete();
-
-        return redirect()->route('preferences.index')
-            ->with('success', __('app.all_preferences_cleared'));
-    }
 
     public function submit(Request $request): RedirectResponse
     {

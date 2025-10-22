@@ -182,19 +182,6 @@
                             </form>
                         @endif
 
-                        @if($canManage && isset($currentPreferences) && $currentPreferences->count() > 0)
-                            <div class="mt-3">
-                                <div class="d-grid gap-2">
-                                    <button type="button" class="btn btn-warning text-dark fw-bold btn-enhanced" onclick="showDeleteConfirmation({
-                                        itemName: '{{ __('app.all_preferences') }}',
-                                        message: '{{ __('app.confirm_clear_all_preferences') }}',
-                                        onConfirm: clearAllPreferences
-                                    })">
-                                        <i class="fas fa-trash-alt"></i> {{ __('app.clear_all_preferences') }}
-                                    </button>
-                                </div>
-                            </div>
-                        @endif
                     @endif
                 </div>
             </div>
@@ -368,10 +355,6 @@
     font-family: Arial, sans-serif;
 }
 
-.fa-trash-alt::before {
-    content: "🗑";
-    font-family: Arial, sans-serif;
-}
 
 .fa-list-ol::before {
     content: "📋";
@@ -613,31 +596,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateButtons();
 });
 
-// Clear all preferences function
-function clearAllPreferences() {
-    // Create a form to submit DELETE request to preferences.destroy route
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route('preferences.destroy') }}';
-
-    // Add CSRF token
-    const csrfToken = document.createElement('input');
-    csrfToken.type = 'hidden';
-    csrfToken.name = '_token';
-    csrfToken.value = '{{ csrf_token() }}';
-    form.appendChild(csrfToken);
-
-    // Add method override for DELETE
-    const methodInput = document.createElement('input');
-    methodInput.type = 'hidden';
-    methodInput.name = '_method';
-    methodInput.value = 'DELETE';
-    form.appendChild(methodInput);
-
-    // Append form to body and submit
-    document.body.appendChild(form);
-    form.submit();
-}
 </script>
 @endpush
 @endsection

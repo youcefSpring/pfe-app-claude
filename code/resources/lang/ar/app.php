@@ -1208,9 +1208,6 @@ return [
     'failed_to_update_order' => 'فشل في تحديث ترتيب التفضيلات. يرجى المحاولة مرة أخرى.',
     'manage_subject_preferences_max' => 'إدارة تفضيلات المواضيع (الحد الأقصى 10)',
     'request_subject' => 'طلب موضوع',
-    'clear_all_preferences' => 'مسح جميع التفضيلات',
-    'confirm_clear_all_preferences' => 'هل أنت متأكد من مسح جميع تفضيلات المواضيع؟ هذا الإجراء لا يمكن التراجع عنه.',
-    'all_preferences' => 'جميع التفضيلات',
     'subjects_selected_progress' => ':current من :max موضوع مختار',
 
     // Session message translations
@@ -1228,7 +1225,6 @@ return [
     'subject_preferences_saved' => 'تم حفظ تفضيلات المواضيع بنجاح!',
     'subject_preferences_updated' => 'تم تحديث تفضيلات المواضيع بنجاح!',
     'subject_added_to_preferences' => 'تم إضافة الموضوع إلى التفضيلات بنجاح!',
-    'all_preferences_cleared' => 'تم مسح جميع التفضيلات بنجاح!',
     'preferences_submitted_final' => 'تم إرسال تفضيلات المواضيع بنجاح! لا يمكنك تعديلها بعد الآن.',
 
     // Subject Requests page translations
