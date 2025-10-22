@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 use App\Models\TeamSubjectPreference;
 use App\Models\SubjectRequest;
 
@@ -521,20 +522,42 @@ class Team extends Model
     {
         // Validate count doesn't exceed max
         if (count($subjectIds) > TeamSubjectPreference::MAX_PREFERENCES) {
+            \Log::error('Too many subject IDs provided', ['count' => count($subjectIds), 'max' => TeamSubjectPreference::MAX_PREFERENCES]);
             return false;
         }
 
         DB::beginTransaction();
         try {
+            // Step 1: Temporarily set all preference orders to high values to avoid unique constraint violations
+            $tempOrderStart = 1000;
             foreach ($subjectIds as $order => $subjectId) {
                 $this->subjectPreferences()
                     ->where('subject_id', $subjectId)
+                    ->update(['preference_order' => $tempOrderStart + $order]);
+            }
+
+            // Step 2: Update to final preference orders
+            foreach ($subjectIds as $order => $subjectId) {
+                $updated = $this->subjectPreferences()
+                    ->where('subject_id', $subjectId)
                     ->update(['preference_order' => $order + 1]);
+
+                \Log::info('Updated preference order', [
+                    'team_id' => $this->id,
+                    'subject_id' => $subjectId,
+                    'new_order' => $order + 1,
+                    'updated_count' => $updated
+                ]);
             }
             DB::commit();
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Failed to update preference order', [
+                'team_id' => $this->id,
+                'subject_ids' => $subjectIds,
+                'error' => $e->getMessage()
+            ]);
             return false;
         }
     }

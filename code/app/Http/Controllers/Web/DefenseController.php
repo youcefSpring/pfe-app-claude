@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Response;
 use ZipArchive;
+use PDF;
 
 class DefenseController extends Controller
 {
@@ -144,7 +145,10 @@ class DefenseController extends Controller
     {
         $user = Auth::user();
 
-        $query = Defense::with(['subject.teacher', 'room', 'juries.teacher']);
+        $query = Defense::with(['subject.teacher', 'room', 'juries.teacher', 'project.team']);
+
+        // Only show current and future defenses
+        $query->where('defense_date', '>=', now()->toDateString());
 
         // Filter based on user role
         switch ($user->role) {
@@ -163,11 +167,29 @@ class DefenseController extends Controller
                     $q->where('department', $user->department);
                 });
                 break;
+            case 'admin':
+                // Admin can see all defenses
+                break;
         }
 
-        $defenses = $query->get();
+        $defensesCollection = $query->orderBy('defense_date')->orderBy('defense_time')->get();
 
-        return view('defenses.calendar', compact('defenses'));
+        // Pass both collections and formatted arrays
+        $defenses = $defensesCollection; // For Blade template
+
+        // Format defenses for JavaScript
+        $defensesJson = $defensesCollection->map(function($defense) {
+            return [
+                'id' => $defense->id,
+                'title' => $defense->subject->title ?? 'Defense',
+                'date' => $defense->defense_date ? $defense->defense_date->format('Y-m-d') : null,
+                'time' => $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : null,
+                'status' => $defense->status,
+                'room' => $defense->room->name ?? 'TBD',
+            ];
+        });
+
+        return view('defenses.calendar', compact('defenses', 'defensesJson'));
     }
 
     /**
@@ -687,36 +709,6 @@ class DefenseController extends Controller
             ->with('success', 'Grade submitted successfully!');
     }
 
-    /**
-     * Generate defense report (HTML view)
-     */
-    public function generateReport(Defense $defense): View
-    {
-        //$this->authorize('viewReport', $defense);
-
-        $defense->load([
-            'subject.teacher',
-            'room',
-            'juries.teacher',
-            'report'
-        ]);
-
-        // Also load project relationships if they exist
-        if ($defense->project_id) {
-            $defense->load([
-                'project.team.members.user'
-            ]);
-        }
-
-        // Load additional relationships for comprehensive data
-        $defense->load([
-            'project.team.members.user' => function($query) {
-                $query->select('id', 'first_name', 'last_name', 'name', 'date_naissance', 'lieu_naissance');
-            }
-        ]);
-
-        return view('defenses.report', compact('defense'));
-    }
 
     /**
      * Generate defense report as PDF
@@ -725,39 +717,77 @@ class DefenseController extends Controller
     {
         //$this->authorize('viewReport', $defense);
 
-        $defense->load([
-            'subject.teacher',
-            'room',
-            'juries.teacher',
-            'report'
-        ]);
+        $user = Auth::user();
 
-        // Also load project relationships if they exist
-        if ($defense->project_id) {
-            $defense->load([
-                'project.team.members.user'
-            ]);
+        // Load necessary relationships early
+        $defense->load(['project.team.members.user.speciality', 'juries.teacher']);
+
+        // Check if user can view this defense report
+        if ($user->role === 'student') {
+            // Students can only view their own defense reports
+            $teamMember = $defense->project->team->members()->where('student_id', $user->id)->first();
+            if (!$teamMember) {
+                abort(403, 'Unauthorized');
+            }
+        } elseif ($user->role === 'teacher') {
+            // Teachers can view reports for defenses they're involved in
+            $isInvolved = $defense->juries()->where('teacher_id', $user->id)->exists() ||
+                         $defense->subject->teacher_id === $user->id;
+            if (!$isInvolved) {
+                abort(403, 'Unauthorized');
+            }
+        }
+        // Admin and department_head can view all reports
+
+        // Validate that all required relationships exist
+        if (!$defense->project) {
+            abort(404, 'Defense project not found');
         }
 
-        // Load additional relationships for comprehensive data
-        $defense->load([
-            'project.team.members.user' => function($query) {
-                $query->select('id', 'first_name', 'last_name', 'name', 'date_naissance', 'lieu_naissance');
-            }
-        ]);
+        if (!$defense->project->team) {
+            abort(404, 'Defense team not found');
+        }
 
-        $pdf = \PDF::loadView('defenses.report', compact('defense'));
+        // Get the first team member for student data
+        $teamMember = $defense->project->team->members()->first();
+        if (!$teamMember) {
+            abort(404, 'Team member not found');
+        }
+
+        if (!$teamMember->user) {
+            abort(404, 'User data not found');
+        }
+
+        $userData = $teamMember->user;
+
+        // Get jury members
+        $juries = $defense->juries()->with('teacher')->get();
+
+        // Get current academic year
+        $currentDate = now();
+        $academicYear = $currentDate->month >= 9
+            ? $currentDate->year . '/' . ($currentDate->year + 1)
+            : ($currentDate->year - 1) . '/' . $currentDate->year;
+
+        // Generate PDF
+        $pdf = \PDF::loadView('defenses.report', compact(
+            'defense',
+            'userData',
+            'juries',
+            'academicYear'
+        ));
 
         // Configure PDF options
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isPhpEnabled' => true,
-            'defaultFont' => 'Arial',
+            'dpi' => 150,
+            'defaultFont' => 'Times-Roman',
             'isRemoteEnabled' => true,
         ]);
 
-        $filename = 'PV_Soutenance_' . str_replace(' ', '_', $defense->project->subject->title ?? 'Defense') . '_' . now()->format('Y-m-d') . '.pdf';
+        // Generate filename
+        $filename = 'PV_Soutenance_' . str_replace(' ', '_', $userData->name) . '_' .
+                   ($defense->defense_date ? $defense->defense_date->format('Y-m-d') : date('Y-m-d')) . '.pdf';
 
         return $pdf->download($filename);
     }
@@ -890,5 +920,176 @@ class DefenseController extends Controller
 
         return redirect()->back()
             ->with('success', __('app.pv_notes_saved_successfully'));
+    }
+
+    /**
+     * Generate defense report (Procès-Verbal) for a student
+     */
+    public function generateReport(Defense $defense): View
+    {
+        $user = Auth::user();
+
+        // Load necessary relationships early
+        $defense->load(['project.team.members.user.speciality', 'juries.teacher']);
+
+        // Check if user can view this defense report
+        if ($user->role === 'student') {
+            // Students can only view their own defense reports
+            $teamMember = $defense->project->team->members()->where('student_id', $user->id)->first();
+            if (!$teamMember) {
+                abort(403, 'Unauthorized');
+            }
+        } elseif ($user->role === 'teacher') {
+            // Teachers can view reports for defenses they're involved in
+            $isInvolved = $defense->juries()->where('teacher_id', $user->id)->exists() ||
+                         $defense->subject->teacher_id === $user->id;
+            if (!$isInvolved) {
+                abort(403, 'Unauthorized');
+            }
+        }
+        // Admin and department_head can view all reports
+
+        // Validate that all required relationships exist
+        if (!$defense->project) {
+            abort(404, 'Defense project not found');
+        }
+
+        if (!$defense->project->team) {
+            abort(404, 'Defense team not found');
+        }
+
+        // Get the first team member for student data
+        $teamMember = $defense->project->team->members()->first();
+        if (!$teamMember) {
+            abort(404, 'Team member not found');
+        }
+
+        if (!$teamMember->user) {
+            abort(404, 'User data not found');
+        }
+
+        $userData = $teamMember->user;
+
+        // Get jury members
+        $juries = $defense->juries()->with('teacher')->get();
+
+        // Get current academic year
+        $currentDate = now();
+        $academicYear = $currentDate->month >= 9
+            ? $currentDate->year . '/' . ($currentDate->year + 1)
+            : ($currentDate->year - 1) . '/' . $currentDate->year;
+
+        return view('defenses.report', compact(
+            'defense',
+            'userData',
+            'juries',
+            'academicYear'
+        ));
+    }
+
+    /**
+     * Download defense report as PDF
+     */
+    public function downloadReport(Defense $defense)
+    {
+        $user = Auth::user();
+
+        // Load necessary relationships early
+        $defense->load(['project.team.members.user.speciality', 'juries.teacher']);
+
+        // Check if user can view this defense report
+        if ($user->role === 'student') {
+            // Students can only view their own defense reports
+            $teamMember = $defense->project->team->members()->where('student_id', $user->id)->first();
+            if (!$teamMember) {
+                abort(403, 'Unauthorized');
+            }
+        } elseif ($user->role === 'teacher') {
+            // Teachers can view reports for defenses they're involved in
+            $isInvolved = $defense->juries()->where('teacher_id', $user->id)->exists() ||
+                         $defense->subject->teacher_id === $user->id;
+            if (!$isInvolved) {
+                abort(403, 'Unauthorized');
+            }
+        }
+        // Admin and department_head can view all reports
+
+        // Validate that all required relationships exist
+        if (!$defense->project) {
+            abort(404, 'Defense project not found');
+        }
+
+        if (!$defense->project->team) {
+            abort(404, 'Defense team not found');
+        }
+
+        // Get the first team member for student data
+        $teamMember = $defense->project->team->members()->first();
+        if (!$teamMember) {
+            abort(404, 'Team member not found');
+        }
+
+        if (!$teamMember->user) {
+            abort(404, 'User data not found');
+        }
+
+        $userData = $teamMember->user;
+
+        // Get jury members
+        $juries = $defense->juries()->with('teacher')->get();
+
+        // Get current academic year
+        $currentDate = now();
+        $academicYear = $currentDate->month >= 9
+            ? $currentDate->year . '/' . ($currentDate->year + 1)
+            : ($currentDate->year - 1) . '/' . $currentDate->year;
+
+        // Generate PDF
+        $pdf = \PDF::loadView('defenses.report', compact(
+            'defense',
+            'userData',
+            'juries',
+            'academicYear'
+        ));
+
+        // Configure PDF options
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOptions([
+            'dpi' => 150,
+            'defaultFont' => 'Times-Roman',
+            'isRemoteEnabled' => true,
+        ]);
+
+        // Generate filename
+        $filename = 'PV_Soutenance_' . str_replace(' ', '_', $userData->name) . '_' .
+                   ($defense->defense_date ? $defense->defense_date->format('Y-m-d') : date('Y-m-d')) . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Update defense grades (for admin and department heads only)
+     */
+    public function updateGrades(Request $request, Defense $defense)
+    {
+        // Check authorization
+        if (!in_array(auth()->user()->role, ['admin', 'department_head'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Validate the request
+        $validated = $request->validate([
+            'manuscript_grade' => 'nullable|numeric|min:0|max:8',
+            'oral_grade' => 'nullable|numeric|min:0|max:6',
+            'questions_grade' => 'nullable|numeric|min:0|max:6',
+            'realization_grade' => 'nullable|numeric|min:0|max:20',
+            'final_grade' => 'nullable|numeric|min:0|max:20',
+        ]);
+
+        // Update the defense with the new grades
+        $defense->update($validated);
+
+        return redirect()->route('defenses.show', $defense)
+            ->with('success', __('app.grades_updated_successfully'));
     }
 }

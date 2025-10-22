@@ -26,11 +26,6 @@
                 <div class="card-body">
                     @if($subjectRequests->isEmpty())
                         @if(isset($teamPreferences) && $teamPreferences->isNotEmpty())
-                            <!-- Show team preferences even when no subject requests exist -->
-                            <div class="alert alert-info mb-4">
-                                <h5><i class="fas fa-list-ol"></i> {{ __('app.your_team_preferences') }}</h5>
-                                <p class="mb-0">{{ __('app.no_subject_requests_but_preferences_exist') }}</p>
-                            </div>
 
                             <div class="table-responsive">
                                 <table class="table table-hover">
@@ -40,6 +35,7 @@
                                             <th>{{ __('app.subject') }}</th>
                                             <th>{{ __('app.teacher') }}</th>
                                             <th>{{ __('app.status') }}</th>
+                                            <th>{{ __('app.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -78,6 +74,14 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-info">{{ __('app.preference') }}</span>
+                                                </td>
+                                                <td>
+                                                    <button type="button"
+                                                            class="btn btn-outline-primary btn-sm"
+                                                            onclick="showSubjectModal({{ $preference->subject->id }})"
+                                                            title="{{ __('app.view_details') }}">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach

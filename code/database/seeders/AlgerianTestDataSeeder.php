@@ -29,61 +29,71 @@ class AlgerianTestDataSeeder extends Seeder
                 'name' => 'Dr. Ahmed Benali',
                 'email' => 'ahmed.benali@univ.dz',
                 'specialty' => 'Intelligence Artificielle',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'Professeur'
             ],
             [
                 'name' => 'Dr. Fatima Boudjadar',
                 'email' => 'fatima.boudjadar@univ.dz',
                 'specialty' => 'Réseaux et Sécurité',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'MCA'
             ],
             [
                 'name' => 'Dr. Mohamed Cherif',
                 'email' => 'mohamed.cherif@univ.dz',
                 'specialty' => 'Génie Logiciel',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'MCB'
             ],
             [
                 'name' => 'Dr. Amina Kaddour',
                 'email' => 'amina.kaddour@univ.dz',
                 'specialty' => 'Base de Données',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'MAA'
             ],
             [
                 'name' => 'Dr. Youcef Mammeri',
                 'email' => 'youcef.mammeri@univ.dz',
                 'specialty' => 'Systèmes Embarqués',
-                'department' => 'Électronique'
+                'department' => 'Électronique',
+                'grade' => 'MAB'
             ],
             [
                 'name' => 'Dr. Samira Brahimi',
                 'email' => 'samira.brahimi@univ.dz',
                 'specialty' => 'Traitement d\'Images',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'MCA'
             ],
             [
                 'name' => 'Dr. Karim Belhadj',
                 'email' => 'karim.belhadj@univ.dz',
                 'specialty' => 'Mathématiques Appliquées',
-                'department' => 'Mathématiques'
+                'department' => 'Mathématiques',
+                'grade' => 'MCB'
             ],
             [
                 'name' => 'Dr. Nabila Chettab',
                 'email' => 'nabila.chettab@univ.dz',
                 'specialty' => 'Interface Homme-Machine',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'Professeur'
             ],
             [
                 'name' => 'Dr. Omar Zenati',
                 'email' => 'omar.zenati@univ.dz',
                 'specialty' => 'Cloud Computing',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'MAA'
             ],
             [
                 'name' => 'Dr. Leila Mokrani',
                 'email' => 'leila.mokrani@univ.dz',
                 'specialty' => 'Data Science',
-                'department' => 'Informatique'
+                'department' => 'Informatique',
+                'grade' => 'MCA'
             ]
         ];
 
@@ -97,6 +107,7 @@ class AlgerianTestDataSeeder extends Seeder
                 'role' => 'teacher',
                 'department' => $teacherData['department'],
                 'speciality' => $teacherData['specialty'],
+                'grade' => $teacherData['grade'],
                 'phone' => '+213' . rand(500000000, 799999999)
             ]);
             $createdTeachers[] = $teacher;
@@ -203,22 +214,22 @@ class AlgerianTestDataSeeder extends Seeder
             $createdStudents[] = $student;
 
             // Create student marks for calculating average_percentage
-            $subjects_for_marks = ['Programmation', 'Base de Données', 'Réseaux', 'Système', 'Math'];
-            foreach ($subjects_for_marks as $subject) {
-                $baseAverage = $studentData['average'];
-                $mark = $baseAverage + rand(-2, 2); // Variance around their average
-                $mark = max(0, min(20, $mark)); // Ensure between 0-20
+            // $subjects_for_marks = ['Programmation', 'Base de Données', 'Réseaux', 'Système', 'Math'];
+            // foreach ($subjects_for_marks as $subject) {
+            //     $baseAverage = $studentData['average'];
+            //     $mark = $baseAverage + rand(-2, 2); // Variance around their average
+            //     $mark = max(0, min(20, $mark)); // Ensure between 0-20
 
-                StudentMark::create([
-                    'user_id' => $student->id,
-                    'subject_name' => $subject,
-                    'mark' => $mark,
-                    'max_mark' => 20.0,
-                    'semester' => 'S' . rand(1, 6),
-                    'academic_year' => '2023-2024',
-                    'created_by' => 1, // Admin
-                ]);
-            }
+            //     StudentMark::create([
+            //         'user_id' => $student->id,
+            //         'subject_name' => $subject,
+            //         'mark' => $mark,
+            //         'max_mark' => 20.0,
+            //         'semester' => 'S' . rand(1, 6),
+            //         'academic_year' => '2023-2024',
+            //         'created_by' => 1, // Admin
+            //     ]);
+            // }
         }
 
         // Create diverse subjects for different specialties
@@ -342,37 +353,37 @@ class AlgerianTestDataSeeder extends Seeder
             'Équipe Epsilon'
         ];
 
-        for ($i = 0; $i < 5; $i++) {
-            // Create team with 2 students each
-            $team = Team::create([
-                'name' => $teamNames[$i],
-                'academic_year' => '2024-2025',
-                'status' => 'complete'
-            ]);
+        // for ($i = 0; $i < 5; $i++) {
+        //     // Create team with 2 students each
+        //     $team = Team::create([
+        //         'name' => $teamNames[$i],
+        //         'academic_year' => '2024-2025',
+        //         'status' => 'complete'
+        //     ]);
 
-            // Add team members
-            TeamMember::create([
-                'team_id' => $team->id,
-                'student_id' => $createdStudents[$i * 2]->id,
-                'role' => 'leader',
-                'joined_at' => now()
-            ]);
+        //     // Add team members
+        //     TeamMember::create([
+        //         'team_id' => $team->id,
+        //         'student_id' => $createdStudents[$i * 2]->id,
+        //         'role' => 'leader',
+        //         'joined_at' => now()
+        //     ]);
 
-            TeamMember::create([
-                'team_id' => $team->id,
-                'student_id' => $createdStudents[$i * 2 + 1]->id,
-                'role' => 'member',
-                'joined_at' => now()
-            ]);
+        //     TeamMember::create([
+        //         'team_id' => $team->id,
+        //         'student_id' => $createdStudents[$i * 2 + 1]->id,
+        //         'role' => 'member',
+        //         'joined_at' => now()
+        //     ]);
 
-            // Teams will be created without any subject preferences or assignments
-            // This allows testing of the subject request system
-        }
+        //     // Teams will be created without any subject preferences or assignments
+        //     // This allows testing of the subject request system
+        // }
 
         // Create allocation deadline (extended to allow subject requests)
         AllocationDeadline::create([
             'name' => 'Allocation PFE 2024-2025',
-            'academic_year' => '2024-2025',
+            'academic_year' => '2025/2026',
             'level' => 'L3',
             'preferences_start' => now()->subDays(30),
             'preferences_deadline' => Carbon::create(2026, 1, 10), // January 10, 2026
@@ -387,11 +398,8 @@ class AlgerianTestDataSeeder extends Seeder
 
         // Create some defense rooms
         $rooms = [
-            ['name' => 'Amphithéâtre A', 'capacity' => 100, 'location' => 'Bâtiment Central, RDC'],
-            ['name' => 'Salle de Conférence B', 'capacity' => 50, 'location' => 'Bâtiment Informatique, 1er étage'],
-            ['name' => 'Laboratoire C', 'capacity' => 30, 'location' => 'Bâtiment Recherche, 2ème étage'],
-            ['name' => 'Salle Polyvalente D', 'capacity' => 80, 'location' => 'Bâtiment Administration, RDC'],
-            ['name' => 'Salle de Réunion E', 'capacity' => 25, 'location' => 'Bâtiment Direction, 3ème étage']
+            ['name' => 'Amphi 100', 'capacity' => 40, 'location' => 'Bloc 5, Rez de-chaussée'],
+            ['name' => 'Amphi 101', 'capacity' => 50, 'location' => 'Bloc 5, Rez de-chaussée'],
         ];
 
         foreach ($rooms as $roomData) {
@@ -404,11 +412,11 @@ class AlgerianTestDataSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('✓ Created 10 Algerian teachers with different specialties');
-        $this->command->info('✓ Created 10 Algerian students with different levels (L3, M1, M2)');
-        $this->command->info('✓ Created 10 diverse subjects across different domains');
-        $this->command->info('✓ Created 5 complete teams WITHOUT subject assignments');
-        $this->command->info('✓ Created 5 defense rooms with different capacities');
-        $this->command->info('🎯 Teams are ready for subject request testing!');
+        // $this->command->info('✓ Created 10 Algerian teachers with different specialties');
+        // $this->command->info('✓ Created 10 Algerian students with different levels (L3, M1, M2)');
+        // $this->command->info('✓ Created 10 diverse subjects across different domains');
+        // $this->command->info('✓ Created 5 complete teams WITHOUT subject assignments');
+        // $this->command->info('✓ Created 5 defense rooms with different capacities');
+        // $this->command->info('🎯 Teams are ready for subject request testing!');
     }
 }

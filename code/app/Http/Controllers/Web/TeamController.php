@@ -590,6 +590,12 @@ class TeamController extends Controller
             'subject_ids.*' => 'exists:subjects,id'
         ]);
 
+        \Log::info('Updating preference order', [
+            'team_id' => $team->id,
+            'user_id' => $user->id,
+            'subject_ids' => $request->subject_ids
+        ]);
+
         if ($team->updatePreferenceOrder($request->subject_ids)) {
             return redirect()->back()
                 ->with('success', __('app.preference_order_updated'));

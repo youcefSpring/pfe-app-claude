@@ -195,18 +195,18 @@
                                                 <div class="d-flex gap-2 mb-3 flex-wrap">
                                                     @if($canSelectSubjects)
                                                         <a href="{{ route('teams.select-subject-form', $team) }}" class="btn btn-success">
-                                                            <i class="fas fa-book"></i> Select Subject
+                                                            <i class="fas fa-book"></i> {{ __('app.select_subject') }}
                                                         </a>
                                                     @endif
                                                     <a href="{{ route('teams.subject-preferences', $team) }}" class="btn btn-primary">
-                                                        <i class="fas fa-list-ol"></i> Manage Subject Preferences (Max 10)
+                                                        <i class="fas fa-list-ol"></i> {{ __('app.manage_subject_preferences_max') }}
                                                     </a>
                                                     <a href="{{ route('teams.subject-requests', $team) }}" class="btn btn-outline-success">
-                                                        <i class="fas fa-hand-paper"></i> Subject Requests
+                                                        <i class="fas fa-hand-paper"></i> {{ __('app.subject_requests') }}
                                                     </a>
                                                     @if($canSelectSubjects)
                                                         <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#requestSubjectModal">
-                                                            <i class="fas fa-paper-plane"></i> Request Subject
+                                                            <i class="fas fa-paper-plane"></i> {{ __('app.request_subject') }}
                                                         </button>
                                                     @endif
                                                     <a href="{{ route('teams.external-project-form', $team) }}" class="btn btn-outline-secondary">

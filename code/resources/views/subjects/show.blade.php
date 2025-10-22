@@ -10,11 +10,11 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">{{ $subject->title }}</h4>
                     <div>
-                        @can('update', $subject)
+                        @if(auth()->user()?->id === $subject->teacher_id)
                             <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                        @endcan
+                        @endif
                         @if($subject->status === 'draft' && auth()->user()->id === $subject->teacher_id)
                             <form action="{{ route('subjects.submit-validation', $subject) }}" method="POST" class="d-inline">
                                 @csrf

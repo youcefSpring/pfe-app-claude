@@ -65,10 +65,10 @@ class DefenseSchedulingService
             throw new \Exception('Defense already scheduled for this project');
         }
 
-        // Find available slot
-        $slot = $this->findAvailableSlot($constraints);
+        // Find available slot considering supervisor availability
+        $slot = $this->findAvailableSlotForProject($project, $constraints);
         if (!$slot) {
-            throw new \Exception('No available slots found for defense');
+            throw new \Exception('No available slots found for defense considering supervisor availability');
         }
 
         // Create defense
@@ -88,6 +88,44 @@ class DefenseSchedulingService
         $this->assignJury($defense, $constraints);
 
         return $defense;
+    }
+
+    /**
+     * Find available time slot for a specific project considering supervisor availability.
+     */
+    public function findAvailableSlotForProject(Project $project, array $constraints = []): ?array
+    {
+        $startDate = Carbon::parse($constraints['start_date'] ?? 'next monday');
+        $endDate = Carbon::parse($constraints['end_date'] ?? $startDate->copy()->addWeeks(4));
+        $duration = $constraints['duration'] ?? 60;
+
+        // Defense hours: 8:00 AM to 6:00 PM
+        $dailySlots = $this->generateDailyTimeSlots('08:00', '18:00', $duration);
+
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            // Skip weekends unless specified
+            if ($date->isWeekend() && !($constraints['include_weekends'] ?? false)) {
+                continue;
+            }
+
+            foreach ($dailySlots as $time) {
+                // Check if supervisor is available at this time
+                if (!$this->isSupervisorAvailable($project->supervisor_id, $date->format('Y-m-d'), $time)) {
+                    continue;
+                }
+
+                $room = $this->findAvailableRoom($date, $time, $duration);
+                if ($room) {
+                    return [
+                        'date' => $date->format('Y-m-d'),
+                        'time' => $time,
+                        'room' => $room,
+                    ];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -140,6 +178,21 @@ class DefenseSchedulingService
     }
 
     /**
+     * Check if supervisor is available at specific date and time.
+     */
+    private function isSupervisorAvailable(int $supervisorId, string $date, string $time): bool
+    {
+        // Check for conflicts with existing defenses where supervisor is assigned
+        $conflicts = DefenseJury::where('teacher_id', $supervisorId)
+            ->whereHas('defense', function ($q) use ($date, $time) {
+                $q->where('defense_date', $date)
+                  ->where('defense_time', $time);
+            })->exists();
+
+        return !$conflicts;
+    }
+
+    /**
      * Check if room is available at specific date and time.
      */
     private function isRoomAvailableAt(Room $room, string $date, string $time, int $duration): bool
@@ -182,19 +235,7 @@ class DefenseSchedulingService
     {
         $project = $defense->project;
 
-        // Check if supervisor is available at this time
-        $supervisorConflict = DefenseJury::where('teacher_id', $project->supervisor_id)
-            ->whereHas('defense', function ($q) use ($defense) {
-                $q->where('defense_date', $defense->defense_date)
-                  ->where('defense_time', $defense->defense_time)
-                  ->where('id', '!=', $defense->id); // Exclude current defense
-            })->exists();
-
-        if ($supervisorConflict) {
-            throw new \Exception('Supervisor is not available at the selected time - already assigned to another defense.');
-        }
-
-        // Assign supervisor as jury member
+        // Assign supervisor as jury member (conflicts already handled in slot selection)
         DefenseJury::create([
             'defense_id' => $defense->id,
             'teacher_id' => $project->supervisor_id,
@@ -211,7 +252,8 @@ class DefenseSchedulingService
             ]);
         }
 
-        // Find and assign examiner
+        // Find and assign examiner (exclude president if already assigned)
+        $constraints['exclude_president_id'] = $president ? $president->id : null;
         $examiner = $this->findJuryExaminer($defense, $constraints);
         if ($examiner) {
             DefenseJury::create([
@@ -271,7 +313,7 @@ class DefenseSchedulingService
     {
         $subjectKeywords = $defense->subject ? strtolower($defense->subject->keywords) : '';
 
-        return User::where('role', 'teacher')
+        $query = User::where('role', 'teacher')
             ->where('id', '!=', $defense->project->supervisor_id)
             ->whereDoesntHave('juryParticipations', function ($q) use ($defense) {
                 $q->whereHas('defense', function ($defenseQuery) use ($defense) {
@@ -281,8 +323,14 @@ class DefenseSchedulingService
             })
             ->whereDoesntHave('juryParticipations', function ($q) use ($defense) {
                 $q->where('defense_id', $defense->id);
-            })
-            ->get()
+            });
+
+        // Exclude president if already assigned
+        if (!empty($constraints['exclude_president_id'])) {
+            $query->where('id', '!=', $constraints['exclude_president_id']);
+        }
+
+        return $query->get()
             ->sortByDesc(function($teacher) use ($subjectKeywords) {
                 return $this->calculateSpecialityMatch($teacher->speciality, $subjectKeywords);
             })
@@ -301,41 +349,55 @@ class DefenseSchedulingService
         $teacherSpeciality = strtolower($teacherSpeciality);
         $subjectKeywords = strtolower($subjectKeywords);
 
-        // Define keyword mappings for better matching
+        // Define improved keyword mappings for better matching
         $keywordMappings = [
-            'ai' => ['intelligence artificielle', 'artificial intelligence', 'machine learning', 'deep learning', 'research', 'reconnaissance'],
-            'mobile' => ['application mobile', 'mobile app', 'android', 'ios', 'development', 'développement'],
-            'web' => ['développement web', 'web development', 'site web', 'application web', 'development', 'génie logiciel'],
-            'iot' => ['internet des objets', 'internet of things', 'capteurs', 'sensors', 'hardware', 'systèmes embarqués'],
-            'crypto' => ['cryptographie', 'cryptographic', 'sécurité', 'security', 'mathématiques appliquées', 'algorithmes'],
-            'cloud' => ['cloud computing', 'aws', 'azure', 'nuage', 'infrastructure'],
-            'database' => ['base de données', 'sql', 'nosql', 'données', 'database'],
-            'network' => ['réseau', 'networking', 'tcp', 'protocole', 'réseaux et sécurité'],
-            'image' => ['traitement d\'images', 'image processing', 'vision', 'opencv', 'research', 'traitement'],
-            'hmi' => ['interface homme-machine', 'human computer interaction', 'ui', 'ux', 'accessibility'],
-            'data' => ['data science', 'analyse de données', 'big data', 'analytics', 'analyse prédictive'],
-            'software' => ['génie logiciel', 'software engineering', 'development', 'développement'],
-            'hardware' => ['systèmes embarqués', 'embedded systems', 'hardware', 'électronique'],
-            'math' => ['mathématiques appliquées', 'applied mathematics', 'algorithmes', 'optimization']
+            'ai' => ['intelligence artificielle', 'artificial intelligence', 'machine learning', 'deep learning', 'apprentissage automatique', 'apprentissage', 'tensorflow', 'pytorch', 'neural', 'réseaux de neurones'],
+            'mobile' => ['application mobile', 'mobile app', 'android', 'ios', 'flutter', 'react native'],
+            'web' => ['développement web', 'web development', 'site web', 'application web', 'html', 'css', 'javascript', 'react', 'vue', 'angular'],
+            'iot' => ['internet des objets', 'internet of things', 'capteurs', 'sensors', 'arduino', 'raspberry'],
+            'crypto' => ['cryptographie', 'cryptographic', 'sécurité', 'security', 'chiffrement', 'encryption'],
+            'cloud' => ['cloud computing', 'aws', 'azure', 'google cloud', 'nuage', 'infrastructure'],
+            'database' => ['base de données', 'sql', 'nosql', 'données', 'database', 'mysql', 'postgresql', 'mongodb'],
+            'network' => ['réseau', 'networking', 'tcp', 'protocole', 'réseaux'],
+            'image' => ['traitement d\'images', 'image processing', 'vision', 'opencv', 'computer vision', 'traitement'],
+            'hmi' => ['interface homme-machine', 'human computer interaction', 'ui', 'ux', 'interface', 'utilisateur'],
+            'data' => ['data science', 'analyse de données', 'big data', 'analytics', 'analyse prédictive', 'données', 'python', 'r'],
+            'software' => ['génie logiciel', 'software engineering', 'développement', 'programming', 'programmation'],
+            'hardware' => ['systèmes embarqués', 'embedded systems', 'hardware', 'électronique', 'microcontroleur'],
+            'math' => ['mathématiques appliquées', 'applied mathematics', 'algorithmes', 'optimization', 'statistiques'],
+            'ecommerce' => ['e-commerce', 'commerce électronique', 'boutique en ligne', 'vente en ligne', 'recommandation'],
+            'recommendation' => ['recommandation', 'recommendation', 'système de recommandation', 'filtrage collaboratif']
         ];
 
         $score = 0.0;
 
-        // Direct word matching
-        $teacherWords = explode(' ', $teacherSpeciality);
-        $subjectWords = explode(' ', $subjectKeywords);
+        // Enhanced direct word matching with stemming-like approach
+        $teacherWords = array_filter(explode(' ', $teacherSpeciality), fn($w) => strlen($w) > 2);
+        $subjectWords = array_filter(explode(' ', $subjectKeywords), fn($w) => strlen($w) > 2);
 
         foreach ($teacherWords as $teacherWord) {
-            if (strlen($teacherWord) > 3) { // Skip very short words
-                foreach ($subjectWords as $subjectWord) {
-                    if (strlen($subjectWord) > 3 && strpos($subjectWord, $teacherWord) !== false) {
-                        $score += 2.0; // Direct match
+            foreach ($subjectWords as $subjectWord) {
+                // Exact match
+                if ($teacherWord === $subjectWord) {
+                    $score += 5.0;
+                }
+                // Partial match (one word contains the other)
+                elseif (strpos($subjectWord, $teacherWord) !== false || strpos($teacherWord, $subjectWord) !== false) {
+                    $score += 3.0;
+                }
+                // Similar words (Levenshtein distance)
+                elseif (strlen($teacherWord) > 4 && strlen($subjectWord) > 4) {
+                    $distance = levenshtein($teacherWord, $subjectWord);
+                    $maxLen = max(strlen($teacherWord), strlen($subjectWord));
+                    $similarity = ($maxLen - $distance) / $maxLen;
+                    if ($similarity > 0.7) {
+                        $score += $similarity * 2.0;
                     }
                 }
             }
         }
 
-        // Keyword mapping matching
+        // Enhanced keyword mapping matching
         foreach ($keywordMappings as $category => $keywords) {
             $teacherMatches = false;
             $subjectMatches = false;
@@ -350,7 +412,25 @@ class DefenseSchedulingService
             }
 
             if ($teacherMatches && $subjectMatches) {
-                $score += 3.0; // Category match
+                $score += 4.0; // Category match bonus
+            }
+        }
+
+        // Bonus for high-relevance specialities
+        $highRelevanceBonus = [
+            'intelligence artificielle' => ['apprentissage', 'machine learning', 'tensorflow', 'neural'],
+            'data science' => ['données', 'analyse', 'python', 'statistiques'],
+            'génie logiciel' => ['développement', 'programmation', 'application'],
+            'base de données' => ['données', 'sql', 'database'],
+        ];
+
+        foreach ($highRelevanceBonus as $speciality => $relevantTerms) {
+            if (strpos($teacherSpeciality, $speciality) !== false) {
+                foreach ($relevantTerms as $term) {
+                    if (strpos($subjectKeywords, $term) !== false) {
+                        $score += 2.0;
+                    }
+                }
             }
         }
 
@@ -497,7 +577,7 @@ class DefenseSchedulingService
             ->get()
             ->groupBy(function ($defense) {
                 return $defense->defense_date->format('Y-m-d') . '_' .
-                       $defense->defense_time->format('H:i') . '_' .
+                       \Carbon\Carbon::parse($defense->defense_time)->format('H:i') . '_' .
                        $defense->room_id;
             });
 
@@ -526,7 +606,7 @@ class DefenseSchedulingService
         foreach ($juryMembers as $teacherId => $participations) {
             $timeSlots = $participations->groupBy(function ($participation) {
                 return $participation->defense->defense_date->format('Y-m-d') . '_' .
-                       $participation->defense->defense_time->format('H:i');
+                       \Carbon\Carbon::parse($participation->defense->defense_time)->format('H:i');
             });
 
             foreach ($timeSlots as $slot => $defenses) {

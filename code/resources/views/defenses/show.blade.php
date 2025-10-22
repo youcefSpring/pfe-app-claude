@@ -18,8 +18,8 @@
                 @endif
                 @if($defense->status === 'completed')
                     <div class="btn-group">
-                        <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-danger">
-                            <i class="bi bi-file-pdf"></i> {{ __('app.download_pdf') }}
+                        <a href="{{ route('defenses.report', $defense) }}" class="btn btn-primary" target="_blank">
+                            <i class="bi bi-file-text"></i> {{ __('app.view_report') }}
                         </a>
                         <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
                             <span class="visually-hidden">{{ __('app.toggle_dropdown') }}</span>
@@ -241,6 +241,82 @@
                                 <small>{{ __('app.check_supervisor_results') }}</small>
                             </div>
                         @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- Defense Grades Form for Admin/President -->
+            @if(in_array(auth()->user()?->role, ['admin', 'department_head']) && $defense->status === 'completed')
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ __('app.defense_grades') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('defenses.update-grades', $defense) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="mb-3">
+                                <label for="manuscript_grade" class="form-label">{{ __('app.manuscript_grade') }} (6/8)</label>
+                                <input type="number" class="form-control @error('manuscript_grade') is-invalid @enderror"
+                                       id="manuscript_grade" name="manuscript_grade"
+                                       value="{{ old('manuscript_grade', $defense->manuscript_grade) }}"
+                                       step="0.01" min="0" max="8">
+                                @error('manuscript_grade')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="oral_grade" class="form-label">{{ __('app.oral_grade') }} (4/6)</label>
+                                <input type="number" class="form-control @error('oral_grade') is-invalid @enderror"
+                                       id="oral_grade" name="oral_grade"
+                                       value="{{ old('oral_grade', $defense->oral_grade) }}"
+                                       step="0.01" min="0" max="6">
+                                @error('oral_grade')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="questions_grade" class="form-label">{{ __('app.questions_grade') }} (5/6)</label>
+                                <input type="number" class="form-control @error('questions_grade') is-invalid @enderror"
+                                       id="questions_grade" name="questions_grade"
+                                       value="{{ old('questions_grade', $defense->questions_grade) }}"
+                                       step="0.01" min="0" max="6">
+                                @error('questions_grade')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="realization_grade" class="form-label">{{ __('app.realization_grade') }} (5/-)</label>
+                                <input type="number" class="form-control @error('realization_grade') is-invalid @enderror"
+                                       id="realization_grade" name="realization_grade"
+                                       value="{{ old('realization_grade', $defense->realization_grade) }}"
+                                       step="0.01" min="0" max="20">
+                                @error('realization_grade')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="final_grade" class="form-label">{{ __('app.final_grade') }} (20)</label>
+                                <input type="number" class="form-control @error('final_grade') is-invalid @enderror"
+                                       id="final_grade" name="final_grade"
+                                       value="{{ old('final_grade', $defense->final_grade) }}"
+                                       step="0.01" min="0" max="20">
+                                @error('final_grade')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> {{ __('app.save_grades') }}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             @endif

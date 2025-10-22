@@ -105,6 +105,37 @@
                             @endif
                         @endif
 
+                        @if($user->role === 'teacher' || $user->role === 'department_head')
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="grade" class="form-label">{{ __('app.grade') }}</label>
+                                        <select class="form-select @error('grade') is-invalid @enderror" id="grade" name="grade">
+                                            <option value="">{{ __('app.select_grade') }}</option>
+                                            <option value="Professeur" {{ old('grade', $user->grade) == 'Professeur' ? 'selected' : '' }}>Professeur</option>
+                                            <option value="MCA" {{ old('grade', $user->grade) == 'MCA' ? 'selected' : '' }}>MCA (Maître de Conférences A)</option>
+                                            <option value="MCB" {{ old('grade', $user->grade) == 'MCB' ? 'selected' : '' }}>MCB (Maître de Conférences B)</option>
+                                            <option value="MAA" {{ old('grade', $user->grade) == 'MAA' ? 'selected' : '' }}>MAA (Maître Assistant A)</option>
+                                            <option value="MAB" {{ old('grade', $user->grade) == 'MAB' ? 'selected' : '' }}>MAB (Maître Assistant B)</option>
+                                        </select>
+                                        @error('grade')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="speciality_teacher" class="form-label">{{ __('app.speciality') }}</label>
+                                        <input type="text" class="form-control @error('speciality') is-invalid @enderror"
+                                               id="speciality_teacher" name="speciality" value="{{ old('speciality', $user->speciality) }}">
+                                        @error('speciality')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">

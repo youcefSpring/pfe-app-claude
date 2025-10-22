@@ -23,6 +23,10 @@ class Defense extends Model
         'notes',
         'pv_notes',
         'final_grade',
+        'manuscript_grade',
+        'oral_grade',
+        'questions_grade',
+        'realization_grade',
         'scheduled_by',
         'scheduled_at',
         'academic_year',
@@ -33,9 +37,12 @@ class Defense extends Model
     {
         return [
             'defense_date' => 'date',
-            'defense_time' => 'time',
             'scheduled_at' => 'datetime',
             'final_grade' => 'decimal:2',
+            'manuscript_grade' => 'decimal:2',
+            'oral_grade' => 'decimal:2',
+            'questions_grade' => 'decimal:2',
+            'realization_grade' => 'decimal:2',
         ];
     }
 

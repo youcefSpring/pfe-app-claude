@@ -297,11 +297,15 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{defense}', [DefenseController::class, 'destroy'])->name('destroy');
             Route::post('/{defense}/complete', [DefenseController::class, 'complete'])->name('complete');
             Route::post('/{defense}/add-pv-notes', [DefenseController::class, 'addPvNotes'])->name('add-pv-notes');
-            Route::get('/{defense}/report', [DefenseController::class, 'generateReport'])->name('generate-report');
+            Route::put('/{defense}/update-grades', [DefenseController::class, 'updateGrades'])->name('update-grades');
             Route::get('/{defense}/report/pdf', [DefenseController::class, 'downloadReportPdf'])->name('download-report-pdf');
             Route::get('/{defense}/student/{student}/report/pdf', [DefenseController::class, 'downloadStudentReportPdf'])->name('download-student-report-pdf');
             Route::get('/{defense}/batch-reports/pdf', [DefenseController::class, 'downloadBatchStudentReports'])->name('download-batch-reports-pdf');
         });
+
+        // Procès-verbal routes (accessible to all authorized users)
+        Route::get('/{defense}/report', [DefenseController::class, 'generateReport'])->name('report');
+        Route::get('/{defense}/report/download', [DefenseController::class, 'downloadReport'])->name('report.download');
 
         // Dynamic route for viewing specific defenses (must be at the end)
         Route::get('/{defense}', [DefenseController::class, 'show'])->name('show');
@@ -346,6 +350,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('specialities', \App\Http\Controllers\Admin\SpecialityController::class);
         Route::patch('/specialities/{speciality}/toggle-status', [\App\Http\Controllers\Admin\SpecialityController::class, 'toggleStatus'])->name('specialities.toggle-status');
         Route::get('/specialities/api/current-year', [\App\Http\Controllers\Admin\SpecialityController::class, 'getCurrentAcademicYear'])->name('specialities.current-year');
+
+        // Team Management
+        Route::get('/teams', [AdminController::class, 'teams'])->name('teams');
+        Route::post('/teams/assign-subject', [AdminController::class, 'assignSubjectToTeam'])->name('teams.assign-subject');
+        Route::delete('/teams/{team}/remove-subject', [AdminController::class, 'removeSubjectFromTeam'])->name('teams.remove-subject');
+        Route::get('/available-subjects', [AdminController::class, 'getAvailableSubjects'])->name('available-subjects');
 
         // Allocation Management
         Route::prefix('allocations')->name('allocations.')->group(function () {

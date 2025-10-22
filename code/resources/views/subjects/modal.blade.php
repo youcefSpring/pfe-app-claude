@@ -172,7 +172,7 @@
             </div>
         @endif
 
-        @if((auth()->user()?->id === $subject->teacher_id) || (auth()->user()?->role === 'admin'))
+        @if(auth()->user()?->id === $subject->teacher_id)
         <div class="mt-3">
             <div class="d-grid gap-2">
                 <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-primary btn-sm">

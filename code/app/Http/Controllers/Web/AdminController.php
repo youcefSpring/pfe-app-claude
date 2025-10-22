@@ -15,9 +15,11 @@ use App\Services\StudentImportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class AdminController extends Controller
@@ -766,6 +768,116 @@ public function processBulkImport(Request $request): RedirectResponse
         ];
 
         return view('admin.reports.teams', compact('stats'));
+    }
+
+    /**
+     * Display teams management page
+     */
+    public function teams(Request $request): View
+    {
+        $query = Team::with(['members.user', 'subject', 'supervisor']);
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('members.user', function($userQ) use ($search) {
+                      $userQ->where('name', 'like', "%{$search}%")
+                            ->orWhere('matricule', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('subject', function($subjectQ) use ($search) {
+                      $subjectQ->where('title', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply academic year filter
+        if ($request->filled('academic_year')) {
+            $query->where('academic_year', $request->academic_year);
+        }
+
+        $teams = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Get filter options
+        $statuses = ['forming', 'active', 'completed'];
+        $academicYears = Team::distinct()->pluck('academic_year')->filter();
+
+        return view('admin.teams.index', compact('teams', 'statuses', 'academicYears'));
+    }
+
+    /**
+     * Assign subject to team
+     */
+    public function assignSubjectToTeam(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'team_id' => 'required|exists:teams,id',
+            'subject_id' => 'required|exists:subjects,id',
+        ]);
+
+        $team = Team::findOrFail($validated['team_id']);
+        $subject = Subject::findOrFail($validated['subject_id']);
+
+        // Check if subject is available
+        if ($subject->status !== 'validated') {
+            return redirect()->back()
+                ->with('error', __('app.subject_not_available_for_assignment'));
+        }
+
+        // Check if subject is already assigned
+        if (Team::where('subject_id', $subject->id)->where('id', '!=', $team->id)->exists()) {
+            return redirect()->back()
+                ->with('error', __('app.subject_already_assigned'));
+        }
+
+        // Assign subject to team
+        $team->update([
+            'subject_id' => $subject->id,
+            'supervisor_id' => $subject->teacher_id,
+            'status' => 'active'
+        ]);
+
+        // Create project if it doesn't exist
+        if (!$team->project) {
+            \App\Models\Project::create([
+                'title' => $subject->title,
+                'description' => $subject->description,
+                'subject_id' => $subject->id,
+                'team_id' => $team->id,
+                'supervisor_id' => $subject->teacher_id,
+                'status' => 'active',
+                'academic_year' => $team->academic_year,
+            ]);
+        }
+
+        return redirect()->back()
+            ->with('success', __('app.subject_assigned_successfully'));
+    }
+
+    /**
+     * Remove subject assignment from team
+     */
+    public function removeSubjectFromTeam(Team $team): RedirectResponse
+    {
+        $team->update([
+            'subject_id' => null,
+            'supervisor_id' => null,
+            'status' => 'forming'
+        ]);
+
+        // Delete associated project if it exists
+        if ($team->project) {
+            $team->project->delete();
+        }
+
+        return redirect()->back()
+            ->with('success', __('app.subject_assignment_removed'));
     }
 
     /**
@@ -1544,5 +1656,30 @@ public function processBulkImport(Request $request): RedirectResponse
 
         return redirect()->back()
             ->with('success', __('app.birth_certificate_rejected', ['name' => $user->name]));
+    }
+
+    /**
+     * Get available subjects for assignment (AJAX endpoint)
+     */
+    public function getAvailableSubjects(): JsonResponse
+    {
+        $availableSubjects = Subject::where('status', 'validated')
+            ->whereNotIn('id', Team::whereNotNull('subject_id')->pluck('subject_id'))
+            ->with('teacher')
+            ->get()
+            ->map(function ($subject) {
+                return [
+                    'id' => $subject->id,
+                    'title' => $subject->title,
+                    'description' => Str::limit($subject->description, 150),
+                    'teacher_name' => $subject->teacher->name ?? __('app.no_teacher'),
+                    'level' => $subject->level ?? '',
+                ];
+            });
+
+        return response()->json([
+            'subjects' => $availableSubjects,
+            'count' => $availableSubjects->count()
+        ]);
     }
 }

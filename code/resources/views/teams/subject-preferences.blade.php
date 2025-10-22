@@ -93,7 +93,8 @@
                         <div id="preference-list">
                             @foreach($currentPreferences as $preference)
                                 <div class="card mb-2 preference-item @if($preference->is_allocated) border-success @endif"
-                                     data-subject-id="{{ $preference->subject_id }}">
+                                     data-subject-id="{{ $preference->subject_id }}"
+                                     data-is-allocated="{{ $preference->is_allocated ? 'true' : 'false' }}">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="d-flex align-items-start flex-grow-1">
@@ -173,7 +174,6 @@
                             <form id="update-order-form" action="{{ route('teams.update-preference-order', $team) }}" method="POST" class="mt-3">
                                 @csrf
                                 @method('PUT')
-                                <input type="hidden" name="subject_ids" id="subject-ids-input">
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary fw-bold shadow btn-enhanced">
                                         <i class="fas fa-save text-white"></i> {{ __('app.save_preference_order') }}
@@ -487,10 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Reorder functionality
-    const moveUpButtons = document.querySelectorAll('.move-up');
-    const moveDownButtons = document.querySelectorAll('.move-down');
     const updateOrderForm = document.getElementById('update-order-form');
-    const subjectIdsInput = document.getElementById('subject-ids-input');
 
     function swapPreferences(button, direction) {
         const currentItem = button.closest('.preference-item');
@@ -513,8 +510,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const items = document.querySelectorAll('.preference-item');
         items.forEach((item, index) => {
             const orderBadge = item.querySelector('.badge');
-            if (orderBadge && !orderBadge.classList.contains('bg-success')) {
-                orderBadge.textContent = index + 1;
+            if (orderBadge) {
+                const newOrder = index + 1;
+                const isAllocated = item.dataset.isAllocated === 'true';
+
+                // Always update the badge text (number)
+                const oldOrder = orderBadge.textContent;
+                orderBadge.textContent = newOrder;
+
+                // Add a brief highlight animation if the order changed
+                if (oldOrder !== newOrder.toString()) {
+                    orderBadge.style.transform = 'scale(1.2)';
+                    orderBadge.style.transition = 'transform 0.2s ease';
+                    setTimeout(() => {
+                        orderBadge.style.transform = 'scale(1)';
+                    }, 200);
+                }
+
+                // Update badge color based on new position (only for non-allocated preferences)
+                if (!isAllocated) {
+                    // Remove all existing badge color classes
+                    orderBadge.classList.remove('bg-success', 'bg-primary', 'bg-warning', 'bg-secondary');
+
+                    // Add new color class based on position
+                    let newBadgeClass = 'bg-secondary';
+                    if (newOrder <= 3) {
+                        newBadgeClass = 'bg-success'; // Green for top 3
+                    } else if (newOrder >= 8) {
+                        newBadgeClass = 'bg-warning'; // Orange for bottom 3
+                    } else {
+                        newBadgeClass = 'bg-primary'; // Blue for middle
+                    }
+
+                    orderBadge.classList.add(newBadgeClass);
+                }
             }
         });
     }
@@ -536,20 +565,47 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    moveUpButtons.forEach(button => {
-        button.addEventListener('click', () => swapPreferences(button, 'up'));
-    });
-
-    moveDownButtons.forEach(button => {
-        button.addEventListener('click', () => swapPreferences(button, 'down'));
+    // Use event delegation for move buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.move-up')) {
+            e.preventDefault();
+            const button = e.target.closest('.move-up');
+            if (!button.disabled) {
+                swapPreferences(button, 'up');
+            }
+        } else if (e.target.closest('.move-down')) {
+            e.preventDefault();
+            const button = e.target.closest('.move-down');
+            if (!button.disabled) {
+                swapPreferences(button, 'down');
+            }
+        }
     });
 
     // Update order form submission
     if (updateOrderForm) {
         updateOrderForm.addEventListener('submit', function(e) {
+            // Clear existing hidden inputs
+            const existingInputs = updateOrderForm.querySelectorAll('input[name="subject_ids[]"]');
+            existingInputs.forEach(input => input.remove());
+
+            // Get current order of preferences
             const items = document.querySelectorAll('.preference-item');
-            const subjectIds = Array.from(items).map(item => item.dataset.subjectId);
-            subjectIdsInput.value = JSON.stringify(subjectIds);
+            console.log('Found items:', items.length);
+
+            // Create hidden inputs for each subject ID in the correct order
+            items.forEach((item, index) => {
+                const subjectId = item.dataset.subjectId;
+                console.log(`Item ${index + 1}: Subject ID ${subjectId}`);
+
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'subject_ids[]';
+                hiddenInput.value = subjectId;
+                updateOrderForm.appendChild(hiddenInput);
+            });
+
+            console.log('Form data being submitted:', new FormData(updateOrderForm));
         });
     }
 

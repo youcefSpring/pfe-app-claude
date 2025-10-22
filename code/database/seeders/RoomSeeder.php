@@ -11,12 +11,12 @@ class RoomSeeder extends Seeder
     {
         $rooms = [
             [
-                'name' => 'Amphi 100',
+                'name' => 'Amphi A',
                 'capacity' => 200,
                 'equipment' => 'projector'
             ],
             [
-                'name' => 'Amphi 101',
+                'name' => 'Amphi B',
                 'capacity' => 150,
                 'equipment' => 'projector',
             ],

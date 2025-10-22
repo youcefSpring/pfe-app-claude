@@ -45,13 +45,16 @@
                                 <select class="form-select" id="status" name="status">
                                     <option value="">{{ __('app.all_statuses') }} ({{ $statusCounts['all'] }})</option>
                                     <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>
-                                        {{ __('app.scheduled') }} ({{ $statusCounts['scheduled'] }})
+                                        {{ __('app.defense_status_scheduled') }} ({{ $statusCounts['scheduled'] }})
+                                    </option>
+                                    <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>
+                                        {{ __('app.defense_status_in_progress') }} ({{ $statusCounts['in_progress'] ?? 0 }})
                                     </option>
                                     <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>
-                                        {{ __('app.completed') }} ({{ $statusCounts['completed'] }})
+                                        {{ __('app.defense_status_completed') }} ({{ $statusCounts['completed'] }})
                                     </option>
                                     <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>
-                                        {{ __('app.cancelled') }} ({{ $statusCounts['cancelled'] ?? 0 }})
+                                        {{ __('app.defense_status_cancelled') }} ({{ $statusCounts['cancelled'] ?? 0 }})
                                     </option>
                                 </select>
                             </div>
@@ -97,10 +100,10 @@
                                 <!-- View Toggle -->
                                 <div class="btn-group" role="group" aria-label="View toggle">
                                     <button type="button" class="btn btn-outline-secondary btn-sm active" id="cardViewBtn">
-                                        <i class="bi bi-grid-3x3-gap me-1"></i>Cartes
+                                        <i class="bi bi-grid-3x3-gap me-1"></i>{{ __('app.cards') }}
                                     </button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" id="tableViewBtn">
-                                        <i class="bi bi-table me-1"></i>Tableau
+                                        <i class="bi bi-table me-1"></i>{{ __('app.table') }}
                                     </button>
                                 </div>
                                 <div class="text-muted">
@@ -119,19 +122,19 @@
                                             <div class="d-flex justify-content-between align-items-start">
                                                 @if($defense->status === 'scheduled')
                                                     <span class="badge bg-warning text-dark fs-6">
-                                                        <i class="bi bi-calendar-event me-1"></i>{{ __('app.scheduled') }}
+                                                        <i class="bi bi-calendar-event me-1"></i>{{ __('app.defense_status_scheduled') }}
                                                     </span>
                                                 @elseif($defense->status === 'in_progress')
                                                     <span class="badge bg-primary fs-6">
-                                                        <i class="bi bi-play-circle me-1"></i>{{ __('app.in_progress') }}
+                                                        <i class="bi bi-play-circle me-1"></i>{{ __('app.defense_status_in_progress') }}
                                                     </span>
                                                 @elseif($defense->status === 'completed')
                                                     <span class="badge bg-success fs-6">
-                                                        <i class="bi bi-check-circle me-1"></i>{{ __('app.completed') }}
+                                                        <i class="bi bi-check-circle me-1"></i>{{ __('app.defense_status_completed') }}
                                                     </span>
                                                 @elseif($defense->status === 'cancelled')
                                                     <span class="badge bg-danger fs-6">
-                                                        <i class="bi bi-x-circle me-1"></i>{{ __('app.cancelled') }}
+                                                        <i class="bi bi-x-circle me-1"></i>{{ __('app.defense_status_cancelled') }}
                                                     </span>
                                                 @else
                                                     <span class="badge bg-secondary fs-6">{{ ucfirst($defense->status) }}</span>
@@ -265,11 +268,11 @@
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
 
-                                                        <a href="{{ route('defenses.download-report-pdf', $defense) }}"
-                                                           class="btn btn-outline-danger btn-sm"
-                                                           title="{{ __('app.download_pdf_report') }}"
+                                                        <a href="{{ route('defenses.report', $defense) }}"
+                                                           class="btn btn-outline-primary btn-sm"
+                                                           title="{{ __('app.view_report') }}"
                                                            target="_blank">
-                                                            <i class="bi bi-file-pdf"></i>
+                                                            <i class="bi bi-file-text"></i>
                                                         </a>
                                                     @endif
 
@@ -378,8 +381,8 @@
                                                         <a href="{{ route('defenses.edit', $defense) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-sm btn-outline-danger" title="PDF" target="_blank">
-                                                            <i class="bi bi-file-pdf"></i>
+                                                        <a href="{{ route('defenses.report', $defense) }}" class="btn btn-sm btn-outline-primary" title="{{ __('app.view_report') }}" target="_blank">
+                                                            <i class="bi bi-file-text"></i>
                                                         </a>
                                                     @endif
                                                 </div>

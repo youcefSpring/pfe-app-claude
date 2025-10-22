@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Subject Requests Management')
+@section('page-title', __('app.subject_requests_management'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,40 +8,40 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">Subject Requests Management</h4>
-                    <p class="text-muted mb-0">Review and manage team subject requests</p>
+                    <h4 class="card-title mb-0">{{ __('app.subject_requests_management') }}</h4>
+                    <p class="text-muted mb-0">{{ __('app.review_manage_team_subject_requests') }}</p>
                 </div>
                 <div class="card-body">
                     @if($subjectRequests->isEmpty())
                         <div class="text-center py-5">
-                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Subject Requests</h5>
-                            <p class="text-muted">There are currently no subject requests to review.</p>
+                            <i class="bi bi-clipboard-x display-1 text-muted mb-3"></i>
+                            <h5 class="text-muted">{{ __('app.no_subject_requests') }}</h5>
+                            <p class="text-muted">{{ __('app.no_subject_requests_to_review') }}</p>
                         </div>
                     @else
                         <!-- Filter tabs -->
                         <ul class="nav nav-tabs mb-4" id="requestTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
-                                    <i class="fas fa-clock"></i> Pending
+                                    <i class="bi bi-clock"></i> {{ __('app.pending') }}
                                     <span class="badge bg-warning ms-1">{{ $subjectRequests->where('status', 'pending')->count() }}</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">
-                                    <i class="fas fa-check"></i> Approved
+                                    <i class="bi bi-check-circle"></i> {{ __('app.approved') }}
                                     <span class="badge bg-success ms-1">{{ $subjectRequests->where('status', 'approved')->count() }}</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">
-                                    <i class="fas fa-times"></i> Rejected
+                                    <i class="bi bi-x-circle"></i> {{ __('app.rejected') }}
                                     <span class="badge bg-danger ms-1">{{ $subjectRequests->where('status', 'rejected')->count() }}</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
-                                    <i class="fas fa-list"></i> All
+                                    <i class="bi bi-list"></i> {{ __('app.all') }}
                                     <span class="badge bg-primary ms-1">{{ $subjectRequests->count() }}</span>
                                 </button>
                             </li>
@@ -85,21 +85,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="responseModalTitle">Respond to Request</h5>
+                <h5 class="modal-title" id="responseModalTitle">{{ __('app.respond_to_request') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="responseForm" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="admin_response" class="form-label">Response Message</label>
+                        <label for="admin_response" class="form-label">{{ __('app.response_message') }}</label>
                         <textarea name="admin_response" id="admin_response" class="form-control" rows="4"
-                                  placeholder="Enter your response message..."></textarea>
+                                  placeholder="{{ __('app.enter_response_message') }}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn" id="responseSubmitBtn">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.cancel') }}</button>
+                    <button type="submit" class="btn" id="responseSubmitBtn">{{ __('app.submit') }}</button>
                 </div>
             </form>
         </div>

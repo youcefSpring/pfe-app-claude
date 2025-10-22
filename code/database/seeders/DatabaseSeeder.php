@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             SubjectSeeder::class,
             TeamSeeder::class,
             AlgerianTestDataSeeder::class,
-            TeamLeadershipTestSeeder::class,
+            // TeamLeadershipTestSeeder::class,
         ]);
     }
 }

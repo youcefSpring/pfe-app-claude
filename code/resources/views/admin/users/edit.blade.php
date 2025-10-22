@@ -157,12 +157,18 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="grade" class="form-label">Grade</label>
-                                    <input type="text" class="form-control @error('grade') is-invalid @enderror"
-                                           id="grade" name="grade" value="{{ old('grade', $user->grade) }}">
+                                    <select class="form-select @error('grade') is-invalid @enderror" id="grade" name="grade">
+                                        <option value="">{{ __('app.select_grade') }}</option>
+                                        <option value="Professeur" {{ old('grade', $user->grade) == 'Professeur' ? 'selected' : '' }}>Professeur</option>
+                                        <option value="MCA" {{ old('grade', $user->grade) == 'MCA' ? 'selected' : '' }}>MCA (Maître de Conférences A)</option>
+                                        <option value="MCB" {{ old('grade', $user->grade) == 'MCB' ? 'selected' : '' }}>MCB (Maître de Conférences B)</option>
+                                        <option value="MAA" {{ old('grade', $user->grade) == 'MAA' ? 'selected' : '' }}>MAA (Maître Assistant A)</option>
+                                        <option value="MAB" {{ old('grade', $user->grade) == 'MAB' ? 'selected' : '' }}>MAB (Maître Assistant B)</option>
+                                    </select>
                                     @error('grade')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="form-text text-muted">Academic grade for teachers (e.g., Professeur, Maître de Conférences)</small>
+                                    <small class="form-text text-muted">Grade académique pour les enseignants</small>
                                 </div>
                             </div>
                             <div class="col-md-6">

@@ -80,37 +80,37 @@
                     @if($defenses->count() > 0)
                         <div class="row">
                             @foreach($defenses->take(6) as $defense)
-                                <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="col-md-6 col-lg-4 mb-2">
                                     <div class="card border-start border-{{ $defense->status === 'completed' ? 'success' : ($defense->status === 'in_progress' ? 'warning' : ($defense->status === 'cancelled' ? 'danger' : 'primary')) }} border-3">
-                                        <div class="card-body p-3">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h6 class="card-title mb-1">{{ $defense->subject->title ?? 'Defense' }}</h6>
-                                                <span class="badge bg-{{ $defense->status === 'completed' ? 'success' : ($defense->status === 'in_progress' ? 'warning' : ($defense->status === 'cancelled' ? 'danger' : 'primary')) }}">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <h6 class="card-title mb-1 small">{{ Str::limit($defense->subject->title ?? 'Defense', 25) }}</h6>
+                                                <span class="badge badge-sm bg-{{ $defense->status === 'completed' ? 'success' : ($defense->status === 'in_progress' ? 'warning' : ($defense->status === 'cancelled' ? 'danger' : 'primary')) }}">
                                                     {{ ucfirst(str_replace('_', ' ', $defense->status)) }}
                                                 </span>
                                             </div>
-                                            <p class="text-muted small mb-2">{{ $defense->subject->teacher->name ?? 'No Teacher' }}</p>
+                                            <p class="text-muted small mb-1">{{ $defense->subject->teacher->name ?? 'No Teacher' }}</p>
                                             @if($defense->defense_date && $defense->defense_time)
-                                                <p class="small mb-2">
+                                                <p class="small mb-1">
                                                     <i class="bi bi-calendar me-1"></i>
-                                                    {{ \Carbon\Carbon::parse($defense->defense_date)->format('M d, Y') }} at {{ \Carbon\Carbon::parse($defense->defense_time)->format('g:i A') }}
+                                                    {{ \Carbon\Carbon::parse($defense->defense_date)->format('M d') }} at {{ \Carbon\Carbon::parse($defense->defense_time)->format('g:i A') }}
                                                 </p>
                                             @elseif($defense->defense_date)
-                                                <p class="small mb-2">
+                                                <p class="small mb-1">
                                                     <i class="bi bi-calendar me-1"></i>
                                                     {{ \Carbon\Carbon::parse($defense->defense_date)->format('M d, Y') }}
                                                 </p>
                                             @endif
                                             @if($defense->room)
-                                                <p class="small mb-2">
+                                                <p class="small mb-1">
                                                     <i class="bi bi-geo-alt me-1"></i>
                                                     {{ $defense->room->name }}
                                                 </p>
                                             @endif
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">{{ $defense->duration ?? 60 }} min</small>
-                                                <a href="{{ route('defenses.show', $defense) }}" class="btn btn-outline-primary btn-sm">
-                                                    View Details
+                                                <small class="text-muted">{{ $defense->duration ?? 60 }}min</small>
+                                                <a href="{{ route('defenses.show', $defense) }}" class="btn btn-outline-primary btn-xs">
+                                                    Details
                                                 </a>
                                             </div>
                                         </div>
@@ -138,16 +138,7 @@
 
 <script>
 // Defense data from Laravel
-const defenses = @json($defenses->map(function($defense) {
-    return [
-        'id' => $defense->id,
-        'title' => $defense->subject->title ?? 'Defense',
-        'date' => $defense->defense_date ? \Carbon\Carbon::parse($defense->defense_date)->format('Y-m-d') : null,
-        'time' => $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : null,
-        'status' => $defense->status,
-        'room' => $defense->room->name ?? 'TBD',
-    ];
-}));
+const defenses = @json($defensesJson);
 
 let currentDate = new Date();
 
@@ -168,8 +159,8 @@ function generateCalendar(year, month) {
 
         for (let day = 0; day < 7; day++) {
             const cell = document.createElement('td');
-            cell.className = 'p-2 border-end border-bottom position-relative';
-            cell.style.height = '120px';
+            cell.className = 'p-1 border-end border-bottom position-relative';
+            cell.style.height = '80px';
             cell.style.verticalAlign = 'top';
 
             if (week === 0 && day < startingDayOfWeek) {
@@ -181,7 +172,7 @@ function generateCalendar(year, month) {
             } else {
                 // Days of current month
                 const dayNumber = document.createElement('div');
-                dayNumber.className = 'fw-bold mb-1';
+                dayNumber.className = 'fw-bold mb-1 small';
                 dayNumber.textContent = date;
                 cell.appendChild(dayNumber);
 
@@ -191,11 +182,12 @@ function generateCalendar(year, month) {
 
                 dayDefenses.forEach(defense => {
                     const defenseDiv = document.createElement('div');
-                    defenseDiv.className = `small p-1 mb-1 rounded text-white bg-${getStatusColor(defense.status)}`;
-                    defenseDiv.style.fontSize = '10px';
+                    defenseDiv.className = `tiny p-1 mb-1 rounded text-white bg-${getStatusColor(defense.status)} defense-event`;
+                    defenseDiv.style.fontSize = '9px';
+                    defenseDiv.style.lineHeight = '1.1';
                     defenseDiv.innerHTML = `
-                        <div class="fw-bold">${defense.time || 'TBD'}</div>
-                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${defense.title.substring(0, 15)}...</div>
+                        <div class="fw-bold" style="font-size: 8px;">${defense.time || 'TBD'}</div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 8px;">${defense.title.substring(0, 12)}...</div>
                     `;
                     defenseDiv.onclick = () => window.location.href = `/defenses/${defense.id}`;
                     defenseDiv.style.cursor = 'pointer';
@@ -249,16 +241,52 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .table td {
     border-color: #dee2e6 !important;
+    padding: 2px !important;
+}
+
+.table th {
+    padding: 8px !important;
+    font-size: 0.875rem;
 }
 
 .defense-event {
     cursor: pointer;
     transition: all 0.2s;
+    margin-bottom: 2px !important;
 }
 
 .defense-event:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tiny {
+    font-size: 0.6rem !important;
+}
+
+#calendar {
+    font-size: 0.8rem;
+}
+
+#calendar .table td {
+    height: 80px;
+    vertical-align: top;
+    position: relative;
+}
+
+.btn-xs {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.675rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.badge-sm {
+    font-size: 0.65em;
+}
+
+.card-body.p-2 {
+    padding: 0.5rem !important;
 }
 </style>
 @endsection

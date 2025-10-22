@@ -232,6 +232,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.teams*') ? 'active' : '' }}" href="{{ route('admin.teams') }}">
+                                <i class="bi bi-people me-2"></i>
+                                {{ __('app.team_management') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.marks*') ? 'active' : '' }}" href="{{ route('admin.marks') }}">
                                 <i class="bi bi-award me-2"></i>
                                 {{ __('app.student_marks') }}
