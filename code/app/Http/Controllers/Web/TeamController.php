@@ -489,7 +489,7 @@ class TeamController extends Controller
                     $q->whereIn('specialities.id', $teamSpecialityIds);
                 });
             }
-            // If team has no specialities but relationships exist, don't show any subjects
+            // If team has no specialities but relationships exist, show all subjects (fallback)
         }
         // If no speciality relationships exist, show all validated subjects
 

@@ -100,10 +100,6 @@ class StudentSetupController extends Controller
             $rules["semester_{$i}_mark"] = 'required|numeric|min:0|max:20';
         }
 
-        // Single academic year for all marks
-        if ($requiredMarks > 0) {
-            $rules['academic_year'] = 'required|integer|min:2020|max:' . (now()->year - 1);
-        }
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -131,7 +127,7 @@ class StudentSetupController extends Controller
                 'user_id' => $user->id,
                 'subject_name' => $semesterName,
                 'mark' => $request->input("semester_{$i}_mark"),
-                'academic_year' => $request->input('academic_year'),
+                'academic_year' => now()->year - 1, // Use previous academic year as default
                 'semester' => "S{$i}",
                 'created_by' => $user->id,
             ]);

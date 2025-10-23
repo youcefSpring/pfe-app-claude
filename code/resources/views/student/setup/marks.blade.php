@@ -83,28 +83,6 @@
                                                 @endfor
                                             </div>
 
-                                            @if($requiredMarks > 0)
-                                                <div class="mt-3">
-                                                    <label for="academic_year" class="form-label fw-bold">
-                                                        {{ __('app.academic_year') }} <span class="text-danger">*</span>
-                                                    </label>
-                                                    <select class="form-select @error('academic_year') is-invalid @enderror"
-                                                            id="academic_year"
-                                                            name="academic_year"
-                                                            required>
-                                                        <option value="">{{ __('app.select_year') }}</option>
-                                                        @for($year = 2020; $year < now()->year; $year++)
-                                                            <option value="{{ $year }}" {{ old('academic_year') == $year ? 'selected' : '' }}>
-                                                                {{ $year }}-{{ $year + 1 }}
-                                                            </option>
-                                                        @endfor
-                                                    </select>
-                                                    @error('academic_year')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                    <small class="text-muted">{{ __('app.year_when_marks_obtained') }}</small>
-                                                </div>
-                                            @endif
                                         </div>
                                     </div>
                                 </div>

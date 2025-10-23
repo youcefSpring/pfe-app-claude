@@ -18,23 +18,29 @@ class TeamSeeder extends Seeder
             ->where('department', 'Computer Science')
             ->get();
 
-        $engStudents = User::where('role', 'student')
-            ->where('department', 'Engineering')
-            ->get();
+
 
         // Create a few simple teams
         $teams = [
             [
-                'name' => 'CodeCrafters',
+                'name' => 'team-1',
                 'status' => 'forming',
-            ]
+            ],
+            [
+                'name' => 'team-2',
+                'status' => 'forming',
+            ],
+            [
+                'name' => 'team-3',
+                'status' => 'forming',
+            ],
         ];
 
         foreach ($teams as $teamData) {
             $team = Team::create($teamData);
 
             // Add some team members
-            $students = $csStudents->take(1);
+            $students = $csStudents->take(3);
             foreach ($students as $index => $student) {
                 TeamMember::create([
                     'team_id' => $team->id,
@@ -45,7 +51,7 @@ class TeamSeeder extends Seeder
             }
 
             // Skip used students for next team
-            $csStudents = $csStudents->skip(1);
+            $csStudents = $csStudents->skip(3);
         }
 
         $this->command->info('Created 3 teams with members');

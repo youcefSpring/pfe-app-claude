@@ -577,9 +577,9 @@ class Team extends Model
     public function canManagePreferences(): bool
     {
         // Team must be complete
-        if (!$this->isComplete()) {
-            return false;
-        }
+        // if (!$this->isComplete()) {
+        //     return false;
+        // }
 
         // Check if allocation deadline has not passed
         $deadline = AllocationDeadline::active()->first();
