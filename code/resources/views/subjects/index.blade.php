@@ -54,12 +54,12 @@
         <!-- Results Info -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="text-muted">
-                Showing {{ $subjects->firstItem() ?? 0 }} to {{ $subjects->lastItem() ?? 0 }}
-                of {{ $subjects->total() }} results
+                {{ __('app.showing') }} {{ $subjects->firstItem() ?? 0 }} {{ __('app.to') }} {{ $subjects->lastItem() ?? 0 }}
+                {{ __('app.of') }} {{ $subjects->total() }} {{ __('app.results') }}
             </div>
             @if(request()->hasAny(['search', 'grade', 'status']))
                 <a href="{{ route('subjects.index') }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-x-circle"></i> Clear Filters
+                    <i class="bi bi-x-circle"></i> {{ __('app.clear_filters') }}
                 </a>
             @endif
         </div>
@@ -77,7 +77,7 @@
                                     <th>{{ __('app.grade') }}</th>
                                     <th>{{ __('app.status') }}</th>
                                     <th>{{ __('app.type') }}</th>
-                                    <th>Teams</th>
+                                    <th>{{ __('app.teams') }}</th>
                                     <th>{{ __('app.created') }}</th>
                                     <th>{{ __('app.actions') }}</th>
                                 </tr>
@@ -99,7 +99,7 @@
                                         </td>
                                         <td>
                                             <span class="badge bg-{{ $subject->status === 'validated' ? 'success' : ($subject->status === 'pending' ? 'warning' : 'secondary') }}">
-                                                {{ ucfirst($subject->status) }}
+                                                {{ __('app.' . $subject->status) }}
                                             </span>
                                         </td>
                                         <td>
@@ -115,7 +115,7 @@
                                         </td>
                                         <td>
                                             @if($subject->preferences_count > 0)
-                                                <span class="badge bg-success" title="{{ $subject->preferences_count }} teams interested">
+                                                <span class="badge bg-success" title="{{ $subject->preferences_count }} {{ __('app.teams_interested') }}">
                                                     <i class="bi bi-people"></i> {{ $subject->preferences_count }}
                                                 </span>
                                             @else
@@ -123,7 +123,7 @@
                                             @endif
                                         </td>
                                         <td class="text-nowrap">
-                                            {{ $subject->created_at->format('M d, Y') }}
+                                            {{ $subject->created_at->format('d/m/Y') }}
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">

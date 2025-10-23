@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Subject Details')
+@section('page-title', __('app.subject_details'))
 
 @section('content')
 <div class="container-fluid">
@@ -12,14 +12,14 @@
                     <div>
                         @if(auth()->user()?->id === $subject->teacher_id)
                             <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> {{ __('app.edit') }}
                             </a>
                         @endif
                         @if($subject->status === 'draft' && auth()->user()->id === $subject->teacher_id)
                             <form action="{{ route('subjects.submit-validation', $subject) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-sm">
-                                    <i class="fas fa-paper-plane"></i> Submit for Validation
+                                    <i class="fas fa-paper-plane"></i> {{ __('app.submit_for_validation') }}
                                 </button>
                             </form>
                         @endif
@@ -29,14 +29,14 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="mb-4">
-                                <h5>Description</h5>
+                                <h5>{{ __('app.description') }}</h5>
                                 <div class="border p-3 bg-light rounded">
                                     {!! nl2br(e($subject->description)) !!}
                                 </div>
                             </div>
 
                             <div class="mb-4">
-                                <h5>Project Plan</h5>
+                                <h5>{{ __('app.project_plan') }}</h5>
                                 <div class="border p-3 bg-light rounded">
                                     {!! nl2br(e($subject->plan)) !!}
                                 </div>
@@ -45,7 +45,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <h6>Keywords</h6>
+                                        <h6>{{ __('app.keywords') }}</h6>
                                         <div class="d-flex flex-wrap">
                                             @foreach(explode(',', $subject->keywords) as $keyword)
                                                 <span class="badge bg-secondary me-1 mb-1">{{ trim($keyword) }}</span>

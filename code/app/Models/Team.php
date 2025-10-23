@@ -121,6 +121,14 @@ class Team extends Model
         return $this->hasMany(SubjectRequest::class);
     }
 
+    /**
+     * Get the team's invitations.
+     */
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(TeamInvitation::class);
+    }
+
     // Scopes
     /**
      * Scope to get active teams.

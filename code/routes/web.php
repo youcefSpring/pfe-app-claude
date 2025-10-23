@@ -154,6 +154,13 @@ Route::middleware(['auth'])->group(function () {
     // TEAM MANAGEMENT ROUTES
     // =====================================================================
 
+    // Public invitation routes (don't require team membership)
+    Route::middleware('auth')->group(function() {
+        Route::get('/invitation/{token}', [TeamController::class, 'showInvitation'])->name('teams.show-invitation');
+        Route::post('/invitation/{token}/accept', [TeamController::class, 'acceptInvitation'])->name('teams.accept-invitation');
+        Route::post('/invitation/{token}/decline', [TeamController::class, 'declineInvitation'])->name('teams.decline-invitation');
+    });
+
     Route::prefix('teams')->name('teams.')->middleware('current_year_data')->group(function () {
         // All users can view teams
         Route::get('/', [TeamController::class, 'index'])->name('index');
@@ -198,9 +205,10 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{team}/transfer-leadership', [TeamController::class, 'transferLeadership'])->name('transfer-leadership');
 
             // Team invitations
-            Route::get('/invitations', [TeamController::class, 'invitations'])->name('invitations');
-            Route::post('/{team}/accept-invitation', [TeamController::class, 'acceptInvitation'])->name('accept-invitation');
-            Route::post('/{team}/decline-invitation', [TeamController::class, 'declineInvitation'])->name('decline-invitation');
+            Route::get('/my-invitations', [TeamController::class, 'myInvitations'])->name('my-invitations');
+
+            // Search students for team invitation
+            Route::get('/search-students', [TeamController::class, 'searchStudents'])->name('search-students');
         });
 
         // Dynamic route for viewing teams (must be after static routes)

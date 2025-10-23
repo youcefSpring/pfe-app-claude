@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Student Dashboard')
+@section('page-title', __('app.student_dashboard'))
 
 @section('content')
 {{-- <div class="row">
@@ -89,7 +89,7 @@
             <div class="card-body" id="team-info">
                 <div class="text-center py-4">
                     <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
-                    <p class="text-muted mt-2">Loading team information...</p>
+                    <p class="text-muted mt-2">{{ __('app.loading_team_information') }}</p>
                 </div>
             </div>
         </div>
@@ -109,7 +109,7 @@
             <div class="card-body" id="project-info">
                 <div class="text-center py-4">
                     <i class="bi bi-folder text-muted" style="font-size: 3rem;"></i>
-                    <p class="text-muted mt-2">Loading project information...</p>
+                    <p class="text-muted mt-2">{{ __('app.loading_project_information') }}</p>
                 </div>
             </div>
         </div>
@@ -129,9 +129,9 @@
                 <div id="recent-activity">
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                            <span class="visually-hidden">{{ __('app.loading') }}</span>
                         </div>
-                        <p class="text-muted mt-2">Loading recent activity...</p>
+                        <p class="text-muted mt-2">{{ __('app.loading_recent_activity') }}</p>
                     </div>
                 </div>
             </div>
@@ -166,7 +166,7 @@
                 <div class="mt-4">
                     <h6 class="text-muted">{{ __('app.upcoming_deadlines') }}</h6>
                     <div id="upcoming-deadlines">
-                        <small class="text-muted">Loading deadlines...</small>
+                        <small class="text-muted">{{ __('app.loading_deadlines') }}</small>
                     </div>
                 </div>
             </div>

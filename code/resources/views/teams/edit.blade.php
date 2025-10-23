@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Edit Team')
+@section('page-title', __('app.edit_team'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,7 +8,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Edit Team</h4>
+                    <h4 class="card-title mb-0">{{ __('app.edit_team') }}</h4>
                     <span class="badge bg-{{ $team->status === 'active' ? 'success' : ($team->status === 'forming' ? 'warning' : 'secondary') }}">
                         {{ ucfirst($team->status) }}
                     </span>
@@ -22,7 +22,7 @@
                             <label for="name" class="form-label">Team Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror"
                                    id="name" name="name" value="{{ old('name', $team->name) }}"
-                                   placeholder="Enter team name">
+                                   placeholder="{{ __('app.enter_team_name') }}">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

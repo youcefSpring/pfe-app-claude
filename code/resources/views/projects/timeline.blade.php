@@ -49,13 +49,13 @@
                                     @endif
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="badge bg-{{ $submission->status === 'approved' ? 'success' : ($submission->status === 'rejected' ? 'danger' : 'warning') }}">
-                                            {{ ucfirst($submission->status) }}
+                                            {{ __('app.' . $submission->status) }}
                                         </span>
                                         @if($submission->grade)
-                                            <span class="badge bg-info">Grade: {{ $submission->grade }}/20</span>
+                                            <span class="badge bg-info">{{ __('app.grade') }}: {{ $submission->grade }}/20</span>
                                         @endif
                                         @if($submission->files->count() > 0)
-                                            <small class="text-muted">{{ $submission->files->count() }} file(s)</small>
+                                            <small class="text-muted">{{ $submission->files->count() }} {{ __('app.files') }}</small>
                                         @endif
                                     </div>
                                 </div>
@@ -68,10 +68,10 @@
                                 <div class="timeline-item">
                                     <div class="timeline-marker bg-info"></div>
                                     <div class="timeline-content">
-                                        <h6 class="mb-1">Supervisor Review</h6>
+                                        <h6 class="mb-1">{{ __('app.supervisor_review') }}</h6>
                                         <p class="text-muted small mb-2">
-                                            Reviewed by {{ $review->reviewer->name ?? 'Supervisor' }} on
-                                            {{ $review->created_at->format('M d, Y \\a\\t g:i A') }}
+                                            {{ __('app.reviewed_by') }} {{ $review->reviewer->name ?? __('app.supervisor') }} {{ __('app.on') }}
+                                            {{ $review->created_at->format('d/m/Y \\à H:i') }}
                                         </p>
                                         @if($review->comments)
                                             <p class="small mb-2">{{ Str::limit($review->comments, 150) }}</p>

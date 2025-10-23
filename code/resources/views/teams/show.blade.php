@@ -15,7 +15,7 @@
                         </span>
                         @if($isLeader)
                             <a href="{{ route('teams.edit', $team) }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit"></i> Edit Team
+                                <i class="fas fa-edit"></i> {{ __('app.edit_team') }}
                             </a>
                         @endif
                     </div>
@@ -82,16 +82,29 @@
 
                                 @if($isLeader && $team->members->count() < 4)
                                     <div class="mt-3">
-                                        <h6>Add Team Member</h6>
-                                        <form action="{{ route('teams.add-member', $team) }}" method="POST" class="row g-2">
+                                        <h6>{{ __('app.invite_team_member') }}</h6>
+                                        <p class="text-muted small">{{ __('app.invitation_will_be_sent_explain') }}</p>
+                                        <form action="{{ route('teams.add-member', $team) }}" method="POST" class="row g-2" id="invite-student-form">
                                             @csrf
                                             <div class="col-md-8">
-                                                <input type="email" class="form-control" name="student_email"
-                                                       placeholder="Enter student email address" required>
+                                                <div class="position-relative">
+                                                    <input type="email" class="form-control" name="student_email" id="student-search-input"
+                                                           placeholder="{{ __('app.search_student_name_email') }}" required autocomplete="off">
+                                                    <input type="hidden" name="student_id" id="selected-student-id">
+                                                    <div id="student-dropdown" class="dropdown-menu w-100" style="display: none; max-height: 300px; overflow-y: auto;">
+                                                        <!-- Student options will be populated here -->
+                                                    </div>
+                                                    <div id="search-loading" class="position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%); display: none;">
+                                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                            <span class="visually-hidden">{{ __('app.loading') }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <small class="text-muted">{{ __('app.search_by_name_or_email') }}</small>
                                             </div>
                                             <div class="col-md-4">
-                                                <button type="submit" class="btn btn-success">
-                                                    <i class="fas fa-plus"></i> Add Member
+                                                <button type="submit" class="btn btn-success" id="invite-btn">
+                                                    <i class="fas fa-envelope"></i> {{ __('app.send_invitation') }}
                                                 </button>
                                             </div>
                                         </form>
@@ -412,7 +425,7 @@
                     <div class="mb-3">
                         <label for="request_message" class="form-label">Request Message (Optional)</label>
                         <textarea name="request_message" id="request_message" class="form-control" rows="4"
-                                  placeholder="Why does your team want this subject? (Optional)"></textarea>
+                                  placeholder="{{ __('app.why_team_want_subject_optional') }}"></textarea>
                         <small class="form-text text-muted">Explain why your team is interested in this subject and how it aligns with your goals.</small>
                     </div>
                     <div class="alert alert-info">
@@ -521,5 +534,118 @@ function transferLeadership(userId, userName) {
     const modal = new bootstrap.Modal(document.getElementById('transferLeadershipModal'));
     modal.show();
 }
+
+// Student search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('student-search-input');
+    const dropdown = document.getElementById('student-dropdown');
+    const loadingSpinner = document.getElementById('search-loading');
+    const selectedStudentId = document.getElementById('selected-student-id');
+    const inviteForm = document.getElementById('invite-student-form');
+
+    if (!searchInput) return;
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+
+        clearTimeout(searchTimeout);
+
+        if (query.length < 2) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        loadingSpinner.style.display = 'block';
+
+        searchTimeout = setTimeout(() => {
+            fetch(`{{ route('teams.search-students') }}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(students => {
+                    loadingSpinner.style.display = 'none';
+
+                    if (students.length === 0) {
+                        dropdown.innerHTML = '<div class="dropdown-item text-muted">{{ __('app.no_students_found') }}</div>';
+                    } else {
+                        dropdown.innerHTML = students.map(student => `
+                            <div class="dropdown-item student-option"
+                                 data-student-id="${student.id}"
+                                 data-student-email="${student.email}"
+                                 style="cursor: pointer;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${student.name}</strong>
+                                        <br>
+                                        <small class="text-muted">${student.email}</small>
+                                        ${student.student_id ? `<br><small class="text-info">{{ __('app.id') }}: ${student.student_id}</small>` : ''}
+                                    </div>
+                                    <i class="fas fa-plus text-success"></i>
+                                </div>
+                            </div>
+                        `).join('');
+
+                        // Add click handlers for student options
+                        dropdown.querySelectorAll('.student-option').forEach(option => {
+                            option.addEventListener('click', function() {
+                                const studentId = this.dataset.studentId;
+                                const studentEmail = this.dataset.studentEmail;
+                                const studentName = this.querySelector('strong').textContent;
+
+                                searchInput.value = studentEmail;
+                                selectedStudentId.value = studentId;
+                                dropdown.style.display = 'none';
+
+                                // Show selected student info
+                                searchInput.style.backgroundColor = '#e8f5e8';
+                                searchInput.title = `{{ __('app.selected') }}: ${studentName}`;
+                            });
+                        });
+                    }
+
+                    dropdown.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    loadingSpinner.style.display = 'none';
+                    dropdown.innerHTML = '<div class="dropdown-item text-danger">{{ __('app.search_error') }}</div>';
+                    dropdown.style.display = 'block';
+                });
+        }, 300);
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Clear selection when input changes manually
+    searchInput.addEventListener('keydown', function() {
+        selectedStudentId.value = '';
+        searchInput.style.backgroundColor = '';
+        searchInput.title = '';
+    });
+
+    // Form submission validation
+    inviteForm.addEventListener('submit', function(e) {
+        const email = searchInput.value.trim();
+
+        if (!email) {
+            e.preventDefault();
+            alert('{{ __('app.please_select_student') }}');
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            alert('{{ __('app.please_enter_valid_email') }}');
+            return;
+        }
+    });
+});
 </script>
 @endpush

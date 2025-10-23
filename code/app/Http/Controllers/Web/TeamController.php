@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Models\TeamMember;
+use App\Models\TeamInvitation;
 use App\Models\User;
 use App\Models\Subject;
 use App\Models\AllocationDeadline;
@@ -308,15 +309,16 @@ class TeamController extends Controller
                 ->with('error', __('app.team_full_max_members'));
         }
 
-        TeamMember::create([
-            'team_id' => $team->id,
-            'student_id' => $student->id,
-            'role' => 'member',
-            'joined_at' => now()
-        ]);
+        $user = Auth::user();
+        $invitation = TeamInvitation::createInvitation($team, $request->student_email, $user);
+
+        if (!$invitation) {
+            return redirect()->back()
+                ->with('error', __('app.failed_to_send_invitation'));
+        }
 
         return redirect()->back()
-            ->with('success', __('app.student_added_to_team'));
+            ->with('success', __('app.invitation_sent_to_student', ['email' => $request->student_email]));
     }
 
     /**
@@ -1019,5 +1021,130 @@ class TeamController extends Controller
         $subjectRequests = $query->orderBy('requested_at', 'asc')->paginate(20);
 
         return view('subject-requests.index', compact('subjectRequests', 'teamPreferences'));
+    }
+
+    /**
+     * Show invitation details
+     */
+    public function showInvitation(string $token): View
+    {
+        $invitation = TeamInvitation::where('token', $token)->firstOrFail();
+
+        if (!$invitation->canRespond()) {
+            abort(404, __('app.invitation_expired_or_invalid'));
+        }
+
+        $invitation->load(['team.members.user', 'invitedBy']);
+
+        return view('teams.invitation', compact('invitation'));
+    }
+
+    /**
+     * Accept team invitation
+     */
+    public function acceptInvitation(string $token): RedirectResponse
+    {
+        $invitation = TeamInvitation::where('token', $token)->firstOrFail();
+
+        if (!$invitation->canRespond()) {
+            return redirect()->route('teams.index')
+                ->with('error', __('app.invitation_expired_or_invalid'));
+        }
+
+        $user = Auth::user();
+        if ($user->email !== $invitation->invited_email) {
+            return redirect()->route('teams.index')
+                ->with('error', __('app.invitation_not_for_you'));
+        }
+
+        if ($user->teamMember) {
+            return redirect()->route('teams.index')
+                ->with('error', __('app.already_member_of_team'));
+        }
+
+        if ($invitation->accept()) {
+            return redirect()->route('teams.show', $invitation->team)
+                ->with('success', __('app.invitation_accepted_successfully'));
+        }
+
+        return redirect()->route('teams.index')
+            ->with('error', __('app.failed_to_accept_invitation'));
+    }
+
+    /**
+     * Decline team invitation
+     */
+    public function declineInvitation(string $token): RedirectResponse
+    {
+        $invitation = TeamInvitation::where('token', $token)->firstOrFail();
+
+        if (!$invitation->canRespond()) {
+            return redirect()->route('teams.index')
+                ->with('error', __('app.invitation_expired_or_invalid'));
+        }
+
+        $user = Auth::user();
+        if ($user->email !== $invitation->invited_email) {
+            return redirect()->route('teams.index')
+                ->with('error', __('app.invitation_not_for_you'));
+        }
+
+        if ($invitation->decline()) {
+            return redirect()->route('teams.index')
+                ->with('success', __('app.invitation_declined_successfully'));
+        }
+
+        return redirect()->route('teams.index')
+            ->with('error', __('app.failed_to_decline_invitation'));
+    }
+
+    /**
+     * Show user's pending invitations
+     */
+    public function myInvitations(): View
+    {
+        $user = Auth::user();
+
+        $invitations = TeamInvitation::where('invited_email', $user->email)
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->with(['team.members.user', 'invitedBy'])
+            ->latest()
+            ->get();
+
+        return view('teams.my-invitations', compact('invitations'));
+    }
+
+    /**
+     * Search for available students for team invitation
+     */
+    public function searchStudents(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $query = $request->get('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $students = User::where('role', 'student')
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('email', 'LIKE', "%{$query}%");
+            })
+            ->whereDoesntHave('teamMember')
+            ->select('id', 'name', 'email', 'student_id')
+            ->limit(10)
+            ->get()
+            ->map(function($student) {
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'student_id' => $student->student_id,
+                    'display' => $student->name . ' (' . $student->email . ')',
+                ];
+            });
+
+        return response()->json($students);
     }
 }

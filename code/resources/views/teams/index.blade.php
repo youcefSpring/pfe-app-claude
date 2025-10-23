@@ -19,11 +19,11 @@
             <i class="bi bi-{{ $canModifyTeams ? 'info-circle' : 'exclamation-triangle' }}"></i>
             @if($canModifyTeams)
                 <strong>{{ __('app.team_formation_active') }}</strong>
-                <br>{{ __('app.deadline') }}: {{ $currentDeadline->preferences_deadline->format('M d, Y \\a\\t g:i A') }}
+                <br>{{ __('app.deadline') }}: {{ $currentDeadline->preferences_deadline->format('d/m/Y \\à H:i') }}
                 <br><small>{{ $currentDeadline->getRemainingTimeForPreferences() }}</small>
             @else
                 <strong>{{ __('app.team_formation_ended') }}</strong>
-                <br><small>{{ __('app.deadline_was') }}: {{ $currentDeadline->preferences_deadline->format('M d, Y \\a\\t g:i A') }}</small>
+                <br><small>{{ __('app.deadline_was') }}: {{ $currentDeadline->preferences_deadline->format('d/m/Y \\à H:i') }}</small>
             @endif
         </div>
     @endif
@@ -231,7 +231,7 @@
     <!-- Pagination -->
     @if($teams->hasPages())
         <div class="d-flex justify-content-center mt-4">
-            <nav aria-label="Teams pagination">
+            <nav aria-label="{{ __('app.teams_pagination') }}">
                 {{ $teams->appends(request()->query())->links('pagination::bootstrap-4') }}
             </nav>
         </div>
