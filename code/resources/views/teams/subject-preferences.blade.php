@@ -39,11 +39,11 @@
                         @php
                             $canManage = $team->canManagePreferences() &&
                                        auth()->user()->teamMember &&
-                                       auth()->user()->teamMember->team_id === $team->id;
+                                       auth()->user()->teamMember->team_id == $team->id;
                                        dd([
                                         'canManage' => $canManage,
                                         'canManageCheck' => $team->canManagePreferences(),
-                                        'authTeamMember' => auth()->user()->teamMember->team_id === $team->id,
+                                        'authTeamMember' => auth()->user()->teamMember->team_id == $team->id,
                                         'has_team' => auth()->user()->teamMember ,
                                        ])
                                     //    dd($canManage);
