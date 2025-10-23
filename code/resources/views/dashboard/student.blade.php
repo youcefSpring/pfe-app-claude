@@ -174,6 +174,97 @@
     </div>
 </div>
 
+<!-- Student Marks Section -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart me-2"></i>{{ __('app.my_marks') }}
+                </h5>
+                <a href="{{ route('marks.index') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> {{ __('app.view_all') }}
+                </a>
+            </div>
+            <div class="card-body">
+                @if($data['userMarks']->count() > 0)
+                    <div class="row">
+                        @foreach($data['userMarks']->take(6) as $mark)
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-left-primary h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">{{ $mark->subject }}</h6>
+                                            <span class="badge bg-{{ $mark->getLetterGrade() === 'A' ? 'success' : ($mark->getLetterGrade() === 'B' ? 'primary' : ($mark->getLetterGrade() === 'C' ? 'warning' : 'danger')) }}">
+                                                {{ $mark->getLetterGrade() }}
+                                            </span>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                                <span>{{ __('app.total_percentage') }}</span>
+                                                <span>{{ number_format($mark->getTotalPercentage(), 1) }}%</span>
+                                            </div>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-{{ $mark->getTotalPercentage() >= 70 ? 'success' : ($mark->getTotalPercentage() >= 50 ? 'warning' : 'danger') }}"
+                                                     style="width: {{ $mark->getTotalPercentage() }}%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row text-center small">
+                                            @if($mark->theory_mark !== null)
+                                                <div class="col">
+                                                    <div class="text-muted">{{ __('app.theory') }}</div>
+                                                    <strong>{{ $mark->theory_mark }}/20</strong>
+                                                </div>
+                                            @endif
+                                            @if($mark->practice_mark !== null)
+                                                <div class="col">
+                                                    <div class="text-muted">{{ __('app.practice') }}</div>
+                                                    <strong>{{ $mark->practice_mark }}/20</strong>
+                                                </div>
+                                            @endif
+                                            @if($mark->project_mark !== null)
+                                                <div class="col">
+                                                    <div class="text-muted">{{ __('app.project') }}</div>
+                                                    <strong>{{ $mark->project_mark }}/20</strong>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                {{ __('app.added_on') }} {{ $mark->created_at->format('d/m/Y') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if($data['userMarks']->count() > 6)
+                        <div class="text-center mt-3">
+                            <a href="{{ route('marks.index') }}" class="btn btn-outline-primary">
+                                {{ __('app.view_all_marks') }} ({{ $data['userMarks']->count() }} {{ __('app.total') }})
+                            </a>
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center py-4">
+                        <i class="bi bi-bar-chart text-muted" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3 text-muted">{{ __('app.no_marks_yet') }}</h6>
+                        <p class="text-muted">{{ __('app.marks_will_appear_here') }}</p>
+                        <a href="{{ route('marks.create') }}" class="btn btn-primary">
+                            <i class="bi bi-plus me-2"></i>{{ __('app.add_marks') }}
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Progress Timeline -->
 <div class="row">
     <div class="col-12">

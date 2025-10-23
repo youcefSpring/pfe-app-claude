@@ -44,6 +44,7 @@ class DashboardController extends Controller
             'availableSubjects' => $team ? [] : \App\Models\Subject::where('status', 'validated')->whereDoesntHave('projects')->get(),
             'recentActivity' => $this->getRecentActivityForStudent($user),
             'upcomingDeadlines' => $this->getUpcomingDeadlines($user),
+            'userMarks' => $user->marks()->orderBy('created_at', 'desc')->get(),
         ];
 
         return view('dashboard.student', compact('user', 'data'));

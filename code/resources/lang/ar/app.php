@@ -1463,4 +1463,15 @@ return [
     'supervisor_review' => 'مراجعة المشرف',
     'reviewed_by' => 'راجعه',
     'supervisor' => 'المشرف',
+
+    // Marks System
+    'my_marks' => 'درجاتي',
+    'total_percentage' => 'النسبة المئوية الإجمالية',
+    'theory' => 'النظري',
+    'practice' => 'العملي',
+    'added_on' => 'أضيف في',
+    'view_all_marks' => 'عرض جميع الدرجات',
+    'no_marks_yet' => 'لا توجد درجات بعد',
+    'marks_will_appear_here' => 'ستظهر درجاتك هنا بمجرد إضافتها',
+    'add_marks' => 'إضافة الدرجات',
 ];

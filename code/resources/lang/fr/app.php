@@ -1558,4 +1558,15 @@ return [
     'supervisor_review' => 'Avis du Superviseur',
     'reviewed_by' => 'Évalué par',
     'supervisor' => 'Superviseur',
+
+    // Marks System
+    'my_marks' => 'Mes Notes',
+    'total_percentage' => 'Pourcentage Total',
+    'theory' => 'Théorie',
+    'practice' => 'Pratique',
+    'added_on' => 'Ajouté le',
+    'view_all_marks' => 'Voir Toutes les Notes',
+    'no_marks_yet' => 'Aucune note pour le moment',
+    'marks_will_appear_here' => 'Vos notes apparaîtront ici une fois ajoutées',
+    'add_marks' => 'Ajouter des Notes',
 ];

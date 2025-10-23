@@ -1554,6 +1554,17 @@ return [
     'project_submissions' => 'Project Submissions',
     'review_project' => 'Review Project',
     'project_supervisor' => 'Project Supervisor',
+
+    // Marks System
+    'my_marks' => 'My Marks',
+    'total_percentage' => 'Total Percentage',
+    'theory' => 'Theory',
+    'practice' => 'Practice',
+    'added_on' => 'Added on',
+    'view_all_marks' => 'View All Marks',
+    'no_marks_yet' => 'No marks yet',
+    'marks_will_appear_here' => 'Your marks will appear here once they are added',
+    'add_marks' => 'Add Marks',
     'submission_date' => 'Submission Date',
     'submission_files' => 'Submission Files',
 
