@@ -40,6 +40,13 @@
                         $canManage = $team->canManagePreferences() &&
                                    auth()->user()->teamMember &&
                                    auth()->user()->teamMember->team_id === $team->id;
+                                   dd([
+                                    'canManage' => $canManage,
+                                    'team_id' => $team->id,
+                                    'canManageCheck' => $team->canManagePreferences(),
+                                    'authTeamMember' => auth()->user()->teamMember,
+                                    'authTeamMemberTeamId' => auth()->user()->teamMember ? auth()->user()->teamMember->team_id : null,
+                                   ])
                                 //    dd($canManage);
                     @endphp
 
