@@ -1122,28 +1122,43 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
+            'subject_name' => 'required|string|max:255',
+            'academic_year' => 'required|string',
+            'semester' => 'nullable|string|max:10',
+            'max_mark' => 'required|numeric|min:1|max:100',
+            'notes' => 'nullable|string|max:1000',
             // Required marks
-            'mark_1' => 'required|numeric|min:0|max:20',
-            'mark_2' => 'required|numeric|min:0|max:20',
+            'mark_1' => 'required|numeric|min:0',
+            'mark_2' => 'required|numeric|min:0',
             // Optional marks
-            'mark_3' => 'nullable|numeric|min:0|max:20',
-            'mark_4' => 'nullable|numeric|min:0|max:20',
-            'mark_5' => 'nullable|numeric|min:0|max:20',
+            'mark_3' => 'nullable|numeric|min:0',
+            'mark_4' => 'nullable|numeric|min:0',
+            'mark_5' => 'nullable|numeric|min:0',
+        ]);
+
+        // Add dynamic validation for marks against max_mark
+        $request->validate([
+            'mark_1' => 'max:' . $request->max_mark,
+            'mark_2' => 'max:' . $request->max_mark,
+            'mark_3' => 'nullable|max:' . $request->max_mark,
+            'mark_4' => 'nullable|max:' . $request->max_mark,
+            'mark_5' => 'nullable|max:' . $request->max_mark,
         ]);
 
         try {
-            $academicYear = date('Y') . '-' . (date('Y') + 1);
-
-            // Check if student already has marks for current academic year
+            // Check if student already has marks for this subject and academic year
             $existingMark = StudentMark::where('user_id', $request->user_id)
-                ->where('subject_name', 'General Assessment')
-                ->where('academic_year', $academicYear)
+                ->where('subject_name', $request->subject_name)
+                ->where('academic_year', $request->academic_year)
+                ->when($request->semester, function ($query) use ($request) {
+                    return $query->where('semester', $request->semester);
+                })
                 ->first();
 
             if ($existingMark) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', __('app.student_already_has_marks_this_year'));
+                    ->with('error', __('app.student_already_has_marks_for_this_subject'));
             }
 
             // Calculate simple average of entered marks
@@ -1161,12 +1176,12 @@ public function processBulkImport(Request $request): RedirectResponse
 
             StudentMark::create([
                 'user_id' => $request->user_id,
-                'subject_name' => 'General Assessment', // Default subject name
-                'mark' => $averageMark, // Average of all marks
-                'max_mark' => 20, // Standard max mark
-                'semester' => null, // Not used anymore
-                'academic_year' => date('Y') . '-' . (date('Y') + 1), // Current academic year
-                'notes' => null, // Not used anymore
+                'subject_name' => $request->subject_name,
+                'mark' => $averageMark,
+                'max_mark' => $request->max_mark,
+                'semester' => $request->semester,
+                'academic_year' => $request->academic_year,
+                'notes' => $request->notes,
                 'created_by' => Auth::id(),
                 // Individual marks
                 'mark_1' => $request->mark_1,
@@ -1174,12 +1189,12 @@ public function processBulkImport(Request $request): RedirectResponse
                 'mark_3' => $request->mark_3,
                 'mark_4' => $request->mark_4,
                 'mark_5' => $request->mark_5,
-                // Max marks (all 20)
-                'max_mark_1' => 20,
-                'max_mark_2' => 20,
-                'max_mark_3' => 20,
-                'max_mark_4' => 20,
-                'max_mark_5' => 20,
+                // Max marks (all same as max_mark)
+                'max_mark_1' => $request->max_mark,
+                'max_mark_2' => $request->max_mark,
+                'max_mark_3' => $request->max_mark,
+                'max_mark_4' => $request->max_mark,
+                'max_mark_5' => $request->max_mark,
                 // Equal weights
                 'weight_1' => 20,
                 'weight_2' => 20,
@@ -1189,10 +1204,10 @@ public function processBulkImport(Request $request): RedirectResponse
             ]);
 
             return redirect()->route('admin.marks')
-                ->with('success', 'Student mark added successfully!');
+                ->with('success', __('app.mark_added_successfully'));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to add mark: ' . $e->getMessage())
+                ->with('error', __('app.failed_to_add_mark') . ': ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -1213,21 +1228,85 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'mark_1' => 'required|numeric|min:0|max:20',
-            'mark_2' => 'required|numeric|min:0|max:20',
-            'mark_3' => 'nullable|numeric|min:0|max:20',
-            'mark_4' => 'nullable|numeric|min:0|max:20',
-            'mark_5' => 'nullable|numeric|min:0|max:20',
+            'subject_name' => 'required|string|max:255',
+            'academic_year' => 'required|string',
+            'semester' => 'nullable|string|max:10',
+            'max_mark' => 'required|numeric|min:1|max:100',
+            'notes' => 'nullable|string|max:1000',
+            // Required marks
+            'mark_1' => 'required|numeric|min:0',
+            'mark_2' => 'required|numeric|min:0',
+            // Optional marks
+            'mark_3' => 'nullable|numeric|min:0',
+            'mark_4' => 'nullable|numeric|min:0',
+            'mark_5' => 'nullable|numeric|min:0',
+        ]);
+
+        // Add dynamic validation for marks against max_mark
+        $request->validate([
+            'mark_1' => 'max:' . $request->max_mark,
+            'mark_2' => 'max:' . $request->max_mark,
+            'mark_3' => 'nullable|max:' . $request->max_mark,
+            'mark_4' => 'nullable|max:' . $request->max_mark,
+            'mark_5' => 'nullable|max:' . $request->max_mark,
         ]);
 
         try {
+            // Check if another mark exists for this student, subject, and academic year (excluding current mark)
+            $existingMark = StudentMark::where('user_id', $request->user_id)
+                ->where('subject_name', $request->subject_name)
+                ->where('academic_year', $request->academic_year)
+                ->when($request->semester, function ($query) use ($request) {
+                    return $query->where('semester', $request->semester);
+                })
+                ->where('id', '!=', $mark->id)
+                ->first();
+
+            if ($existingMark) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', __('app.student_already_has_marks_for_this_subject'));
+            }
+
+            // Calculate simple average of entered marks
+            $marks = array_filter([
+                $request->mark_1,
+                $request->mark_2,
+                $request->mark_3,
+                $request->mark_4,
+                $request->mark_5
+            ], function($markValue) {
+                return $markValue !== null && $markValue !== '';
+            });
+
+            $averageMark = count($marks) > 0 ? array_sum($marks) / count($marks) : 0;
+
             $mark->update([
                 'user_id' => $request->user_id,
+                'subject_name' => $request->subject_name,
+                'mark' => $averageMark,
+                'max_mark' => $request->max_mark,
+                'semester' => $request->semester,
+                'academic_year' => $request->academic_year,
+                'notes' => $request->notes,
+                // Individual marks
                 'mark_1' => $request->mark_1,
                 'mark_2' => $request->mark_2,
                 'mark_3' => $request->mark_3,
                 'mark_4' => $request->mark_4,
                 'mark_5' => $request->mark_5,
+                // Max marks (all same as max_mark)
+                'max_mark_1' => $request->max_mark,
+                'max_mark_2' => $request->max_mark,
+                'max_mark_3' => $request->max_mark,
+                'max_mark_4' => $request->max_mark,
+                'max_mark_5' => $request->max_mark,
+                // Keep equal weights
+                'weight_1' => 20,
+                'weight_2' => 20,
+                'weight_3' => 20,
+                'weight_4' => 20,
+                'weight_5' => 20,
             ]);
 
             return redirect()->route('admin.marks')

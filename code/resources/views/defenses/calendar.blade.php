@@ -121,11 +121,11 @@
                     @else
                         <div class="text-center py-4">
                             <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
-                            <h5 class="mt-3">No Defenses Scheduled</h5>
-                            <p class="text-muted">There are no defenses scheduled at the moment.</p>
+                            <h5 class="mt-3">{{ __('app.no_defenses_found') }}</h5>
+                            <p class="text-muted">{{ __('app.no_defenses_scheduled_yet') }}</p>
                             @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
                                 <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
-                                    <i class="bi bi-calendar-plus"></i> Schedule First Defense
+                                    <i class="bi bi-calendar-plus"></i> {{ __('app.schedule_first_defense') }}
                                 </a>
                             @endif
                         </div>

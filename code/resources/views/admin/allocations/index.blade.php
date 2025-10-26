@@ -132,11 +132,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    @if($deadlines->hasPages())
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $deadlines->links() }}
-                        </div>
-                    @endif
+                    <x-admin-pagination :paginator="$deadlines" />
                 </div>
             </div>
         </div>

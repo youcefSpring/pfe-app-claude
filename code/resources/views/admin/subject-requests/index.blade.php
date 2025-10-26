@@ -70,9 +70,7 @@
                         </div>
 
                         <!-- Pagination -->
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $subjectRequests->links() }}
-                        </div>
+                        <x-admin-pagination :paginator="$subjectRequests" />
                     @endif
                 </div>
             </div>

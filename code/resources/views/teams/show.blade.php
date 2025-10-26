@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Team Details')
+@section('page-title', __('app.team_details'))
 
 @section('content')
 <div class="container-fluid">
@@ -25,7 +25,7 @@
                         <div class="col-md-8">
                             <!-- Team Members -->
                             <div class="mb-4">
-                                <h5>Team Members ({{ $team->members->count() }}/4)</h5>
+                                <h5>{{ __('app.team_members') }} ({{ $team->members->count() }}/4)</h5>
                                 <div class="row">
                                     @foreach($team->members as $member)
                                         <div class="col-md-6 mb-3">
@@ -134,10 +134,10 @@
                                 </div>
                             @else
                                 <div class="mb-4">
-                                    <h5>Subject Selection</h5>
+                                    <h5>{{ __('app.subject_selection') }}</h5>
                                     @if($team->status === 'forming')
                                         <div class="alert alert-info">
-                                            Complete team formation before selecting a subject.
+                                            {{ __('app.complete_team_formation_before_selecting_subject') }}
                                         </div>
                                     @elseif($isLeader)
                                         <div class="row">
@@ -240,7 +240,7 @@
                         <div class="col-md-4">
                             <div class="card bg-light">
                                 <div class="card-body">
-                                    <h6 class="card-title">Team Information</h6>
+                                    <h6 class="card-title">{{ __('app.team_information') }}</h6>
 
                                     <div class="mb-3">
                                         <small class="text-muted">Status</small>

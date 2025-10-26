@@ -182,9 +182,7 @@
                                 </div>
 
                                 <!-- Pagination -->
-                                <div class="d-flex justify-content-center mt-4">
-                                    {{ $rooms->links() }}
-                                </div>
+                                <x-admin-pagination :paginator="$rooms" />
                             @else
                                 <div class="text-center py-5">
                                     <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>

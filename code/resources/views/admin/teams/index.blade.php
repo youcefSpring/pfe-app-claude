@@ -169,9 +169,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="d-flex justify-content-center">
-                        {{ $teams->links() }}
-                    </div>
+                    <x-admin-pagination :paginator="$teams" />
                 </div>
             </div>
         </div>

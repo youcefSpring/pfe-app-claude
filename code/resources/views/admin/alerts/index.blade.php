@@ -103,9 +103,7 @@
                         </div>
 
                         <!-- Pagination -->
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $alerts->links() }}
-                        </div>
+                        <x-admin-pagination :paginator="$alerts" />
                     @else
                         <div class="text-center py-5">
                             <i class="bi bi-bell fa-3x text-muted mb-3"></i>

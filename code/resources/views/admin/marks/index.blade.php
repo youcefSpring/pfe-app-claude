@@ -84,11 +84,7 @@
                             </table>
                         </div>
 
-                        <div class="d-flex justify-content-center mt-4">
-                            <nav aria-label="Marks pagination">
-                                {{ $marks->links('pagination::bootstrap-4') }}
-                            </nav>
-                        </div>
+                        <x-admin-pagination :paginator="$marks" />
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>

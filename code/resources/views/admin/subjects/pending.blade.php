@@ -202,13 +202,7 @@
         </div>
 
         <!-- Pagination -->
-        @if($pendingSubjects->hasPages())
-            <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Pending subjects pagination">
-                    {{ $pendingSubjects->links('pagination::bootstrap-4') }}
-                </nav>
-            </div>
-        @endif
+        <x-admin-pagination :paginator="$pendingSubjects" />
     @else
         <!-- No Pending Subjects -->
         <div class="text-center py-5">

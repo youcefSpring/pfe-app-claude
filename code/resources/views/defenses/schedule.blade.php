@@ -99,7 +99,7 @@
                                         <label for="team_id" class="form-label">{{ __('app.team') }} <span class="text-danger">*</span></label>
                                         <select class="form-select @error('team_id') is-invalid @enderror"
                                                 id="team_id" name="team_id" required>
-                                            <option value="">{{ __('app.select_subject_first') }}</option>
+                                            <option value="">{{ __('app.select_team') }}</option>
                                         </select>
                                         @error('team_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -527,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const teamSelect = document.getElementById('team_id');
         const teamInfo = document.getElementById('team-info');
 
-        teamSelect.innerHTML = '<option value="">{{ __("app.select_subject_first") }}</option>';
+        teamSelect.innerHTML = '<option value="">{{ __("app.select_team") }}</option>';
         teamSelect.disabled = true;
         teamInfo.innerHTML = '';
     }

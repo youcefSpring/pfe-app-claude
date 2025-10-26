@@ -298,13 +298,7 @@
         </div>
 
         <!-- Pagination -->
-        @if($subjects->hasPages())
-            <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Subjects pagination">
-                    {{ $subjects->appends(request()->query())->links('pagination::bootstrap-4') }}
-                </nav>
-            </div>
-        @endif
+        <x-admin-pagination :paginator="$subjects" />
     @else
         <!-- No Subjects -->
         <div class="text-center py-5">

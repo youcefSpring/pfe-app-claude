@@ -28,6 +28,7 @@ class Team extends Model
         'supervisor_id',
         'external_supervisor',
         'academic_year',
+        'level',
     ];
 
     // Relationships

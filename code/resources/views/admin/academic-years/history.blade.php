@@ -104,11 +104,7 @@
                         </table>
                     </div>
 
-                    @if($completedYears->hasPages())
-                        <div class="d-flex justify-content-center">
-                            {{ $completedYears->links() }}
-                        </div>
-                    @endif
+                    <x-admin-pagination :paginator="$completedYears" />
                 </div>
             </div>
 

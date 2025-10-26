@@ -269,11 +269,7 @@
                         </div>
 
                         <!-- Pagination -->
-                        @if($students->hasPages())
-                            <div class="d-flex justify-content-center">
-                                {{ $students->appends(request()->query())->links() }}
-                            </div>
-                        @endif
+                        <x-admin-pagination :paginator="$students" />
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-certificate fa-3x text-muted mb-3"></i>

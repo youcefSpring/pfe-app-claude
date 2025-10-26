@@ -168,11 +168,7 @@
                             </table>
                         </div>
 
-                        <div class="d-flex justify-content-center mt-4">
-                            <nav aria-label="Specialities pagination">
-                                {{ $specialities->links('pagination::bootstrap-4') }}
-                            </nav>
-                        </div>
+                        <x-admin-pagination :paginator="$specialities" />
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>

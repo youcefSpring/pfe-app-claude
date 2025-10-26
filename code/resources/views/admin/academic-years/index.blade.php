@@ -170,11 +170,7 @@
                         </table>
                     </div>
 
-                    @if($academicYears->hasPages())
-                        <div class="d-flex justify-content-center">
-                            {{ $academicYears->links() }}
-                        </div>
-                    @endif
+                    <x-admin-pagination :paginator="$academicYears" />
                 </div>
             </div>
         </div>
