@@ -31,7 +31,7 @@ class Setting extends Model
     /**
      * Set a setting value
      */
-    public static function set(string $key, $value, string $type = 'string', string $description = null): void
+    public static function set(string $key, $value, string $type = 'string', ?string $description = null): void
     {
         $setting = static::where('key', $key)->first();
 

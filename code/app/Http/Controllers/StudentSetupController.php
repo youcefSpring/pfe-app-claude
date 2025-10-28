@@ -35,12 +35,23 @@ class StudentSetupController extends Controller
      */
     public function storePersonalInfo(Request $request): RedirectResponse
     {
-        $validator = Validator::make($request->all(), [
+        // CHECK SETTINGS: Birth certificate requirement
+        $birthCertificateRequired = \App\Services\SettingsService::requiresBirthCertificate();
+
+        $rules = [
             'date_naissance' => 'required|date|before:today',
             'lieu_naissance' => 'required|string|max:255',
             'student_level' => 'required|in:licence_3,master_1,master_2',
-            'birth_certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
+        ];
+
+        // Add birth certificate rule if required by settings
+        if ($birthCertificateRequired) {
+            $rules['birth_certificate'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
+        } else {
+            $rules['birth_certificate'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -92,6 +103,16 @@ class StudentSetupController extends Controller
     public function storeMarks(Request $request): RedirectResponse
     {
         $user = Auth::user();
+
+        // CHECK SETTINGS: Previous marks requirement
+        $marksRequired = \App\Services\SettingsService::requiresPreviousMarks();
+
+        if (!$marksRequired) {
+            // If marks not required, skip this step and complete setup
+            $user->update(['profile_completed' => true]);
+            return redirect()->route('student.setup.complete');
+        }
+
         $requiredMarks = $user->getRequiredPreviousMarks();
 
         // Build validation rules based on required marks
@@ -99,7 +120,6 @@ class StudentSetupController extends Controller
         for ($i = 1; $i <= $requiredMarks; $i++) {
             $rules["semester_{$i}_mark"] = 'required|numeric|min:0|max:20';
         }
-
 
         $validator = Validator::make($request->all(), $rules);
 

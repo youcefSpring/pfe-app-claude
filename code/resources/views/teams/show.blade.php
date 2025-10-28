@@ -347,7 +347,7 @@
 </div>
 
 <!-- Select Subject Modal -->
-@if($isLeader && !$team->project && $availableSubjects->count() > 0)
+@if($isLeader && !$team->project && ($availableSubjects ?? collect())->count() > 0)
 <div class="modal fade" id="selectSubjectModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

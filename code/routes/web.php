@@ -375,6 +375,11 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/allocation/{allocation}', [AdminAllocationController::class, 'removeAllocation'])->name('remove-allocation');
         });
 
+        // Birth Certificate Management
+        Route::get('/birth-certificates', [AdminController::class, 'birthCertificates'])->name('birth-certificates');
+        Route::post('/birth-certificates/{user}/approve', [AdminController::class, 'approveBirthCertificate'])->name('birth-certificates.approve');
+        Route::post('/birth-certificates/{user}/reject', [AdminController::class, 'rejectBirthCertificate'])->name('birth-certificates.reject');
+
         // Student Marks Management
         Route::get('/marks', [AdminController::class, 'marks'])->name('marks');
         Route::get('/marks/create', [AdminController::class, 'createMark'])->name('marks.create');
@@ -384,6 +389,14 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/marks/{mark}', [AdminController::class, 'destroyMark'])->name('marks.destroy');
         Route::get('/marks/bulk-import', [AdminController::class, 'bulkImportMarks'])->name('marks.bulk-import');
         Route::post('/marks/bulk-import', [AdminController::class, 'processBulkImportMarks'])->name('marks.bulk-import.process');
+
+        // Bulk Marks Management (Enhanced)
+        Route::get('/marks/bulk-create', [AdminController::class, 'bulkMarksCreate'])->name('marks.bulk-create');
+        Route::post('/marks/bulk-store', [AdminController::class, 'bulkMarksStore'])->name('marks.bulk-store');
+        Route::get('/marks/bulk-all-students', [AdminController::class, 'bulkAllStudentsCreate'])->name('marks.bulk-all-create');
+        Route::post('/marks/bulk-all-store', [AdminController::class, 'bulkAllStudentsStore'])->name('marks.bulk-all-store');
+        Route::get('/students/{user}/marks/{semester}', [AdminController::class, 'studentMarksBySemester'])->name('students.marks.semester');
+        Route::get('/students/{user}/marks-summary', [AdminController::class, 'studentMarksSummary'])->name('students.marks.summary');
 
         // Subject Approval Management
         Route::get('/subjects/pending', [AdminController::class, 'pendingSubjects'])->name('subjects.pending');
@@ -421,6 +434,26 @@ Route::middleware(['auth'])->group(function () {
         // Backup and Maintenance
         Route::get('/maintenance', [AdminController::class, 'maintenance'])->name('maintenance');
         Route::post('/backup', [AdminController::class, 'backup'])->name('backup');
+
+        // Academic Year Management
+        Route::prefix('academic-years')->name('academic-years.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AcademicYearController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\AcademicYearController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\AcademicYearController::class, 'store'])->name('store');
+            Route::get('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'show'])->name('show');
+            Route::get('/{academicYear}/edit', [\App\Http\Controllers\Admin\AcademicYearController::class, 'edit'])->name('edit');
+            Route::put('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'update'])->name('update');
+            Route::post('/{academicYear}/activate', [\App\Http\Controllers\Admin\AcademicYearController::class, 'activate'])->name('activate');
+            Route::post('/{academicYear}/end', [\App\Http\Controllers\Admin\AcademicYearController::class, 'end'])->name('end');
+            Route::delete('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'destroy'])->name('destroy');
+            Route::get('/history/completed', [\App\Http\Controllers\Admin\AcademicYearController::class, 'history'])->name('history');
+            Route::get('/{academicYear}/statistics', [\App\Http\Controllers\Admin\AcademicYearController::class, 'statistics'])->name('statistics');
+        });
+
+        // Student Alerts Management
+        Route::get('/alerts', [AdminController::class, 'alerts'])->name('alerts');
+        Route::get('/alerts/{alert}', [AdminController::class, 'showAlert'])->name('alerts.show');
+        Route::post('/alerts/{alert}/respond', [AdminController::class, 'respondToAlert'])->name('alerts.respond');
 
         // Debug Routes (only in development)
         if (app()->environment(['local', 'testing'])) {
@@ -533,71 +566,6 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-// =========================================================================
-// ADMIN ROUTES
-// =========================================================================
-
-Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::middleware('role:admin')->group(function () {
-        // User management
-        Route::get('/users', [AdminController::class, 'users'])->name('users');
-        Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
-        Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
-        Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
-        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
-        Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
-        Route::get('/users/bulk-import', [AdminController::class, 'bulkImport'])->name('users.bulk-import');
-        Route::post('/users/bulk-import', [AdminController::class, 'processBulkImport'])->name('users.bulk-import.process');
-
-        // Birth certificate management
-        Route::get('/birth-certificates', [AdminController::class, 'birthCertificates'])->name('birth-certificates');
-        Route::post('/birth-certificates/{user}/approve', [AdminController::class, 'approveBirthCertificate'])->name('birth-certificates.approve');
-        Route::post('/birth-certificates/{user}/reject', [AdminController::class, 'rejectBirthCertificate'])->name('birth-certificates.reject');
-
-        // Student marks management
-        Route::get('/marks', [AdminController::class, 'marks'])->name('marks');
-        Route::get('/marks/create', [AdminController::class, 'createMark'])->name('marks.create');
-        Route::post('/marks', [AdminController::class, 'storeMark'])->name('marks.store');
-        Route::get('/marks/{mark}/edit', [AdminController::class, 'editMark'])->name('marks.edit');
-        Route::put('/marks/{mark}', [AdminController::class, 'updateMark'])->name('marks.update');
-        Route::delete('/marks/{mark}', [AdminController::class, 'destroyMark'])->name('marks.destroy');
-
-        // Bulk marks management
-        Route::get('/marks/bulk-create', [AdminController::class, 'bulkMarksCreate'])->name('marks.bulk-create');
-        Route::post('/marks/bulk-store', [AdminController::class, 'bulkMarksStore'])->name('marks.bulk-store');
-
-        // Bulk marks for all students
-        Route::get('/marks/bulk-all-students', [AdminController::class, 'bulkAllStudentsCreate'])->name('marks.bulk-all-create');
-        Route::post('/marks/bulk-all-store', [AdminController::class, 'bulkAllStudentsStore'])->name('marks.bulk-all-store');
-
-        Route::get('/students/{user}/marks/{semester}', [AdminController::class, 'studentMarksBySemester'])->name('students.marks.semester');
-        Route::get('/students/{user}/marks-summary', [AdminController::class, 'studentMarksSummary'])->name('students.marks.summary');
-
-        // Academic Year Management
-        Route::prefix('academic-years')->name('academic-years.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\AcademicYearController::class, 'index'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\AcademicYearController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\AcademicYearController::class, 'store'])->name('store');
-            Route::get('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'show'])->name('show');
-            Route::get('/{academicYear}/edit', [\App\Http\Controllers\Admin\AcademicYearController::class, 'edit'])->name('edit');
-            Route::put('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'update'])->name('update');
-            Route::post('/{academicYear}/activate', [\App\Http\Controllers\Admin\AcademicYearController::class, 'activate'])->name('activate');
-            Route::post('/{academicYear}/end', [\App\Http\Controllers\Admin\AcademicYearController::class, 'end'])->name('end');
-            Route::delete('/{academicYear}', [\App\Http\Controllers\Admin\AcademicYearController::class, 'destroy'])->name('destroy');
-            Route::get('/history/completed', [\App\Http\Controllers\Admin\AcademicYearController::class, 'history'])->name('history');
-            Route::get('/{academicYear}/statistics', [\App\Http\Controllers\Admin\AcademicYearController::class, 'statistics'])->name('statistics');
-        });
-
-        // Student Alerts Management
-        Route::get('/alerts', [AdminController::class, 'alerts'])->name('alerts');
-        Route::get('/alerts/{alert}', [AdminController::class, 'showAlert'])->name('alerts.show');
-        Route::post('/alerts/{alert}/respond', [AdminController::class, 'respondToAlert'])->name('alerts.respond');
-
-        // Reports and analytics
-        Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
-        Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-    });
-});
 
 // =========================================================================
 // STUDENT ROUTES

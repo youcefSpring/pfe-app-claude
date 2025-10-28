@@ -328,10 +328,13 @@ class DefenseController extends Controller
     {
         //$this->authorize('schedule', Defense::class);
 
+        // CHECK SETTINGS: Get minimum notice days required
+        $minNoticeDays = \App\Services\SettingsService::getDefenseNoticeMinDays();
+
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'team_id' => 'required|exists:teams,id',
-            'defense_date' => 'required|date|after:now',
+            'defense_date' => "required|date|after:+{$minNoticeDays} days",
             'defense_time' => 'required|date_format:H:i',
             'room_id' => 'required|exists:rooms,id',
             'supervisor_id' => 'required|exists:users,id',
@@ -339,6 +342,16 @@ class DefenseController extends Controller
             'examiner_id' => 'required|exists:users,id|different:supervisor_id,president_id',
             'notes' => 'nullable|string|max:500'
         ]);
+
+        // Validate defense notice period
+        $defenseDate = \Carbon\Carbon::parse($validated['defense_date']);
+        $daysUntilDefense = now()->diffInDays($defenseDate, false);
+
+        if ($daysUntilDefense < $minNoticeDays) {
+            return redirect()->back()
+                ->with('error', __('app.defense_requires_min_notice_days', ['days' => $minNoticeDays]))
+                ->withInput();
+        }
 
         // Check if subject exists and is validated
         $subject = Subject::find($validated['subject_id']);

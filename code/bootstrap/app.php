@@ -18,10 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'locale' => \App\Http\Middleware\LocaleMiddleware::class,
             'current_year_data' => \App\Http\Middleware\CurrentAcademicYearData::class,
             'student_setup' => \App\Http\Middleware\StudentProfileSetup::class,
+            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
 
         // Global middleware
         $middleware->web(append: [
+            \App\Http\Middleware\CheckMaintenanceMode::class, // Check maintenance mode first
             \App\Http\Middleware\LocaleMiddleware::class,
             \App\Http\Middleware\StudentProfileSetup::class,
         ]);

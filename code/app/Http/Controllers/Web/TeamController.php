@@ -139,6 +139,12 @@ class TeamController extends Controller
 
         $user = Auth::user();
 
+        // CHECK SETTINGS: Team formation enabled
+        if (!\App\Services\SettingsService::isTeamFormationEnabled()) {
+            return redirect()->back()
+                ->with('error', __('app.team_formation_disabled'));
+        }
+
         // Check if user is already in a team
         if ($user->teamMember) {
             return redirect()->back()
@@ -304,9 +310,13 @@ class TeamController extends Controller
                 ->with('error', __('app.student_already_in_team'));
         }
 
-        if ($team->members->count() >= 4) { // Max team size
+        // CHECK SETTINGS: Respect max team size based on student level
+        $studentLevel = $student->student_level ?? 'licence_3';
+        $maxTeamSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
+
+        if ($team->members->count() >= $maxTeamSize) {
             return redirect()->back()
-                ->with('error', __('app.team_full_max_members'));
+                ->with('error', __('app.team_full_max_members') . " ($maxTeamSize)");
         }
 
         $user = Auth::user();
@@ -509,6 +519,12 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
+        // CHECK SETTINGS: Preferences enabled
+        if (!\App\Services\SettingsService::arePreferencesEnabled()) {
+            return redirect()->back()
+                ->with('error', __('app.preferences_disabled'));
+        }
+
         // Check authorization
         if (!$team->hasMember($user) && $user->role !== 'admin') {
             return redirect()->back()
@@ -521,10 +537,19 @@ class TeamController extends Controller
                 ->with('error', __('app.cannot_manage_preferences'));
         }
 
+        // CHECK SETTINGS: Max preferences limit
+        $maxPreferences = \App\Services\SettingsService::getMaxPreferences();
+
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
-            'preference_order' => 'nullable|integer|min:1|max:10'
+            'preference_order' => 'nullable|integer|min:1|max:' . $maxPreferences
         ]);
+
+        // Check if max preferences reached
+        if ($team->subjectPreferences()->count() >= $maxPreferences) {
+            return redirect()->back()
+                ->with('error', __('app.max_preferences_reached') . " ($maxPreferences)");
+        }
 
         $subject = Subject::find($request->subject_id);
 
@@ -646,14 +671,24 @@ class TeamController extends Controller
                 ->with('error', __('app.team_already_has_project'));
         }
 
-        // Create external project
-        $externalProject = $team->externalProject()->create($validated + [
-            'status' => 'pending_approval',
-            'submitted_at' => now()
-        ]);
+        try {
+            // Use transaction to ensure data consistency
+            \DB::transaction(function () use ($team, $validated) {
+                // Create external project
+                $team->externalProject()->create($validated + [
+                    'status' => 'pending_approval',
+                    'submitted_at' => now()
+                ]);
+            });
 
-        return redirect()->route('teams.show', $team)
-            ->with('success', __('app.external_project_submitted'));
+            return redirect()->route('teams.show', $team)
+                ->with('success', __('app.external_project_submitted'));
+        } catch (\Exception $e) {
+            \Log::error('Failed to submit external project: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', __('app.external_project_submission_failed'));
+        }
     }
 
     /**

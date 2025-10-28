@@ -417,7 +417,7 @@ class User extends Authenticatable
         $required = $this->getRequiredPreviousMarks();
         if ($required === 0) return true;
 
-        $marksCount = $this->studentMarks()
+        $marksCount = $this->marks()
             ->where('academic_year', '<', now()->year)
             ->count();
 

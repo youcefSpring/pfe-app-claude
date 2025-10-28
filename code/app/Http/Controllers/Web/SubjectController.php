@@ -121,6 +121,20 @@ class SubjectController extends Controller
 
         $user = Auth::user();
 
+        // CHECK SETTINGS: Students can create subjects
+        if ($user->role === 'student' && !\App\Services\SettingsService::canStudentsCreateSubjects()) {
+            return redirect()->back()
+                ->with('error', __('app.students_cannot_create_subjects'))
+                ->withInput();
+        }
+
+        // CHECK SETTINGS: External projects allowed for students
+        if ($user->role === 'student' && $request->boolean('is_external') && !\App\Services\SettingsService::areExternalProjectsAllowed()) {
+            return redirect()->back()
+                ->with('error', __('app.external_projects_not_allowed'))
+                ->withInput();
+        }
+
         $rules = [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -193,17 +207,13 @@ class SubjectController extends Controller
         $subject->load(['teacher', 'student', 'validator', 'externalSupervisor', 'projects.team.members.user']);
 
         // Get teams that have chosen this subject as a preference, ordered by priority
-        $teamPreferences = \App\Models\SubjectPreference::where('subject_id', $subject->id)
+        $teamPreferences = \App\Models\TeamSubjectPreference::where('subject_id', $subject->id)
             ->with([
                 'team.members.user',
-                'allocationDeadline'
+                'selectedBy'
             ])
             ->orderBy('preference_order')
             ->get()
-            ->groupBy('team_id')
-            ->map(function ($preferences) {
-                return $preferences->first(); // Get the first (highest priority) preference for each team
-            })
             ->sortBy('preference_order');
 
         return view('subjects.show', compact('subject', 'teamPreferences'));
@@ -223,33 +233,15 @@ class SubjectController extends Controller
      */
     public function requests(Subject $subject): View
     {
-        // Get students that have chosen this subject as a preference, ordered by priority
-        $studentRequests = \App\Models\SubjectPreference::where('subject_id', $subject->id)
+        // Get teams that have chosen this subject as a preference, ordered by priority
+        $teamRequests = \App\Models\TeamSubjectPreference::where('subject_id', $subject->id)
             ->with([
-                'student.teamMember.team.members.user'
+                'team.members.user',
+                'selectedBy'
             ])
             ->orderBy('preference_order')
-            ->get();
-
-        // Group by team to show team-based requests
-        $teamRequests = $studentRequests->groupBy(function($preference) {
-            return $preference->student->teamMember ? $preference->student->teamMember->team_id : null;
-        })->map(function($preferences, $teamId) {
-            if($teamId === null) {
-                // Students without teams
-                return $preferences;
-            }
-
-            // Return the first preference for each team (assuming team members have same priorities)
-            $firstPreference = $preferences->first();
-            $team = $firstPreference->student->teamMember->team;
-
-            // Add team data to the preference object
-            $firstPreference->team = $team;
-            $firstPreference->team_members_preferences = $preferences;
-
-            return $firstPreference;
-        })->filter()->sortBy('preference_order');
+            ->get()
+            ->sortBy('preference_order');
 
         return view('subjects.requests', compact('subject', 'teamRequests'));
     }

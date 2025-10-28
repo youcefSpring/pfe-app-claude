@@ -470,7 +470,10 @@ class AdminController extends Controller
         $universityInfo = \App\Models\Setting::getUniversityInfo();
         $currentLogo = \App\Models\Setting::getUniversityLogo();
 
-        return view('admin.settings', compact('universityInfo', 'currentLogo'));
+        // Get all settings grouped by category
+        $settingsGroups = \App\Services\SettingsService::getAllSettings();
+
+        return view('admin.settings', compact('universityInfo', 'currentLogo', 'settingsGroups'));
     }
 
     /**
@@ -478,54 +481,53 @@ class AdminController extends Controller
      */
     public function updateSettings(Request $request): RedirectResponse
     {
-        $request->validate([
-            'university_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'university_name_ar' => 'nullable|string|max:255',
-            'university_name_fr' => 'nullable|string|max:255',
-            'faculty_name_ar' => 'nullable|string|max:255',
-            'faculty_name_fr' => 'nullable|string|max:255',
-            'department_name_ar' => 'nullable|string|max:255',
-            'department_name_fr' => 'nullable|string|max:255',
-            'ministry_name_ar' => 'nullable|string|max:255',
-            'ministry_name_fr' => 'nullable|string|max:255',
-            'republic_name_ar' => 'nullable|string|max:255',
-            'republic_name_fr' => 'nullable|string|max:255',
-        ]);
+        try {
+            // Handle logo upload
+            if ($request->hasFile('university_logo')) {
+                $request->validate([
+                    'university_logo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+                ]);
 
-        // Handle logo upload
-        if ($request->hasFile('university_logo')) {
-            // Delete old logo if exists
-            $oldLogo = \App\Models\Setting::get('university_logo');
-            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
-                Storage::disk('public')->delete($oldLogo);
+                // Delete old logo if exists
+                $oldLogo = \App\Models\Setting::get('university_logo');
+                if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                    Storage::disk('public')->delete($oldLogo);
+                }
+
+                // Store new logo
+                $logoPath = $request->file('university_logo')->store('logos', 'public');
+                \App\Services\SettingsService::set('university_logo', $logoPath, 'string', 'University logo file path');
             }
 
-            // Store new logo
-            $logoPath = $request->file('university_logo')->store('logos', 'public');
-            \App\Models\Setting::set('university_logo', $logoPath, 'string', 'University logo file path');
-        }
+            // Get all settings from database to determine types
+            $allSettings = \App\Models\Setting::all()->keyBy('key');
 
-        // Update university information
-        $settingsMap = [
-            'university_name_ar' => 'University name in Arabic',
-            'university_name_fr' => 'University name in French',
-            'faculty_name_ar' => 'Faculty name in Arabic',
-            'faculty_name_fr' => 'Faculty name in French',
-            'department_name_ar' => 'Department name in Arabic',
-            'department_name_fr' => 'Department name in French',
-            'ministry_name_ar' => 'Ministry name in Arabic',
-            'ministry_name_fr' => 'Ministry name in French',
-            'republic_name_ar' => 'Republic name in Arabic',
-            'republic_name_fr' => 'Republic name in French',
-        ];
+            // Update all submitted settings
+            foreach ($request->except(['_token', '_method', 'university_logo']) as $key => $value) {
+                if ($allSettings->has($key)) {
+                    $setting = $allSettings->get($key);
+                    $type = $setting->type;
+                    $description = $setting->description;
 
-        foreach ($settingsMap as $key => $description) {
-            if ($request->filled($key)) {
-                \App\Models\Setting::set($key, $request->input($key), 'string', $description);
+                    // Convert boolean values
+                    if ($type === 'boolean') {
+                        $value = $value ? '1' : '0';
+                    }
+
+                    \App\Services\SettingsService::set($key, $value, $type, $description);
+                }
             }
-        }
 
-        return redirect()->back()->with('success', 'Settings updated successfully!');
+            // Clear cache after update
+            \App\Services\SettingsService::clearCache();
+
+            return redirect()->back()->with('success', __('app.settings_updated_successfully'));
+        } catch (\Exception $e) {
+            \Log::error('Settings update failed: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', __('app.settings_update_failed') . ': ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -831,34 +833,46 @@ public function processBulkImport(Request $request): RedirectResponse
                 ->with('error', __('app.subject_not_available_for_assignment'));
         }
 
-        // Check if subject is already assigned
-        if (Team::where('subject_id', $subject->id)->where('id', '!=', $team->id)->exists()) {
+        try {
+            // Use transaction with locking to prevent race conditions
+            \DB::transaction(function () use ($team, $subject) {
+                // Lock the teams table to check if subject is already assigned
+                $assignedTeam = Team::where('subject_id', $subject->id)
+                    ->where('id', '!=', $team->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($assignedTeam) {
+                    throw new \Exception(__('app.subject_already_assigned'));
+                }
+
+                // Assign subject to team
+                $team->update([
+                    'subject_id' => $subject->id,
+                    'supervisor_id' => $subject->teacher_id,
+                    'status' => 'active'
+                ]);
+
+                // Create project if it doesn't exist
+                if (!$team->project) {
+                    \App\Models\Project::create([
+                        'title' => $subject->title,
+                        'description' => $subject->description,
+                        'subject_id' => $subject->id,
+                        'team_id' => $team->id,
+                        'supervisor_id' => $subject->teacher_id,
+                        'status' => 'active',
+                        'academic_year' => $team->academic_year,
+                    ]);
+                }
+            });
+
             return redirect()->back()
-                ->with('error', __('app.subject_already_assigned'));
+                ->with('success', __('app.subject_assigned_successfully'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
         }
-
-        // Assign subject to team
-        $team->update([
-            'subject_id' => $subject->id,
-            'supervisor_id' => $subject->teacher_id,
-            'status' => 'active'
-        ]);
-
-        // Create project if it doesn't exist
-        if (!$team->project) {
-            \App\Models\Project::create([
-                'title' => $subject->title,
-                'description' => $subject->description,
-                'subject_id' => $subject->id,
-                'team_id' => $team->id,
-                'supervisor_id' => $subject->teacher_id,
-                'status' => 'active',
-                'academic_year' => $team->academic_year,
-            ]);
-        }
-
-        return redirect()->back()
-            ->with('success', __('app.subject_assigned_successfully'));
     }
 
     /**

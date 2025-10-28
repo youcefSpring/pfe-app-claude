@@ -154,8 +154,8 @@
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger fw-bold btn-enhanced"
                                                                 onclick="return showDeleteConfirmation({
-                                                                    itemName: '{{ $preference->subject->title }}',
-                                                                    message: '{{ __('app.confirm_remove_preference') }}',
+                                                                    itemName: @json($preference->subject->title),
+                                                                    message: @json(__('app.confirm_remove_preference')),
                                                                     form: this.closest('form')
                                                                 })"
                                                                 title="{{ __('app.remove_preference') }}"

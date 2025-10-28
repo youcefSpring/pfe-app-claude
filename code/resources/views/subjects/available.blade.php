@@ -94,7 +94,7 @@
                                                             title="{{ __('app.view_details') }}">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
-                                                    @if(auth()->user()->role === 'student' && auth()->user()->teamMember?->team && !auth()->user()->teamMember->team->project)
+                                                    @if(auth()->user()->role === 'student' && auth()->user()->teamMember?->team && !auth()->user()->teamMember?->team?->project)
                                                         <button type="button" class="btn btn-outline-success"
                                                                 onclick="selectSubject({{ $subject->id }}, '{{ $subject->title }}')"
                                                                 title="{{ __('app.select_subject') }}">

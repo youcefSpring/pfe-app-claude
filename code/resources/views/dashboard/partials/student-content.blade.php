@@ -158,7 +158,7 @@
         </div>
         <div class="card-body">
             @php
-                $preferences = auth()->user()->subjectPreferences()->count();
+                $preferences = auth()->user()->teamMember?->team?->subjectPreferences()->count() ?? 0;
                 $currentDeadline = \App\Models\AllocationDeadline::active()->first();
                 $allocation = auth()->user()->subjectAllocation;
             @endphp
