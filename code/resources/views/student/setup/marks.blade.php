@@ -45,7 +45,7 @@
                                         <div class="card-header bg-primary text-white">
                                             <h6 class="mb-0">
                                                 <i class="fas fa-chart-line me-2"></i>
-                                                {{ __('app.semester_marks_entry') }}
+                                                {{ __('app.marks_entry') }}
                                             </h6>
                                         </div>
                                         <div class="card-body">
@@ -54,10 +54,9 @@
                                                     <div class="col-md-6 mb-3">
                                                         <div class="form-group">
                                                             <label for="semester_{{ $i }}_mark" class="form-label fw-bold">
-                                                                @if($user->student_level === 'licence_3')
-                                                                    {{ __('app.semester') }} S{{ $i }}
-                                                                @else
-                                                                    S{{ $i }} - {{ __('app.previous_year') }}
+                                                                {{ __('app.mark') }} {{ $i }}
+                                                                @if($user->student_level !== 'licence_3')
+                                                                    - {{ __('app.previous_year') }}
                                                                 @endif
                                                                 <span class="text-danger">*</span>
                                                             </label>
@@ -77,7 +76,7 @@
                                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                                 @enderror
                                                             </div>
-                                                            <small class="text-muted">{{ __('app.enter_overall_semester_average') }}</small>
+                                                            <small class="text-muted">{{ __('app.enter_overall_average') }}</small>
                                                         </div>
                                                     </div>
                                                 @endfor

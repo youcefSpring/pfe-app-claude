@@ -7,16 +7,21 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-folder-fill me-2"></i>
-                    @if(auth()->user()->role === 'student')
-                        My Projects
-                    @elseif(auth()->user()->role === 'teacher')
-                        Supervised Projects
-                    @else
-                        All Projects
-                    @endif
-                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0">
+                        <i class="bi bi-folder-fill me-2"></i>
+                        @if(auth()->user()->role === 'student')
+                            {{ __('app.my_projects') }}
+                        @elseif(auth()->user()->role === 'teacher')
+                            {{ __('app.supervised_projects') }}
+                        @else
+                            {{ __('app.all_projects') }}
+                        @endif
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
+                </div>
                 <div class="d-flex gap-2">
                     @if(auth()->user()->role === 'student')
                         @php
@@ -451,3 +456,34 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 @endpush
+
+<!-- Page Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.projects_page_help') }}" icon="bi-folder">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.projects_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        @if(auth()->user()->role === 'student')
+            <li><strong>{{ __('app.view_project') }}:</strong> {{ __('app.view_project_help') }}</li>
+            <li><strong>{{ __('app.submit_project') }}:</strong> {{ __('app.submit_project_help') }}</li>
+            <li><strong>{{ __('app.project_timeline') }}:</strong> {{ __('app.project_timeline_help') }}</li>
+        @elseif(auth()->user()->role === 'teacher')
+            <li><strong>{{ __('app.supervise_projects') }}:</strong> {{ __('app.supervise_projects_help') }}</li>
+            <li><strong>{{ __('app.review_submissions') }}:</strong> {{ __('app.review_submissions_help') }}</li>
+            <li><strong>{{ __('app.provide_feedback') }}:</strong> {{ __('app.provide_feedback_help') }}</li>
+        @else
+            <li><strong>{{ __('app.monitor_projects') }}:</strong> {{ __('app.monitor_projects_help') }}</li>
+            <li><strong>{{ __('app.project_reports') }}:</strong> {{ __('app.project_reports_help') }}</li>
+        @endif
+    </ul>
+
+    @if(auth()->user()->role === 'student')
+        <h6>{{ __('app.project_tips') }}</h6>
+        <ul>
+            <li>{{ __('app.project_tip_1') }}</li>
+            <li>{{ __('app.project_tip_2') }}</li>
+            <li>{{ __('app.project_tip_3') }}</li>
+        </ul>
+    @endif
+</x-info-modal>

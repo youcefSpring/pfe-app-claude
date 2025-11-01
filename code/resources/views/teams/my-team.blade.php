@@ -9,9 +9,16 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title mb-0">{{ __('app.my_team') }}: {{ $team->name }}</h4>
-                        <small class="text-muted">{{ __('app.team_details_and_members') }}</small>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="card-title mb-0">{{ __('app.my_team') }}: {{ $team->name }}</h4>
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                                    <i class="bi bi-question-circle"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ __('app.team_details_and_members') }}</small>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -191,5 +198,26 @@
             </div>
         </div>
     @endif
+
+    <!-- Page Help Modal -->
+    <x-info-modal id="pageHelpModal" title="{{ __('app.my_team_help') }}" icon="bi-people">
+        <h6>{{ __('app.what_is_this_page') }}</h6>
+        <p>{{ __('app.my_team_page_description') }}</p>
+
+        <h6>{{ __('app.how_to_use') }}</h6>
+        <ul>
+            <li><strong>{{ __('app.manage_members') }}:</strong> {{ __('app.manage_members_help') }}</li>
+            <li><strong>{{ __('app.invite_members') }}:</strong> {{ __('app.invite_members_help') }}</li>
+            <li><strong>{{ __('app.select_preferences') }}:</strong> {{ __('app.select_preferences_help') }}</li>
+            <li><strong>{{ __('app.view_allocation') }}:</strong> {{ __('app.view_allocation_help') }}</li>
+        </ul>
+
+        <h6>{{ __('app.team_leader_responsibilities') }}</h6>
+        <ul>
+            <li>{{ __('app.leader_responsibility_1') }}</li>
+            <li>{{ __('app.leader_responsibility_2') }}</li>
+            <li>{{ __('app.leader_responsibility_3') }}</li>
+        </ul>
+    </x-info-modal>
 </div>
 @endsection

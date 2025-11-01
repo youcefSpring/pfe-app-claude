@@ -5,51 +5,47 @@
 @section('content')
 <div class="container-fluid">
     <!-- Header Section -->
-    <div class="row mb-4">
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h4 class="card-title mb-1">{{ $deadline->name }}</h4>
-                            <small class="text-muted">{{ $deadline->academic_year }} - {{ $deadline->level }}</small>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <span class="badge bg-{{ $deadline->status == 'active' ? 'success' : ($deadline->status == 'auto_allocation_completed' ? 'info' : 'secondary') }} fs-6">
-                                {{ ucfirst(str_replace('_', ' ', $deadline->status)) }}
-                            </span>
-                            <a href="{{ route('admin.allocations.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> {{ __('app.back') }}
-                            </a>
-                        </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="mb-1">{{ $deadline->name }}</h4>
+                    <small class="text-muted">{{ $deadline->academic_year }} - {{ $deadline->level }}</small>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-{{ $deadline->status == 'active' ? 'success' : ($deadline->status == 'auto_allocation_completed' ? 'info' : 'secondary') }}">
+                        {{ ucfirst(str_replace('_', ' ', $deadline->status)) }}
+                    </span>
+                    <a href="{{ route('admin.allocations.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> {{ __('app.back') }}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Compact Stats -->
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <div class="stat-card-compact text-center">
+                        <div class="stat-number-compact text-primary">{{ $stats['total_teams'] }}</div>
+                        <div class="stat-label-compact">{{ __('app.total_teams') }}</div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="stat-card text-center">
-                                <div class="stat-number text-primary">{{ $stats['total_teams'] }}</div>
-                                <div class="stat-label">{{ __('app.total_teams') }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-card text-center">
-                                <div class="stat-number text-info">{{ $stats['teams_with_preferences'] }}</div>
-                                <div class="stat-label">{{ __('app.teams_with_preferences') }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-card text-center">
-                                <div class="stat-number text-success">{{ $stats['allocated_teams'] }}</div>
-                                <div class="stat-label">{{ __('app.allocated_teams') }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-card text-center">
-                                <div class="stat-number text-warning">{{ $stats['available_subjects'] }}</div>
-                                <div class="stat-label">{{ __('app.available_subjects') }}</div>
-                            </div>
-                        </div>
+                <div class="col-md-3">
+                    <div class="stat-card-compact text-center">
+                        <div class="stat-number-compact text-info">{{ $stats['teams_with_preferences'] }}</div>
+                        <div class="stat-label-compact">{{ __('app.teams_with_preferences') }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card-compact text-center">
+                        <div class="stat-number-compact text-success">{{ $stats['allocated_teams'] }}</div>
+                        <div class="stat-label-compact">{{ __('app.allocated_teams') }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card-compact text-center">
+                        <div class="stat-number-compact text-warning">{{ $stats['available_subjects'] }}</div>
+                        <div class="stat-label-compact">{{ __('app.available_subjects') }}</div>
                     </div>
                 </div>
             </div>
@@ -57,37 +53,33 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="row mb-4">
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        @if($deadline->canPerformAutoAllocation())
-                            <form action="{{ route('admin.allocations.auto-allocation', $deadline) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-primary" onclick="return confirm('{{ __('app.confirm_auto_allocation') }}')">
-                                    <i class="fas fa-magic"></i> {{ __('app.perform_auto_allocation') }}
-                                </button>
-                            </form>
-                        @else
-                            <button class="btn btn-secondary" disabled>
-                                <i class="fas fa-magic"></i> {{ __('app.auto_allocation_completed') }}
-                            </button>
-                        @endif
+            <div class="d-flex flex-wrap gap-2">
+                @if($deadline->canPerformAutoAllocation())
+                    <form action="{{ route('admin.allocations.auto-allocation', $deadline) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('{{ __('app.confirm_auto_allocation') }}')">
+                            <i class="fas fa-magic"></i> {{ __('app.perform_auto_allocation') }}
+                        </button>
+                    </form>
+                @else
+                    <button class="btn btn-sm btn-secondary" disabled>
+                        <i class="fas fa-magic"></i> {{ __('app.auto_allocation_completed') }}
+                    </button>
+                @endif
 
-                        @if(!$deadline->second_round_needed && $unallocatedTeams->count() > 0)
-                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#secondRoundModal">
-                                <i class="fas fa-redo"></i> {{ __('app.initialize_second_round') }}
-                            </button>
-                        @endif
+                @if(!$deadline->second_round_needed && $unallocatedTeams->count() > 0)
+                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#secondRoundModal">
+                        <i class="fas fa-redo"></i> {{ __('app.initialize_second_round') }}
+                    </button>
+                @endif
 
-                        @if($deadline->isSecondRoundActive())
-                            <span class="badge bg-primary fs-6 align-self-center">
-                                <i class="fas fa-clock"></i> {{ __('app.second_round_active') }}
-                            </span>
-                        @endif
-                    </div>
-                </div>
+                @if($deadline->isSecondRoundActive())
+                    <span class="badge bg-primary align-self-center">
+                        <i class="fas fa-clock"></i> {{ __('app.second_round_active') }}
+                    </span>
+                @endif
             </div>
         </div>
     </div>
@@ -277,18 +269,21 @@
 
 @push('styles')
 <style>
-.stat-card {
-    padding: 1rem;
-    border-radius: 8px;
+.stat-card-compact {
+    padding: 0.5rem;
+    border-radius: 6px;
     background: #f8f9fa;
+    border: 1px solid #e0e0e0;
 }
-.stat-number {
-    font-size: 2rem;
+.stat-number-compact {
+    font-size: 1.5rem;
     font-weight: bold;
+    line-height: 1.2;
 }
-.stat-label {
-    font-size: 0.875rem;
+.stat-label-compact {
+    font-size: 0.75rem;
     color: #6c757d;
+    margin-top: 0.25rem;
 }
 </style>
 @endpush

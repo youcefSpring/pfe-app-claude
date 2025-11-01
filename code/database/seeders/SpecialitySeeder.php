@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Speciality;
 
@@ -39,7 +40,7 @@ class SpecialitySeeder extends Seeder
         // Master specialities as requested
         $masterSpecialities = [
             [
-                'name' => 'Informatique et Technologies de l\'Information',
+                'name' => 'Ingénierie du Logiciel et Traitement de l\'Information',
                 'code' => 'ILTI',
                 'level' => 'master',
                 'academic_year' => $currentAcademicYear,
@@ -48,13 +49,14 @@ class SpecialitySeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name' => 'Systèmes d\'Information et Réseaux',
+                'name' => 'Systèmes d\'Information et Répartie',
                 'code' => 'SIR',
                 'level' => 'master',
                 'academic_year' => $currentAcademicYear,
                 'semester' => 'S4',
-                'description' => 'Master en Systèmes d\'Information et Réseaux',
+                'description' => 'Master en Systèmes d\'Information  Répartie',
                 'is_active' => true,
+
             ],
             [
                 'name' => 'Technologies de l\'Information',

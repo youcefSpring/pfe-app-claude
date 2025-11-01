@@ -9,6 +9,8 @@ class PfeHelper
 {
     /**
      * Generate academic year string.
+     * Academic year runs from October 1st to September 30th.
+     * September is considered session 2 of the previous academic year.
      */
     public static function getAcademicYear(?Carbon $date = null): string
     {
@@ -16,40 +18,12 @@ class PfeHelper
         $year = $date->year;
         $month = $date->month;
 
-        // Academic year starts in September
-        if ($month >= 9) {
+        // Academic year starts in October (month 10)
+        // September (month 9) is session 2 of the previous academic year
+        if ($month >= 10) {
             return $year . '-' . ($year + 1);
         } else {
             return ($year - 1) . '-' . $year;
-        }
-    }
-
-    /**
-     * Generate semester information.
-     */
-    public static function getCurrentSemester(?Carbon $date = null): array
-    {
-        $date = $date ?: now();
-        $month = $date->month;
-
-        if ($month >= 9 || $month <= 1) {
-            return [
-                'semester' => 1,
-                'name' => 'First Semester',
-                'academic_year' => self::getAcademicYear($date),
-            ];
-        } elseif ($month >= 2 && $month <= 6) {
-            return [
-                'semester' => 2,
-                'name' => 'Second Semester',
-                'academic_year' => self::getAcademicYear($date),
-            ];
-        } else {
-            return [
-                'semester' => 0,
-                'name' => 'Summer Break',
-                'academic_year' => self::getAcademicYear($date),
-            ];
         }
     }
 
@@ -371,43 +345,23 @@ class PfeHelper
     /**
      * Helper methods for date calculations.
      */
-    private static function getCurrentSemesterStart(Carbon $date): Carbon
-    {
-        $month = $date->month;
-
-        if ($month >= 9) {
-            return $date->copy()->month(9)->startOfMonth();
-        } else {
-            return $date->copy()->subYear()->month(9)->startOfMonth();
-        }
-    }
-
-    private static function getCurrentSemesterEnd(Carbon $date): Carbon
-    {
-        $month = $date->month;
-
-        if ($month >= 9) {
-            return $date->copy()->addYear()->month(1)->endOfMonth();
-        } else {
-            return $date->copy()->month(6)->endOfMonth();
-        }
-    }
-
     private static function getAcademicYearStart(Carbon $date): Carbon
     {
-        if ($date->month >= 9) {
-            return $date->copy()->month(9)->startOfMonth();
+        // Academic year starts in October
+        if ($date->month >= 10) {
+            return $date->copy()->month(10)->startOfMonth();
         } else {
-            return $date->copy()->subYear()->month(9)->startOfMonth();
+            return $date->copy()->subYear()->month(10)->startOfMonth();
         }
     }
 
     private static function getAcademicYearEnd(Carbon $date): Carbon
     {
-        if ($date->month >= 9) {
-            return $date->copy()->addYear()->month(6)->endOfMonth();
+        // Academic year ends in September (session 2)
+        if ($date->month >= 10) {
+            return $date->copy()->addYear()->month(9)->endOfMonth();
         } else {
-            return $date->copy()->month(6)->endOfMonth();
+            return $date->copy()->month(9)->endOfMonth();
         }
     }
 }

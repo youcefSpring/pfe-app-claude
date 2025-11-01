@@ -8,7 +8,12 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">Create New Team</h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">{{ __('app.create_team') }}</h4>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('teams.store') }}" method="POST">
@@ -100,3 +105,30 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<!-- Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.create_team_help') }}" icon="bi-people">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.create_team_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.team_name') }}:</strong> {{ __('app.team_name_auto_generated') }}</li>
+        <li><strong>{{ __('app.submit') }}:</strong> {{ __('app.click_create_team_to_form') }}</li>
+    </ul>
+
+    <h6>{{ __('app.team_guidelines_help') }}</h6>
+    <ul>
+        <li>{{ __('app.team_guideline_1') }}</li>
+        <li>{{ __('app.team_guideline_2') }}</li>
+        <li>{{ __('app.team_guideline_3') }}</li>
+        <li>{{ __('app.team_guideline_4') }}</li>
+    </ul>
+
+    <h6>{{ __('app.important_notes') }}</h6>
+    <ul>
+        <li>{{ __('app.create_team_note_1') }}</li>
+        <li>{{ __('app.create_team_note_2') }}</li>
+        <li>{{ __('app.create_team_note_3') }}</li>
+    </ul>
+</x-info-modal>

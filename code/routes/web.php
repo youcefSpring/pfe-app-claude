@@ -412,6 +412,7 @@ Route::middleware(['auth'])->group(function () {
         // System Configuration
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/settings/reset', [AdminController::class, 'resetSettings'])->name('settings.reset');
 
         // Reports and Analytics
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');

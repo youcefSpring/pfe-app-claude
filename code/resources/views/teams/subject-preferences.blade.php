@@ -11,9 +11,14 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="card-title mb-1">
-                                <i class="fas fa-list-ol"></i> {{ __('app.subject_preferences_for_team') }}: {{ $team->name }}
-                            </h4>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="card-title mb-1">
+                                    <i class="fas fa-list-ol"></i> {{ __('app.subject_preferences_for_team') }}: {{ $team->name }}
+                                </h4>
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                                    <i class="bi bi-question-circle"></i>
+                                </button>
+                            </div>
                             <small class="text-muted">{{ __('app.manage_your_team_subject_preferences') }}</small>
                         </div>
                         <a href="{{ route('teams.my-team') }}" class="btn btn-outline-secondary">
@@ -599,4 +604,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 @endpush
+
+<!-- Page Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.subject_preferences_help') }}" icon="bi-list-ol">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.subject_preferences_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.browse_available_subjects') }}:</strong> {{ __('app.browse_available_subjects_help') }}</li>
+        <li><strong>{{ __('app.add_to_preferences') }}:</strong> {{ __('app.add_to_preferences_help') }}</li>
+        <li><strong>{{ __('app.reorder_preferences') }}:</strong> {{ __('app.reorder_preferences_help') }}</li>
+        <li><strong>{{ __('app.submit_final_preferences') }}:</strong> {{ __('app.submit_final_preferences_help') }}</li>
+    </ul>
+
+    <h6>{{ __('app.important_notes') }}</h6>
+    <ul>
+        <li>{{ __('app.preference_note_1') }}</li>
+        <li>{{ __('app.preference_note_2') }}</li>
+        <li>{{ __('app.preference_note_3') }}</li>
+    </ul>
+</x-info-modal>
+
 @endsection

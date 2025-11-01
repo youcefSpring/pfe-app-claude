@@ -134,21 +134,20 @@ class StudentSetupController extends Controller
             ->where('academic_year', '<', now()->year)
             ->delete();
 
-        // Store new marks with generic semester names
+        // Store new marks (previous year marks)
         for ($i = 1; $i <= $requiredMarks; $i++) {
-            $semesterName = "S{$i}";
+            $markName = "Mark {$i}";
             if ($user->student_level === 'licence_3') {
-                $semesterName = "Semester {$i}";
+                $markName = "Mark {$i}";
             } else {
-                $semesterName = "S{$i} - Previous Year";
+                $markName = "Mark {$i} - Previous Year";
             }
 
             StudentMark::create([
                 'user_id' => $user->id,
-                'subject_name' => $semesterName,
+                'subject_name' => $markName,
                 'mark' => $request->input("semester_{$i}_mark"),
-                'academic_year' => now()->year - 1, // Use previous academic year as default
-                'semester' => "S{$i}",
+                'academic_year' => \App\Services\PfeHelper::getAcademicYear(now()->subYear()), // Previous academic year
                 'created_by' => $user->id,
             ]);
         }

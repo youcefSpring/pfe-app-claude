@@ -5,7 +5,12 @@
 @section('content')
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{{ __('app.teams') }}</h1>
+        <div class="d-flex align-items-center gap-2">
+            <h1 class="h3 mb-0">{{ __('app.teams') }}</h1>
+            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                <i class="bi bi-question-circle"></i>
+            </button>
+        </div>
         @if(auth()->user()?->role === 'student' && isset($canModifyTeams) && $canModifyTeams)
             <a href="{{ route('teams.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus"></i> {{ __('app.create_team') }}
@@ -236,5 +241,34 @@
             </nav>
         </div>
     @endif
+
+    <!-- Page Help Modal -->
+    <x-info-modal id="pageHelpModal" title="{{ __('app.teams_page_help') }}" icon="bi-people">
+        <h6>{{ __('app.what_is_this_page') }}</h6>
+        <p>{{ __('app.teams_page_description') }}</p>
+
+        <h6>{{ __('app.how_to_use') }}</h6>
+        <ul>
+            <li><strong>{{ __('app.view_teams') }}:</strong> {{ __('app.view_teams_help') }}</li>
+            @if(auth()->user()?->role === 'student')
+                <li><strong>{{ __('app.create_team') }}:</strong> {{ __('app.create_team_help') }}</li>
+                <li><strong>{{ __('app.join_team') }}:</strong> {{ __('app.join_team_help') }}</li>
+                <li><strong>{{ __('app.manage_team') }}:</strong> {{ __('app.manage_team_help') }}</li>
+            @endif
+            @if(auth()->user()?->role === 'admin')
+                <li><strong>{{ __('app.assign_subject') }}:</strong> {{ __('app.assign_subject_team_help') }}</li>
+                <li><strong>{{ __('app.monitor_teams') }}:</strong> {{ __('app.monitor_teams_help') }}</li>
+            @endif
+        </ul>
+
+        @if(auth()->user()?->role === 'student')
+            <h6>{{ __('app.team_formation_tips') }}</h6>
+            <ul>
+                <li>{{ __('app.team_tip_1') }}</li>
+                <li>{{ __('app.team_tip_2') }}</li>
+                <li>{{ __('app.team_tip_3') }}</li>
+            </ul>
+        @endif
+    </x-info-modal>
 </div>
 @endsection

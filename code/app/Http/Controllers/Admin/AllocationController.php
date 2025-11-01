@@ -57,35 +57,37 @@ class AllocationController extends Controller
                 ->count(),
             'teams_with_preferences' => Team::where('academic_year', $deadline->academic_year)
                 ->where('level', $deadline->level)
-                ->whereHas('preferences', function($q) use ($deadline) {
-                    $q->where('allocation_deadline_id', $deadline->id);
-                })
+                ->whereHas('subjectPreferences')
                 ->count(),
             'allocated_teams' => $deadline->allocations()->where('status', 'confirmed')->count(),
-            'available_subjects' => Subject::where('level', $deadline->level)
-                ->where('academic_year', $deadline->academic_year)
-                ->where('is_validated', true)
+            'available_subjects' => Subject::where('academic_year', $deadline->academic_year)
+                ->where('status', 'validated')
                 ->whereDoesntHave('allocations', function($q) use ($deadline) {
                     $q->where('allocation_deadline_id', $deadline->id)
                       ->where('status', 'confirmed');
+                })
+                ->whereHas('specialities', function($q) use ($deadline) {
+                    $q->where('level', $deadline->level);
                 })
                 ->count()
         ];
 
         $unallocatedTeams = Team::where('academic_year', $deadline->academic_year)
             ->where('level', $deadline->level)
-            ->whereDoesntHave('projects', function($q) use ($deadline) {
+            ->whereDoesntHave('project', function($q) use ($deadline) {
                 $q->where('academic_year', $deadline->academic_year);
             })
-            ->with(['members.user', 'preferences.subject'])
+            ->with(['members.user', 'subjectPreferences.subject'])
             ->get();
 
-        $availableSubjects = Subject::where('level', $deadline->level)
-            ->where('academic_year', $deadline->academic_year)
-            ->where('is_validated', true)
+        $availableSubjects = Subject::where('academic_year', $deadline->academic_year)
+            ->where('status', 'validated')
             ->whereDoesntHave('allocations', function($q) use ($deadline) {
                 $q->where('allocation_deadline_id', $deadline->id)
                   ->where('status', 'confirmed');
+            })
+            ->whereHas('specialities', function($q) use ($deadline) {
+                $q->where('level', $deadline->level);
             })
             ->with('teacher')
             ->get();

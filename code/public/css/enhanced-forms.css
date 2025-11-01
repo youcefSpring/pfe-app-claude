@@ -1,0 +1,599 @@
+/* Enhanced Forms and UX Styles */
+
+/* ============================================
+   FORM ENHANCEMENTS - Larger, More User-Friendly
+   ============================================ */
+
+/* Larger Form Controls */
+.form-control,
+.form-select {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+    min-height: 50px;
+    border-radius: 0.5rem;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Larger Textareas */
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+textarea.form-control-lg {
+    min-height: 180px;
+}
+
+/* Form Labels */
+.form-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label.required::after {
+    content: "*";
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-left: 0.25rem;
+}
+
+.form-label i {
+    color: var(--bs-primary);
+    font-size: 1.1rem;
+}
+
+/* Form Text / Helper Text */
+.form-text {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    line-height: 1.6;
+}
+
+.form-text i {
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+/* Input Groups with Icons */
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-right: none;
+    font-size: 1.2rem;
+    padding: 0.75rem 1rem;
+    min-width: 50px;
+    justify-content: center;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--bs-primary);
+    background-color: #e7f1ff;
+    color: var(--bs-primary);
+}
+
+/* ============================================
+   BUTTON ENHANCEMENTS - Larger, Clearer
+   ============================================ */
+
+.btn {
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    min-height: 48px;
+}
+
+.btn i {
+    font-size: 1.2rem;
+}
+
+.btn-lg {
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    min-height: 56px;
+}
+
+.btn-lg i {
+    font-size: 1.4rem;
+}
+
+.btn-sm {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    min-height: 38px;
+}
+
+/* Button Hover Effects */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+/* Disabled Button State */
+.btn:disabled,
+.btn.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ============================================
+   DEADLINE ALERTS - Prominent Visual Feedback
+   ============================================ */
+
+.deadline-alert {
+    border-left: 5px solid;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: start;
+    gap: 1rem;
+}
+
+.deadline-alert-success {
+    border-left-color: #198754;
+    background-color: #d1e7dd;
+}
+
+.deadline-alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.deadline-alert-danger {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.deadline-alert-info {
+    border-left-color: #0dcaf0;
+    background-color: #cff4fc;
+}
+
+.deadline-alert-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
+.deadline-alert-content {
+    flex: 1;
+}
+
+.deadline-alert-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deadline-alert-message {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.deadline-alert-time {
+    font-size: 0.95rem;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+/* Countdown Timer Style */
+.deadline-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 0.5rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.deadline-countdown i {
+    font-size: 1.1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================
+   CARD ENHANCEMENTS
+   ============================================ */
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 1rem 1rem 0 0 !important;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Form Card */
+.form-card {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-card .card-body {
+    padding: 2rem;
+}
+
+/* ============================================
+   STATUS BADGES - Larger, More Visible
+   ============================================ */
+
+.badge {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.badge i {
+    font-size: 1rem;
+}
+
+.badge-lg {
+    font-size: 1.1rem;
+    padding: 0.75rem 1.25rem;
+}
+
+/* ============================================
+   ICON ENHANCEMENTS
+   ============================================ */
+
+.icon-box {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.icon-box-sm {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+}
+
+.icon-box-lg {
+    width: 64px;
+    height: 64px;
+    font-size: 2rem;
+}
+
+.icon-box-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: var(--bs-primary);
+}
+
+.icon-box-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--bs-success);
+}
+
+.icon-box-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: var(--bs-warning);
+}
+
+.icon-box-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--bs-danger);
+}
+
+.icon-box-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    color: var(--bs-info);
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   FORM SECTIONS
+   ============================================ */
+
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.form-section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-section-title i {
+    font-size: 1.5rem;
+    color: var(--bs-primary);
+}
+
+/* ============================================
+   RADIO & CHECKBOX ENHANCEMENTS
+   ============================================ */
+
+.form-check {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    margin-bottom: 0.75rem;
+}
+
+.form-check:hover {
+    background-color: #f8f9fa;
+}
+
+.form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.15rem;
+    cursor: pointer;
+    border: 2px solid #dee2e6;
+}
+
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.form-check-label {
+    font-size: 1.05rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+/* Radio/Checkbox Card Style */
+.form-check-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-check-card:hover {
+    border-color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.02);
+}
+
+.form-check-card .form-check-input:checked ~ .form-check-label {
+    color: var(--bs-primary);
+    font-weight: 700;
+}
+
+.form-check-card:has(.form-check-input:checked) {
+    border-color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.05);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+    .form-control,
+    .form-select {
+        font-size: 1rem;
+        min-height: 46px;
+    }
+
+    .btn {
+        font-size: 1rem;
+        padding: 0.65rem 1.25rem;
+        min-height: 44px;
+    }
+
+    .deadline-alert {
+        flex-direction: column;
+    }
+
+    .deadline-alert-icon {
+        font-size: 1.5rem;
+    }
+
+    .form-section-title {
+        font-size: 1.15rem;
+    }
+}
+
+/* ============================================
+   VALIDATION FEEDBACK ENHANCEMENTS
+   ============================================ */
+
+.invalid-feedback,
+.valid-feedback {
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.invalid-feedback i,
+.valid-feedback i {
+    font-size: 1rem;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545;
+    border-width: 2px;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: #198754;
+    border-width: 2px;
+}
+
+/* ============================================
+   PAGE DESCRIPTIONS - Multilingual
+   ============================================ */
+
+.page-description {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--bs-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.page-description-icon {
+    font-size: 2rem;
+    color: var(--bs-primary);
+    margin-right: 1rem;
+    float: left;
+}
+
+.page-description-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #495057;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-large {
+    font-size: 1.1rem;
+}
+
+.text-larger {
+    font-size: 1.25rem;
+}
+
+.fw-semibold {
+    font-weight: 600;
+}
+
+.shadow-hover {
+    transition: box-shadow 0.3s ease;
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+}

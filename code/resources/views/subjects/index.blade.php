@@ -5,7 +5,12 @@
 @section('content')
     <div class="container-fluid py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">{{ __('app.subjects') }}</h1>
+            <div class="d-flex align-items-center gap-2">
+                <h1 class="h3 mb-0">{{ __('app.subjects') }}</h1>
+                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
             @if(auth()->user()?->role === 'teacher')
                 <a href="{{ route('subjects.create') }}" class="btn btn-primary">
                     <i class="bi bi-plus"></i> {{ __('app.create') }} {{ __('app.subject') }}
@@ -15,8 +20,15 @@
 
         <!-- Filters -->
         <div class="card mb-4">
-            <div class="card-body">
-                <form method="GET" action="{{ route('subjects.index') }}" class="row g-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">{{ __('app.filters') }}</h6>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="true" aria-controls="filtersCollapse">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="filtersCollapse">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('subjects.index') }}" class="row g-3">
                     <div class="col-md-3">
                         <label for="grade" class="form-label">{{ __('app.grade') }}</label>
                         <select class="form-select" id="grade" name="grade">
@@ -48,6 +60,7 @@
                         </div>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
 
@@ -141,7 +154,7 @@
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#requestsModal"
                                                             data-subject-id="{{ $subject->id }}"
-                                                            title="See Requests ({{ $subject->preferences_count }})">
+                                                            title="{{ __('app.see_requests') }} ({{ $subject->preferences_count }})">
                                                         <i class="bi bi-list-ul"></i>
                                                     </button>
                                                 @endif
@@ -176,17 +189,17 @@
                 @else
                     <div class="text-center py-5">
                         <i class="bi bi-journal-x text-muted" style="font-size: 4rem;"></i>
-                        <h4 class="mt-3">No Subjects Found</h4>
+                        <h4 class="mt-3">{{ __('app.no_subjects_found') }}</h4>
                         <p class="text-muted">
                             @if(request()->hasAny(['search', 'grade', 'status']))
-                                No subjects match your current filters. Try adjusting your search criteria.
+                                {{ __('app.no_subjects_match_filters') }}
                             @else
-                                There are no subjects available at the moment.
+                                {{ __('app.no_subjects_available_moment') }}
                             @endif
                         </p>
                         @if(auth()->user()?->role === 'teacher')
                             <a href="{{ route('subjects.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus"></i> Create First Subject
+                                <i class="bi bi-plus"></i> {{ __('app.create_first_subject') }}
                             </a>
                         @endif
                     </div>
@@ -197,7 +210,7 @@
         <!-- Pagination -->
         @if($subjects->hasPages())
             <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Subjects pagination">
+                <nav aria-label="{{ __('app.subjects_pagination') }}">
                     {{ $subjects->appends(request()->query())->links('pagination::bootstrap-4') }}
                 </nav>
             </div>
@@ -216,7 +229,7 @@
                     <div id="subjectModalContent">
                         <div class="text-center py-4">
                             <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                                <span class="visually-hidden">{{ __('app.loading') }}</span>
                             </div>
                         </div>
                     </div>
@@ -233,24 +246,53 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="requestsModalLabel">Team Requests</h5>
+                    <h5 class="modal-title" id="requestsModalLabel">{{ __('app.team_requests') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="requestsModalContent">
                         <div class="text-center py-4">
                             <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                                <span class="visually-hidden">{{ __('app.loading') }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.close') }}</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Page Help Modal -->
+    <x-info-modal id="pageHelpModal" title="{{ __('app.subjects_page_help') }}" icon="bi-journal-text">
+        <h6>{{ __('app.what_is_this_page') }}</h6>
+        <p>{{ __('app.subjects_page_description') }}</p>
+
+        <h6>{{ __('app.how_to_use') }}</h6>
+        <ul>
+            <li><strong>{{ __('app.browse_subjects') }}:</strong> {{ __('app.browse_subjects_help') }}</li>
+            <li><strong>{{ __('app.filter') }}:</strong> {{ __('app.filter_subjects_help') }}</li>
+            <li><strong>{{ __('app.view_details') }}:</strong> {{ __('app.view_subject_details_help') }}</li>
+            @if(auth()->user()?->role === 'teacher')
+                <li><strong>{{ __('app.create_subject') }}:</strong> {{ __('app.create_subject_help') }}</li>
+                <li><strong>{{ __('app.edit_subject') }}:</strong> {{ __('app.edit_subject_help') }}</li>
+            @endif
+            @if(auth()->user()?->role === 'student')
+                <li><strong>{{ __('app.request_subject') }}:</strong> {{ __('app.request_subject_help') }}</li>
+            @endif
+        </ul>
+
+        @if(auth()->user()?->role === 'teacher')
+            <h6>{{ __('app.subject_status') }}</h6>
+            <ul>
+                <li><strong>{{ __('app.draft') }}:</strong> {{ __('app.draft_status_help') }}</li>
+                <li><strong>{{ __('app.pending') }}:</strong> {{ __('app.pending_status_help') }}</li>
+                <li><strong>{{ __('app.validated') }}:</strong> {{ __('app.validated_status_help') }}</li>
+            </ul>
+        @endif
+    </x-info-modal>
 @endsection
 
 @push('scripts')
@@ -269,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modalContent.innerHTML = `
             <div class="text-center py-4">
                 <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">{{ __('app.loading') }}</span>
                 </div>
             </div>
         `;
@@ -284,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalContent.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle"></i>
-                        Error loading subject details. Please try again.
+                        {{ __('app.error_loading_subject_details') }}
                     </div>
                 `;
             });
@@ -300,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modalContent.innerHTML = `
             <div class="text-center py-4">
                 <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">{{ __('app.loading') }}</span>
                 </div>
             </div>
         `;
@@ -315,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalContent.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle"></i>
-                        Error loading team requests. Please try again.
+                        {{ __('app.error_loading_team_requests') }}
                     </div>
                 `;
             });

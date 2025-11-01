@@ -137,10 +137,8 @@ class AutoAllocationService
      */
     private function getTeamsWithPreferences(AllocationDeadline $deadline): Collection
     {
-        return Team::with(['members.user.grades', 'preferences.subject'])
-            ->whereHas('preferences', function ($query) use ($deadline) {
-                $query->where('allocation_deadline_id', $deadline->id);
-            })
+        return Team::with(['members.user.grades', 'subjectPreferences.subject'])
+            ->whereHas('subjectPreferences')
             ->where('level', $deadline->level)
             ->where('academic_year', $deadline->academic_year)
             ->get();
@@ -151,12 +149,14 @@ class AutoAllocationService
      */
     private function getAvailableSubjects(AllocationDeadline $deadline): Collection
     {
-        return Subject::where('level', $deadline->level)
-            ->where('academic_year', $deadline->academic_year)
-            ->where('is_validated', true)
+        return Subject::where('academic_year', $deadline->academic_year)
+            ->where('status', 'validated')
             ->whereDoesntHave('allocations', function ($query) use ($deadline) {
                 $query->where('allocation_deadline_id', $deadline->id)
                       ->where('status', 'confirmed');
+            })
+            ->whereHas('specialities', function($q) use ($deadline) {
+                $q->where('level', $deadline->level);
             })
             ->get();
     }
@@ -167,7 +167,7 @@ class AutoAllocationService
     private function groupTeamsByPreferences(Collection $teams): Collection
     {
         return $teams->groupBy(function ($team) {
-            $firstPreference = $team->preferences
+            $firstPreference = $team->subjectPreferences
                 ->where('preference_order', 1)
                 ->first();
 
@@ -220,7 +220,7 @@ class AutoAllocationService
             throw new \Exception("Team {$team->name} has no members");
         }
 
-        $preference = $team->preferences()
+        $preference = $team->subjectPreferences()
             ->where('subject_id', $subject->id)
             ->first();
 
@@ -270,8 +270,7 @@ class AutoAllocationService
         $unallocatedTeams = $teams->whereNotIn('id', $allocated);
 
         foreach ($unallocatedTeams as $team) {
-            $preferences = $team->preferences()
-                ->where('allocation_deadline_id', $deadline->id)
+            $preferences = $team->subjectPreferences()
                 ->orderBy('preference_order')
                 ->get();
 

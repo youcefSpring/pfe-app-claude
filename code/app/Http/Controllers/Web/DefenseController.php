@@ -761,17 +761,11 @@ class DefenseController extends Controller
             abort(404, 'Defense team not found');
         }
 
-        // Get the first team member for student data
-        $teamMember = $defense->project->team->members()->first();
-        if (!$teamMember) {
-            abort(404, 'Team member not found');
+        // Get all team members for generating individual pages
+        $teamMembers = $defense->project->team->members()->with('user.speciality')->get();
+        if ($teamMembers->isEmpty()) {
+            abort(404, 'No team members found');
         }
-
-        if (!$teamMember->user) {
-            abort(404, 'User data not found');
-        }
-
-        $userData = $teamMember->user;
 
         // Get jury members
         $juries = $defense->juries()->with('teacher')->get();
@@ -782,10 +776,10 @@ class DefenseController extends Controller
             ? $currentDate->year . '/' . ($currentDate->year + 1)
             : ($currentDate->year - 1) . '/' . $currentDate->year;
 
-        // Generate PDF
-        $pdf = \PDF::loadView('defenses.report', compact(
+        // Generate PDF with one page per student
+        $pdf = \PDF::loadView('defenses.report-all-students', compact(
             'defense',
-            'userData',
+            'teamMembers',
             'juries',
             'academicYear'
         ));
@@ -798,8 +792,9 @@ class DefenseController extends Controller
             'isRemoteEnabled' => true,
         ]);
 
-        // Generate filename
-        $filename = 'PV_Soutenance_' . str_replace(' ', '_', $userData->name) . '_' .
+        // Generate filename using team name or first student name
+        $teamName = $defense->project->team->name ?? 'Team';
+        $filename = 'PV_Soutenance_' . str_replace(' ', '_', $teamName) . '_' .
                    ($defense->defense_date ? $defense->defense_date->format('Y-m-d') : date('Y-m-d')) . '.pdf';
 
         return $pdf->download($filename);

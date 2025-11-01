@@ -88,6 +88,6 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Created users: 1 admin, 4 department heads, 13 teachers, 30 students, 3 external supervisors');
+        $this->command->info('Created users: 1 admin, 4 department heads, 2 teachers, 7 students, 1 external supervisor');
     }
 }

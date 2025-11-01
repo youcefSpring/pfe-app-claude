@@ -8,9 +8,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">
-                        <i class="fas fa-tasks text-primary"></i> {{ __('app.allocation_management') }}
-                    </h4>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-tasks text-primary"></i> {{ __('app.allocation_management') }}
+                        </h4>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </div>
                     <a href="{{ route('admin.allocations.index') }}" class="btn btn-outline-primary">
                         <i class="fas fa-sync"></i> {{ __('app.refresh') }}
                     </a>
@@ -152,4 +157,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<!-- Page Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.allocation_management_help') }}" icon="bi-diagram-3">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.allocation_management_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.view_allocations') }}:</strong> {{ __('app.view_allocations_help') }}</li>
+        <li><strong>{{ __('app.manage_deadline') }}:</strong> {{ __('app.manage_deadline_help') }}</li>
+        <li><strong>{{ __('app.run_auto_allocation') }}:</strong> {{ __('app.run_auto_allocation_help') }}</li>
+        <li><strong>{{ __('app.manual_assignment') }}:</strong> {{ __('app.manual_assignment_help') }}</li>
+    </ul>
+
+    <h6>{{ __('app.allocation_process') }}</h6>
+    <ul>
+        <li>{{ __('app.allocation_step_1') }}</li>
+        <li>{{ __('app.allocation_step_2') }}</li>
+        <li>{{ __('app.allocation_step_3') }}</li>
+        <li>{{ __('app.allocation_step_4') }}</li>
+    </ul>
+</x-info-modal>
+
 @endsection

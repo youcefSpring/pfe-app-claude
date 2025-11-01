@@ -15,7 +15,6 @@ class StudentMark extends Model
         'subject_name',
         'mark',
         'max_mark',
-        'semester',
         'academic_year',
         'notes',
         'created_by',

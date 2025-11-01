@@ -11,7 +11,12 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <h4 class="card-title mb-2">{{ __('app.my_profile') }}</h4>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="card-title mb-2">{{ __('app.my_profile') }}</h4>
+                                <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                                    <i class="bi bi-question-circle"></i>
+                                </button>
+                            </div>
                             <p class="card-text mb-0">{{ __('app.view_manage_account_info') }}</p>
                         </div>
                         <div class="col-auto">
@@ -283,5 +288,27 @@
             @endif
         </div>
     </div>
+
+    <!-- Page Help Modal -->
+    <x-info-modal id="pageHelpModal" title="{{ __('app.my_profile_help') }}" icon="bi-person-circle">
+        <h6>{{ __('app.what_is_this_page') }}</h6>
+        <p>{{ __('app.my_profile_page_description') }}</p>
+
+        <h6>{{ __('app.how_to_use') }}</h6>
+        <ul>
+            <li><strong>{{ __('app.update_personal_info') }}:</strong> {{ __('app.update_personal_info_help') }}</li>
+            <li><strong>{{ __('app.change_password') }}:</strong> {{ __('app.change_password_help') }}</li>
+            @if(auth()->user()->role === 'student')
+                <li><strong>{{ __('app.view_academic_status') }}:</strong> {{ __('app.view_academic_status_help') }}</li>
+            @endif
+        </ul>
+
+        <h6>{{ __('app.important_notes') }}</h6>
+        <ul>
+            <li>{{ __('app.profile_note_1') }}</li>
+            <li>{{ __('app.profile_note_2') }}</li>
+            <li>{{ __('app.profile_note_3') }}</li>
+        </ul>
+    </x-info-modal>
 </div>
 @endsection

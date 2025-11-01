@@ -51,7 +51,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-light text-dark">{{ $student->department ?? 'N/A' }}</span>
+                                                <span class="badge bg-light text-dark">{{ $student->department ?? __('app.na') }}</span>
                                             </td>
                                             <td>
                                                 <input type="number" step="0.01" min="0" max="20"
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.previewMarks = function() {
         const selectedStudents = document.querySelectorAll('.student-checkbox:checked');
-        let previewHtml = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Student</th><th>Mark 1</th><th>Mark 2</th><th>Mark 3</th><th>Mark 4</th><th>Mark 5</th><th>Average</th></tr></thead><tbody>';
+        let previewHtml = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>{{ __('app.student') }}</th><th>{{ __('app.mark') }} 1</th><th>{{ __('app.mark') }} 2</th><th>{{ __('app.mark') }} 3</th><th>{{ __('app.mark') }} 4</th><th>{{ __('app.mark') }} 5</th><th>{{ __('app.average') }}</th></tr></thead><tbody>';
 
         selectedStudents.forEach(checkbox => {
             const studentId = checkbox.value;

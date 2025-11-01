@@ -39,6 +39,6 @@ class SubjectSeeder extends Seeder
             Subject::create($subject);
         }
 
-        $this->command->info('Created 9 subjects across all departments');
+        $this->command->info('Created 2 subjects for Computer Science department');
     }
 }

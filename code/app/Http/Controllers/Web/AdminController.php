@@ -531,6 +531,31 @@ class AdminController extends Controller
     }
 
     /**
+     * Reset settings to default values
+     */
+    public function resetSettings(): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Run the settings seeder to reset all values
+            \Artisan::call('db:seed', ['--class' => 'SettingsSeeder', '--force' => true]);
+
+            // Clear cache
+            \App\Services\SettingsService::clearCache();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('app.settings_reset_successfully')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Settings reset failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => __('app.settings_reset_failed') . ': ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Reports page
      */
     public function reports(): View
@@ -1126,7 +1151,8 @@ public function processBulkImport(Request $request): RedirectResponse
     public function createMark(): View
     {
         $students = User::where('role', 'student')->get();
-        return view('admin.marks.create', compact('students'));
+        $currentAcademicYear = \App\Services\PfeHelper::getAcademicYear();
+        return view('admin.marks.create', compact('students', 'currentAcademicYear'));
     }
 
     /**
@@ -1136,66 +1162,46 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'subject_name' => 'required|string|max:255',
-            'academic_year' => 'required|string',
-            'semester' => 'nullable|string|max:10',
-            'max_mark' => 'required|numeric|min:1|max:100',
-            'notes' => 'nullable|string|max:1000',
-            // Required marks
-            'mark_1' => 'required|numeric|min:0',
-            'mark_2' => 'required|numeric|min:0',
-            // Optional marks
-            'mark_3' => 'nullable|numeric|min:0',
-            'mark_4' => 'nullable|numeric|min:0',
-            'mark_5' => 'nullable|numeric|min:0',
-        ]);
-
-        // Add dynamic validation for marks against max_mark
-        $request->validate([
-            'mark_1' => 'max:' . $request->max_mark,
-            'mark_2' => 'max:' . $request->max_mark,
-            'mark_3' => 'nullable|max:' . $request->max_mark,
-            'mark_4' => 'nullable|max:' . $request->max_mark,
-            'mark_5' => 'nullable|max:' . $request->max_mark,
+            // Required marks (out of 20)
+            'mark_1' => 'required|numeric|min:0|max:20',
+            'mark_2' => 'required|numeric|min:0|max:20',
+            // Optional marks (out of 20)
+            'mark_3' => 'nullable|numeric|min:0|max:20',
+            'mark_4' => 'nullable|numeric|min:0|max:20',
+            'mark_5' => 'nullable|numeric|min:0|max:20',
         ]);
 
         try {
-            // Check if student already has marks for this subject and academic year
+            $currentAcademicYear = \App\Services\PfeHelper::getAcademicYear();
+            $student = User::findOrFail($request->user_id);
+
+            // Check if student already has marks for current academic year
             $existingMark = StudentMark::where('user_id', $request->user_id)
-                ->where('subject_name', $request->subject_name)
-                ->where('academic_year', $request->academic_year)
-                ->when($request->semester, function ($query) use ($request) {
-                    return $query->where('semester', $request->semester);
-                })
+                ->where('academic_year', $currentAcademicYear)
                 ->first();
 
             if ($existingMark) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', __('app.student_already_has_marks_for_this_subject'));
+                return redirect()->route('admin.marks.edit', $existingMark)
+                    ->with('info', __('app.student_already_has_marks_redirecting_to_edit'));
             }
 
-            // Calculate simple average of entered marks
-            $marks = array_filter([
-                $request->mark_1,
-                $request->mark_2,
-                $request->mark_3,
-                $request->mark_4,
-                $request->mark_5
-            ], function($mark) {
-                return $mark !== null && $mark !== '';
-            });
+            // Calculate simple average of entered marks (only non-empty and non-zero)
+            $enteredMarks = [];
+            if ($request->mark_1 !== null && $request->mark_1 !== '' && $request->mark_1 > 0) $enteredMarks[] = floatval($request->mark_1);
+            if ($request->mark_2 !== null && $request->mark_2 !== '' && $request->mark_2 > 0) $enteredMarks[] = floatval($request->mark_2);
+            if ($request->mark_3 !== null && $request->mark_3 !== '' && $request->mark_3 > 0) $enteredMarks[] = floatval($request->mark_3);
+            if ($request->mark_4 !== null && $request->mark_4 !== '' && $request->mark_4 > 0) $enteredMarks[] = floatval($request->mark_4);
+            if ($request->mark_5 !== null && $request->mark_5 !== '' && $request->mark_5 > 0) $enteredMarks[] = floatval($request->mark_5);
 
-            $averageMark = count($marks) > 0 ? array_sum($marks) / count($marks) : 0;
+            $averageMark = count($enteredMarks) > 0 ? array_sum($enteredMarks) / count($enteredMarks) : 0;
 
             StudentMark::create([
                 'user_id' => $request->user_id,
-                'subject_name' => $request->subject_name,
+                'subject_name' => 'General Academic Performance', // Default
                 'mark' => $averageMark,
-                'max_mark' => $request->max_mark,
-                'semester' => $request->semester,
-                'academic_year' => $request->academic_year,
-                'notes' => $request->notes,
+                'max_mark' => 20, // Fixed to 20
+                'academic_year' => $currentAcademicYear,
+                'notes' => null, // Not used in simplified form
                 'created_by' => Auth::id(),
                 // Individual marks
                 'mark_1' => $request->mark_1,
@@ -1203,12 +1209,12 @@ public function processBulkImport(Request $request): RedirectResponse
                 'mark_3' => $request->mark_3,
                 'mark_4' => $request->mark_4,
                 'mark_5' => $request->mark_5,
-                // Max marks (all same as max_mark)
-                'max_mark_1' => $request->max_mark,
-                'max_mark_2' => $request->max_mark,
-                'max_mark_3' => $request->max_mark,
-                'max_mark_4' => $request->max_mark,
-                'max_mark_5' => $request->max_mark,
+                // Max marks (all fixed to 20)
+                'max_mark_1' => 20,
+                'max_mark_2' => 20,
+                'max_mark_3' => 20,
+                'max_mark_4' => 20,
+                'max_mark_5' => 20,
                 // Equal weights
                 'weight_1' => 20,
                 'weight_2' => 20,
@@ -1232,7 +1238,8 @@ public function processBulkImport(Request $request): RedirectResponse
     public function editMark(StudentMark $mark): View
     {
         $students = User::where('role', 'student')->get();
-        return view('admin.marks.edit', compact('mark', 'students'));
+        $currentAcademicYear = \App\Services\PfeHelper::getAcademicYear();
+        return view('admin.marks.edit', compact('mark', 'students', 'currentAcademicYear'));
     }
 
     /**
@@ -1242,79 +1249,59 @@ public function processBulkImport(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'subject_name' => 'required|string|max:255',
-            'academic_year' => 'required|string',
-            'semester' => 'nullable|string|max:10',
-            'max_mark' => 'required|numeric|min:1|max:100',
-            'notes' => 'nullable|string|max:1000',
-            // Required marks
-            'mark_1' => 'required|numeric|min:0',
-            'mark_2' => 'required|numeric|min:0',
-            // Optional marks
-            'mark_3' => 'nullable|numeric|min:0',
-            'mark_4' => 'nullable|numeric|min:0',
-            'mark_5' => 'nullable|numeric|min:0',
-        ]);
-
-        // Add dynamic validation for marks against max_mark
-        $request->validate([
-            'mark_1' => 'max:' . $request->max_mark,
-            'mark_2' => 'max:' . $request->max_mark,
-            'mark_3' => 'nullable|max:' . $request->max_mark,
-            'mark_4' => 'nullable|max:' . $request->max_mark,
-            'mark_5' => 'nullable|max:' . $request->max_mark,
+            // Required marks (out of 20)
+            'mark_1' => 'required|numeric|min:0|max:20',
+            'mark_2' => 'required|numeric|min:0|max:20',
+            // Optional marks (out of 20)
+            'mark_3' => 'nullable|numeric|min:0|max:20',
+            'mark_4' => 'nullable|numeric|min:0|max:20',
+            'mark_5' => 'nullable|numeric|min:0|max:20',
         ]);
 
         try {
-            // Check if another mark exists for this student, subject, and academic year (excluding current mark)
+            $currentAcademicYear = \App\Services\PfeHelper::getAcademicYear();
+
+            // Check if another mark exists for this student in current academic year (excluding current mark)
             $existingMark = StudentMark::where('user_id', $request->user_id)
-                ->where('subject_name', $request->subject_name)
-                ->where('academic_year', $request->academic_year)
-                ->when($request->semester, function ($query) use ($request) {
-                    return $query->where('semester', $request->semester);
-                })
+                ->where('academic_year', $currentAcademicYear)
                 ->where('id', '!=', $mark->id)
                 ->first();
 
             if ($existingMark) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', __('app.student_already_has_marks_for_this_subject'));
+                    ->with('error', __('app.student_already_has_marks_for_this_year'));
             }
 
-            // Calculate simple average of entered marks
-            $marks = array_filter([
-                $request->mark_1,
-                $request->mark_2,
-                $request->mark_3,
-                $request->mark_4,
-                $request->mark_5
-            ], function($markValue) {
-                return $markValue !== null && $markValue !== '';
-            });
+            // Calculate simple average of entered marks (only non-empty and non-zero)
+            $enteredMarks = [];
+            if ($request->mark_1 !== null && $request->mark_1 !== '' && $request->mark_1 > 0) $enteredMarks[] = floatval($request->mark_1);
+            if ($request->mark_2 !== null && $request->mark_2 !== '' && $request->mark_2 > 0) $enteredMarks[] = floatval($request->mark_2);
+            if ($request->mark_3 !== null && $request->mark_3 !== '' && $request->mark_3 > 0) $enteredMarks[] = floatval($request->mark_3);
+            if ($request->mark_4 !== null && $request->mark_4 !== '' && $request->mark_4 > 0) $enteredMarks[] = floatval($request->mark_4);
+            if ($request->mark_5 !== null && $request->mark_5 !== '' && $request->mark_5 > 0) $enteredMarks[] = floatval($request->mark_5);
 
-            $averageMark = count($marks) > 0 ? array_sum($marks) / count($marks) : 0;
+            $averageMark = count($enteredMarks) > 0 ? array_sum($enteredMarks) / count($enteredMarks) : 0;
 
             $mark->update([
                 'user_id' => $request->user_id,
-                'subject_name' => $request->subject_name,
+                'subject_name' => 'General Academic Performance', // Default
                 'mark' => $averageMark,
-                'max_mark' => $request->max_mark,
-                'semester' => $request->semester,
-                'academic_year' => $request->academic_year,
-                'notes' => $request->notes,
+                'max_mark' => 20, // Fixed to 20
+                'academic_year' => $currentAcademicYear,
+                'notes' => null, // Not used in simplified form
                 // Individual marks
                 'mark_1' => $request->mark_1,
                 'mark_2' => $request->mark_2,
                 'mark_3' => $request->mark_3,
                 'mark_4' => $request->mark_4,
                 'mark_5' => $request->mark_5,
-                // Max marks (all same as max_mark)
-                'max_mark_1' => $request->max_mark,
-                'max_mark_2' => $request->max_mark,
-                'max_mark_3' => $request->max_mark,
-                'max_mark_4' => $request->max_mark,
-                'max_mark_5' => $request->max_mark,
+                // Max marks (all fixed to 20)
+                'max_mark_1' => 20,
+                'max_mark_2' => 20,
+                'max_mark_3' => 20,
+                'max_mark_4' => 20,
+                'max_mark_5' => 20,
                 // Keep equal weights
                 'weight_1' => 20,
                 'weight_2' => 20,
@@ -1406,7 +1393,6 @@ public function processBulkImport(Request $request): RedirectResponse
                 'subject_name' => 'General Assessment', // Default subject name
                 'mark' => $averageMark, // Average of all marks
                 'max_mark' => 20, // Standard max mark
-                'semester' => null, // Not used anymore
                 'academic_year' => $academicYear, // Current academic year
                 'notes' => null, // Not used anymore
                 'created_by' => Auth::id(),
@@ -1544,7 +1530,6 @@ public function processBulkImport(Request $request): RedirectResponse
                     $markData = [
                         'user_id' => $studentId,
                         'subject_name' => 'General Assessment', // Default since no subject selection
-                        'semester' => null,
                         'academic_year' => $academicYear,
                         'mark' => $averageMark, // Required average mark field
                         'max_mark' => 20, // Standard max mark

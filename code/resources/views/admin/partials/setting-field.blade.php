@@ -8,46 +8,46 @@
                    value="1"
                    {{ $setting['value'] == '1' ? 'checked' : '' }}>
             <label class="form-check-label" for="{{ $setting['key'] }}">
-                <strong>{{ ucfirst(str_replace('_', ' ', $setting['key'])) }}</strong>
-                @if($setting['description'])
-                    <br><small class="text-muted">{{ $setting['description'] }}</small>
+                <strong>{{ __('settings.' . $setting['key'] . '_label') }}</strong>
+                @if(__('settings.' . $setting['key'] . '_desc') !== 'settings.' . $setting['key'] . '_desc')
+                    <br><small class="text-muted">{{ __('settings.' . $setting['key'] . '_desc') }}</small>
                 @endif
             </label>
         </div>
     @elseif($setting['type'] === 'integer')
         <label for="{{ $setting['key'] }}" class="form-label">
-            <strong>{{ ucfirst(str_replace('_', ' ', $setting['key'])) }}</strong>
+            <strong>{{ __('settings.' . $setting['key'] . '_label') }}</strong>
         </label>
         <input type="number" class="form-control"
                id="{{ $setting['key'] }}"
                name="{{ $setting['key'] }}"
                value="{{ $setting['value'] }}"
                min="0">
-        @if($setting['description'])
-            <small class="form-text text-muted">{{ $setting['description'] }}</small>
+        @if(__('settings.' . $setting['key'] . '_desc') !== 'settings.' . $setting['key'] . '_desc')
+            <small class="form-text text-muted">{{ __('settings.' . $setting['key'] . '_desc') }}</small>
         @endif
     @elseif($setting['type'] === 'text')
         <label for="{{ $setting['key'] }}" class="form-label">
-            <strong>{{ ucfirst(str_replace('_', ' ', $setting['key'])) }}</strong>
+            <strong>{{ __('settings.' . $setting['key'] . '_label') }}</strong>
         </label>
         <textarea class="form-control"
                   id="{{ $setting['key'] }}"
                   name="{{ $setting['key'] }}"
                   rows="3">{{ $setting['value'] }}</textarea>
-        @if($setting['description'])
-            <small class="form-text text-muted">{{ $setting['description'] }}</small>
+        @if(__('settings.' . $setting['key'] . '_desc') !== 'settings.' . $setting['key'] . '_desc')
+            <small class="form-text text-muted">{{ __('settings.' . $setting['key'] . '_desc') }}</small>
         @endif
     @else
         {{-- Default: string --}}
         <label for="{{ $setting['key'] }}" class="form-label">
-            <strong>{{ ucfirst(str_replace('_', ' ', $setting['key'])) }}</strong>
+            <strong>{{ __('settings.' . $setting['key'] . '_label') }}</strong>
         </label>
         <input type="text" class="form-control"
                id="{{ $setting['key'] }}"
                name="{{ $setting['key'] }}"
                value="{{ $setting['value'] }}">
-        @if($setting['description'])
-            <small class="form-text text-muted">{{ $setting['description'] }}</small>
+        @if(__('settings.' . $setting['key'] . '_desc') !== 'settings.' . $setting['key'] . '_desc')
+            <small class="form-text text-muted">{{ __('settings.' . $setting['key'] . '_desc') }}</small>
         @endif
     @endif
 </div>

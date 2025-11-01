@@ -8,7 +8,12 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Edit Subject</h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">{{ __('app.edit_subject') }}</h4>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('subjects.update', $subject) }}" method="POST">
@@ -227,3 +232,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<!-- Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.edit_subject_help') }}" icon="bi-journal-text">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.edit_subject_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.edit_details') }}:</strong> {{ __('app.edit_subject_details_help') }}</li>
+        <li><strong>{{ __('app.change_status') }}:</strong> {{ __('app.change_subject_status_help') }}</li>
+        <li><strong>{{ __('app.save_changes') }}:</strong> {{ __('app.save_subject_changes_help') }}</li>
+    </ul>
+
+    <h6>{{ __('app.important_notes') }}</h6>
+    <ul>
+        <li>{{ __('app.edit_subject_note_1') }}</li>
+        <li>{{ __('app.edit_subject_note_2') }}</li>
+        <li>{{ __('app.edit_subject_note_3') }}</li>
+    </ul>
+</x-info-modal>

@@ -1,50 +1,57 @@
-@extends('layouts.app')
+@extends('layouts.pfe-app')
 
-@section('title', __('app.allocation_results'))
+@section('page-title', __('app.allocation_results'))
 
 @section('content')
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 mb-0">{{ __('app.subject_allocation_results') }}</h1>
-                    <p class="text-muted">{{ __('app.review_manage_allocation_outcomes') }}</p>
-                </div>
-                <div>
-                    <a href="{{ route('allocations.index') }}" class="btn btn-outline-secondary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>{{ __('app.back_to_allocations') }}
-                    </a>
-                    <a href="{{ route('allocations.deadlines') }}" class="btn btn-primary">
-                        <i class="bi bi-calendar-event me-1"></i>Manage Deadlines
-                    </a>
-                </div>
+    <!-- Compact Page Header -->
+    <div class="page-header-compact">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>
+                <i class="bi bi-clipboard-check"></i>
+                {{ __('app.subject_allocation_results') }}
+            </h1>
+            <div>
+                <a href="{{ route('allocations.index') }}" class="btn btn-sm btn-default me-2">
+                    <i class="bi bi-arrow-left"></i>
+                    {{ __('app.back') }}
+                </a>
+                <a href="{{ route('allocations.deadlines') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-calendar-event"></i>
+                    {{ __('app.manage_deadlines') }}
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
+    <!-- Compact Info Alert -->
+    <div class="page-description-compact">
+        <i class="bi bi-info-circle"></i>
+        {{ __('app.review_manage_allocation_outcomes') }}
+    </div>
+
+    <!-- Statistics Cards (Compact) -->
+    <div class="row mb-3">
         <div class="col-md-3">
-            <div class="card border-primary">
-                <div class="card-body text-center">
-                    <h3 class="text-primary mb-1">{{ $stats['total_allocations'] }}</h3>
+            <div class="box box-primary">
+                <div class="box-body text-center p-2">
+                    <h3 class="mb-0">{{ $stats['total_allocations'] }}</h3>
                     <small class="text-muted">{{ __('app.total_allocations') }}</small>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-success">
-                <div class="card-body text-center">
-                    <h3 class="text-success mb-1">{{ $stats['confirmed_allocations'] }}</h3>
+            <div class="box box-success">
+                <div class="box-body text-center p-2">
+                    <h3 class="mb-0">{{ $stats['confirmed_allocations'] }}</h3>
                     <small class="text-muted">{{ __('app.confirmed') }}</small>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-warning">
-                <div class="card-body text-center">
-                    <h3 class="text-warning mb-1">{{ $stats['total_allocations'] - $stats['confirmed_allocations'] }}</h3>
+            <div class="box box-warning">
+                <div class="box-body text-center p-2">
+                    <h3 class="mb-0">{{ $stats['total_allocations'] - $stats['confirmed_allocations'] }}</h3>
                     <small class="text-muted">{{ __('app.pending') }}</small>
                 </div>
             </div>

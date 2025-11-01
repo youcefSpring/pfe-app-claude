@@ -330,22 +330,37 @@ class SettingsService
     // ============================================================================
 
     /**
-     * Get all settings grouped by category
+     * Get all settings grouped by category and sorted by type (boolean, integer, string)
      */
     public static function getAllSettings(): array
     {
         $allSettings = Setting::orderBy('key')->get();
 
+        // Define type order priority: boolean (1), integer (2), text/string (3)
+        $typeOrder = [
+            'boolean' => 1,
+            'integer' => 2,
+            'text' => 3,
+            'string' => 4,
+        ];
+
+        // Helper function to sort settings by type
+        $sortByType = function($settings) use ($typeOrder) {
+            return $settings->sortBy(function($setting) use ($typeOrder) {
+                return $typeOrder[$setting->type] ?? 99;
+            })->values();
+        };
+
         return [
-            'team' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'team_')),
-            'subject' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'subject_') || str_starts_with($s->key, 'preferences_') || str_starts_with($s->key, 'max_subject_') || str_starts_with($s->key, 'min_subject_') || str_starts_with($s->key, 'external_')),
-            'registration' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'registration_') || str_starts_with($s->key, 'require_')),
-            'file' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'max_file_') || str_starts_with($s->key, 'allowed_file_')),
-            'defense' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'defense_') || str_starts_with($s->key, 'auto_scheduling_')),
-            'notification' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'email_') || str_starts_with($s->key, 'notification_')),
-            'allocation' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'auto_allocation_') || str_starts_with($s->key, 'allocation_') || str_starts_with($s->key, 'allow_second_')),
-            'system' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'maintenance_') || str_starts_with($s->key, 'default_') || str_starts_with($s->key, 'available_')),
-            'university' => $allSettings->filter(fn($s) => str_starts_with($s->key, 'university_') || str_starts_with($s->key, 'faculty_') || str_starts_with($s->key, 'department_') || str_starts_with($s->key, 'ministry_') || str_starts_with($s->key, 'republic_')),
+            'team' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'team_'))),
+            'subject' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'subject_') || str_starts_with($s->key, 'preferences_') || str_starts_with($s->key, 'max_subject_') || str_starts_with($s->key, 'min_subject_') || str_starts_with($s->key, 'external_'))),
+            'registration' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'registration_') || str_starts_with($s->key, 'require_'))),
+            'file' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'max_file_') || str_starts_with($s->key, 'allowed_file_'))),
+            'defense' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'defense_') || str_starts_with($s->key, 'auto_scheduling_'))),
+            'notification' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'email_') || str_starts_with($s->key, 'notification_'))),
+            'allocation' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'auto_allocation_') || str_starts_with($s->key, 'allocation_') || str_starts_with($s->key, 'allow_second_'))),
+            'system' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'maintenance_') || str_starts_with($s->key, 'default_') || str_starts_with($s->key, 'available_'))),
+            'university' => $sortByType($allSettings->filter(fn($s) => str_starts_with($s->key, 'university_') || str_starts_with($s->key, 'faculty_') || str_starts_with($s->key, 'department_') || str_starts_with($s->key, 'ministry_') || str_starts_with($s->key, 'republic_'))),
         ];
     }
 

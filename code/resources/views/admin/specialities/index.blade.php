@@ -8,9 +8,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">
-                        <i class="bi bi-mortarboard me-2"></i>{{ __('app.specialities_management') }}
-                    </h4>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="card-title mb-0">
+                            <i class="bi bi-mortarboard me-2"></i>{{ __('app.specialities_management') }}
+                        </h4>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </div>
                     <a href="{{ route('admin.specialities.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-lg me-1"></i>{{ __('app.new_speciality') }}
                     </a>
@@ -264,3 +269,31 @@ function deleteSpeciality(specialityId, specialityName) {
 }
 </script>
 @endpush
+
+<!-- Page Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.specialities_management_help') }}" icon="bi-mortarboard">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.specialities_management_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.create_speciality') }}:</strong> {{ __('app.create_speciality_help') }}</li>
+        <li><strong>{{ __('app.filter_specialities') }}:</strong> {{ __('app.filter_specialities_help') }}</li>
+        <li><strong>{{ __('app.edit_speciality') }}:</strong> {{ __('app.edit_speciality_help') }}</li>
+        <li><strong>{{ __('app.activate_deactivate') }}:</strong> {{ __('app.activate_deactivate_help') }}</li>
+    </ul>
+
+    <h6>{{ __('app.speciality_levels') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.licence') }}:</strong> {{ __('app.licence_level_description') }}</li>
+        <li><strong>{{ __('app.master') }}:</strong> {{ __('app.master_level_description') }}</li>
+        <li><strong>{{ __('app.doctorate') }}:</strong> {{ __('app.doctorate_level_description') }}</li>
+    </ul>
+
+    <h6>{{ __('app.important_notes') }}</h6>
+    <ul>
+        <li>{{ __('app.speciality_note_1') }}</li>
+        <li>{{ __('app.speciality_note_2') }}</li>
+        <li>{{ __('app.speciality_note_3') }}</li>
+    </ul>
+</x-info-modal>

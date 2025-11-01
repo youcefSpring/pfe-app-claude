@@ -12,24 +12,6 @@
                     <small class="text-muted">{{ __('app.import_multiple_users') }}</small>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle"></i> {{ __('app.import_instructions') }}</h6>
-                        <ul class="mb-0">
-                            <li>{{ __('app.excel_file_format') }}</li>
-                            <li><strong>{{ __('app.column_c') }}:</strong> {{ __('app.matricule_student_id') }}</li>
-                            <li><strong>{{ __('app.column_d') }}:</strong> {{ __('app.nom_last_name') }}</li>
-                            <li><strong>{{ __('app.column_e') }}:</strong> {{ __('app.prenom_first_name') }}</li>
-                            <li><strong>{{ __('app.column_f') }}:</strong> {{ __('app.section_optional') }}</li>
-                            <li><strong>{{ __('app.column_g') }}:</strong> {{ __('app.groupe_optional') }}</li>
-                            <li><strong>{{ __('app.name_format') }}:</strong> {{ __('app.name_format_description') }}</li>
-                            <li>{{ __('app.email_auto_generated') }}: <code>matricule@gmail.com</code></li>
-                            <li>{{ __('app.password_set_to_matricule') }}</li>
-                            <li>{{ __('app.default_department_computer_science') }}</li>
-                            <li>{{ __('app.speciality_selected_below') }}</li>
-                            <li>{{ __('app.file_size_formats') }}</li>
-                        </ul>
-                    </div>
-
                     <form action="{{ route('admin.users.bulk-import.process') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">

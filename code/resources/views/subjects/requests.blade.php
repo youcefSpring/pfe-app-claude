@@ -97,8 +97,8 @@
     @else
         <div class="text-center py-4">
             <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
-            <h5 class="mt-3 text-muted">No Team Requests</h5>
-            <p class="text-muted">No teams have requested this subject yet.</p>
+            <h5 class="mt-3 text-muted">{{ __('app.no_team_requests') }}</h5>
+            <p class="text-muted">{{ __('app.no_teams_requested_subjects') }}</p>
         </div>
     @endif
 </div>

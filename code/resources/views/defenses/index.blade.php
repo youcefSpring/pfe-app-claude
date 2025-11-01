@@ -8,7 +8,12 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">{{ __('app.defenses') }}</h4>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="card-title mb-0">{{ __('app.defenses') }}</h4>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </div>
                     @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
                         <div class="btn-group" role="group">
                             <a href="{{ route('defenses.schedule-form') }}" class="btn btn-primary">
@@ -786,3 +791,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<!-- Page Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.defenses_page_help') }}" icon="bi-shield-check">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.defenses_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.view_defenses') }}:</strong> {{ __('app.view_defenses_help') }}</li>
+        @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
+            <li><strong>{{ __('app.schedule_defense') }}:</strong> {{ __('app.schedule_defense_help') }}</li>
+            <li><strong>{{ __('app.assign_jury') }}:</strong> {{ __('app.assign_jury_help') }}</li>
+            <li><strong>{{ __('app.calendar_view') }}:</strong> {{ __('app.calendar_view_help') }}</li>
+        @endif
+        @if(auth()->user()?->role === 'student')
+            <li><strong>{{ __('app.my_defense') }}:</strong> {{ __('app.my_defense_help') }}</li>
+        @endif
+        @if(auth()->user()?->role === 'teacher')
+            <li><strong>{{ __('app.jury_assignments') }}:</strong> {{ __('app.jury_assignments_help') }}</li>
+        @endif>
+    </ul>
+
+    <h6>{{ __('app.defense_status') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.scheduled') }}:</strong> {{ __('app.scheduled_defense_help') }}</li>
+        <li><strong>{{ __('app.in_progress') }}:</strong> {{ __('app.in_progress_defense_help') }}</li>
+        <li><strong>{{ __('app.completed') }}:</strong> {{ __('app.completed_defense_help') }}</li>
+    </ul>
+</x-info-modal>

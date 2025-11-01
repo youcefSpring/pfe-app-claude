@@ -8,6 +8,12 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="mb-0">{{ __('app.user_management') }}</h4>
+                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                                <i class="bi bi-question-circle"></i>
+                            </button>
+                        </div>
                         <div class="btn-group" role="group">
                             <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
                                 <i class="bi bi-person-plus me-2"></i>{{ __('app.add_user') }}
@@ -325,3 +331,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<!-- Page Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.user_management_help') }}" icon="bi-people">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.user_management_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.add_user') }}:</strong> {{ __('app.add_user_help') }}</li>
+        <li><strong>{{ __('app.bulk_import') }}:</strong> {{ __('app.bulk_import_help') }}</li>
+        <li><strong>{{ __('app.filter_search') }}:</strong> {{ __('app.filter_search_help') }}</li>
+        <li><strong>{{ __('app.edit_user') }}:</strong> {{ __('app.edit_user_help') }}</li>
+        <li><strong>{{ __('app.delete_user') }}:</strong> {{ __('app.delete_user_help') }}</li>
+    </ul>
+
+    <h6>{{ __('app.user_roles') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.administrator') }}:</strong> {{ __('app.admin_role_description') }}</li>
+        <li><strong>{{ __('app.teacher') }}:</strong> {{ __('app.teacher_role_description') }}</li>
+        <li><strong>{{ __('app.student') }}:</strong> {{ __('app.student_role_description') }}</li>
+    </ul>
+</x-info-modal>

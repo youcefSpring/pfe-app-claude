@@ -8,7 +8,12 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">{{ __('app.edit_team') }}</h4>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="card-title mb-0">{{ __('app.edit_team') }}</h4>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pageHelpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </div>
                     <span class="badge bg-{{ $team->status === 'active' ? 'success' : ($team->status === 'forming' ? 'warning' : 'secondary') }}">
                         {{ ucfirst($team->status) }}
                     </span>
@@ -185,3 +190,29 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+<!-- Help Modal -->
+<x-info-modal id="pageHelpModal" title="{{ __('app.edit_team_help') }}" icon="bi-people">
+    <h6>{{ __('app.what_is_this_page') }}</h6>
+    <p>{{ __('app.edit_team_page_description') }}</p>
+
+    <h6>{{ __('app.how_to_use') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.team_name') }}:</strong> {{ __('app.edit_team_name_help') }}</li>
+        <li><strong>{{ __('app.team_status') }}:</strong> {{ __('app.team_status_help') }}</li>
+        <li><strong>{{ __('app.delete_team') }}:</strong> {{ __('app.delete_team_help') }}</li>
+    </ul>
+
+    <h6>{{ __('app.team_status_types') }}</h6>
+    <ul>
+        <li><strong>{{ __('app.forming') }}:</strong> {{ __('app.forming_status_description') }}</li>
+        <li><strong>{{ __('app.active') }}:</strong> {{ __('app.active_status_description') }}</li>
+    </ul>
+
+    <h6>{{ __('app.important_notes') }}</h6>
+    <ul>
+        <li>{{ __('app.edit_team_note_1') }}</li>
+        <li>{{ __('app.edit_team_note_2') }}</li>
+        <li>{{ __('app.edit_team_note_3') }}</li>
+    </ul>
+</x-info-modal>

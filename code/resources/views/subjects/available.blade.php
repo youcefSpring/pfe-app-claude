@@ -179,7 +179,7 @@
                 <div id="subjectModalContent">
                     <div class="text-center py-4">
                         <div class="spinner-border" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                            <span class="visually-hidden">{{ __('app.loading') }}</span>
                         </div>
                     </div>
                 </div>
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalContent.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle"></i>
-                        Error loading subject details. Please try again.
+                        {{ __('app.error_loading_subject_details') }}
                     </div>
                 `;
             });

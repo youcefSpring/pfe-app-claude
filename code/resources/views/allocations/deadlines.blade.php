@@ -229,7 +229,7 @@
 </div>
 @endsection
 
-
+@push('styles')
 <style>
 .btn-group .btn,
 .d-flex .btn {
@@ -241,7 +241,9 @@
     font-size: 0.8rem;
 }
 </style>
+@endpush
 
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Bootstrap tooltips
@@ -267,4 +269,4 @@ function editDeadline(deadlineId) {
     modal.show();
 }
 </script>
-@endsection
+@endpush
