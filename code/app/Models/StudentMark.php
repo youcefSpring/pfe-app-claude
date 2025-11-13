@@ -15,6 +15,7 @@ class StudentMark extends Model
         'subject_name',
         'mark',
         'max_mark',
+        'semester',           // ✅ FIXED: Added semester field to $fillable
         'academic_year',
         'notes',
         'created_by',

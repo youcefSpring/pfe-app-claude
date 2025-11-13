@@ -78,7 +78,12 @@ class TeamInvitation extends Model
             return false;
         }
 
-        if ($this->team->members()->count() >= 4) {
+        // ✅ FIXED: Use SettingsService instead of hardcoded value
+        $leader = $this->team->leader;
+        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+        $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
+
+        if ($this->team->members()->count() >= $maxSize) {
             return false;
         }
 
@@ -120,7 +125,12 @@ class TeamInvitation extends Model
 
     public static function createInvitation(Team $team, string $email, User $invitedBy): ?self
     {
-        if ($team->members()->count() >= 4) {
+        // ✅ FIXED: Use SettingsService instead of hardcoded value
+        $leader = $team->leader;
+        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+        $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
+
+        if ($team->members()->count() >= $maxSize) {
             return null;
         }
 

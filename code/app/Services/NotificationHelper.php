@@ -336,6 +336,16 @@ class NotificationHelper
      */
     private static function sendEmail(string $to, string $subject, string $template, array $data): void
     {
+        // ✅ FIXED: Check if email notifications are enabled in settings
+        if (!\App\Services\SettingsService::areEmailNotificationsEnabled()) {
+            Log::info("Email notification skipped (disabled in settings)", [
+                'to' => $to,
+                'subject' => $subject,
+                'template' => $template,
+            ]);
+            return;
+        }
+
         // In a real implementation, this would use Laravel's Mail facade
         // For now, simulate email sending with logging
 

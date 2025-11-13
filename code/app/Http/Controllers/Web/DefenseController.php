@@ -437,13 +437,16 @@ class DefenseController extends Controller
         DB::beginTransaction();
         try {
             // Create defense
+            // ✅ FIXED: Use SettingsService instead of hardcoded duration
+            $defaultDuration = \App\Services\SettingsService::getDefenseDuration();
+
             $defense = Defense::create([
                 'project_id' => $project->id,
                 'subject_id' => $validated['subject_id'],
                 'defense_date' => $validated['defense_date'],
                 'defense_time' => $validated['defense_time'],
                 'room_id' => $validated['room_id'],
-                'duration' => 90, // Default 90 minutes
+                'duration' => $defaultDuration,
                 'status' => 'scheduled',
                 'notes' => $validated['notes'],
                 'scheduled_by' => Auth::id(),
@@ -500,10 +503,13 @@ class DefenseController extends Controller
         try {
             $defenseSchedulingService = new DefenseSchedulingService();
 
+            // ✅ FIXED: Use SettingsService instead of hardcoded duration
+            $defaultDuration = \App\Services\SettingsService::getDefenseDuration();
+
             $constraints = [
                 'start_date' => $validated['start_date'],
                 'end_date' => $validated['end_date'],
-                'duration' => 90,
+                'duration' => $defaultDuration,
                 'include_weekends' => in_array('saturday', $validated['working_days']) || in_array('sunday', $validated['working_days'])
             ];
 

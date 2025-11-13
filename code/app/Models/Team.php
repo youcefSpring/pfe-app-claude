@@ -184,8 +184,10 @@ class Team extends Model
             };
         }
 
-        $minSize = config("team.sizes.{$academicLevel}.min", 1);
-        $maxSize = config("team.sizes.{$academicLevel}.max", 4);
+        // ✅ FIXED: Use SettingsService instead of config file
+        $studentLevel = $academicLevel === 'licence' ? 'licence_3' : 'master_1';
+        $minSize = \App\Services\SettingsService::getMinTeamSize($studentLevel);
+        $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
 
         return $memberCount >= $minSize && $memberCount <= $maxSize;
     }
@@ -241,7 +243,10 @@ class Team extends Model
 
         // Check team size limits
         $currentSize = $this->members()->count();
-        $maxSize = config('team.sizes.licence.max', 3);
+        // ✅ FIXED: Use SettingsService instead of config
+        $leader = $this->leader;
+        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+        $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
 
         if ($currentSize >= $maxSize) {
             return false;
@@ -362,9 +367,14 @@ class Team extends Model
      */
     public function getSizeConfig(): array
     {
-        // This would be determined by the students' level (licence/master)
-        // For now, return default
-        return config('team.sizes.licence', ['min' => 2, 'max' => 3]);
+        // ✅ FIXED: Use SettingsService instead of config file
+        $leader = $this->leader;
+        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+
+        return [
+            'min' => \App\Services\SettingsService::getMinTeamSize($studentLevel),
+            'max' => \App\Services\SettingsService::getMaxTeamSize($studentLevel)
+        ];
     }
 
     /**

@@ -612,8 +612,11 @@ class TeamController extends Controller
                 ->with('error', __('app.cannot_manage_preferences'));
         }
 
+        // ✅ FIXED: Use dynamic max from SettingsService
+        $maxPreferences = \App\Services\SettingsService::getMaxPreferences();
+
         $request->validate([
-            'subject_ids' => 'required|array|max:10',
+            'subject_ids' => "required|array|max:{$maxPreferences}",
             'subject_ids.*' => 'exists:subjects,id'
         ]);
 
@@ -708,7 +711,12 @@ class TeamController extends Controller
                 ->with('error', __('app.already_member_of_team'));
         }
 
-        if ($team->members->count() >= 4) {
+        // ✅ FIXED: Use SettingsService instead of hardcoded value
+        $leader = $team->leader;
+        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+        $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
+
+        if ($team->members->count() >= $maxSize) {
             return redirect()->back()
                 ->with('error', __('app.team_full'));
         }

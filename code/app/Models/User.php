@@ -114,6 +114,8 @@ class User extends Authenticatable
 
     /**
      * Get the average percentage for this student.
+     * Uses final_percentage from weighted marks (mark_1 to mark_5) if available,
+     * otherwise falls back to simple percentage calculation.
      */
     public function getAveragePercentageAttribute(): float
     {
@@ -123,7 +125,9 @@ class User extends Authenticatable
         }
 
         $totalPercentage = $marks->sum(function($mark) {
-            return $mark->percentage;
+            // Use final_percentage if student has weighted marks (mark_1 to mark_5)
+            // Otherwise use simple percentage (mark / max_mark * 100)
+            return $mark->final_percentage ?: $mark->percentage;
         });
 
         return round($totalPercentage / $marks->count(), 2);

@@ -58,8 +58,12 @@ class SubjectPreferenceController extends Controller
                 ->with('error', 'Preference selection period has ended.');
         }
 
+        // ✅ FIXED: Use dynamic max/min from SettingsService
+        $maxPreferences = \App\Services\SettingsService::getMaxPreferences();
+        $minPreferences = \App\Services\SettingsService::getMinPreferences();
+
         $validated = $request->validate([
-            'subject_preferences' => 'required|array|min:1|max:10',
+            'subject_preferences' => "required|array|min:{$minPreferences}|max:{$maxPreferences}",
             'subject_preferences.*' => 'required|exists:subjects,id',
         ]);
 
@@ -99,8 +103,12 @@ class SubjectPreferenceController extends Controller
                 ->with('error', 'Preference selection period has ended.');
         }
 
+        // ✅ FIXED: Use dynamic max/min from SettingsService
+        $maxPreferences = \App\Services\SettingsService::getMaxPreferences();
+        $minPreferences = \App\Services\SettingsService::getMinPreferences();
+
         $validated = $request->validate([
-            'subject_preferences' => 'required|array|min:1|max:10',
+            'subject_preferences' => "required|array|min:{$minPreferences}|max:{$maxPreferences}",
             'subject_preferences.*' => 'required|exists:subjects,id',
         ]);
 

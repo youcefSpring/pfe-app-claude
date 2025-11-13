@@ -179,7 +179,16 @@ class SubjectController extends Controller
             $validated['is_external'] = false;
         }
 
-        $validated['status'] = 'draft';
+        // ✅ FIXED: Check if validation is required
+        // If validation not required, auto-approve the subject
+        if (\App\Services\SettingsService::requiresSubjectValidation()) {
+            $validated['status'] = 'draft';
+        } else {
+            // Auto-approve if validation is disabled
+            $validated['status'] = 'validated';
+            $validated['validated_at'] = now();
+            $validated['validated_by'] = $user->id;
+        }
 
         // Ensure tools has a default value if not provided
         if (empty($validated['tools'])) {
