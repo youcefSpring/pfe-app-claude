@@ -8,7 +8,7 @@
     <style>
         @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 0;
         }
 
         * {
@@ -19,79 +19,70 @@
 
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 13px;
-            line-height: 2.3;
+            font-size: 14px;
+            line-height: 1.3;
             background-color: #f5f5f5;
             color: #000;
+            margin: 0;
+            padding: 0;
         }
 
         .page-container {
             width: 210mm;
-            min-height: 297mm;
-            margin: 20px auto;
+            height: 297mm;
             background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: relative;
-        }
-
-        .content-wrapper {
-            padding: 1.5cm;
+            padding: 15mm 20mm;
+            overflow: hidden;
         }
 
         .republic-title {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
             text-align: center;
             color: #000;
-            margin-bottom: 1px;
-            padding-top: 5px;
+            margin-bottom: 2px;
         }
 
         .header-section {
             border-bottom: 2px solid #000;
-            padding: 8px 1.5cm;
-            margin: 0 -1.5cm 8px -1.5cm;
+            padding: 8px 0;
+            margin-bottom: 8px;
         }
 
         .header-col {
-            font-size: 8px;
-            line-height: 1.3;
+            font-size: 10px;
+            line-height: 1.2;
         }
 
         .logo-img {
-            width: 55px;
-            height: 55px;
+            width: 50px;
+            height: 50px;
             object-fit: contain;
         }
 
         .main-title {
-            font-size: 10px;
+            font-size: 14px;
             font-weight: bold;
             border: 2px solid #000;
-            padding: 4px;
+            padding: 5px;
             text-align: center;
-            margin: 6px 0;
+            margin: 8px 0;
         }
 
         .content-section {
-            font-size: 10px;
-            margin: 4px 0;
-        }
-
-        .underline-text {
-            display: inline-block;
-            border-bottom: 1px solid #000;
-            min-width: 70px;
-            padding: 0 3px 0px;
-            color: #000;
+            font-size: 12px;
+            margin: 5px 0;
+            line-height: 1.3;
         }
 
         .dynamic-text {
             display: inline-block;
             font-weight: bold;
             min-width: 70px;
-            padding: 0 3px 0px;
+            padding: 0 3px;
             color: #000;
+            border-bottom: 1px solid #000;
         }
 
         .bold-label {
@@ -100,20 +91,20 @@
 
         .section-header {
             font-weight: bold;
-            font-size: 10px;
-            margin: 6px 0 3px;
+            font-size: 12px;
+            margin: 8px 0 5px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 5px 0;
-            font-size: 9px;
+            margin: 8px 0;
+            font-size: 10px;
         }
 
         th, td {
             border: 1px solid #000;
-            padding: 4px 2px;
+            padding: 4px 3px;
             text-align: center;
         }
 
@@ -123,7 +114,7 @@
         }
 
         tbody tr {
-            height: 28px;
+            height: 24px;
         }
 
         .checkbox-box {
@@ -132,14 +123,14 @@
             border: 1px solid #000;
             display: inline-block;
             vertical-align: middle;
-            margin-right: 2px;
+            margin-right: 3px;
         }
 
         .mentions-row {
             display: flex;
             justify-content: space-between;
-            margin: 4px 0;
-            font-size: 9px;
+            margin: 8px 0;
+            font-size: 10px;
         }
 
         .mention-item {
@@ -150,9 +141,9 @@
         .signatures {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
+            margin-top: 30px;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 12px;
         }
 
         .print-btn {
@@ -171,6 +162,10 @@
             background-color: #2563eb;
         }
 
+        .page-break {
+            page-break-after: always;
+        }
+
         @media print {
             body {
                 background: white;
@@ -182,11 +177,15 @@
                 box-shadow: none;
                 margin: 0;
                 width: 100%;
+                height: 100%;
             }
 
-            .print-btn,
-            .actions-container {
-                display: none !important;
+            .print-btn {
+                display: none;
+            }
+
+            .page-break {
+                page-break-after: always;
             }
         }
     </style>
@@ -194,34 +193,38 @@
 <body>
     <button class="print-btn" onclick="window.print()">🖨️ {{ __('app.print') }}</button>
 
-    <div class="page-container">
-        <!-- Republic Headers -->
-        <div class="republic-title">الجمهورية الجزائرية الديمقراطية الشعبية</div>
-        <div class="republic-title" style="margin-bottom: 0;">REPUBLIQUE ALGERIENNE DEMOCRATIQUE ET POPULAIRE</div>
+    @foreach($teamMembers as $teamMember)
+        @php
+            $userData = $teamMember->user;
+        @endphp
 
-        <!-- Header Section with Green Border -->
-        <div class="header-section">
-            <div class="grid grid-cols-12 gap-2 items-center">
-                <div class="col-span-5 header-col">
-                    <div>Ministère de l'Enseignement Supérieur
-                et de la Recherche Scientifique</div>
-                    <div>Université M'Hamed BOUGARA - Boumerdès</div>
-                    <div>Faculté des Sciences</div>
-                    <div>Département : Informatique</div>
-                </div>
-                <div class="col-span-2 text-center">
-                    <img src="https://images.cdn-files-a.com/uploads/1598328/800_5bd31cdbbf082.jpg" alt="Logo" class="logo-img mx-auto">
-                </div>
-                <div class="col-span-5 header-col text-right" style="direction: rtl;">
-                    <div>وزارة التعليم العالي و البحث العلمي</div>
-                    <div>جامعة أحمد بوقرة ـ بومرداس</div>
-                    <div>كلية العلوم</div>
-                    <div>قسم الاعلام الالي</div>
+        <div class="page-container {{ !$loop->last ? 'page-break' : '' }}">
+            <!-- Republic Headers -->
+            <div class="republic-title">الجمهورية الجزائرية الديمقراطية الشعبية</div>
+            <div class="republic-title" style="margin-bottom: 5px;">REPUBLIQUE ALGERIENNE DEMOCRATIQUE ET POPULAIRE</div>
+
+            <!-- Header Section -->
+            <div class="header-section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="header-col" style="flex: 1;">
+                        <div>Ministère de l'Enseignement Supérieur</div>
+                        <div>et de la Recherche Scientifique</div>
+                        <div>Université M'Hamed BOUGARA - Boumerdès</div>
+                        <div>Faculté des Sciences</div>
+                        <div>Département : Informatique</div>
+                    </div>
+                    <div style="text-align: center; flex: 0 0 auto; margin: 0 15px;">
+                        <img src="https://images.cdn-files-a.com/uploads/1598328/800_5bd31cdbbf082.jpg" alt="Logo" class="logo-img">
+                    </div>
+                    <div class="header-col" style="flex: 1; text-align: right; direction: rtl;">
+                        <div>وزارة التعليم العالي و البحث العلمي</div>
+                        <div>جامعة أحمد بوقرة ـ بومرداس</div>
+                        <div>كلية العلوم</div>
+                        <div>قسم الاعلام الالي</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="content-wrapper">
             <!-- Main Title -->
             <div class="main-title">Procès-Verbal de Soutenance de Mémoire de Master</div>
 
@@ -371,8 +374,9 @@
                 <div>Le Chef de Département</div>
             </div>
         </div>
-    </div>
+    @endforeach
 
     <button class="print-btn" onclick="window.print()">🖨️ {{ __('app.print') }}</button>
 </body>
 </html>
+

@@ -937,7 +937,7 @@ class DefenseController extends Controller
     }
 
     /**
-     * Generate defense report (Procès-Verbal) for a student
+     * Generate defense report (Procès-Verbal) for all team members
      */
     public function generateReport(Defense $defense): View
     {
@@ -972,17 +972,11 @@ class DefenseController extends Controller
             abort(404, 'Defense team not found');
         }
 
-        // Get the first team member for student data
-        $teamMember = $defense->project->team->members()->first();
-        if (!$teamMember) {
-            abort(404, 'Team member not found');
+        // Get ALL team members for generating individual pages
+        $teamMembers = $defense->project->team->members()->with('user.speciality')->get();
+        if ($teamMembers->isEmpty()) {
+            abort(404, 'No team members found');
         }
-
-        if (!$teamMember->user) {
-            abort(404, 'User data not found');
-        }
-
-        $userData = $teamMember->user;
 
         // Get jury members
         $juries = $defense->juries()->with('teacher')->get();
@@ -995,7 +989,7 @@ class DefenseController extends Controller
 
         return view('defenses.report', compact(
             'defense',
-            'userData',
+            'teamMembers',
             'juries',
             'academicYear'
         ));
