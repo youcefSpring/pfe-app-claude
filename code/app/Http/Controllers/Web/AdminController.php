@@ -477,6 +477,73 @@ class AdminController extends Controller
     }
 
     /**
+     * Display features status dashboard
+     */
+    public function featuresStatus(): View
+    {
+        $features = [
+            [
+                'name' => __('app.team_formation'),
+                'key' => 'team_formation_enabled',
+                'enabled' => \App\Services\SettingsService::isTeamFormationEnabled(),
+                'icon' => 'bi-people',
+                'color' => 'primary',
+            ],
+            [
+                'name' => __('app.student_subject_creation'),
+                'key' => 'students_can_create_subjects',
+                'enabled' => \App\Services\SettingsService::canStudentsCreateSubjects(),
+                'icon' => 'bi-journal-plus',
+                'color' => 'success',
+            ],
+            [
+                'name' => __('app.subject_preferences'),
+                'key' => 'preferences_enabled',
+                'enabled' => \App\Services\SettingsService::arePreferencesEnabled(),
+                'icon' => 'bi-list-check',
+                'color' => 'info',
+            ],
+            [
+                'name' => __('app.student_registration'),
+                'key' => 'registration_open',
+                'enabled' => \App\Services\SettingsService::isRegistrationOpen(),
+                'icon' => 'bi-person-plus',
+                'color' => 'warning',
+            ],
+            [
+                'name' => __('app.external_projects'),
+                'key' => 'external_projects_allowed',
+                'enabled' => \App\Services\SettingsService::areExternalProjectsAllowed(),
+                'icon' => 'bi-folder-plus',
+                'color' => 'danger',
+            ],
+            [
+                'name' => __('app.email_notifications'),
+                'key' => 'email_notifications_enabled',
+                'enabled' => \App\Services\SettingsService::areEmailNotificationsEnabled(),
+                'icon' => 'bi-envelope',
+                'color' => 'secondary',
+            ],
+            [
+                'name' => __('app.auto_scheduling'),
+                'key' => 'auto_scheduling_enabled',
+                'enabled' => \App\Services\SettingsService::isAutoSchedulingEnabled(),
+                'icon' => 'bi-calendar-check',
+                'color' => 'primary',
+            ],
+            [
+                'name' => __('app.auto_allocation'),
+                'key' => 'auto_allocation_enabled',
+                'enabled' => \App\Services\SettingsService::isAutoAllocationEnabled(),
+                'icon' => 'bi-diagram-3',
+                'color' => 'success',
+            ],
+        ];
+
+        return view('admin.features-status', compact('features'));
+    }
+
+    /**
      * Update system settings
      */
     public function updateSettings(Request $request): RedirectResponse

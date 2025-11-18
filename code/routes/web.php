@@ -69,10 +69,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     // =====================================================================
-    // STUDENT SETUP WIZARD (no middleware needed - handled by StudentProfileSetup middleware)
+    // STUDENT SETUP WIZARD (check if registration is open)
     // =====================================================================
 
-    Route::prefix('student/setup')->name('student.setup.')->group(function () {
+    Route::prefix('student/setup')->name('student.setup.')->middleware('check.registration')->group(function () {
         Route::get('/welcome', [StudentSetupController::class, 'welcome'])->name('welcome');
         Route::get('/personal-info', [StudentSetupController::class, 'personalInfo'])->name('personal-info');
         Route::post('/personal-info', [StudentSetupController::class, 'storePersonalInfo'])->name('store-personal-info');
@@ -114,8 +114,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [SubjectController::class, 'index'])->name('index');
         Route::get('/available/{grade?}', [SubjectController::class, 'available'])->name('available');
 
-        // Teachers and students can create subjects
-        Route::middleware('role:teacher,student')->group(function () {
+        // Teachers can always create subjects
+        Route::middleware('role:teacher')->group(function () {
+            Route::get('/create', [SubjectController::class, 'create'])->name('create');
+            Route::post('/', [SubjectController::class, 'store'])->name('store');
+        });
+
+        // Students can create subjects only if enabled in settings
+        Route::middleware(['role:student', 'check.student.subject'])->group(function () {
             Route::get('/create', [SubjectController::class, 'create'])->name('create');
             Route::post('/', [SubjectController::class, 'store'])->name('store');
         });
@@ -166,7 +172,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [TeamController::class, 'index'])->name('index');
 
         // Students can create and manage teams (static routes before dynamic ones)
-        Route::middleware('role:student')->group(function () {
+        Route::middleware(['role:student', 'check.team.formation'])->group(function () {
             Route::get('/my-team', [TeamController::class, 'myTeam'])->name('my-team');
             Route::get('/create', [TeamController::class, 'create'])->name('create');
             Route::post('/', [TeamController::class, 'store'])->name('store');
@@ -195,9 +201,11 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{team}/subject-requests/order', [TeamController::class, 'updateSubjectRequestOrder'])->name('update-subject-request-order');
             Route::delete('/{team}/subject-requests/{subjectRequest}', [TeamController::class, 'cancelSubjectRequest'])->name('cancel-subject-request');
 
-            // External project submission
-            Route::get('/{team}/external-project', [TeamController::class, 'externalProjectForm'])->name('external-project-form');
-            Route::post('/{team}/external-project', [TeamController::class, 'submitExternalProject'])->name('external-project');
+            // External project submission (check if external projects are allowed)
+            Route::middleware('check.external.projects')->group(function () {
+                Route::get('/{team}/external-project', [TeamController::class, 'externalProjectForm'])->name('external-project-form');
+                Route::post('/{team}/external-project', [TeamController::class, 'submitExternalProject'])->name('external-project');
+            });
 
             // Team actions
             Route::post('/{team}/join', [TeamController::class, 'join'])->name('join');
@@ -413,6 +421,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
         Route::post('/settings/reset', [AdminController::class, 'resetSettings'])->name('settings.reset');
+        Route::get('/features-status', [AdminController::class, 'featuresStatus'])->name('features.status');
 
         // Reports and Analytics
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
@@ -515,7 +524,7 @@ Route::middleware(['auth'])->group(function () {
     // SUBJECT PREFERENCES ROUTES
     // =====================================================================
 
-    Route::prefix('preferences')->name('preferences.')->middleware('role:student')->group(function () {
+    Route::prefix('preferences')->name('preferences.')->middleware(['role:student', 'check.preferences'])->group(function () {
         Route::get('/', [SubjectPreferenceController::class, 'index'])->name('index');
         Route::get('/create', [SubjectPreferenceController::class, 'create'])->name('create');
         Route::post('/', [SubjectPreferenceController::class, 'store'])->name('store');

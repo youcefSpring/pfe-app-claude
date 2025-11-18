@@ -19,6 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'current_year_data' => \App\Http\Middleware\CurrentAcademicYearData::class,
             'student_setup' => \App\Http\Middleware\StudentProfileSetup::class,
             'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+            // Settings enforcement middlewares
+            'check.team.formation' => \App\Http\Middleware\CheckTeamFormationEnabled::class,
+            'check.student.subject' => \App\Http\Middleware\CheckStudentSubjectCreation::class,
+            'check.preferences' => \App\Http\Middleware\CheckPreferencesEnabled::class,
+            'check.registration' => \App\Http\Middleware\CheckRegistrationOpen::class,
+            'check.external.projects' => \App\Http\Middleware\CheckExternalProjectsAllowed::class,
         ]);
 
         // Global middleware
