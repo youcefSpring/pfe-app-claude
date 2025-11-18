@@ -58,69 +58,79 @@
         </div>
     @endif
 
-    <!-- Quick Actions Bar -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i>
-                    {{ __('app.back_to_dashboard') }}
-                </a>
-                <button type="button" class="btn btn-sm btn-warning" onclick="resetToDefaults()">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                    {{ __('app.reset_to_defaults') }}
-                </button>
+    <div class="row">
+        <!-- Left Sidebar - Vertical Tabs Navigation -->
+        <div class="col-md-3">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <i class="bi bi-list-ul"></i>
+                        {{ __('app.settings_categories') }}
+                    </h3>
+                </div>
+                <div class="box-body p-0">
+                    <div class="nav flex-column nav-pills" id="settingsTab" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link active" id="university-tab" data-bs-toggle="tab" data-bs-target="#university" type="button" role="tab">
+                            <i class="bi bi-building me-2"></i>
+                            {{ __('app.university_information') }}
+                        </button>
+                        <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
+                            <i class="bi bi-gear me-2"></i>
+                            {{ __('app.system_configuration') }}
+                        </button>
+                        <button class="nav-link" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button" role="tab">
+                            <i class="bi bi-people me-2"></i>
+                            {{ __('app.team_settings') }}
+                        </button>
+                        <button class="nav-link" id="subject-tab" data-bs-toggle="tab" data-bs-target="#subject" type="button" role="tab">
+                            <i class="bi bi-journal-text me-2"></i>
+                            {{ __('app.subject_settings') }}
+                        </button>
+                        <button class="nav-link" id="registration-tab" data-bs-toggle="tab" data-bs-target="#registration" type="button" role="tab">
+                            <i class="bi bi-person-plus me-2"></i>
+                            {{ __('app.registration_settings') }}
+                        </button>
+                        <button class="nav-link" id="defense-tab" data-bs-toggle="tab" data-bs-target="#defense" type="button" role="tab">
+                            <i class="bi bi-shield-check me-2"></i>
+                            {{ __('app.defense_settings') }}
+                        </button>
+                        <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification" type="button" role="tab">
+                            <i class="bi bi-bell me-2"></i>
+                            {{ __('app.notification_settings') }}
+                        </button>
+                        <button class="nav-link" id="allocation-tab" data-bs-toggle="tab" data-bs-target="#allocation" type="button" role="tab">
+                            <i class="bi bi-diagram-3 me-2"></i>
+                            {{ __('app.allocation_settings') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <i class="bi bi-lightning"></i>
+                        {{ __('app.quick_actions') }}
+                    </h3>
+                </div>
+                <div class="box-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            {{ __('app.back_to_dashboard') }}
+                        </a>
+                        <button type="button" class="btn btn-sm btn-warning" onclick="resetToDefaults()">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            {{ __('app.reset_to_defaults') }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <!-- Horizontal Tab Navigation -->
-            <ul class="nav nav-tabs" id="settingsTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="university-tab" data-bs-toggle="tab" data-bs-target="#university" type="button" role="tab">
-                        <i class="bi bi-building me-2"></i>{{ __('app.university_information') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
-                        <i class="bi bi-gear me-2"></i>{{ __('app.system_configuration') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button" role="tab">
-                        <i class="bi bi-people me-2"></i>{{ __('app.team_settings') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="subject-tab" data-bs-toggle="tab" data-bs-target="#subject" type="button" role="tab">
-                        <i class="bi bi-journal-text me-2"></i>{{ __('app.subject_settings') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="registration-tab" data-bs-toggle="tab" data-bs-target="#registration" type="button" role="tab">
-                        <i class="bi bi-person-plus me-2"></i>{{ __('app.registration_settings') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="defense-tab" data-bs-toggle="tab" data-bs-target="#defense" type="button" role="tab">
-                        <i class="bi bi-shield-check me-2"></i>{{ __('app.defense_settings') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification" type="button" role="tab">
-                        <i class="bi bi-bell me-2"></i>{{ __('app.notification_settings') }}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="allocation-tab" data-bs-toggle="tab" data-bs-target="#allocation" type="button" role="tab">
-                        <i class="bi bi-diagram-3 me-2"></i>{{ __('app.allocation_settings') }}
-                    </button>
-                </li>
-            </ul>
-
-            <!-- Tab Content -->
+        <!-- Right Content - Tab Content -->
+        <div class="col-md-9">
             <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -519,54 +529,41 @@
     color: #0c5460;
 }
 
-/* Modern Horizontal Tab Styling */
-.nav-tabs {
-    border-bottom: 2px solid #e9ecef;
-    margin-bottom: 0;
-    background: #f8f9fa;
-    padding: 0.5rem 1rem 0;
-    border-radius: 8px 8px 0 0;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    border-bottom: 3px solid transparent;
+/* Modern Vertical Tab Styling */
+.nav-pills .nav-link {
+    text-align: left;
+    border-radius: 0;
+    border-left: 4px solid transparent;
+    padding: 0.85rem 1.25rem;
     color: #495057;
-    padding: 0.75rem 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
     font-weight: 500;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
-    background: transparent;
-    margin-bottom: -2px;
+    margin-bottom: 2px;
 }
 
-.nav-tabs .nav-link:hover {
-    border-color: #667eea;
-    color: #667eea;
-    background: rgba(102, 126, 234, 0.05);
+.nav-pills .nav-link:hover {
+    background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left-color: #667eea;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
 }
 
-.nav-tabs .nav-link.active {
-    color: #667eea;
-    border-bottom-color: #667eea;
-    background: white;
-    font-weight: 600;
+.nav-pills .nav-link.active {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-left-color: #5a67d8;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.nav-tabs .nav-link i {
-    font-size: 1rem;
+.nav-pills .nav-link i {
+    width: 24px;
+    font-size: 1.1rem;
 }
 
-/* Tab Content Styling */
-.tab-content {
-    background: white;
-    border: 1px solid #e9ecef;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    padding: 1.5rem;
-    min-height: 400px;
-}
-
+/* Tab Content Animation */
 .tab-pane {
     animation: fadeIn 0.3s ease-in;
 }
