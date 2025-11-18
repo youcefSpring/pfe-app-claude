@@ -313,7 +313,7 @@
                                 </h3>
                             </div>
                             <div class="box-body">
-                                @if(isset($settingsGroups['system']))
+                                @if(isset($settingsGroups['system']) && $settingsGroups['system']->isNotEmpty())
                                     @foreach($settingsGroups['system'] as $setting)
                                         @include('admin.partials.setting-field', ['setting' => $setting])
                                     @endforeach
@@ -335,7 +335,7 @@
                             </div>
                             <div class="box-body">
                                 <p class="text-muted mb-3">{{ __('app.configure_team_formation_rules') }}</p>
-                                @if(isset($settingsGroups['team']))
+                                @if(isset($settingsGroups['team']) && $settingsGroups['team']->isNotEmpty())
                                     <div class="row">
                                         @foreach($settingsGroups['team'] as $index => $setting)
                                             <div class="col-md-6">
@@ -361,7 +361,7 @@
                             </div>
                             <div class="box-body">
                                 <p class="text-muted mb-3">{{ __('app.configure_subject_management_rules') }}</p>
-                                @if(isset($settingsGroups['subject']))
+                                @if(isset($settingsGroups['subject']) && $settingsGroups['subject']->isNotEmpty())
                                     <div class="row">
                                         @foreach($settingsGroups['subject'] as $index => $setting)
                                             <div class="col-md-6">
@@ -387,7 +387,7 @@
                             </div>
                             <div class="box-body">
                                 <p class="text-muted mb-3">{{ __('app.configure_student_registration_process') }}</p>
-                                @if(isset($settingsGroups['registration']))
+                                @if(isset($settingsGroups['registration']) && $settingsGroups['registration']->isNotEmpty())
                                     @foreach($settingsGroups['registration'] as $setting)
                                         @include('admin.partials.setting-field', ['setting' => $setting])
                                     @endforeach
@@ -409,7 +409,7 @@
                             </div>
                             <div class="box-body">
                                 <p class="text-muted mb-3">{{ __('app.configure_defense_scheduling_rules') }}</p>
-                                @if(isset($settingsGroups['defense']))
+                                @if(isset($settingsGroups['defense']) && $settingsGroups['defense']->isNotEmpty())
                                     @foreach($settingsGroups['defense'] as $setting)
                                         @include('admin.partials.setting-field', ['setting' => $setting])
                                     @endforeach
@@ -431,7 +431,7 @@
                             </div>
                             <div class="box-body">
                                 <p class="text-muted mb-3">{{ __('app.configure_notification_preferences') }}</p>
-                                @if(isset($settingsGroups['notification']))
+                                @if(isset($settingsGroups['notification']) && $settingsGroups['notification']->isNotEmpty())
                                     @foreach($settingsGroups['notification'] as $setting)
                                         @include('admin.partials.setting-field', ['setting' => $setting])
                                     @endforeach
@@ -453,7 +453,7 @@
                             </div>
                             <div class="box-body">
                                 <p class="text-muted mb-3">{{ __('app.configure_subject_allocation_process') }}</p>
-                                @if(isset($settingsGroups['allocation']))
+                                @if(isset($settingsGroups['allocation']) && $settingsGroups['allocation']->isNotEmpty())
                                     @foreach($settingsGroups['allocation'] as $setting)
                                         @include('admin.partials.setting-field', ['setting' => $setting])
                                     @endforeach
