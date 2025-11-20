@@ -26,6 +26,7 @@
         .arabic {
             direction: rtl;
             text-align: right;
+            font-family: 'DejaVu Sans', sans-serif;
         }
         .french {
             text-align: left;

@@ -21,6 +21,9 @@
                         <a href="{{ route('defenses.report', $defense) }}" class="btn btn-primary" target="_blank">
                             <i class="bi bi-file-text"></i> {{ __('app.view_report') }}
                         </a>
+                        <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-danger">
+                            <i class="bi bi-file-pdf"></i> {{ __('app.download_pdf') }}
+                        </a>
                         <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
                             <span class="visually-hidden">{{ __('app.toggle_dropdown') }}</span>
                         </button>

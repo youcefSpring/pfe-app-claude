@@ -1,4 +1,6 @@
+<?php
 
+return [
     // Settings Enforcement Messages
     'team_formation_disabled' => 'La formation d\'équipes est actuellement désactivée par l\'administrateur.',
     'student_subject_creation_disabled' => 'Les étudiants ne peuvent pas créer de sujets actuellement. Cette fonctionnalité est désactivée.',

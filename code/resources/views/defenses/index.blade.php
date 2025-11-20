@@ -277,7 +277,12 @@
                                                            class="btn btn-outline-primary btn-sm"
                                                            title="{{ __('app.view_report') }}"
                                                            target="_blank">
-                                                            <i class="bi bi-file-text"></i>
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <a href="{{ route('defenses.download-report-pdf', $defense) }}"
+                                                           class="btn btn-outline-danger btn-sm"
+                                                           title="{{ __('app.download_pdf') }}">
+                                                            <i class="bi bi-file-pdf"></i>
                                                         </a>
                                                     @endif
 
@@ -388,6 +393,9 @@
                                                         </a>
                                                         <a href="{{ route('defenses.report', $defense) }}" class="btn btn-sm btn-outline-primary" title="{{ __('app.view_report') }}" target="_blank">
                                                             <i class="bi bi-file-text"></i>
+                                                        </a>
+                                                        <a href="{{ route('defenses.download-report-pdf', $defense) }}" class="btn btn-sm btn-outline-danger" title="{{ __('app.download_pdf') }}">
+                                                            <i class="bi bi-file-pdf"></i>
                                                         </a>
                                                     @endif
                                                 </div>

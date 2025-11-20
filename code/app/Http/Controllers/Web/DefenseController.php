@@ -783,12 +783,12 @@ class DefenseController extends Controller
             : ($currentDate->year - 1) . '/' . $currentDate->year;
 
         // Generate PDF with one page per student
-        $pdf = \PDF::loadView('defenses.report-all-students', compact(
+        $pdf = \PDF::loadView('defenses.report', compact(
             'defense',
             'teamMembers',
             'juries',
             'academicYear'
-        ));
+        ) + ['isPdf' => true]);
 
         // Configure PDF options
         $pdf->setPaper('A4', 'portrait');
@@ -1058,7 +1058,7 @@ class DefenseController extends Controller
             'userData',
             'juries',
             'academicYear'
-        ));
+        ) + ['isPdf' => true]);
 
         // Configure PDF options
         $pdf->setPaper('A4', 'portrait');
