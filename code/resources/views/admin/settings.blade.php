@@ -303,12 +303,16 @@
                                     <i class="bi bi-gear"></i>
                                     {{ __('app.system_configuration') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">Configure system-wide settings and preferences</p>
                             </div>
-                            <div class="box-body">
+                            <div class="box-body settings-grid">
                                 @forelse($settingsGroups['system'] ?? [] as $setting)
                                     @include('admin.partials.setting-field', ['setting' => $setting])
                                 @empty
-                                    <p class="text-muted">{{ __('app.no_settings_available') }}</p>
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
@@ -322,20 +326,17 @@
                                     <i class="bi bi-people"></i>
                                     {{ __('app.team_settings') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_team_formation_rules') }}</p>
                             </div>
-                            <div class="box-body">
-                                <p class="text-muted mb-3">{{ __('app.configure_team_formation_rules') }}</p>
-                                <div class="row">
-                                    @forelse($settingsGroups['team'] ?? [] as $setting)
-                                        <div class="col-md-6">
-                                            @include('admin.partials.setting-field', ['setting' => $setting])
-                                        </div>
-                                    @empty
-                                        <div class="col-12">
-                                            <p class="text-muted">{{ __('app.no_settings_available') }}</p>
-                                        </div>
-                                    @endforelse
-                                </div>
+                            <div class="box-body settings-grid">
+                                @forelse($settingsGroups['team'] ?? [] as $setting)
+                                    @include('admin.partials.setting-field', ['setting' => $setting])
+                                @empty
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -348,20 +349,17 @@
                                     <i class="bi bi-journal-text"></i>
                                     {{ __('app.subject_settings') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_subject_management_rules') }}</p>
                             </div>
-                            <div class="box-body">
-                                <p class="text-muted mb-3">{{ __('app.configure_subject_management_rules') }}</p>
-                                <div class="row">
-                                    @forelse($settingsGroups['subject'] ?? [] as $setting)
-                                        <div class="col-md-6">
-                                            @include('admin.partials.setting-field', ['setting' => $setting])
-                                        </div>
-                                    @empty
-                                        <div class="col-12">
-                                            <p class="text-muted">{{ __('app.no_settings_available') }}</p>
-                                        </div>
-                                    @endforelse
-                                </div>
+                            <div class="box-body settings-grid">
+                                @forelse($settingsGroups['subject'] ?? [] as $setting)
+                                    @include('admin.partials.setting-field', ['setting' => $setting])
+                                @empty
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -374,13 +372,16 @@
                                     <i class="bi bi-person-plus"></i>
                                     {{ __('app.registration_settings') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_student_registration_process') }}</p>
                             </div>
-                            <div class="box-body">
-                                <p class="text-muted mb-3">{{ __('app.configure_student_registration_process') }}</p>
+                            <div class="box-body settings-grid">
                                 @forelse($settingsGroups['registration'] ?? [] as $setting)
                                     @include('admin.partials.setting-field', ['setting' => $setting])
                                 @empty
-                                    <p class="text-muted">{{ __('app.no_settings_available') }}</p>
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
@@ -394,13 +395,16 @@
                                     <i class="bi bi-shield-check"></i>
                                     {{ __('app.defense_settings') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_defense_scheduling_rules') }}</p>
                             </div>
-                            <div class="box-body">
-                                <p class="text-muted mb-3">{{ __('app.configure_defense_scheduling_rules') }}</p>
+                            <div class="box-body settings-grid">
                                 @forelse($settingsGroups['defense'] ?? [] as $setting)
                                     @include('admin.partials.setting-field', ['setting' => $setting])
                                 @empty
-                                    <p class="text-muted">{{ __('app.no_settings_available') }}</p>
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
@@ -414,13 +418,16 @@
                                     <i class="bi bi-bell"></i>
                                     {{ __('app.notification_settings') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_notification_preferences') }}</p>
                             </div>
-                            <div class="box-body">
-                                <p class="text-muted mb-3">{{ __('app.configure_notification_preferences') }}</p>
+                            <div class="box-body settings-grid">
                                 @forelse($settingsGroups['notification'] ?? [] as $setting)
                                     @include('admin.partials.setting-field', ['setting' => $setting])
                                 @empty
-                                    <p class="text-muted">{{ __('app.no_settings_available') }}</p>
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
@@ -434,13 +441,16 @@
                                     <i class="bi bi-diagram-3"></i>
                                     {{ __('app.allocation_settings') }}
                                 </h3>
+                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_subject_allocation_process') }}</p>
                             </div>
-                            <div class="box-body">
-                                <p class="text-muted mb-3">{{ __('app.configure_subject_allocation_process') }}</p>
+                            <div class="box-body settings-grid">
                                 @forelse($settingsGroups['allocation'] ?? [] as $setting)
                                     @include('admin.partials.setting-field', ['setting' => $setting])
                                 @empty
-                                    <p class="text-muted">{{ __('app.no_settings_available') }}</p>
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>{{ __('app.no_settings_available') }}</p>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
@@ -643,6 +653,42 @@
     color: #495057;
     font-weight: 600;
     font-size: 0.95rem;
+}
+
+/* Settings Grid Layout */
+.settings-grid {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #adb5bd;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Box Header Improvements */
+.box-header.with-border {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 1rem;
+    margin-bottom: 0;
+}
+
+.box-header .text-muted {
+    font-size: 0.875rem;
 }
 </style>
 @endpush
