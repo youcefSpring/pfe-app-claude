@@ -379,4 +379,52 @@ class SettingsService
     {
         return $count >= self::getMinPreferences() && $count <= self::getMaxPreferences();
     }
+
+    /**
+     * Get default settings structure for when database is empty
+     */
+    public static function getDefaultSettingsStructure(): array
+    {
+        return [
+            'team' => [
+                (object)['key' => 'team_formation_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Enable team formation'],
+                (object)['key' => 'team_min_size_licence', 'value' => '2', 'type' => 'integer', 'description' => 'Minimum team size for Licence'],
+                (object)['key' => 'team_max_size_licence', 'value' => '3', 'type' => 'integer', 'description' => 'Maximum team size for Licence'],
+                (object)['key' => 'team_min_size_master', 'value' => '1', 'type' => 'integer', 'description' => 'Minimum team size for Master'],
+                (object)['key' => 'team_max_size_master', 'value' => '2', 'type' => 'integer', 'description' => 'Maximum team size for Master'],
+            ],
+            'subject' => [
+                (object)['key' => 'students_can_create_subjects', 'value' => '1', 'type' => 'boolean', 'description' => 'Allow students to create subjects'],
+                (object)['key' => 'subject_validation_required', 'value' => '1', 'type' => 'boolean', 'description' => 'Require subject validation'],
+                (object)['key' => 'external_projects_allowed', 'value' => '1', 'type' => 'boolean', 'description' => 'Allow external projects'],
+                (object)['key' => 'preferences_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Enable subject preferences'],
+                (object)['key' => 'max_subject_preferences', 'value' => '10', 'type' => 'integer', 'description' => 'Maximum subject preferences'],
+                (object)['key' => 'min_subject_preferences', 'value' => '3', 'type' => 'integer', 'description' => 'Minimum subject preferences'],
+            ],
+            'registration' => [
+                (object)['key' => 'registration_open', 'value' => '1', 'type' => 'boolean', 'description' => 'Open student registration'],
+                (object)['key' => 'require_profile_completion', 'value' => '1', 'type' => 'boolean', 'description' => 'Require profile completion'],
+                (object)['key' => 'require_birth_certificate', 'value' => '1', 'type' => 'boolean', 'description' => 'Require birth certificate'],
+                (object)['key' => 'require_previous_marks', 'value' => '1', 'type' => 'boolean', 'description' => 'Require previous marks'],
+            ],
+            'defense' => [
+                (object)['key' => 'auto_scheduling_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Enable auto-scheduling'],
+                (object)['key' => 'defense_duration_minutes', 'value' => '30', 'type' => 'integer', 'description' => 'Defense duration (minutes)'],
+                (object)['key' => 'defense_notice_min_days', 'value' => '7', 'type' => 'integer', 'description' => 'Minimum notice days for defense'],
+            ],
+            'notification' => [
+                (object)['key' => 'email_notifications_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Enable email notifications'],
+            ],
+            'allocation' => [
+                (object)['key' => 'auto_allocation_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Enable auto-allocation'],
+                (object)['key' => 'allow_second_round_allocation', 'value' => '1', 'type' => 'boolean', 'description' => 'Allow second round allocation'],
+                (object)['key' => 'allocation_algorithm', 'value' => 'priority_based', 'type' => 'string', 'description' => 'Allocation algorithm'],
+            ],
+            'system' => [
+                (object)['key' => 'maintenance_mode', 'value' => '0', 'type' => 'boolean', 'description' => 'Maintenance mode'],
+                (object)['key' => 'default_language', 'value' => 'fr', 'type' => 'string', 'description' => 'Default language'],
+                (object)['key' => 'available_languages', 'value' => 'ar,fr,en', 'type' => 'string', 'description' => 'Available languages'],
+            ],
+        ];
+    }
 }

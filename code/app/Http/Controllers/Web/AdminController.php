@@ -472,6 +472,12 @@ class AdminController extends Controller
 
         // Get all settings grouped by category
         $settingsGroups = \App\Services\SettingsService::getAllSettings();
+        
+        // If settings are empty (fresh database), provide default structure
+        $isEmpty = collect($settingsGroups)->every(fn($group) => $group->isEmpty());
+        if ($isEmpty) {
+            $settingsGroups = \App\Services\SettingsService::getDefaultSettingsStructure();
+        }
 
         return view('admin.settings', compact('universityInfo', 'currentLogo', 'settingsGroups'));
     }
