@@ -306,14 +306,20 @@
                                 <p class="text-muted mb-0 mt-2">Configure system-wide settings and preferences</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['system'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['system'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -329,14 +335,20 @@
                                 <p class="text-muted mb-0 mt-2">{{ __('app.configure_team_formation_rules') }}</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['team'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['team'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -352,14 +364,20 @@
                                 <p class="text-muted mb-0 mt-2">{{ __('app.configure_subject_management_rules') }}</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['subject'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['subject'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -375,14 +393,20 @@
                                 <p class="text-muted mb-0 mt-2">{{ __('app.configure_student_registration_process') }}</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['registration'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['registration'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -398,14 +422,20 @@
                                 <p class="text-muted mb-0 mt-2">{{ __('app.configure_defense_scheduling_rules') }}</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['defense'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['defense'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -421,14 +451,20 @@
                                 <p class="text-muted mb-0 mt-2">{{ __('app.configure_notification_preferences') }}</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['notification'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['notification'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -444,14 +480,20 @@
                                 <p class="text-muted mb-0 mt-2">{{ __('app.configure_subject_allocation_process') }}</p>
                             </div>
                             <div class="box-body settings-grid">
-                                @forelse($settingsGroups['allocation'] ?? [] as $setting)
-                                    @include('admin.partials.setting-field', ['setting' => $setting])
-                                @empty
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <p>{{ __('app.no_settings_available') }}</p>
-                                    </div>
-                                @endforelse
+                                <div class="row">
+                                    @forelse($settingsGroups['allocation'] ?? [] as $setting)
+                                        <div class="col-md-6">
+                                            @include('admin.partials.setting-field', ['setting' => $setting])
+                                        </div>
+                                    @empty
+                                        <div class="col-12">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox"></i>
+                                                <p>{{ __('app.no_settings_available') }}</p>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>

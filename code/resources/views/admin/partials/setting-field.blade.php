@@ -7,7 +7,11 @@
                 <div class="setting-header">
                     <i class="bi bi-toggle-on setting-icon"></i>
                     <label class="setting-title" for="{{ $setting->key }}">
-                        {{ __('settings.' . $setting->key . '_label', $setting->description) }}
+                        @if(__('settings.' . $setting->key . '_label') !== 'settings.' . $setting->key . '_label')
+                            {{ __('settings.' . $setting->key . '_label') }}
+                        @else
+                            {{ $setting->description }}
+                        @endif
                     </label>
                 </div>
                 @if(__('settings.' . $setting->key . '_desc') !== 'settings.' . $setting->key . '_desc')
@@ -33,7 +37,11 @@
             <div class="setting-header">
                 <i class="bi bi-123 setting-icon"></i>
                 <label for="{{ $setting->key }}" class="setting-title">
-                    {{ __('settings.' . $setting->key . '_label', $setting->description) }}
+                    @if(__('settings.' . $setting->key . '_label') !== 'settings.' . $setting->key . '_label')
+                        {{ __('settings.' . $setting->key . '_label') }}
+                    @else
+                        {{ $setting->description }}
+                    @endif
                 </label>
             </div>
             @if(__('settings.' . $setting->key . '_desc') !== 'settings.' . $setting->key . '_desc')
@@ -58,7 +66,11 @@
             <div class="setting-header">
                 <i class="bi bi-text-paragraph setting-icon"></i>
                 <label for="{{ $setting->key }}" class="setting-title">
-                    {{ __('settings.' . $setting->key . '_label', $setting->description) }}
+                    @if(__('settings.' . $setting->key . '_label') !== 'settings.' . $setting->key . '_label')
+                        {{ __('settings.' . $setting->key . '_label') }}
+                    @else
+                        {{ $setting->description }}
+                    @endif
                 </label>
             </div>
             @if(__('settings.' . $setting->key . '_desc') !== 'settings.' . $setting->key . '_desc')
@@ -79,7 +91,11 @@
             <div class="setting-header">
                 <i class="bi bi-input-cursor-text setting-icon"></i>
                 <label for="{{ $setting->key }}" class="setting-title">
-                    {{ __('settings.' . $setting->key . '_label', $setting->description) }}
+                    @if(__('settings.' . $setting->key . '_label') !== 'settings.' . $setting->key . '_label')
+                        {{ __('settings.' . $setting->key . '_label') }}
+                    @else
+                        {{ $setting->description }}
+                    @endif
                 </label>
             </div>
             @if(__('settings.' . $setting->key . '_desc') !== 'settings.' . $setting->key . '_desc')
