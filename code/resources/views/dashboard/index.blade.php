@@ -24,37 +24,37 @@
                         @switch(auth()->user()->role)
                             @case('admin')
                                 <div class="col-md-4 col-lg-3">
-                                    <a href="{{ route('admin.users') }}" class="btn btn-outline-primary w-100 py-3">
+                                    <a href="{{ route('admin.users') }}" class="btn btn-primary text-white w-100 py-3">
                                         <i class="bi bi-people d-block mb-2" style="font-size: 2rem;"></i>
                                         <small>{{ __('app.manage_users') }}</small>
                                     </a>
                                 </div>
                                 <div class="col-md-4 col-lg-3">
-                                    <a href="{{ route('admin.specialities.index') }}" class="btn btn-outline-success w-100 py-3">
+                                    <a href="{{ route('admin.specialities.index') }}" class="btn btn-success text-white w-100 py-3">
                                         <i class="bi bi-mortarboard d-block mb-2" style="font-size: 2rem;"></i>
                                         <small>{{ __('app.specialities') }}</small>
                                     </a>
                                 </div>
                                 <div class="col-md-4 col-lg-3">
-                                    <a href="{{ route('admin.academic-years.index') }}" class="btn btn-outline-info w-100 py-3">
+                                    <a href="{{ route('admin.academic-years.index') }}" class="btn btn-info text-white w-100 py-3">
                                         <i class="bi bi-calendar-range d-block mb-2" style="font-size: 2rem;"></i>
                                         <small>{{ __('app.academic_years_management') }}</small>
                                     </a>
                                 </div>
                                 <div class="col-md-4 col-lg-3">
-                                    <a href="{{ route('admin.reports') }}" class="btn btn-outline-warning w-100 py-3">
+                                    <a href="{{ route('admin.reports') }}" class="btn btn-warning text-white w-100 py-3">
                                         <i class="bi bi-graph-up d-block mb-2" style="font-size: 2rem;"></i>
                                         <small>{{ __('app.reports_analytics') }}</small>
                                     </a>
                                 </div>
                                 <div class="col-md-4 col-lg-3">
-                                    <a href="{{ route('admin.settings') }}" class="btn btn-outline-secondary w-100 py-3">
+                                    <a href="{{ route('admin.settings') }}" class="btn btn-secondary text-white w-100 py-3">
                                         <i class="bi bi-gear d-block mb-2" style="font-size: 2rem;"></i>
                                         <small>{{ __('app.system_settings') }}</small>
                                     </a>
                                 </div>
                                 <div class="col-md-4 col-lg-3">
-                                    <a href="{{ route('admin.users.bulk-import') }}" class="btn btn-outline-dark w-100 py-3">
+                                    <a href="{{ route('admin.users.bulk-import') }}" class="btn btn-dark text-white w-100 py-3">
                                         <i class="bi bi-upload d-block mb-2" style="font-size: 2rem;"></i>
                                         <small>Bulk Import</small>
                                     </a>
