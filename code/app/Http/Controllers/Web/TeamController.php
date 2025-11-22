@@ -107,7 +107,7 @@ class TeamController extends Controller
      */
     public function create(): View|RedirectResponse
     {
-        //$this->authorize('create', Team::class);
+        $this->authorize('create', Team::class);
 
         $user = Auth::user();
 
@@ -135,7 +135,7 @@ class TeamController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        //$this->authorize('create', Team::class);
+        $this->authorize('create', Team::class);
 
         $user = Auth::user();
 
@@ -227,7 +227,7 @@ class TeamController extends Controller
      */
     public function edit(Team $team): View
     {
-        // //$this->authorize('update', $team);
+        $this->authorize('update', $team);
         return view('teams.edit', compact('team'));
     }
 
@@ -236,7 +236,7 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team): RedirectResponse
     {
-        // //$this->authorize('update', $team);
+        $this->authorize('update', $team);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:teams,name,' . $team->id,
@@ -253,7 +253,7 @@ class TeamController extends Controller
      */
     public function destroy(Team $team): RedirectResponse
     {
-        //$this->authorize('delete', $team);
+        $this->authorize('delete', $team);
 
         $user = Auth::user();
 
@@ -290,7 +290,7 @@ class TeamController extends Controller
      */
     public function addMember(Request $request, Team $team): RedirectResponse
     {
-        //$this->authorize('addMember', $team);
+        $this->authorize('addMember', $team);
 
         $request->validate([
             'student_email' => 'required|email|exists:users,email'
@@ -336,7 +336,7 @@ class TeamController extends Controller
      */
     public function removeMember(Team $team, TeamMember $member): RedirectResponse
     {
-        //$this->authorize('removeMember', [$team, $member]);
+        $this->authorize('removeMember', [$team, $member]);
 
         if ($member->role === 'leader' && $team->members->count() > 1) {
             return redirect()->back()
@@ -640,7 +640,7 @@ class TeamController extends Controller
      */
     public function externalProjectForm(Team $team): View|RedirectResponse
     {
-        //$this->authorize('selectSubject', $team);
+        $this->authorize('selectSubject', $team);
 
         if ($team->project) {
             return redirect()->route('teams.show', $team)
@@ -655,7 +655,7 @@ class TeamController extends Controller
      */
     public function submitExternalProject(Request $request, Team $team): RedirectResponse
     {
-        //$this->authorize('selectSubject', $team);
+        $this->authorize('selectSubject', $team);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -782,7 +782,7 @@ class TeamController extends Controller
      */
     public function transferLeadership(Request $request, Team $team): RedirectResponse
     {
-        //$this->authorize('transferLeadership', $team);
+        $this->authorize('transferLeadership', $team);
 
         $request->validate([
             'new_leader_id' => 'required|exists:team_members,student_id'

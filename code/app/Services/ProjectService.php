@@ -64,7 +64,10 @@ class ProjectService
 
         $result = $project->start();
 
-        // TODO: Send notification to team and supervisor
+        // Notify team members
+        foreach ($project->team->members as $member) {
+            $member->user->notify(new \App\Notifications\ProjectAssigned($project, 'team'));
+        }
 
         return $result;
     }
@@ -87,7 +90,10 @@ class ProjectService
         $result = $project->submit();
 
         if ($result) {
-            // TODO: Send notification to defense committee
+            // Notify defense committee (jury members)
+            foreach ($project->defense->juries as $jury) {
+                $jury->teacher->notify(new \App\Notifications\DefenseScheduled($project->defense, 'jury'));
+            }
         }
 
         return $result;
@@ -265,7 +271,8 @@ class ProjectService
             'status' => 'submitted',
         ]);
 
-        // TODO: Send notification to supervisor
+        // Notify supervisor
+        $supervisor->notify(new \App\Notifications\ProjectAssigned($project, 'supervisor'));
 
         return $submission;
     }

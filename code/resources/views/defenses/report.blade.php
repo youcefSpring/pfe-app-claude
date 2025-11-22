@@ -250,7 +250,7 @@
             </div>
 
             <div class="content-section">
-                <span class="dynamic-text" style="min-width: 200px; font-size: 1.1em;">{{ $userData->name }}</span>
+                <span class="dynamic-text" style="min-width: 200px; font-size: 1.1em;">{{ $userData->name ?? 'N/A' }}</span>
                 né(e) le <span class="dynamic-text">{{ $userData->date_naissance ? $userData->date_naissance->format('d/m/Y') : '___/___/___' }}</span>
                 à <span class="dynamic-text" style="min-width: 150px;">{{ $userData->lieu_naissance ?? '________________' }}</span>
             </div>
@@ -266,7 +266,7 @@
             </div>
 
             <div class="content-section">
-                <span class="bold-label">Spécialité</span> : <span class="dynamic-text" style="min-width: 250px;">{{ $userData->speciality->name ?? '________________' }}</span>
+                <span class="bold-label">Spécialité</span> : <span class="dynamic-text" style="min-width: 250px;">{{ $userData->speciality->name ?? 'Non spécifiée' }}</span>
             </div>
 
             <div class="content-section">
@@ -320,7 +320,7 @@
             <div class="content-section" style="margin-top: 15px;">
                 <span class="bold-label">Intitulé du sujet :</span>
                 <div style="border: 1px solid #ccc; padding: 10px; margin-top: 5px; background-color: #fcfcfc; min-height: 40px;">
-                    {{ $defense->subject->title ?? '' }}
+                    {{ $defense->subject->title ?? 'Sujet non spécifié' }}
                 </div>
             </div>
 
@@ -340,11 +340,11 @@
                 </thead>
                 <tbody>
                     <tr style="height: 50px;">
-                        <td>{{ $defense->manuscript_grade ?? '' }}</td>
-                        <td>{{ $defense->oral_grade ?? '' }}</td>
-                        <td>{{ $defense->questions_grade ?? '' }}</td>
-                        <td>{{ $defense->realization_grade ?? '' }}</td>
-                        <td style="font-weight: bold; font-size: 1.2em;">{{ $defense->final_grade ?? '' }}</td>
+                        <td>{{ $defense->manuscript_grade ?? '-' }}</td>
+                        <td>{{ $defense->oral_grade ?? '-' }}</td>
+                        <td>{{ $defense->questions_grade ?? '-' }}</td>
+                        <td>{{ $defense->realization_grade ?? '-' }}</td>
+                        <td style="font-weight: bold; font-size: 1.2em;">{{ $defense->final_grade ?? '-' }}</td>
                     </tr>
                 </tbody>
             </table>

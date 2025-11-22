@@ -243,7 +243,7 @@ class DefenseController extends Controller
      */
     public function scheduleForm(): View
     {
-        //$this->authorize('schedule', Defense::class);
+        $this->authorize('schedule', Defense::class);
 
         $subjects = Subject::with(['teacher', 'projects.team.members.user'])
             ->where('status', 'validated')
@@ -326,7 +326,7 @@ class DefenseController extends Controller
      */
     public function schedule(Request $request): RedirectResponse
     {
-        //$this->authorize('schedule', Defense::class);
+        $this->authorize('schedule', Defense::class);
 
         // CHECK SETTINGS: Get minimum notice days required
         $minNoticeDays = \App\Services\SettingsService::getDefenseNoticeMinDays();
@@ -422,17 +422,41 @@ class DefenseController extends Controller
                 ->with('error', "Teacher {$teacherName} is already assigned to another defense at this time (Subject: {$conflictSubject}). Please choose a different time or jury member.");
         }
 
-        // Create or update project if needed
-        $project = Project::firstOrCreate([
-            'team_id' => $validated['team_id'],
-            'subject_id' => $validated['subject_id'],
-        ], [
-            'supervisor_id' => $subject->teacher_id,
-            'academic_year' => $subject->academic_year ?? '2024-2025',
-            'type' => $subject->is_external ? 'external' : 'internal',
-            'status' => 'assigned',
-            'started_at' => now(),
-        ]);
+        // Check if team already has a defense scheduled
+        $team = Team::find($validated['team_id']);
+        $existingTeamDefense = Defense::whereHas('project.team', function($q) use ($team) {
+            $q->where('id', $team->id);
+        })->first();
+
+        if ($existingTeamDefense) {
+            return redirect()->back()
+                ->with('error', "Team {$team->name} already has a defense scheduled.");
+        }
+
+        // ✅ IMPROVED: Ensure project exists or create it properly
+        // First, check if a project already exists for this team and subject
+        $project = Project::where('team_id', $validated['team_id'])
+            ->where('subject_id', $validated['subject_id'])
+            ->first();
+
+        // If no project exists, create one
+        if (!$project) {
+            $project = Project::create([
+                'team_id' => $validated['team_id'],
+                'subject_id' => $validated['subject_id'],
+                'supervisor_id' => $subject->teacher_id,
+                'academic_year' => $subject->academic_year ?? '2024-2025',
+                'type' => $subject->is_external ? 'external' : 'internal',
+                'status' => 'assigned',
+                'started_at' => now(),
+            ]);
+        }
+
+        // Validate project is ready for defense
+        if (!in_array($project->status, ['submitted', 'assigned', 'in_progress'])) {
+            return redirect()->back()
+                ->with('error', 'Project must be in a valid status (assigned, in_progress, or submitted) to schedule a defense.');
+        }
 
         DB::beginTransaction();
         try {
@@ -541,7 +565,7 @@ class DefenseController extends Controller
      */
     public function edit(Defense $defense): View
     {
-        //$this->authorize('update', $defense);
+        $this->authorize('update', $defense);
 
         $rooms = Room::orderBy('name')->get();
         $teachers = User::where('role', 'teacher')->orderBy('name')->get();
@@ -556,7 +580,7 @@ class DefenseController extends Controller
      */
     public function update(Request $request, Defense $defense): RedirectResponse
     {
-        //$this->authorize('update', $defense);
+        $this->authorize('update', $defense);
 
         $validated = $request->validate([
             'defense_date' => 'required|date',
@@ -647,7 +671,7 @@ class DefenseController extends Controller
      */
     public function cancel(Defense $defense): RedirectResponse
     {
-        //$this->authorize('delete', $defense);
+        $this->authorize('delete', $defense);
 
         if ($defense->status === 'completed') {
             return redirect()->back()
@@ -669,7 +693,7 @@ class DefenseController extends Controller
      */
     public function complete(Defense $defense): RedirectResponse
     {
-        //$this->authorize('update', $defense);
+        $this->authorize('update', $defense);
 
         if ($defense->status !== 'in_progress' && $defense->status !== 'scheduled') {
             return redirect()->back()
@@ -690,7 +714,7 @@ class DefenseController extends Controller
      */
     public function submitGrade(Request $request, Defense $defense): RedirectResponse
     {
-        //$this->authorize('grade', $defense);
+        $this->authorize('grade', $defense);
 
         $validated = $request->validate([
             'presentation_grade' => 'required|numeric|min:0|max:20',
@@ -734,7 +758,7 @@ class DefenseController extends Controller
      */
     public function downloadReportPdf(Defense $defense)
     {
-        //$this->authorize('viewReport', $defense);
+        $this->authorize('viewReport', $defense);
 
         $user = Auth::user();
 

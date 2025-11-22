@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Defense;
+use App\Models\Project;
 use App\Models\StudentGrade;
+use App\Models\Team;
+use App\Policies\DefensePolicy;
+use App\Policies\ProjectPolicy;
 use App\Policies\StudentGradePolicy;
+use App\Policies\TeamPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -14,7 +20,10 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        Defense::class => DefensePolicy::class,
+        Project::class => ProjectPolicy::class,
         StudentGrade::class => StudentGradePolicy::class,
+        Team::class => TeamPolicy::class,
     ];
 
     /**

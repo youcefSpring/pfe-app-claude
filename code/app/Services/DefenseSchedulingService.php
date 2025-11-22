@@ -483,7 +483,16 @@ class DefenseSchedulingService
             'duration' => $newSlot['duration'] ?? $defense->duration,
         ]);
 
-        // TODO: Send notifications about rescheduling
+        // Send notifications about rescheduling
+        // Notify team members
+        foreach ($defense->project->team->members as $member) {
+            $member->user->notify(new \App\Notifications\DefenseRescheduled($defense, $oldDate, $oldTime));
+        }
+        
+        // Notify jury members
+        foreach ($defense->juries as $jury) {
+            $jury->teacher->notify(new \App\Notifications\DefenseRescheduled($defense, $oldDate, $oldTime));
+        }
 
         return true;
     }
