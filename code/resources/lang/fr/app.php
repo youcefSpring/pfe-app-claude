@@ -5,8 +5,16 @@ return [
     'dashboard' => 'Tableau de Bord',
     'system_administration' => 'Administration Système',
     'quick_actions' => 'Actions Rapides',
+    'welcome' => 'Bienvenue',
     'welcome_back' => 'Bon retour',
     'academic_year' => 'Année Académique',
+    'new_subject_teachers' => 'Nouveaux Enseignants de Sujets',
+    'no_new_teachers' => 'Aucun nouvel enseignant dans les 30 derniers jours',
+    
+    // Table Headers
+    'name' => 'Nom',
+    'email' => 'Email',
+    'joined' => 'Inscrit',
     
     // Quick Actions
     'manage_users' => 'Gérer les Utilisateurs',

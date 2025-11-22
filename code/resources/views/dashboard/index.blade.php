@@ -6,8 +6,8 @@
 <div class="container-fluid">
     <!-- Welcome Header -->
     <div class="text-center mb-4">
-        <h3 class="mb-2">Welcome, <strong>{{ auth()->user()->name }}</strong></h3>
-        <p class="text-muted">Academic Year {{ now()->format('Y') }}/{{ now()->addYear()->format('Y') }}</p>
+        <h3 class="mb-2">{{ __('app.welcome') }}, <strong>{{ auth()->user()->name }}</strong></h3>
+        <p class="text-muted">{{ __('app.academic_year') }} {{ now()->format('Y') }}/{{ now()->addYear()->format('Y') }}</p>
     </div>
 
     <!-- Quick Actions -->
@@ -162,7 +162,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">
-                        <i class="bi bi-person-plus me-2 text-success"></i>New Subject Teachers
+                        <i class="bi bi-person-plus me-2 text-success"></i>{{ __('app.new_subject_teachers') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -179,12 +179,12 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Department</th>
-                                        <th>Joined</th>
-                                        <th>Subjects</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('app.name') }}</th>
+                                        <th>{{ __('app.email') }}</th>
+                                        <th>{{ __('app.department') }}</th>
+                                        <th>{{ __('app.joined') }}</th>
+                                        <th>{{ __('app.subjects') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -204,7 +204,7 @@
                                                 <small class="text-muted">{{ $teacher->created_at->diffForHumans() }}</small>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $teacher->subjects()->count() }} subjects</span>
+                                                <span class="badge bg-primary">{{ $teacher->subjects()->count() }} {{ __('app.subjects') }}</span>
                                             </td>
                                             <td>
                                                 <a href="{{ route('admin.users.edit', $teacher) }}" class="btn btn-sm btn-outline-primary">
@@ -219,7 +219,7 @@
                     @else
                         <div class="text-center py-4 text-muted">
                             <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                            <p class="mt-2">No new teachers in the last 30 days</p>
+                            <p class="mt-2">{{ __('app.no_new_teachers') }}</p>
                         </div>
                     @endif
                 </div>
