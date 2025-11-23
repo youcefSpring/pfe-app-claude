@@ -156,59 +156,67 @@
     </div>
 
     @if(auth()->user()->role === 'admin')
-    <!-- New Subject Teachers (Admin Only) -->
+    <!-- New Subjects (Admin Only) -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">
-                        <i class="bi bi-person-plus me-2 text-success"></i>{{ __('app.new_subject_teachers') }}
+                        <i class="bi bi-journal-plus me-2 text-success"></i>{{ __('app.new_subjects') }}
                     </h5>
                 </div>
                 <div class="card-body">
                     @php
-                        $newTeachers = \App\Models\User::where('role', 'teacher')
-                            ->where('created_at', '>=', now()->subDays(30))
+                        $newSubjects = \App\Models\Subject::where('created_at', '>=', now()->subDays(30))
+                            ->with(['teacher', 'speciality'])
                             ->orderBy('created_at', 'desc')
                             ->limit(10)
                             ->get();
                     @endphp
 
-                    @if($newTeachers->count() > 0)
+                    @if($newSubjects->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('app.name') }}</th>
-                                        <th>{{ __('app.email') }}</th>
-                                        <th>{{ __('app.department') }}</th>
-                                        <th>{{ __('app.joined') }}</th>
-                                        <th>{{ __('app.subjects') }}</th>
+                                        <th>{{ __('app.title') }}</th>
+                                        <th>{{ __('app.teacher') }}</th>
+                                        <th>{{ __('app.speciality') }}</th>
+                                        <th>{{ __('app.created') }}</th>
+                                        <th>{{ __('app.status') }}</th>
                                         <th>{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($newTeachers as $teacher)
+                                    @foreach($newSubjects as $subject)
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="bg-success bg-opacity-10 rounded-circle p-2 me-2">
-                                                        <i class="bi bi-person text-success"></i>
+                                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                                        <i class="bi bi-journal-text text-primary"></i>
                                                     </div>
-                                                    <strong>{{ $teacher->name }}</strong>
+                                                    <strong>{{ Str::limit($subject->title, 40) }}</strong>
                                                 </div>
                                             </td>
-                                            <td>{{ $teacher->email }}</td>
-                                            <td>{{ $teacher->department ?? 'N/A' }}</td>
+                                            <td>{{ $subject->teacher->name }}</td>
+                                            <td>{{ $subject->speciality->name ?? 'N/A' }}</td>
                                             <td>
-                                                <small class="text-muted">{{ $teacher->created_at->diffForHumans() }}</small>
+                                                <small class="text-muted">{{ $subject->created_at->diffForHumans() }}</small>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $teacher->subjects()->count() }} {{ __('app.subjects') }}</span>
+                                                @if($subject->status === 'validated')
+                                                    <span class="badge bg-success">{{ __('app.validated') }}</span>
+                                                @elseif($subject->status === 'pending_validation')
+                                                    <span class="badge bg-warning">{{ __('app.pending') }}</span>
+                                                @elseif($subject->status === 'rejected')
+                                                    <span class="badge bg-danger">{{ __('app.rejected') }}</span>
+                                                @else
+                                                    <span class="badge bg-secondary">{{ ucfirst($subject->status) }}</span>
+                                                @endif
                                             </td>
                                             <td>
-                                                <a href="{{ route('admin.users.edit', $teacher) }}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-pencil"></i>
+                                                <a href="{{ route('subjects.show', $subject) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -219,7 +227,7 @@
                     @else
                         <div class="text-center py-4 text-muted">
                             <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                            <p class="mt-2">{{ __('app.no_new_teachers') }}</p>
+                            <p class="mt-2">{{ __('app.no_new_subjects') }}</p>
                         </div>
                     @endif
                 </div>

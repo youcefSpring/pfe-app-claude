@@ -8,13 +8,17 @@ return [
     'welcome' => 'Bienvenue',
     'welcome_back' => 'Bon retour',
     'academic_year' => 'Année Académique',
-    'new_subject_teachers' => 'Nouveaux Enseignants de Sujets',
-    'no_new_teachers' => 'Aucun nouvel enseignant dans les 30 derniers jours',
+    'new_subjects' => 'Nouveaux Sujets',
+    'no_new_subjects' => 'Aucun nouveau sujet dans les 30 derniers jours',
     
     // Table Headers
     'name' => 'Nom',
     'email' => 'Email',
     'joined' => 'Inscrit',
+    'title' => 'Titre',
+    'teacher' => 'Enseignant',
+    'speciality' => 'Spécialité',
+    'created' => 'Créé',
     
     // Quick Actions
     'manage_users' => 'Gérer les Utilisateurs',
