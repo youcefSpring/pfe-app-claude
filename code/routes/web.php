@@ -317,6 +317,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{defense}/report/pdf', [DefenseController::class, 'downloadReportPdf'])->name('download-report-pdf');
             Route::get('/{defense}/student/{student}/report/pdf', [DefenseController::class, 'downloadStudentReportPdf'])->name('download-student-report-pdf');
             Route::get('/{defense}/batch-reports/pdf', [DefenseController::class, 'downloadBatchStudentReports'])->name('download-batch-reports-pdf');
+            Route::get('/{defense}/edit-student-data', [DefenseController::class, 'editStudentData'])->name('edit-student-data');
+            Route::put('/{defense}/update-student-data', [DefenseController::class, 'updateStudentData'])->name('update-student-data');
         });
 
         // Procès-verbal routes (accessible to all authorized users)

@@ -205,4 +205,50 @@ return [
     'confirmed' => 'Confirmé',
     'manage_deadlines' => 'Gérer les Dates Limites',
     'view_results' => 'Voir les Résultats',
+    
+    // Defense Report
+    'student_data_updated_successfully' => 'Données de l\'étudiant mises à jour avec succès',
+    'edit_student_data' => 'Modifier les données de l\'étudiant',
+    'print' => 'Imprimer',
+    
+    // Sidebar translations
+    'team_management_sidebar' => 'Gestion des équipes',
+    'my_defense_sidebar' => 'Ma soutenance',
+    'manage_rooms_sidebar' => 'Gérer les salles',
+    'guest_sidebar' => 'Invité',
+    'academic_management' => 'Gestion Académique',
+    'student_management' => 'Gestion des Étudiants',
+    'system_configuration' => 'Configuration Système',
+    'academic_years' => 'Années Académiques',
+    
+    // Rooms Management
+    'room_management' => 'Gestion des Salles',
+    'total_rooms' => 'Total des Salles',
+    'in_use' => 'En Utilisation',
+    'add_new_room' => 'Ajouter une Nouvelle Salle',
+    'all_rooms' => 'Toutes les Salles',
+    'room_name' => 'Nom de la Salle',
+    'not_specified' => 'Non spécifié',
+    'no_equipment_listed' => 'Aucun équipement listé',
+    'unavailable' => 'Indisponible',
+    'confirm_delete_room' => 'Êtes-vous sûr de vouloir supprimer cette salle ?',
+    'cannot_delete_room_with_defenses' => 'Impossible de supprimer une salle avec des soutenances programmées',
+    'no_rooms_found' => 'Aucune Salle Trouvée',
+    'start_by_adding_first_room' => 'Commencez par ajouter votre première salle de classe.',
+    'add_first_room' => 'Ajouter la Première Salle',
+
+    // Bulk Import
+    'bulk_import_users' => 'Importation en masse d\'utilisateurs',
+    'import_multiple_users' => 'Importer plusieurs utilisateurs à partir d\'un fichier Excel',
+    'excel_file' => 'Fichier Excel',
+    'default_role' => 'Rôle par défaut',
+    'default_speciality' => 'Spécialité par défaut',
+    'select_speciality' => 'Sélectionner une spécialité',
+    'back_to_users' => 'Retour aux utilisateurs',
+    'import_users' => 'Importer les utilisateurs',
+
+    // User Roles
+    'student' => 'Étudiant',
+    'teacher' => 'Enseignant',
+    'department_head' => 'Chef de Département',
 ];

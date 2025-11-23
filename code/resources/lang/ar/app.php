@@ -14,6 +14,7 @@ return [
     'login' => 'تسجيل الدخول',
     'home' => 'الرئيسية',
 
+       'new_subjects' => 'المواضيع الجديدة',
     // Auth & Login
     'register' => 'التسجيل',
     'password' => 'كلمة المرور',
@@ -1849,4 +1850,43 @@ return [
     // Marks Controller Messages
     'student_already_has_marks_redirecting_to_edit' => 'لدى هذا الطالب علامات بالفعل للعام الأكاديمي الحالي. إعادة التوجيه إلى صفحة التعديل.',
     'student_already_has_marks_for_this_year' => 'لدى هذا الطالب علامات بالفعل للعام الأكاديمي الحالي.',
+    
+    // Sidebar translations
+    'team_management' => 'إدارة الفرق',
+    'my_defense' => 'مناقشتي',
+    'manage_rooms' => 'إدارة القاعات',
+    'academic_management' => 'الإدارة الأكاديمية',
+    'student_management' => 'إدارة الطلاب',
+    'system_configuration' => 'تكوين النظام',
+    'academic_years' => 'السنوات الأكاديمية',
+    
+    // Rooms Management
+    'room_management' => 'إدارة القاعات',
+    'total_rooms' => 'إجمالي القاعات',
+    'in_use' => 'قيد الاستخدام',
+    'add_new_room' => 'إضافة قاعة جديدة',
+    'all_rooms' => 'جميع القاعات',
+    'room_name' => 'اسم القاعة',
+    'not_specified' => 'غير محدد',
+    'no_equipment_listed' => 'لا توجد معدات مدرجة',
+    'unavailable' => 'غير متاح',
+    'confirm_delete_room' => 'هل أنت متأكد من أنك تريد حذف هذه القاعة؟',
+    'cannot_delete_room_with_defenses' => 'لا يمكن حذف قاعة بها مناقشات مجدولة',
+    'no_rooms_found' => 'لم يتم العثور على قاعات',
+    'start_by_adding_first_room' => 'ابدأ بإضافة أول قاعة دراسية.',
+    'add_first_room' => 'إضافة أول قاعة',
+
+    // Bulk Import
+    'bulk_import_users' => 'استيراد جماعي للمستخدمين',
+    'import_multiple_users' => 'استيراد عدة مستخدمين من ملف Excel',
+    'excel_file' => 'ملف Excel',
+    'default_role' => 'الدور الافتراضي',
+    'default_speciality' => 'التخصص الافتراضي',
+    'select_speciality' => 'اختر التخصص',
+    'back_to_users' => 'العودة للمستخدمين',
+    'import_users' => 'استيراد المستخدمين',
+
+    // User Roles
+    'teacher' => 'أستاذ',
+    'department_head' => 'رئيس القسم',
 ];

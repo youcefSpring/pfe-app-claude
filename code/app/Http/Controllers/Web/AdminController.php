@@ -959,7 +959,7 @@ public function processBulkImport(Request $request): RedirectResponse
                         'subject_id' => $subject->id,
                         'team_id' => $team->id,
                         'supervisor_id' => $subject->teacher_id,
-                        'status' => 'active',
+                        'status' => 'assigned',
                         'academic_year' => $team->academic_year,
                     ]);
                 }

@@ -1,6 +1,6 @@
 @extends('layouts.pfe-app')
 
-@section('page-title', 'Room Management')
+@section('page-title', __('app.room_management'))
 
 @section('content')
         <div class="container-fluid">
@@ -50,7 +50,7 @@
                     <div class="card border-primary">
                         <div class="card-body text-center">
                             <h3 class="text-primary mb-1">{{ $rooms->total() }}</h3>
-                            <small class="text-muted">Total Rooms</small>
+                            <small class="text-muted">{{ __('app.total_rooms') }}</small>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
     $availableCount = $rooms->where('is_available', true)->count();
                             @endphp
                             <h3 class="text-success mb-1">{{ $availableCount }}</h3>
-                            <small class="text-muted">Available</small>
+                            <small class="text-muted">{{ __('app.available') }}</small>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
     $roomsWithDefenses = $rooms->where('defenses_count', '>', 0)->count();
                             @endphp
                             <h3 class="text-warning mb-1">{{ $roomsWithDefenses }}</h3>
-                            <small class="text-muted">In Use</small>
+                            <small class="text-muted">{{ __('app.in_use') }}</small>
                         </div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                             <h3 class="text-info mb-1">{{ $totalCapacity }}</h3>
                             <small class="text-muted">Total Capacity</small> --}}
                             <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus-circle me-2"></i>Add New Room
+                                <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_new_room') }}
                             </a>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-list me-2"></i>All Rooms
+                                <i class="bi bi-list me-2"></i>{{ __('app.all_rooms') }}
                             </h5>
                         </div>
                         <div class="card-body">
@@ -108,13 +108,13 @@
                                     <table class="table table-hover">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Room Name</th>
-                                                <th>Location</th>
-                                                <th>Capacity</th>
-                                                <th>Equipment</th>
-                                                <th>Status</th>
-                                                <th>Defenses</th>
-                                                <th>Actions</th>
+                                                <th>{{ __('app.room_name') }}</th>
+                                                <th>{{ __('app.location') }}</th>
+                                                <th>{{ __('app.capacity') }}</th>
+                                                <th>{{ __('app.equipment') }}</th>
+                                                <th>{{ __('app.status') }}</th>
+                                                <th>{{ __('app.defenses') }}</th>
+                                                <th>{{ __('app.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -127,10 +127,10 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span class="text-muted">{{ $room->location ?? 'Not specified' }}</span>
+                                                        <span class="text-muted">{{ $room->location ?? __('app.not_specified') }}</span>
                                                     </td>
                                                     <td>
-                                                        <span class="badge bg-info">{{ $room->capacity }} seats</span>
+                                                        <span class="badge bg-info">{{ $room->capacity }} {{ __('app.seats') }}</span>
                                                     </td>
                                                     <td>
                                                         @if($room->equipment)
@@ -139,18 +139,18 @@
                                                                 {{ $room->equipment }}
                                                             </span>
                                                         @else
-                                                            <span class="text-muted">No equipment listed</span>
+                                                            <span class="text-muted">{{ __('app.no_equipment_listed') }}</span>
                                                         @endif
                                                     </td>
                                                     <td>
                                                         @if($room->is_available)
-                                                            <span class="badge bg-success">Available</span>
+                                                            <span class="badge bg-success">{{ __('app.available') }}</span>
                                                         @else
-                                                            <span class="badge bg-danger">Unavailable</span>
+                                                            <span class="badge bg-danger">{{ __('app.unavailable') }}</span>
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <span class="badge bg-secondary">{{ $room->defenses_count }} scheduled</span>
+                                                        <span class="badge bg-secondary">{{ $room->defenses_count }} {{ __('app.scheduled') }}</span>
                                                     </td>
                                                     <td>
                                                         <div class="btn-group btn-group-sm" role="group">
@@ -161,7 +161,7 @@
                                                             @if($room->defenses_count == 0)
                                                                 <form action="{{ route('admin.rooms.destroy', $room) }}"
                                                                       method="POST" class="d-inline"
-                                                                      onsubmit="return confirm('Are you sure you want to delete this room?')">
+                                                                      onsubmit="return confirm('{{ __('app.confirm_delete_room') }}')">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="btn btn-outline-danger" title="Delete Room">
@@ -169,7 +169,7 @@
                                                                     </button>
                                                                 </form>
                                                             @else
-                                                                <button class="btn btn-outline-secondary" disabled title="Cannot delete room with scheduled defenses">
+                                                                <button class="btn btn-outline-secondary" disabled title="{{ __('app.cannot_delete_room_with_defenses') }}">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             @endif
@@ -186,10 +186,10 @@
                             @else
                                 <div class="text-center py-5">
                                     <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>
-                                    <h5 class="text-muted mt-3">No Rooms Found</h5>
-                                    <p class="text-muted">Start by adding your first classroom.</p>
+                                    <h5 class="text-muted mt-3">{{ __('app.no_rooms_found') }}</h5>
+                                    <p class="text-muted">{{ __('app.start_by_adding_first_room') }}</p>
                                     <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary">
-                                        <i class="bi bi-plus-circle me-2"></i>Add First Room
+                                        <i class="bi bi-plus-circle me-2"></i>{{ __('app.add_first_room') }}
                                     </a>
                                 </div>
                             @endif

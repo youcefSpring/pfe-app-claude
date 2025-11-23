@@ -168,7 +168,7 @@
                 <div class="card-body">
                     @php
                         $newSubjects = \App\Models\Subject::where('created_at', '>=', now()->subDays(30))
-                            ->with(['teacher', 'speciality'])
+                            ->with(['teacher', 'specialities'])
                             ->orderBy('created_at', 'desc')
                             ->limit(10)
                             ->get();
@@ -199,7 +199,7 @@
                                                 </div>
                                             </td>
                                             <td>{{ $subject->teacher->name }}</td>
-                                            <td>{{ $subject->speciality->name ?? 'N/A' }}</td>
+                                            <td>{{ $subject->specialities->pluck('name')->join(', ') ?: 'N/A' }}</td>
                                             <td>
                                                 <small class="text-muted">{{ $subject->created_at->diffForHumans() }}</small>
                                             </td>

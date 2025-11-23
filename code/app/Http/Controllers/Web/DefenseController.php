@@ -1100,6 +1100,79 @@ class DefenseController extends Controller
     }
 
     /**
+     * Show form to edit student data for defense report
+     */
+    public function editStudentData(Defense $defense): View
+    {
+        // Check authorization
+        if (!in_array(auth()->user()->role, ['admin', 'department_head'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Load necessary relationships
+        $defense->load(['project.team.members.user.speciality', 'juries.teacher']);
+
+        // Validate that all required relationships exist
+        if (!$defense->project || !$defense->project->team) {
+            abort(404, 'Defense team not found');
+        }
+
+        // Get all team members
+        $teamMembers = $defense->project->team->members()->with('user.speciality')->get();
+        if ($teamMembers->isEmpty()) {
+            abort(404, 'No team members found');
+        }
+
+        return view('defenses.report-editable', compact('defense', 'teamMembers'));
+    }
+
+    /**
+     * Update student data for defense report
+     */
+    public function updateStudentData(Request $request, Defense $defense): RedirectResponse
+    {
+        // Check authorization
+        if (!in_array(auth()->user()->role, ['admin', 'department_head'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Validate the request
+        $validated = $request->validate([
+            'students' => 'required|array|min:1',
+            'students.*.user_id' => 'required|exists:users,id',
+            'students.*.name' => 'required|string|max:255',
+            'students.*.date_naissance' => 'required|date|before:today',
+            'students.*.lieu_naissance' => 'required|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Update each student's data
+            foreach ($validated['students'] as $studentData) {
+                $user = User::find($studentData['user_id']);
+                if ($user) {
+                    $user->update([
+                        'name' => $studentData['name'],
+                        'date_naissance' => $studentData['date_naissance'],
+                        'lieu_naissance' => $studentData['lieu_naissance'],
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('defenses.report', $defense)
+                ->with('success', __('app.student_data_updated_successfully'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to update student data: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Update defense grades (for admin and department heads only)
      */
     public function updateGrades(Request $request, Defense $defense)

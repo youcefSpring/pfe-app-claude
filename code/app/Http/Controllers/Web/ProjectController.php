@@ -395,12 +395,12 @@ class ProjectController extends Controller
 
         $currentYear = \App\Models\AcademicYear::getCurrentYear();
         $project = Project::create($validated + [
-            'status' => 'active',
+            'status' => 'assigned',
             'created_by' => Auth::id(),
             'academic_year' => $currentYear ? $currentYear->year : date('Y') . '-' . (date('Y') + 1),
         ]);
 
-        $team->update(['status' => 'active']);
+        $team->update(['status' => 'assigned']);
 
         return redirect()->route('projects.show', $project)
             ->with('success', 'Project created successfully!');

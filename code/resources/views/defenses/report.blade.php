@@ -207,6 +207,31 @@
 </head>
 <body>
     @if(!isset($isPdf) || !$isPdf)
+        @if(session('success'))
+            <div style="background-color: #d4edda; color: #155724; padding: 15px; margin: 15px auto; max-width: 800px; border: 1px solid #c3e6cb; border-radius: 5px; text-align: center;">
+                <strong>✓</strong> {{ session('success') }}
+            </div>
+        @endif
+
+        @php
+            $hasMissingData = false;
+            foreach($teamMembers as $member) {
+                if (!$member->user->date_naissance || !$member->user->lieu_naissance) {
+                    $hasMissingData = true;
+                    break;
+                }
+            }
+        @endphp
+
+        @if($hasMissingData && in_array(auth()->user()->role, ['admin', 'department_head']))
+            <div style="background-color: #fff3cd; color: #856404; padding: 15px; margin: 15px auto; max-width: 800px; border: 1px solid #ffc107; border-radius: 5px; text-align: center;">
+                <strong>⚠️ Attention:</strong> Certaines données des étudiants sont manquantes. 
+                <a href="{{ route('defenses.edit-student-data', $defense) }}" style="color: #0d6efd; text-decoration: underline; font-weight: bold;">
+                    Cliquez ici pour les compléter
+                </a>
+            </div>
+        @endif
+
         <button class="print-btn" onclick="window.print()">🖨️ {{ __('app.print') }}</button>
     @endif
 

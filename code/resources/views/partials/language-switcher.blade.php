@@ -5,11 +5,9 @@
 @endphp
 
 <div class="dropdown">
-    <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button"
+    <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center justify-content-center" type="button"
             id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="me-2">{{ $currentLanguage['flag'] }}</span>
-        <span class="d-none d-md-inline">{{ $currentLanguage['name'] }}</span>
-        <span class="d-md-none">{{ strtoupper($currentLocale) }}</span>
+        <span>{{ $currentLanguage['flag'] }}</span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
         @foreach($availableLocales as $locale => $info)

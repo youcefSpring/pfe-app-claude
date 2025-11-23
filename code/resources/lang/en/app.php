@@ -836,6 +836,7 @@ return [
     'system_maintenance' => 'System Maintenance',
     'recent_system_activity' => 'Recent System Activity',
     'new_user' => 'New user',
+    'new_subjects' => 'New subjects',
     'new_subject' => 'New subject',
     'quick_statistics' => 'Quick Statistics',
     'todays_logins' => 'Today\'s Logins',
@@ -2427,4 +2428,39 @@ return [
     // Marks Controller Messages
     'student_already_has_marks_redirecting_to_edit' => 'This student already has marks for the current academic year. Redirecting to edit page.',
     'student_already_has_marks_for_this_year' => 'This student already has marks for the current academic year.',
+    
+    // Sidebar translations
+    'team_management' => 'Team Management',
+    'my_defense' => 'My Defense',
+    'manage_rooms' => 'Manage Rooms',
+    'academic_management' => 'Academic Management',
+    'student_management' => 'Student Management',
+    'system_configuration' => 'System Configuration',
+    'academic_years' => 'Academic Years',
+    
+    // Rooms Management
+    'room_management' => 'Room Management',
+    'total_rooms' => 'Total Rooms',
+    'in_use' => 'In Use',
+    'add_new_room' => 'Add New Room',
+    'all_rooms' => 'All Rooms',
+    'room_name' => 'Room Name',
+    'not_specified' => 'Not specified',
+    'no_equipment_listed' => 'No equipment listed',
+    'unavailable' => 'Unavailable',
+    'confirm_delete_room' => 'Are you sure you want to delete this room?',
+    'cannot_delete_room_with_defenses' => 'Cannot delete room with scheduled defenses',
+    'no_rooms_found' => 'No Rooms Found',
+    'start_by_adding_first_room' => 'Start by adding your first classroom.',
+    'add_first_room' => 'Add First Room',
+
+    // Bulk Import
+    'bulk_import_users' => 'Bulk Import Users',
+    'import_multiple_users' => 'Import multiple users from an Excel file',
+    'excel_file' => 'Excel File',
+    'default_role' => 'Default Role',
+    'default_speciality' => 'Default Speciality',
+    'select_speciality' => 'Select Speciality',
+    'back_to_users' => 'Back to Users',
+    'import_users' => 'Import Users',
 ];
