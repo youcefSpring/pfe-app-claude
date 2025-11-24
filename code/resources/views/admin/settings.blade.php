@@ -108,17 +108,17 @@
                 <div class="tab-content" id="settingsTabContent">
                     <!-- University Information Tab -->
                     <div class="tab-pane fade show active" id="university" role="tabpanel">
-                        <div class="box box-primary">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">
-                                    <i class="bi bi-building"></i>
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-building me-2"></i>
                                     {{ __('app.university_information') }}
-                                </h3>
-                                <button type="button" class="btn btn-xs btn-info float-end" data-bs-toggle="modal" data-bs-target="#universityHelpModal">
+                                </h5>
+                                <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#universityHelpModal">
                                     <i class="bi bi-question-circle"></i> {{ __('app.help') }}
                                 </button>
                             </div>
-                            <div class="box-body">
+                            <div class="card-body">
                                 <!-- Logo Upload Section -->
                                 <div class="logo-upload-section mb-4">
                                     <label for="university_logo" class="form-label-compact d-flex align-items-center">
@@ -267,15 +267,15 @@
 
                     <!-- System Settings Tab -->
                     <div class="tab-pane fade" id="system" role="tabpanel">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">
-                                    <i class="bi bi-gear"></i>
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-gear me-2"></i>
                                     {{ __('app.system_configuration') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">Configure system-wide settings and preferences</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">Configure system-wide settings and preferences</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['system'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -301,10 +301,10 @@
                                 <h3 class="box-title">
                                     <i class="bi bi-people"></i>
                                     {{ __('app.team_settings') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_team_formation_rules') }}</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">{{ __('app.configure_team_formation_rules') }}</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['team'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -330,10 +330,10 @@
                                 <h3 class="box-title">
                                     <i class="bi bi-journal-text"></i>
                                     {{ __('app.subject_settings') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_subject_management_rules') }}</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">{{ __('app.configure_subject_management_rules') }}</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['subject'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -359,10 +359,10 @@
                                 <h3 class="box-title">
                                     <i class="bi bi-person-plus"></i>
                                     {{ __('app.registration_settings') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_student_registration_process') }}</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">{{ __('app.configure_student_registration_process') }}</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['registration'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -388,10 +388,10 @@
                                 <h3 class="box-title">
                                     <i class="bi bi-shield-check"></i>
                                     {{ __('app.defense_settings') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_defense_scheduling_rules') }}</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">{{ __('app.configure_defense_scheduling_rules') }}</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['defense'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -412,15 +412,15 @@
 
                     <!-- Notification Settings Tab -->
                     <div class="tab-pane fade" id="notification" role="tabpanel">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
                                     <i class="bi bi-bell"></i>
                                     {{ __('app.notification_settings') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_notification_preferences') }}</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">{{ __('app.configure_notification_preferences') }}</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['notification'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -446,10 +446,10 @@
                                 <h3 class="box-title">
                                     <i class="bi bi-diagram-3"></i>
                                     {{ __('app.allocation_settings') }}
-                                </h3>
-                                <p class="text-muted mb-0 mt-2">{{ __('app.configure_subject_allocation_process') }}</p>
+                                </h5>
+                                <p class="text-white-50 mb-0 mt-2 small">{{ __('app.configure_subject_allocation_process') }}</p>
                             </div>
-                            <div class="box-body settings-grid">
+                            <div class="card-body settings-grid">
                                 <div class="row">
                                     @forelse($settingsGroups['allocation'] ?? [] as $setting)
                                         <div class="col-md-6">
@@ -470,7 +470,7 @@
                 </div>
 
                 <!-- Save Button (Sticky) -->
-                <div class="box-footer">
+                <div class="card-footer bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">
                             <i class="bi bi-info-circle"></i>
@@ -599,7 +599,7 @@
 }
 
 /* Sticky Save Button */
-.box-footer {
+.card-footer {
     position: sticky;
     bottom: 0;
     background: white;
@@ -689,15 +689,64 @@
     margin: 0;
 }
 
-/* Box Header Improvements */
-.box-header.with-border {
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 1rem;
-    margin-bottom: 0;
+/* Card Header Improvements */
+.card-header {
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+    padding: 1rem 1.25rem;
 }
 
-.box-header .text-muted {
+.card-header .text-white-50 {
     font-size: 0.875rem;
+}
+
+.card-header h5 i {
+    opacity: 0.9;
+}
+
+/* Card Styling */
+.card {
+    border: 1px solid rgba(0,0,0,0.125);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Form Control Compact Styling */
+.form-control-compact {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-compact:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label-compact {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-label-compact.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-group-compact {
+    margin-bottom: 1rem;
+}
+
+.form-text-compact {
+    font-size: 0.825rem;
+    color: #6c757d;
 }
 </style>
 @endpush

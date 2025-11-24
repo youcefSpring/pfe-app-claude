@@ -56,6 +56,11 @@
     <div class="row mb-3">
         <div class="col-12">
             <div class="d-flex flex-wrap gap-2">
+                <!-- View Subject Requests with Rankings -->
+                <a href="{{ route('admin.allocations.subject-requests', $deadline) }}" class="btn btn-sm btn-info">
+                    <i class="fas fa-trophy"></i> View Subject Requests & Rankings
+                </a>
+
                 @if($deadline->canPerformAutoAllocation())
                     <form action="{{ route('admin.allocations.auto-allocation', $deadline) }}" method="POST" class="d-inline">
                         @csrf

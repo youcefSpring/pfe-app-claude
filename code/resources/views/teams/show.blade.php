@@ -80,7 +80,7 @@
                                     @endforeach
                                 </div>
 
-                                @if($isLeader && $team->members->count() < 4)
+                                @if(($isLeader || auth()->user()->role === 'admin') && $team->members->count() < 4)
                                     <div class="mt-3">
                                         <h6>{{ __('app.invite_team_member') }}</h6>
                                         <p class="text-muted small">{{ __('app.invitation_will_be_sent_explain') }}</p>

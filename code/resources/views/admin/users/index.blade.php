@@ -163,9 +163,16 @@
                                                                             @endif
                                                                         </td>
                                                                         <td>
-                                                                        <small class="text-muted">
-                                                                           {{ \App\Models\Speciality::where('id',$user->speciality_id)->first()->code ?? '-' }}
-                                                                        </small>
+                                                                            @php
+                                                                                $userSpeciality = $user->speciality()->first();
+                                                                            @endphp
+                                                                            @if($userSpeciality)
+                                                                                <span class="badge bg-info">
+                                                                                    {{ $userSpeciality->code ?? $userSpeciality->name }}
+                                                                                </span>
+                                                                            @else
+                                                                                <small class="text-muted">-</small>
+                                                                            @endif
                                                                         </td>
                                                                         <td>
                                                                             <small class="text-muted">

@@ -328,13 +328,10 @@ class DefenseController extends Controller
     {
         $this->authorize('schedule', Defense::class);
 
-        // CHECK SETTINGS: Get minimum notice days required
-        $minNoticeDays = \App\Services\SettingsService::getDefenseNoticeMinDays();
-
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'team_id' => 'required|exists:teams,id',
-            'defense_date' => "required|date|after:+{$minNoticeDays} days",
+            'defense_date' => 'required|date|after_or_equal:today',
             'defense_time' => 'required|date_format:H:i',
             'room_id' => 'required|exists:rooms,id',
             'supervisor_id' => 'required|exists:users,id',
@@ -342,16 +339,6 @@ class DefenseController extends Controller
             'examiner_id' => 'required|exists:users,id|different:supervisor_id,president_id',
             'notes' => 'nullable|string|max:500'
         ]);
-
-        // Validate defense notice period
-        $defenseDate = \Carbon\Carbon::parse($validated['defense_date']);
-        $daysUntilDefense = now()->diffInDays($defenseDate, false);
-
-        if ($daysUntilDefense < $minNoticeDays) {
-            return redirect()->back()
-                ->with('error', __('app.defense_requires_min_notice_days', ['days' => $minNoticeDays]))
-                ->withInput();
-        }
 
         // Check if subject exists and is validated
         $subject = Subject::find($validated['subject_id']);
@@ -514,7 +501,7 @@ class DefenseController extends Controller
     public function autoSchedule(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'start_date' => 'required|date|after:now',
+            'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
             'daily_limit' => 'required|integer|min:1|max:10',
             'working_days' => 'required|array|min:1',
@@ -1109,15 +1096,19 @@ class DefenseController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Load necessary relationships
-        $defense->load(['project.team.members.user.speciality', 'juries.teacher']);
+        // Load necessary relationships including speciality
+        $defense->load([
+            'project.team.members.user.speciality',
+            'juries.teacher',
+            'subject.teacher'
+        ]);
 
         // Validate that all required relationships exist
         if (!$defense->project || !$defense->project->team) {
             abort(404, 'Defense team not found');
         }
 
-        // Get all team members
+        // Get all team members with speciality relationship
         $teamMembers = $defense->project->team->members()->with('user.speciality')->get();
         if ($teamMembers->isEmpty()) {
             abort(404, 'No team members found');
@@ -1141,6 +1132,8 @@ class DefenseController extends Controller
             'students' => 'required|array|min:1',
             'students.*.user_id' => 'required|exists:users,id',
             'students.*.name' => 'required|string|max:255',
+            'students.*.email' => 'required|email|max:255',
+            'students.*.speciality_id' => 'nullable|exists:specialities,id',
             'students.*.date_naissance' => 'required|date|before:today',
             'students.*.lieu_naissance' => 'required|string|max:255',
         ]);
@@ -1151,8 +1144,19 @@ class DefenseController extends Controller
             foreach ($validated['students'] as $studentData) {
                 $user = User::find($studentData['user_id']);
                 if ($user) {
+                    // Check email uniqueness (excluding current user)
+                    $emailExists = User::where('email', $studentData['email'])
+                        ->where('id', '!=', $user->id)
+                        ->exists();
+                    
+                    if ($emailExists) {
+                        throw new \Exception("Email {$studentData['email']} is already in use by another user.");
+                    }
+
                     $user->update([
                         'name' => $studentData['name'],
+                        'email' => $studentData['email'],
+                        'speciality_id' => $studentData['speciality_id'] ?? null,
                         'date_naissance' => $studentData['date_naissance'],
                         'lieu_naissance' => $studentData['lieu_naissance'],
                     ]);

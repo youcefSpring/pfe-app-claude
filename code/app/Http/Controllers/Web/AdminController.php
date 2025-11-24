@@ -179,7 +179,8 @@ class AdminController extends Controller
      */
     public function updateUser(Request $request, User $user): RedirectResponse
     {
-        $request->validate([
+        // Validate the incoming request
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:student,teacher,department_head,admin',
@@ -193,22 +194,62 @@ class AdminController extends Controller
             'lieu_naissance' => 'nullable|string|max:255',
             'grade' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
+            'send_notification' => 'nullable|in:on,1,true',
         ]);
-        //  dd($request->all());
 
         try {
-            $data = $request->only(['name', 'email', 'role', 'matricule', 'speciality_id', 'first_name', 'last_name', 'date_naissance', 'lieu_naissance', 'grade', 'position']);
-            $data['department'] = 'Computer Science'; // Fixed to Computer Science only
+            // Prepare data for update
+            $data = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'role' => $validated['role'],
+                'matricule' => $validated['matricule'] ?? null,
+                'speciality_id' => $validated['speciality_id'] ?? null,
+                'first_name' => $validated['first_name'] ?? null,
+                'last_name' => $validated['last_name'] ?? null,
+                'date_naissance' => $validated['date_naissance'] ?? null,
+                'lieu_naissance' => $validated['lieu_naissance'] ?? null,
+                'grade' => $validated['grade'] ?? null,
+                'position' => $validated['position'] ?? null,
+                'department' => 'Computer Science', // Fixed to Computer Science only
+            ];
 
+            // Handle password update if provided
             if ($request->filled('password')) {
-                $data['password'] = bcrypt($request->password);
+                $data['password'] = bcrypt($validated['password']);
             }
 
-            $user->update($data);
+            // Log the update attempt for debugging
+            \Log::info('Updating user', [
+                'user_id' => $user->id,
+                'updated_by' => auth()->id(),
+                'data' => array_diff_key($data, ['password' => ''])
+            ]);
+
+            // Update the user
+            $updated = $user->update($data);
+
+            if (!$updated) {
+                throw new \Exception('User update returned false');
+            }
+
+            // Log successful update
+            \Log::info('User updated successfully', ['user_id' => $user->id]);
 
             return redirect()->route('admin.users')
                 ->with('success', 'User updated successfully!');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Validation errors are automatically handled by Laravel
+            throw $e;
         } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Failed to update user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return redirect()->back()
                 ->with('error', 'Failed to update user: ' . $e->getMessage())
                 ->withInput();
@@ -1012,13 +1053,70 @@ public function processBulkImport(Request $request): RedirectResponse
      */
     public function defensesReport(): View
     {
+        // Get comprehensive defense statistics
         $stats = [
             'total' => \App\Models\Defense::count(),
             'scheduled' => \App\Models\Defense::where('status', 'scheduled')->count(),
             'completed' => \App\Models\Defense::where('status', 'completed')->count(),
+            'in_progress' => \App\Models\Defense::where('status', 'in_progress')->count(),
+            'cancelled' => \App\Models\Defense::where('status', 'cancelled')->count(),
         ];
 
-        return view('admin.reports.defenses', compact('stats'));
+        // Get defenses with full relationships
+        $defenses = \App\Models\Defense::with([
+            'subject' => function($query) {
+                $query->select('id', 'title', 'teacher_id');
+            },
+            'subject.teacher' => function($query) {
+                $query->select('id', 'name', 'email');
+            },
+            'room' => function($query) {
+                $query->select('id', 'name', 'capacity');
+            },
+            'project' => function($query) {
+                $query->select('id', 'team_id', 'subject_id');
+            },
+            'project.team' => function($query) {
+                $query->select('id', 'name', 'status');
+            },
+            'project.team.members' => function($query) {
+                $query->select('team_members.id', 'team_members.team_id', 'team_members.student_id', 'team_members.role');
+            },
+            'project.team.members.user' => function($query) {
+                $query->select('id', 'name', 'email', 'matricule');
+            },
+            'juries' => function($query) {
+                $query->select('defense_juries.id', 'defense_juries.defense_id', 'defense_juries.teacher_id', 'defense_juries.role');
+            },
+            'juries.teacher' => function($query) {
+                $query->select('id', 'name', 'email');
+            }
+        ])
+        ->orderBy('defense_date', 'desc')
+        ->orderBy('defense_time', 'desc')
+        ->get();
+
+        // Group defenses by month
+        $defensesByMonth = $defenses->groupBy(function($defense) {
+            return \Carbon\Carbon::parse($defense->defense_date)->format('Y-m');
+        });
+
+        // Calculate average jury count
+        $avgJurySize = $defenses->count() > 0 ? $defenses->avg(function($defense) {
+            return $defense->juries->count();
+        }) : 0;
+
+        // Most used rooms
+        $roomUsage = $defenses->filter(function($defense) {
+            return $defense->room !== null;
+        })->groupBy('room_id')->map(function($group) {
+            return [
+                'room' => $group->first()->room,
+                'count' => $group->count()
+            ];
+        })->sortByDesc('count')->take(5);
+
+        return view('admin.reports.defenses', compact('stats', 'defenses', 'defensesByMonth', 'avgJurySize', 'roomUsage'));
     }
 
     /**

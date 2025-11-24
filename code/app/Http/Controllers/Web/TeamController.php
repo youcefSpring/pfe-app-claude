@@ -320,6 +320,20 @@ class TeamController extends Controller
         }
 
         $user = Auth::user();
+
+        // If admin, add directly without invitation
+        if ($user->role === 'admin') {
+            TeamMember::create([
+                'team_id' => $team->id,
+                'student_id' => $student->id,
+                'role' => 'member',
+                'joined_at' => now()
+            ]);
+
+            return redirect()->back()
+                ->with('success', __('app.member_added_successfully'));
+        }
+
         $invitation = TeamInvitation::createInvitation($team, $request->student_email, $user);
 
         if (!$invitation) {
@@ -338,15 +352,24 @@ class TeamController extends Controller
     {
         $this->authorize('removeMember', [$team, $member]);
 
+        // Prevent removing leader if there are other members, unless admin
         if ($member->role === 'leader' && $team->members->count() > 1) {
-            return redirect()->back()
-                ->with('error', __('app.cannot_remove_leader'));
+            if (Auth::user()->role !== 'admin') {
+                return redirect()->back()
+                    ->with('error', __('app.cannot_remove_leader'));
+            }
+
+            // If admin removes leader, assign new leader automatically
+            $newLeader = $team->members()->where('id', '!=', $member->id)->first();
+            if ($newLeader) {
+                $newLeader->update(['role' => 'leader']);
+            }
         }
 
         $member->delete();
 
         // If leader left and team is empty, delete team
-        if ($team->members->count() === 0) {
+        if ($team->members()->count() === 0) {
             $team->delete();
             return redirect()->route('teams.index')
                 ->with('success', __('app.team_dissolved_leader_left'));
@@ -1172,10 +1195,11 @@ class TeamController extends Controller
         $students = User::where('role', 'student')
             ->where(function($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('email', 'LIKE', "%{$query}%");
+                  ->orWhere('email', 'LIKE', "%{$query}%")
+                  ->orWhere('matricule', 'LIKE', "%{$query}%");
             })
             ->whereDoesntHave('teamMember')
-            ->select('id', 'name', 'email', 'student_id')
+            ->select('id', 'name', 'email', 'matricule')
             ->limit(10)
             ->get()
             ->map(function($student) {
@@ -1183,7 +1207,7 @@ class TeamController extends Controller
                     'id' => $student->id,
                     'name' => $student->name,
                     'email' => $student->email,
-                    'student_id' => $student->student_id,
+                    'student_id' => $student->matricule,
                     'display' => $student->name . ' (' . $student->email . ')',
                 ];
             });

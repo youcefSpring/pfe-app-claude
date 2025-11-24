@@ -8,6 +8,8 @@ use App\Models\Subject;
 use App\Models\Team;
 use App\Models\SubjectAllocation;
 use App\Models\Project;
+use App\Models\TeamSubjectPreference;
+use App\Models\User;
 use App\Services\AutoAllocationService;
 use App\Services\SubjectAllocationService;
 use Illuminate\Http\Request;
@@ -334,5 +336,179 @@ class AllocationController extends Controller
             'availableSubjects',
             'academicYear'
         ));
+    }
+
+    /**
+     * Show subject requests with competing teams ranked by best student
+     */
+    public function subjectRequests(AllocationDeadline $deadline): View
+    {
+        // Get all subjects for this deadline
+        $subjects = Subject::where('academic_year', $deadline->academic_year)
+            ->where('status', 'validated')
+            ->with(['teacher', 'specialities'])
+            ->get();
+
+        // For each subject, get teams that requested it
+        $subjectsWithTeams = $subjects->map(function ($subject) use ($deadline) {
+            // Get teams that have this subject in their preferences
+            $teamPreferences = TeamSubjectPreference::where('subject_id', $subject->id)
+                ->with(['team.members.user.marks'])
+                ->get();
+
+            // Calculate best student mark for each team
+            $teamsWithRanking = $teamPreferences->map(function ($preference) {
+                $team = $preference->team;
+                $bestStudentMark = 0;
+                $bestStudent = null;
+
+                foreach ($team->members as $member) {
+                    $studentAverage = $member->user->average_percentage;
+                    if ($studentAverage > $bestStudentMark) {
+                        $bestStudentMark = $studentAverage;
+                        $bestStudent = $member->user;
+                    }
+                }
+
+                return [
+                    'team' => $team,
+                    'preference_order' => $preference->preference_order,
+                    'selected_at' => $preference->selected_at,
+                    'best_student_mark' => $bestStudentMark,
+                    'best_student' => $bestStudent,
+                    'is_allocated' => $team->project()->where('academic_year', $deadline->academic_year)->exists(),
+                ];
+            })->sortByDesc('best_student_mark')->values();
+
+            // Check if subject is already allocated
+            $allocation = SubjectAllocation::where('subject_id', $subject->id)
+                ->where('allocation_deadline_id', $deadline->id)
+                ->where('status', 'confirmed')
+                ->with('student')
+                ->first();
+
+            return [
+                'subject' => $subject,
+                'teams' => $teamsWithRanking->where('is_allocated', false), // Hide allocated teams
+                'total_requests' => $teamPreferences->count(),
+                'unallocated_requests' => $teamsWithRanking->where('is_allocated', false)->count(),
+                'allocation' => $allocation,
+                'is_allocated' => !is_null($allocation),
+            ];
+        })->sortByDesc('total_requests');
+
+        return view('admin.allocations.subject-requests', compact('deadline', 'subjectsWithTeams'));
+    }
+
+    /**
+     * Manually allocate subject to team with custom supervisor
+     */
+    public function manualAllocateWithSupervisor(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'deadline_id' => 'required|exists:allocation_deadlines,id',
+            'team_id' => 'required|exists:teams,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'supervisor_id' => 'required|exists:users,id',
+        ]);
+
+        $deadline = AllocationDeadline::find($validated['deadline_id']);
+        $team = Team::find($validated['team_id']);
+        $subject = Subject::find($validated['subject_id']);
+        $supervisor = User::find($validated['supervisor_id']);
+
+        // Verify supervisor is a teacher
+        if ($supervisor->role !== 'teacher') {
+            return redirect()->back()
+                ->with('error', __('app.supervisor_must_be_teacher'));
+        }
+
+        // Check if subject is available
+        $existingAllocation = SubjectAllocation::where('subject_id', $subject->id)
+            ->where('allocation_deadline_id', $deadline->id)
+            ->where('status', 'confirmed')
+            ->first();
+
+        if ($existingAllocation) {
+            return redirect()->back()
+                ->with('error', __('app.subject_already_allocated'));
+        }
+
+        // Check if team already has an allocation
+        $teamAllocation = SubjectAllocation::where('allocation_deadline_id', $deadline->id)
+            ->whereHas('student', function($q) use ($team) {
+                $q->whereIn('id', $team->members->pluck('student_id'));
+            })
+            ->where('status', 'confirmed')
+            ->first();
+
+        if ($teamAllocation) {
+            return redirect()->back()
+                ->with('error', __('app.team_already_has_allocation'));
+        }
+
+        DB::beginTransaction();
+        try {
+            // Get team leader
+            $teamLeader = $team->members()->where('role', 'leader')->first()
+                ?? $team->members()->first();
+
+            if (!$teamLeader) {
+                throw new \Exception("Team {$team->name} has no members");
+            }
+
+            // Get team's preference for this subject
+            $preference = $team->subjectPreferences()->where('subject_id', $subject->id)->first();
+            $preferenceOrder = $preference ? $preference->preference_order : 99;
+
+            // Get best student average
+            $bestAverage = 0;
+            foreach ($team->members as $member) {
+                $avg = $member->user->average_percentage;
+                if ($avg > $bestAverage) {
+                    $bestAverage = $avg;
+                }
+            }
+
+            // Create allocation
+            SubjectAllocation::create([
+                'allocation_deadline_id' => $deadline->id,
+                'student_id' => $teamLeader->student_id,
+                'subject_id' => $subject->id,
+                'student_preference_order' => $preferenceOrder,
+                'student_average' => $bestAverage,
+                'allocation_rank' => 1,
+                'allocation_method' => 'manual',
+                'status' => 'confirmed',
+                'confirmed_by' => Auth::id(),
+                'confirmed_at' => now(),
+                'allocation_notes' => 'Manually allocated with custom supervisor',
+            ]);
+
+            // Create project with custom supervisor
+            Project::create([
+                'team_id' => $team->id,
+                'subject_id' => $subject->id,
+                'supervisor_id' => $supervisor->id, // Custom supervisor
+                'type' => $subject->is_external ? 'external' : 'internal',
+                'status' => 'assigned',
+                'academic_year' => $deadline->academic_year,
+                'started_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', __('app.subject_allocated_with_supervisor', [
+                    'subject' => $subject->title,
+                    'team' => $team->name,
+                    'supervisor' => $supervisor->name
+                ]));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Allocation failed: ' . $e->getMessage());
+        }
     }
 }

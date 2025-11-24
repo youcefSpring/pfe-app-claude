@@ -75,7 +75,7 @@ class Team extends Model
     /**
      * Get the team leader.
      */
-    public function leader()
+    public function getLeaderAttribute()
     {
         return $this->members()->where('role', 'leader')->first()?->student;
     }

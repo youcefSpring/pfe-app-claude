@@ -180,11 +180,6 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{team}', [TeamController::class, 'update'])->name('update');
             Route::delete('/{team}', [TeamController::class, 'destroy'])->name('destroy');
 
-            // Team member management
-            Route::post('/{team}/members', [TeamController::class, 'addMember'])->name('add-member');
-            Route::delete('/{team}/members/{member}', [TeamController::class, 'removeMember'])->name('remove-member');
-            Route::post('/{team}/invite', [TeamController::class, 'sendInvitation'])->name('send-invitation');
-
             // Subject selection
             Route::get('/{team}/select-subject', [TeamController::class, 'selectSubjectForm'])->name('select-subject-form');
             Route::post('/{team}/select-subject', [TeamController::class, 'selectSubject'])->name('select-subject');
@@ -214,10 +209,15 @@ Route::middleware(['auth'])->group(function () {
 
             // Team invitations
             Route::get('/my-invitations', [TeamController::class, 'myInvitations'])->name('my-invitations');
-
-            // Search students for team invitation
-            Route::get('/search-students', [TeamController::class, 'searchStudents'])->name('search-students');
         });
+
+        // Search students for team invitation (accessible to students and admins)
+        Route::get('/search-students', [TeamController::class, 'searchStudents'])->name('search-students');
+
+        // Team member management (accessible to students and admins)
+        Route::post('/{team}/members', [TeamController::class, 'addMember'])->name('add-member');
+        Route::delete('/{team}/members/{member}', [TeamController::class, 'removeMember'])->name('remove-member');
+        Route::post('/{team}/invite', [TeamController::class, 'sendInvitation'])->name('send-invitation');
 
         // Dynamic route for viewing teams (must be after static routes)
         Route::get('/{team}', [TeamController::class, 'show'])->name('show');
@@ -379,8 +379,10 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('allocations')->name('allocations.')->group(function () {
             Route::get('/', [AdminAllocationController::class, 'index'])->name('index');
             Route::get('/{deadline}', [AdminAllocationController::class, 'show'])->name('show');
+            Route::get('/{deadline}/subject-requests', [AdminAllocationController::class, 'subjectRequests'])->name('subject-requests');
             Route::post('/{deadline}/auto-allocation', [AdminAllocationController::class, 'performAutoAllocation'])->name('auto-allocation');
             Route::post('/manual-assignment', [AdminAllocationController::class, 'manualAssignment'])->name('manual-assignment');
+            Route::post('/manual-allocate-supervisor', [AdminAllocationController::class, 'manualAllocateWithSupervisor'])->name('manual-allocate-supervisor');
             Route::post('/{deadline}/second-round', [AdminAllocationController::class, 'initializeSecondRound'])->name('second-round');
             Route::delete('/allocation/{allocation}', [AdminAllocationController::class, 'removeAllocation'])->name('remove-allocation');
         });

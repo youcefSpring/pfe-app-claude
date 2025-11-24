@@ -114,11 +114,15 @@
                                     <div class="mb-3">
                                         <label for="defense_date" class="form-label">{{ __('app.defense_date') }} <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control @error('defense_date') is-invalid @enderror"
-                                               id="defense_date" name="defense_date" value="{{ old('defense_date') }}"
+                                               id="defense_date" name="defense_date"
+                                               value="{{ old('defense_date') }}"
                                                min="{{ now()->format('Y-m-d') }}" required>
                                         @error('defense_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
+                                        <small class="form-text text-muted">
+                                            <i class="bi bi-info-circle"></i> {{ __('app.can_schedule_from_today') }}
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -294,8 +298,11 @@
                                     <div class="mb-3">
                                         <label for="start_date" class="form-label">Planning Start Date <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control" id="start_date" name="start_date"
-                                               value="{{ old('start_date', now()->addWeek()->format('Y-m-d')) }}"
+                                               value="{{ old('start_date', now()->format('Y-m-d')) }}"
                                                min="{{ now()->format('Y-m-d') }}" required>
+                                        <small class="form-text text-muted">
+                                            <i class="bi bi-info-circle"></i> Can start from today
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -607,6 +614,50 @@ document.addEventListener('DOMContentLoaded', function() {
             endDate.min = this.value;
             if (endDate.value && endDate.value < this.value) {
                 endDate.value = this.value;
+            }
+        });
+    }
+
+    // Defense date validation - Allow from today
+    const defenseDate = document.getElementById('defense_date');
+    if (defenseDate) {
+        const today = new Date();
+        const minDateStr = today.toISOString().split('T')[0];
+
+        // Set min attribute to today
+        defenseDate.min = minDateStr;
+
+        // Validate on change - only check not in past
+        defenseDate.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < todayDate) {
+                alert('Defense date cannot be in the past. Please select today or a future date.');
+                this.value = minDateStr;
+            }
+        });
+    }
+
+    // Auto-schedule date validation - Allow from today
+    const autoStartDate = document.getElementById('start_date');
+    if (autoStartDate) {
+        const today = new Date();
+        const minDateStr = today.toISOString().split('T')[0];
+
+        autoStartDate.min = minDateStr;
+
+        autoStartDate.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < todayDate) {
+                alert('Start date cannot be in the past. Please select today or a future date.');
+                this.value = minDateStr;
             }
         });
     }

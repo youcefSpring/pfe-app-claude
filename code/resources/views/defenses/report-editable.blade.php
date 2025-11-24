@@ -169,19 +169,32 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Email</label>
+                            <label class="form-label required-field">Email</label>
                             <input type="email" 
-                                   class="form-control" 
-                                   value="{{ $userData->email }}"
-                                   disabled>
+                                   class="form-control @error('students.'.$index.'.email') is-invalid @enderror" 
+                                   name="students[{{ $index }}][email]" 
+                                   value="{{ old('students.'.$index.'.email', $userData->email) }}"
+                                   required>
+                            @error('students.'.$index.'.email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Spécialité</label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   value="{{ $userData->speciality->name ?? 'Non spécifiée' }}"
-                                   disabled>
+                            <select class="form-control @error('students.'.$index.'.speciality_id') is-invalid @enderror"
+                                    name="students[{{ $index }}][speciality_id]">
+                                <option value="">Non spécifiée</option>
+                                @foreach(\App\Models\Speciality::active()->get() as $speciality)
+                                    <option value="{{ $speciality->id }}" 
+                                        {{ old('students.'.$index.'.speciality_id', $userData->speciality_id) == $speciality->id ? 'selected' : '' }}>
+                                        {{ $speciality->name }} ({{ $speciality->level }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('students.'.$index.'.speciality_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>

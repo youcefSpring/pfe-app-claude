@@ -291,7 +291,10 @@
             </div>
 
             <div class="content-section">
-                <span class="bold-label">Spécialité</span> : <span class="dynamic-text" style="min-width: 250px;">{{ $userData->speciality->name ?? 'Non spécifiée' }}</span>
+                @php
+                    $userSpeciality = $userData->speciality()->first();
+                @endphp
+                <span class="bold-label">Spécialité</span> : <span class="dynamic-text" style="min-width: 250px;">{{ $userSpeciality ? $userSpeciality->name : 'Non spécifiée' }}</span>
             </div>
 
             <div class="content-section">
