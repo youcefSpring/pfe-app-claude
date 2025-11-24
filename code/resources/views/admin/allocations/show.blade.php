@@ -96,11 +96,11 @@
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-check-circle"></i>
-                        {{ __('app.allocated_teams') }} ({{ $allocatedTeams->count() }})
+                        {{ __('app.allocated_teams') }} ({{ $deadline->allocations->where('status', 'confirmed')->count() }})
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if($allocatedTeams->count() > 0)
+                    @if($deadline->allocations->where('status', 'confirmed')->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead>
@@ -113,47 +113,52 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($allocatedTeams as $team)
-                                        <tr>
-                                            <td>
-                                                <span class="fw-bold">{{ $team->name }}</span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach($team->members as $member)
-                                                        <span class="badge bg-light text-dark border">
-                                                            {{ $member->user->name }}
-                                                            @if($member->is_leader)
-                                                                <i class="fas fa-crown text-warning small"></i>
-                                                            @endif
-                                                        </span>
-                                                    @endforeach
-                                                </div>
-                                            </td>
-                                            <td>
-                                                @if($team->project)
-                                                    <span class="fw-semibold text-primary">{{ $team->project->subject->title }}</span>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($team->project && $team->project->supervisor)
-                                                    {{ $team->project->supervisor->name }}
-                                                @else
-                                                    <span class="text-muted">{{ __('app.not_assigned') }}</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <form action="{{ route('admin.allocations.remove-allocation', $team->project->id ?? 0) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('app.confirm_remove_allocation') }}')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('app.remove_allocation') }}">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
+                                    @foreach($deadline->allocations->where('status', 'confirmed') as $allocation)
+                                        @php
+                                            $team = $allocation->student->teamMember->team ?? null;
+                                        @endphp
+                                        @if($team)
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-bold">{{ $team->name }}</span>
+                                                    @if($allocation->allocation_method === 'direct')
+                                                        <span class="badge bg-success ms-1" title="Direct Allocation">Direct</span>
+                                                    @elseif($allocation->allocation_method === 'conflict_resolved')
+                                                        <span class="badge bg-warning ms-1" title="Conflict Resolved">Resolved</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @foreach($team->members as $member)
+                                                            <span class="badge bg-light text-dark border">
+                                                                {{ $member->user->name }}
+                                                                @if($member->is_leader)
+                                                                    <i class="fas fa-crown text-warning small"></i>
+                                                                @endif
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-semibold text-primary">{{ $allocation->subject->title }}</span>
+                                                    <div class="small text-muted">
+                                                        Rank: {{ $allocation->student_preference_order }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {{ $allocation->subject->teacher->name ?? __('app.not_assigned') }}
+                                                </td>
+                                                <td>
+                                                    <form action="{{ route('admin.allocations.remove-allocation', $allocation->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('app.confirm_remove_allocation') }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('app.remove_allocation') }}">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>
