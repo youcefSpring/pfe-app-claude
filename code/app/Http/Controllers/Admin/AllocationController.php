@@ -51,7 +51,7 @@ class AllocationController extends Controller
      */
     public function show(AllocationDeadline $deadline): View
     {
-        $deadline->load(['allocations.student', 'allocations.subject']);
+        $deadline->load(['allocations.student.teamMember.team.members.user', 'allocations.subject.teacher']);
 
         $stats = [
             'total_teams' => Team::where('academic_year', $deadline->academic_year)

@@ -89,6 +89,86 @@
         </div>
     </div>
 
+    <!-- Allocated Teams Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-circle"></i>
+                        {{ __('app.allocated_teams') }} ({{ $allocatedTeams->count() }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if($allocatedTeams->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('app.team') }}</th>
+                                        <th>{{ __('app.members') }}</th>
+                                        <th>{{ __('app.assigned_subject') }}</th>
+                                        <th>{{ __('app.supervisor') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($allocatedTeams as $team)
+                                        <tr>
+                                            <td>
+                                                <span class="fw-bold">{{ $team->name }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    @foreach($team->members as $member)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ $member->user->name }}
+                                                            @if($member->is_leader)
+                                                                <i class="fas fa-crown text-warning small"></i>
+                                                            @endif
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if($team->project)
+                                                    <span class="fw-semibold text-primary">{{ $team->project->subject->title }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($team->project && $team->project->supervisor)
+                                                    {{ $team->project->supervisor->name }}
+                                                @else
+                                                    <span class="text-muted">{{ __('app.not_assigned') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <form action="{{ route('admin.allocations.remove-allocation', $team->project->id ?? 0) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('app.confirm_remove_allocation') }}')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('app.remove_allocation') }}">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>{{ __('app.no_teams_allocated_yet') }}</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Unallocated Teams -->
         <div class="col-lg-6">
