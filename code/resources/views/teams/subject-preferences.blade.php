@@ -211,7 +211,13 @@
 
                         <div style="max-height: 500px; overflow-y: auto;" id="available-subjects">
                             @foreach($availableSubjects as $subject)
-                                <div class="card mb-2 subject-item">
+                                <div class="card mb-2 subject-item"
+                                     data-title="{{ $subject->title }}"
+                                     data-teacher="{{ $subject->teacher->name ?? '' }}"
+                                     data-description="{{ $subject->description ?? '' }}"
+                                     data-keywords="{{ $subject->keywords ?? '' }}"
+                                     data-tools="{{ $subject->tools ?? '' }}"
+                                     data-grade="{{ $subject->target_grade ?? '' }}">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
@@ -221,21 +227,31 @@
                                                     {{ __('app.teacher') }}: {{ $subject->teacher->name ?? __('app.not_assigned') }}
                                                 </small>
                                                 @if($subject->description)
-                                                    <small class="text-muted d-block mt-1">{{ Str::limit($subject->description, 120) }}</small>
+                                                    <small class="text-muted d-block mt-1 subject-description">{{ Str::limit($subject->description, 120) }}</small>
                                                 @endif
-                                                <small class="text-info d-block mt-1">
+                                                <small class="text-info d-block mt-1 subject-grade">
                                                     <i class="fas fa-graduation-cap"></i>
                                                     {{ ucfirst($subject->target_grade) }}
                                                 </small>
                                             </div>
 
-                                            <form action="{{ route('teams.add-subject-preference', $team) }}" method="POST" class="ms-2">
-                                                @csrf
-                                                <input type="hidden" name="subject_id" value="{{ $subject->id }}">
-                                                <button type="submit" class="btn btn-success fw-bold btn-enhanced">
-                                                    <i class="fas fa-plus text-white"></i> {{ __('app.add') }}
+                                            <div class="ms-2 d-flex gap-2">
+                                                <button type="button"
+                                                        class="btn btn-outline-info fw-bold btn-enhanced"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#subjectModal"
+                                                        data-subject-id="{{ $subject->id }}"
+                                                        title="{{ __('app.view_details') }}">
+                                                    <i class="bi bi-eye"></i>
                                                 </button>
-                                            </form>
+                                                <form action="{{ route('teams.add-subject-preference', $team) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="subject_id" value="{{ $subject->id }}">
+                                                    <button type="submit" class="btn btn-success fw-bold btn-enhanced" title="{{ __('app.add') }}">
+                                                        <i class="fas fa-plus text-white"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -287,6 +303,30 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject Details Modal -->
+<div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subjectModalLabel">{{ __('app.subject_details') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="subjectModalContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">{{ __('app.loading') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('app.close') }}</button>
             </div>
         </div>
     </div>
@@ -456,7 +496,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
+    // Search functionality - Enhanced to search all data
     const searchInput = document.getElementById('subject-search');
     const subjectItems = document.querySelectorAll('.subject-item');
 
@@ -465,8 +505,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchTerm = this.value.toLowerCase();
 
             subjectItems.forEach(item => {
-                const title = item.querySelector('.subject-title').textContent.toLowerCase();
-                if (title.includes(searchTerm)) {
+                // Get all searchable data
+                const title = (item.dataset.title || '').toLowerCase();
+                const teacher = (item.dataset.teacher || '').toLowerCase();
+                const description = (item.dataset.description || '').toLowerCase();
+                const keywords = (item.dataset.keywords || '').toLowerCase();
+                const tools = (item.dataset.tools || '').toLowerCase();
+                const grade = (item.dataset.grade || '').toLowerCase();
+
+                // Search in all fields
+                const searchableText = `${title} ${teacher} ${description} ${keywords} ${tools} ${grade}`;
+
+                if (searchableText.includes(searchTerm)) {
                     item.style.display = 'block';
                 } else {
                     item.style.display = 'none';
@@ -600,6 +650,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize button states
     updateButtons();
+
+    // Subject details modal
+    const subjectModal = document.getElementById('subjectModal');
+    if (subjectModal) {
+        subjectModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const subjectId = button.getAttribute('data-subject-id');
+            const modalContent = document.getElementById('subjectModalContent');
+
+            // Show loading spinner
+            modalContent.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">{{ __('app.loading') }}</span>
+                    </div>
+                </div>
+            `;
+
+            // Fetch subject details
+            fetch(`/subjects/${subjectId}/modal`)
+                .then(response => response.text())
+                .then(html => {
+                    modalContent.innerHTML = html;
+                })
+                .catch(error => {
+                    modalContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            {{ __('app.error_loading_subject_details') }}
+                        </div>
+                    `;
+                });
+        });
+    }
 });
 
 </script>

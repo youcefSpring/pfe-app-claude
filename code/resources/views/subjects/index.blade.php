@@ -22,11 +22,11 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">{{ __('app.filters') }}</h6>
-                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="true" aria-controls="filtersCollapse">
-                    <i class="bi bi-funnel"></i>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+                    <i class="bi bi-funnel me-1"></i> {{ __('app.show_filters') }}
                 </button>
             </div>
-            <div class="collapse show" id="filtersCollapse">
+            <div class="collapse" id="filtersCollapse">
                 <div class="card-body">
                     <form method="GET" action="{{ route('subjects.index') }}" class="row g-3">
                     <div class="col-md-3">
@@ -127,13 +127,52 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if($subject->preferences_count > 0)
-                                                <span class="badge bg-success" title="{{ $subject->preferences_count }} {{ __('app.teams_interested') }}">
-                                                    <i class="bi bi-people"></i> {{ $subject->preferences_count }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
+                                            <div class="d-flex gap-1 align-items-center">
+                                                @if($subject->preferences_count > 0)
+                                                    <button type="button"
+                                                            class="btn btn-success btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#requestsModal"
+                                                            data-subject-id="{{ $subject->id }}"
+                                                            title="{{ __('app.view_team_requests') }}">
+                                                        <i class="bi bi-people"></i> {{ $subject->preferences_count }}
+                                                    </button>
+                                                @endif
+
+                                                @php
+                                                    // Check for assigned team - either via direct relationship or project
+                                                    $assignedTeam = null;
+                                                    if ($subject->teams && $subject->teams->count() > 0) {
+                                                        $assignedTeam = $subject->teams->first();
+                                                    } elseif ($subject->project && $subject->project->team) {
+                                                        $assignedTeam = $subject->project->team;
+                                                    }
+                                                @endphp
+
+                                                @if($assignedTeam)
+                                                    <a href="{{ route('teams.show', $assignedTeam) }}"
+                                                       class="btn btn-primary btn-sm"
+                                                       title="{{ __('app.view_assigned_team') }}">
+                                                        <i class="bi bi-check-circle"></i> {{ $assignedTeam->name }}
+                                                    </a>
+                                                    @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
+                                                        <form method="POST"
+                                                              action="{{ route('admin.subjects.unassign-team', $subject) }}"
+                                                              style="display: inline;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-sm btn-outline-warning"
+                                                                    title="{{ __('app.unassign_team') }}"
+                                                                    onclick="return confirm('{{ __('app.confirm_unassign_team', ['team' => $assignedTeam->name]) }}')">
+                                                                <i class="bi bi-x-circle"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @elseif($subject->preferences_count === 0)
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="text-nowrap">
                                             {{ $subject->created_at->format('d/m/Y') }}
@@ -148,16 +187,6 @@
                                                         title="{{ __('app.view_details') }}">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
-                                                @if($subject->preferences_count > 0)
-                                                    <button type="button"
-                                                            class="btn btn-outline-info btn-sm"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#requestsModal"
-                                                            data-subject-id="{{ $subject->id }}"
-                                                            title="{{ __('app.see_requests') }} ({{ $subject->preferences_count }})">
-                                                        <i class="bi bi-list-ul"></i>
-                                                    </button>
-                                                @endif
                                                 @if(auth()->user()?->id === $subject->teacher_id)
                                                     <a href="{{ route('subjects.edit', $subject) }}"
                                                        class="btn btn-outline-warning btn-sm"
@@ -219,7 +248,7 @@
 
     <!-- Subject Details Modal -->
     <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="subjectModalLabel">{{ __('app.subject_details') }}</h5>
@@ -298,6 +327,20 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Filter toggle button text update
+    const filtersCollapse = document.getElementById('filtersCollapse');
+    const filterToggleBtn = document.querySelector('[data-bs-target="#filtersCollapse"]');
+
+    if (filtersCollapse && filterToggleBtn) {
+        filtersCollapse.addEventListener('show.bs.collapse', function() {
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel me-1"></i> {{ __("app.hide_filters") }}';
+        });
+
+        filtersCollapse.addEventListener('hide.bs.collapse', function() {
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel me-1"></i> {{ __("app.show_filters") }}';
+        });
+    }
+
     const subjectModal = document.getElementById('subjectModal');
     const requestsModal = document.getElementById('requestsModal');
 

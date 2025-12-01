@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\Team;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SubjectController extends Controller
@@ -21,7 +24,7 @@ class SubjectController extends Controller
     {
         $user = Auth::user();
 
-        $query = Subject::with(['teacher'])
+        $query = Subject::with(['teacher', 'project.team', 'teams'])
             ->withCount(['preferences as preferences_count']);
 
         // Apply search filter
@@ -543,5 +546,93 @@ class SubjectController extends Controller
         ]);
 
         return redirect()->back()->with('success', __('app.individual_subject_request_submitted'));
+    }
+
+    /**
+     * Assign a subject to a team (Admin only)
+     */
+    public function assignTeam(Request $request, Subject $subject): RedirectResponse
+    {
+        $validated = $request->validate([
+            'team_id' => 'required|exists:teams,id',
+        ]);
+
+        $team = Team::findOrFail($validated['team_id']);
+
+        // Check if team already has a project
+        if ($team->project) {
+            return redirect()->back()
+                ->with('error', __('app.team_already_has_project'));
+        }
+
+        try {
+            // Use transaction with locking to prevent race conditions
+            DB::transaction(function () use ($team, $subject) {
+                // Lock the teams table to check if subject is already assigned
+                $assignedTeam = Team::where('subject_id', $subject->id)
+                    ->where('id', '!=', $team->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($assignedTeam) {
+                    throw new \Exception(__('app.subject_already_assigned'));
+                }
+
+                // Assign subject to team
+                $team->update([
+                    'subject_id' => $subject->id,
+                    'supervisor_id' => $subject->teacher_id,
+                    'status' => 'active'
+                ]);
+
+                // Create project
+                Project::create([
+                    'title' => $subject->title,
+                    'description' => $subject->description,
+                    'subject_id' => $subject->id,
+                    'team_id' => $team->id,
+                    'supervisor_id' => $subject->teacher_id,
+                    'status' => 'assigned',
+                    'academic_year' => $team->academic_year,
+                ]);
+            });
+
+            return redirect()->back()
+                ->with('success', __('app.subject_assigned_successfully', ['team' => $team->name]));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Unassign a team from a subject (Admin only)
+     */
+    public function unassignTeam(Subject $subject): RedirectResponse
+    {
+        try {
+            DB::transaction(function () use ($subject) {
+                // Remove subject from all teams that have it
+                Team::where('subject_id', $subject->id)->update([
+                    'subject_id' => null,
+                    'supervisor_id' => null,
+                    'status' => 'forming'
+                ]);
+
+                // Delete associated projects
+                if ($subject->project) {
+                    $subject->project->delete();
+                }
+
+                // Delete all projects for this subject
+                $subject->projects()->delete();
+            });
+
+            return redirect()->back()
+                ->with('success', __('app.team_unassigned_successfully'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
     }
 }

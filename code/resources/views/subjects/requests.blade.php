@@ -13,6 +13,9 @@
                         <th>Team Name</th>
                         <th>Members</th>
                         <th width="120">Request Date</th>
+                        @if(auth()->user()->role === 'admin')
+                            <th width="100">Actions</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -60,6 +63,26 @@
                             <td>
                                 <small class="text-muted">{{ $request->created_at->format('M d, Y') }}</small>
                             </td>
+                            @if(auth()->user()->role === 'admin')
+                                <td>
+                                    @if(isset($request->team) && !$request->team->project)
+                                        <form action="{{ route('admin.subjects.assign-team', $subject) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="team_id" value="{{ $request->team->id }}">
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-success"
+                                                    title="{{ __('app.assign_to_team') }}"
+                                                    onclick="return confirm('{{ __('app.confirm_assign_subject_to_team', ['team' => $request->team->name]) }}')">
+                                                <i class="bi bi-check-circle"></i> {{ __('app.assign') }}
+                                            </button>
+                                        </form>
+                                    @elseif(isset($request->team) && $request->team->project)
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill"></i> {{ __('app.assigned') }}
+                                        </span>
+                                    @endif
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 </tbody>

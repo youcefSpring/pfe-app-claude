@@ -478,6 +478,9 @@
                                         <li><a class="dropdown-item {{ request()->routeIs('admin.allocations*') ? 'active' : '' }}" href="{{ route('admin.allocations.index') }}">
                                             <i class="bi bi-diagram-3 me-2"></i> {{ __('app.allocations') }}
                                         </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('admin.external-documents*') ? 'active' : '' }}" href="{{ route('admin.external-documents.index') }}">
+                                            <i class="bi bi-file-earmark-text me-2"></i> {{ __('External Documents') }}
+                                        </a></li>
                                     </ul>
                                 </li>
 
@@ -531,10 +534,18 @@
 
                                 @elseif(auth()->user()?->role === 'department_head')
                                 <!-- Department Head Navigation -->
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                                         <i class="bi bi-journal-text me-1"></i> {{ __('app.subjects') }}
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.index') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                            <i class="bi bi-list-ul me-2"></i> {{ __('app.subject_list') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.create') ? 'active' : '' }}" href="{{ route('subjects.create') }}">
+                                            <i class="bi bi-plus-circle me-2"></i> {{ __('app.create_subject') }}
+                                        </a></li>
+                                    </ul>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('teams*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
@@ -554,10 +565,18 @@
 
                                 @elseif(auth()->user()?->role === 'teacher')
                                 <!-- Teacher Navigation -->
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                                         <i class="bi bi-journal-text me-1"></i> {{ __('app.subjects') }}
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.index') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                            <i class="bi bi-list-ul me-2"></i> {{ __('app.subject_list') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.create') ? 'active' : '' }}" href="{{ route('subjects.create') }}">
+                                            <i class="bi bi-plus-circle me-2"></i> {{ __('app.create_subject') }}
+                                        </a></li>
+                                    </ul>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('teams*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
@@ -572,15 +591,38 @@
 
                                 @else
                                 <!-- Student Navigation -->
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle {{ request()->routeIs('subjects*', 'teams.subject-preferences*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                                         <i class="bi bi-journal-text me-1"></i> {{ __('app.subjects') }}
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.index') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                            <i class="bi bi-list-ul me-2"></i> {{ __('app.subject_list') }}
+                                        </a></li>
+                                        @if(auth()->user()->teamMember?->team)
+                                            <li><a class="dropdown-item {{ request()->routeIs('teams.subject-preferences*') ? 'active' : '' }}" href="{{ route('teams.subject-preferences', auth()->user()->teamMember->team) }}">
+                                                <i class="bi bi-star me-2"></i> {{ __('app.manage_preferences') }}
+                                            </a></li>
+                                        @endif
+                                    </ul>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('teams*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
+                                    <a class="nav-link {{ request()->routeIs('teams*') && !request()->routeIs('teams.subject-preferences*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
                                         <i class="bi bi-people me-1"></i> {{ __('app.my_team') }}
                                     </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle {{ request()->routeIs('external-documents*', 'subjects.create') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-building me-1"></i> {{ __('External Subject') }}
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.create') ? 'active' : '' }}" href="{{ route('subjects.create') }}">
+                                            <i class="bi bi-plus-circle me-2"></i> {{ __('Propose External Subject') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('external-documents*') ? 'active' : '' }}" href="{{ route('external-documents.index') }}">
+                                            <i class="bi bi-file-earmark-text me-2"></i> {{ __('External Subject Documents') }}
+                                        </a></li>
+                                    </ul>
                                 </li>
                                 @endif
                             </ul>

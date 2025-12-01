@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\AllocationController as AdminAllocationController
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentSetupController;
 use App\Http\Controllers\SpecialityController;
+use App\Http\Controllers\Admin\ExternalDocumentController as AdminExternalDocumentController;
+use App\Http\Controllers\Web\ExternalDocumentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -206,6 +208,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{team}/join', [TeamController::class, 'join'])->name('join');
             Route::post('/{team}/leave', [TeamController::class, 'leave'])->name('leave');
             Route::post('/{team}/transfer-leadership', [TeamController::class, 'transferLeadership'])->name('transfer-leadership');
+            Route::post('/{team}/assign-leader', [TeamController::class, 'assignLeader'])->name('assign-leader');
+            Route::post('/{team}/remove-leader', [TeamController::class, 'removeLeader'])->name('remove-leader');
 
             // Team invitations
             Route::get('/my-invitations', [TeamController::class, 'myInvitations'])->name('my-invitations');
@@ -415,6 +419,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/subjects/{subject}/approve', [AdminController::class, 'approveSubject'])->name('subjects.approve');
         Route::post('/subjects/{subject}/reject', [AdminController::class, 'rejectSubject'])->name('subjects.reject');
         Route::get('/subjects/all', [AdminController::class, 'allSubjects'])->name('subjects.all');
+        Route::post('/subjects/{subject}/assign-team', [SubjectController::class, 'assignTeam'])->name('subjects.assign-team');
+        Route::delete('/subjects/{subject}/unassign-team', [SubjectController::class, 'unassignTeam'])->name('subjects.unassign-team');
 
         // Subject Request Management
         Route::get('/subject-requests', [AdminController::class, 'subjectRequests'])->name('subject-requests');
@@ -577,6 +583,39 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{speciality}', [SpecialityController::class, 'destroy'])->name('destroy');
             Route::patch('/{speciality}/toggle-active', [SpecialityController::class, 'toggleActive'])->name('toggleActive');
         });
+    });
+
+    // =====================================================================
+    // EXTERNAL DOCUMENTS ROUTES (FOR STUDENTS/TEAMS)
+    // =====================================================================
+
+    Route::prefix('external-documents')->name('external-documents.')->middleware('role:student')->group(function () {
+        Route::get('/', [ExternalDocumentController::class, 'index'])->name('index');
+        Route::get('/{externalDocument}', [ExternalDocumentController::class, 'show'])->name('show');
+        Route::get('/{externalDocument}/download', [ExternalDocumentController::class, 'download'])->name('download');
+        Route::post('/{externalDocument}/respond', [ExternalDocumentController::class, 'storeResponse'])->name('respond');
+        Route::get('/{externalDocument}/response', [ExternalDocumentController::class, 'viewResponse'])->name('view-response');
+    });
+
+    // =====================================================================
+    // ADMIN: EXTERNAL DOCUMENTS MANAGEMENT
+    // =====================================================================
+
+    Route::prefix('admin/external-documents')->name('admin.external-documents.')->middleware('role:admin')->group(function () {
+        Route::get('/', [AdminExternalDocumentController::class, 'index'])->name('index');
+        Route::get('/create', [AdminExternalDocumentController::class, 'create'])->name('create');
+        Route::post('/', [AdminExternalDocumentController::class, 'store'])->name('store');
+        Route::get('/{externalDocument}', [AdminExternalDocumentController::class, 'show'])->name('show');
+        Route::get('/{externalDocument}/edit', [AdminExternalDocumentController::class, 'edit'])->name('edit');
+        Route::put('/{externalDocument}', [AdminExternalDocumentController::class, 'update'])->name('update');
+        Route::delete('/{externalDocument}', [AdminExternalDocumentController::class, 'destroy'])->name('destroy');
+        Route::get('/{externalDocument}/download', [AdminExternalDocumentController::class, 'download'])->name('download');
+        Route::patch('/{externalDocument}/toggle-active', [AdminExternalDocumentController::class, 'toggleActive'])->name('toggle-active');
+
+        // Response management
+        Route::get('/responses/{response}/download', [AdminExternalDocumentController::class, 'downloadResponse'])->name('responses.download');
+        Route::get('/responses/{response}/feedback', [AdminExternalDocumentController::class, 'showFeedbackForm'])->name('responses.feedback');
+        Route::post('/responses/{response}/feedback', [AdminExternalDocumentController::class, 'storeFeedback'])->name('responses.store-feedback');
     });
 });
 

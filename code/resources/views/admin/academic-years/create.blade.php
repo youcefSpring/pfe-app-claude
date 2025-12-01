@@ -32,7 +32,7 @@
                                     <label for="year" class="form-label">{{ __('app.academic_year') }} <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('year') is-invalid @enderror"
                                            id="year" name="year" value="{{ old('year') }}"
-                                           placeholder="2024-2025" required>
+                                           required>
                                     @error('year')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

@@ -192,6 +192,7 @@ class TeamController extends Controller
         $user = Auth::user();
         $isMember = $team->members->contains('student_id', $user->id);
         $isLeader = $team->members->where('student_id', $user->id)->where('role', 'leader')->isNotEmpty();
+        $hasLeader = $team->members->where('role', 'leader')->isNotEmpty();
 
         $subjectsQuery = Subject::where('status', 'validated')
             ->whereDoesntHave('projects');
@@ -219,7 +220,7 @@ class TeamController extends Controller
 
         $availableSubjects = $subjectsQuery->get();
 
-        return view('teams.show', compact('team', 'isMember', 'isLeader', 'availableSubjects'));
+        return view('teams.show', compact('team', 'isMember', 'isLeader', 'hasLeader', 'availableSubjects'));
     }
 
     /**
@@ -834,6 +835,91 @@ class TeamController extends Controller
             DB::rollBack();
             return redirect()->back()
                 ->with('error', __('app.transfer_leadership_failed'));
+        }
+    }
+
+    /**
+     * Assign a leader when team has no leader
+     */
+    public function assignLeader(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Authorization: Admin can always assign, or team members can assign if no leader exists
+        $canAssign = $user->role === 'admin' || $team->members->contains('student_id', $user->id);
+
+        if (!$canAssign) {
+            return redirect()->back()
+                ->with('error', __('You are not authorized to assign a leader'));
+        }
+
+        $request->validate([
+            'member_id' => 'required|exists:team_members,student_id'
+        ]);
+
+        // Check if team already has a leader
+        $existingLeader = $team->members->where('role', 'leader')->first();
+        if ($existingLeader) {
+            return redirect()->back()
+                ->with('error', __('Team already has a leader. Use transfer leadership instead.'));
+        }
+
+        $newLeader = $team->members->where('student_id', $request->member_id)->first();
+
+        if (!$newLeader) {
+            return redirect()->back()
+                ->with('error', __('Member not found in team'));
+        }
+
+        DB::beginTransaction();
+        try {
+            $newLeader->update(['role' => 'leader']);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', __('Leader assigned successfully'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', __('Failed to assign leader'));
+        }
+    }
+
+    /**
+     * Remove leader role (demote to member)
+     */
+    public function removeLeader(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Authorization: Only admin can remove leader
+        if ($user->role !== 'admin') {
+            return redirect()->back()
+                ->with('error', __('Only administrators can remove leader role'));
+        }
+
+        $leader = $team->members->where('role', 'leader')->first();
+
+        if (!$leader) {
+            return redirect()->back()
+                ->with('error', __('Team has no leader'));
+        }
+
+        DB::beginTransaction();
+        try {
+            $leader->update(['role' => 'member']);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', __('Leader role removed. Team now has no leader.'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', __('Failed to remove leader role'));
         }
     }
 

@@ -130,6 +130,14 @@ class Team extends Model
         return $this->hasMany(TeamInvitation::class);
     }
 
+    /**
+     * Get the team's external document responses.
+     */
+    public function externalDocumentResponses(): HasMany
+    {
+        return $this->hasMany(ExternalDocumentResponse::class);
+    }
+
     // Scopes
     /**
      * Scope to get active teams.

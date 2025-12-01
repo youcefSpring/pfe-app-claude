@@ -156,15 +156,52 @@
 
         @if($subject->status === 'validated' && !$subject->projects->count() && auth()->user()->role === 'student')
             <div class="mt-3">
-                <div class="alert alert-success">
-                    <h6>{{ __('app.available_for_selection') }}</h6>
-                    <p class="mb-2">{{ __('app.subject_available_for_team_selection') }}</p>
+                <div class="alert alert-success border-0 shadow-sm">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        {{ __('app.available_for_selection') }}
+                    </h6>
+                    <p class="mb-3 small">{{ __('app.subject_available_for_team_selection') }}</p>
                     @if(auth()->user()->teamMember?->team)
-                        <a href="{{ route('teams.my-team') }}" class="btn btn-success btn-sm">
-                            {{ __('app.view_my_team') }}
-                        </a>
+                        @php
+                            $userTeam = auth()->user()->teamMember->team;
+                            $isInPreferences = $userTeam->subjectPreferences->contains('subject_id', $subject->id);
+                            $isLeader = auth()->user()->teamMember->role === 'leader';
+                            $canAddMore = $userTeam->subjectPreferences->count() < 10;
+                        @endphp
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ route('teams.my-team') }}" class="btn btn-success">
+                                <i class="bi bi-people-fill me-2"></i>
+                                {{ __('app.view_my_team') }}
+                            </a>
+
+                            @if($isLeader)
+                                @if($isInPreferences)
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="bi bi-check-circle-fill me-2"></i> {{ __('In Preferences') }}
+                                    </button>
+                                @elseif($canAddMore)
+                                    <form action="{{ route('teams.add-subject-preference', $userTeam) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="subject_id" value="{{ $subject->id }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-star-fill me-2"></i> {{ __('Add to Favorites') }}
+                                        </button>
+                                    </form>
+                                @else
+                                    <button class="btn btn-warning" disabled title="{{ __('Maximum 10 preferences reached') }}">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ __('Max Reached') }}
+                                    </button>
+                                @endif
+                                <a href="{{ route('teams.subject-preferences', $userTeam) }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-list-ol me-2"></i> {{ __('Manage Preferences') }}
+                                </a>
+                            @endif
+                        </div>
                     @else
-                        <a href="{{ route('teams.create') }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route('teams.create') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
                             {{ __('app.create_team_first') }}
                         </a>
                     @endif
@@ -175,14 +212,14 @@
         @if(auth()->user()?->id === $subject->teacher_id)
         <div class="mt-3">
             <div class="d-grid gap-2">
-                <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-pencil"></i> {{ __('app.edit') }}
+                <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil me-2"></i> {{ __('app.edit') }}
                 </a>
                 @if($subject->status === 'draft' && auth()->user()->id === $subject->teacher_id)
                     <form action="{{ route('subjects.submit-validation', $subject) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success btn-sm w-100">
-                            <i class="bi bi-check-circle"></i> {{ __('app.submit_for_validation') }}
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle me-2"></i> {{ __('app.submit_for_validation') }}
                         </button>
                     </form>
                 @endif
@@ -191,3 +228,62 @@
         @endif
     </div>
 </div>
+
+<style>
+    /* Enhanced button styling for subject modal */
+    .alert-success {
+        background-color: #d1e7dd;
+        border: 1px solid #badbcc;
+    }
+
+    .alert-success .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .alert-success .btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .alert-success .btn-success {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .alert-success .btn-success:hover {
+        background-color: #157347;
+        border-color: #146c43;
+    }
+
+    .alert-success .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .alert-success .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+
+    .alert-success .btn-outline-primary {
+        color: #0d6efd;
+        border-color: #0d6efd;
+        background-color: transparent;
+    }
+
+    .alert-success .btn-outline-primary:hover {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .alert-success .btn-secondary:disabled {
+        opacity: 0.7;
+    }
+
+    .alert-success .btn-warning:disabled {
+        opacity: 0.8;
+    }
+</style>

@@ -183,7 +183,7 @@
                                                         <strong>{{ $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : '' }}</strong>
                                                     @endif
                                                     @if($defense->duration)
-                                                        <span class="badge bg-info ms-2">{{ $defense->duration }}min</span>
+                                                        <span class="badge bg-info ms-2">{{ $defense->duration }}{{ __('app.min') }}</span>
                                                     @endif
                                                 </div>
                                             @else
@@ -199,7 +199,7 @@
                                                     <i class="bi bi-geo-alt me-2 text-muted"></i>
                                                     <span class="fw-semibold">{{ $defense->room->name }}</span>
                                                     @if($defense->room->capacity)
-                                                        <small class="text-muted ms-1">({{ $defense->room->capacity }} places)</small>
+                                                        <small class="text-muted ms-1">({{ $defense->room->capacity }} {{ __('app.places') }})</small>
                                                     @endif
                                                 </div>
                                             @endif
@@ -313,13 +313,13 @@
                             <table class="table table-hover">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Sujet</th>
-                                        <th>Étudiants</th>
-                                        <th>Date/Heure</th>
-                                        <th>Salle</th>
-                                        <th>Statut</th>
-                                        <th>Note</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('app.subject') }}</th>
+                                        <th>{{ __('app.students') }}</th>
+                                        <th>{{ __('app.date_time') }}</th>
+                                        <th>{{ __('app.room') }}</th>
+                                        <th>{{ __('app.status') }}</th>
+                                        <th>{{ __('app.grade') }}</th>
+                                        <th>{{ __('app.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -352,7 +352,7 @@
                                                         <small class="text-muted">{{ $defense->defense_time ? \Carbon\Carbon::parse($defense->defense_time)->format('H:i') : '' }}</small>
                                                     @endif
                                                 @else
-                                                    <span class="text-muted">Non programmée</span>
+                                                    <span class="text-muted">{{ __('app.not_scheduled') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -364,13 +364,13 @@
                                             </td>
                                             <td>
                                                 @if($defense->status === 'scheduled')
-                                                    <span class="badge bg-warning text-dark">Programmé</span>
+                                                    <span class="badge bg-warning text-dark">{{ __('app.defense_status_scheduled') }}</span>
                                                 @elseif($defense->status === 'in_progress')
-                                                    <span class="badge bg-primary">En cours</span>
+                                                    <span class="badge bg-primary">{{ __('app.defense_status_in_progress') }}</span>
                                                 @elseif($defense->status === 'completed')
-                                                    <span class="badge bg-success">Terminé</span>
+                                                    <span class="badge bg-success">{{ __('app.defense_status_completed') }}</span>
                                                 @elseif($defense->status === 'cancelled')
-                                                    <span class="badge bg-danger">Annulé</span>
+                                                    <span class="badge bg-danger">{{ __('app.defense_status_cancelled') }}</span>
                                                 @else
                                                     <span class="badge bg-secondary">{{ ucfirst($defense->status) }}</span>
                                                 @endif
@@ -384,11 +384,11 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group">
-                                                    <a href="{{ route('defenses.show', $defense) }}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                                    <a href="{{ route('defenses.show', $defense) }}" class="btn btn-sm btn-outline-primary" title="{{ __('app.view') }}">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
                                                     @if(in_array(auth()->user()?->role, ['admin', 'department_head']))
-                                                        <a href="{{ route('defenses.edit', $defense) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                        <a href="{{ route('defenses.edit', $defense) }}" class="btn btn-sm btn-outline-warning" title="{{ __('app.edit') }}">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                         <a href="{{ route('defenses.report', $defense) }}" class="btn btn-sm btn-outline-primary" title="{{ __('app.view_report') }}" target="_blank">

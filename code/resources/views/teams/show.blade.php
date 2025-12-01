@@ -25,7 +25,21 @@
                         <div class="col-md-8">
                             <!-- Team Members -->
                             <div class="mb-4">
-                                <h5>{{ __('app.team_members') }} ({{ $team->members->count() }}/4)</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">{{ __('app.team_members') }} ({{ $team->members->count() }}/4)</h5>
+                                    @if(!$hasLeader)
+                                        <span class="badge bg-warning">{{ __('No Leader Assigned') }}</span>
+                                    @endif
+                                </div>
+
+                                @if(!$hasLeader && ($isMember || auth()->user()->role === 'admin'))
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <strong>{{ __('This team has no leader!') }}</strong>
+                                        {{ __('Please assign a leader from the team members below.') }}
+                                    </div>
+                                @endif
+
                                 <div class="row">
                                     @foreach($team->members as $member)
                                         <div class="col-md-6 mb-3">
@@ -41,7 +55,25 @@
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        @if($isLeader && $member->role !== 'leader')
+                                                        @if(!$hasLeader && ($isMember || auth()->user()->role === 'admin'))
+                                                            <!-- Assign Leader Button (when no leader exists) -->
+                                                            <form action="{{ route('teams.assign-leader', $team) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="member_id" value="{{ $member->user->id }}">
+                                                                <button type="submit" class="btn btn-sm btn-primary" title="{{ __('Make Leader') }}">
+                                                                    <i class="fas fa-crown"></i> {{ __('Make Leader') }}
+                                                                </button>
+                                                            </form>
+                                                        @elseif($member->role === 'leader' && auth()->user()->role === 'admin')
+                                                            <!-- Remove Leader Button (admin only) -->
+                                                            <form action="{{ route('teams.remove-leader', $team) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-sm btn-warning" title="{{ __('Remove Leader Role') }}"
+                                                                        onclick="return confirm('{{ __('Are you sure you want to remove this leader? The team will have no leader.') }}')">
+                                                                    <i class="fas fa-user-minus"></i> {{ __('Remove Leader') }}
+                                                                </button>
+                                                            </form>
+                                                        @elseif($isLeader && $member->role !== 'leader')
                                                             <div class="dropdown">
                                                                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
                                                                     <i class="fas fa-ellipsis-v"></i>
@@ -134,7 +166,15 @@
                                 </div>
                             @else
                                 <div class="mb-4">
-                                    <h5>{{ __('app.subject_selection') }}</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">{{ __('app.subject_selection') }}</h5>
+                                        @if($isLeader && $team->status !== 'forming')
+                                            <a href="{{ route('teams.subject-preferences', $team) }}" class="btn btn-primary">
+                                                <i class="fas fa-list-ol"></i> {{ __('Manage Subject Preferences') }} (10 max)
+                                            </a>
+                                        @endif
+                                    </div>
+
                                     @if($team->status === 'forming')
                                         <div class="alert alert-info">
                                             {{ __('app.complete_team_formation_before_selecting_subject') }}
