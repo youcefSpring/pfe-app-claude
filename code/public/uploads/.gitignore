@@ -1,0 +1,4 @@
+*
+!.gitignore
+!external_documents/.gitignore
+!external_document_responses/.gitignore

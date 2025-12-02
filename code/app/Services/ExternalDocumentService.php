@@ -26,14 +26,15 @@ class ExternalDocumentService
         }
         // If no deadline is configured, allow the upload (admin can upload anytime)
 
-        // Store file
-        $filePath = $file->store('external_documents', 'public');
+        // Store file in public disk
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->move(public_path('uploads/external_documents'), $fileName);
 
         // Create document record
         $document = ExternalDocument::create([
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
-            'file_path' => $filePath,
+            'file_path' => 'uploads/external_documents/' . $fileName,
             'file_original_name' => $file->getClientOriginalName(),
             'file_size' => $file->getSize(),
             'file_type' => $file->getClientOriginalExtension(),
@@ -59,15 +60,17 @@ class ExternalDocumentService
         // Update file if provided
         if ($file) {
             // Delete old file
-            if (Storage::disk('public')->exists($document->file_path)) {
-                Storage::disk('public')->delete($document->file_path);
+            $oldFilePath = public_path($document->file_path);
+            if (file_exists($oldFilePath)) {
+                unlink($oldFilePath);
             }
 
             // Store new file
-            $filePath = $file->store('external_documents', 'public');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->move(public_path('uploads/external_documents'), $fileName);
 
             $document->update([
-                'file_path' => $filePath,
+                'file_path' => 'uploads/external_documents/' . $fileName,
                 'file_original_name' => $file->getClientOriginalName(),
                 'file_size' => $file->getSize(),
                 'file_type' => $file->getClientOriginalExtension(),
@@ -83,8 +86,9 @@ class ExternalDocumentService
     public function deleteDocument(ExternalDocument $document): bool
     {
         // Delete file
-        if (Storage::disk('public')->exists($document->file_path)) {
-            Storage::disk('public')->delete($document->file_path);
+        $filePath = public_path($document->file_path);
+        if (file_exists($filePath)) {
+            unlink($filePath);
         }
 
         // Delete all responses and their files
@@ -116,14 +120,15 @@ class ExternalDocumentService
             throw new \Exception('Your team has already submitted a response to this document');
         }
 
-        // Store file
-        $filePath = $file->store('external_document_responses', 'public');
+        // Store file in public disk
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->move(public_path('uploads/external_document_responses'), $fileName);
 
         // Create response record
         $response = ExternalDocumentResponse::create([
             'external_document_id' => $document->id,
             'team_id' => $data['team_id'],
-            'file_path' => $filePath,
+            'file_path' => 'uploads/external_document_responses/' . $fileName,
             'file_original_name' => $file->getClientOriginalName(),
             'file_size' => $file->getSize(),
             'file_type' => $file->getClientOriginalExtension(),
@@ -153,8 +158,9 @@ class ExternalDocumentService
     public function deleteResponse(ExternalDocumentResponse $response): bool
     {
         // Delete file
-        if (Storage::disk('public')->exists($response->file_path)) {
-            Storage::disk('public')->delete($response->file_path);
+        $filePath = public_path($response->file_path);
+        if (file_exists($filePath)) {
+            unlink($filePath);
         }
 
         // Delete response
@@ -221,11 +227,13 @@ class ExternalDocumentService
      */
     public function downloadDocument(ExternalDocument $document)
     {
-        if (!Storage::disk('public')->exists($document->file_path)) {
+        $filePath = public_path($document->file_path);
+
+        if (!file_exists($filePath)) {
             throw new \Exception('File not found');
         }
 
-        return Storage::disk('public')->download($document->file_path, $document->file_original_name);
+        return response()->download($filePath, $document->file_original_name);
     }
 
     /**
@@ -233,10 +241,12 @@ class ExternalDocumentService
      */
     public function downloadResponse(ExternalDocumentResponse $response)
     {
-        if (!Storage::disk('public')->exists($response->file_path)) {
+        $filePath = public_path($response->file_path);
+
+        if (!file_exists($filePath)) {
             throw new \Exception('File not found');
         }
 
-        return Storage::disk('public')->download($response->file_path, $response->file_original_name);
+        return response()->download($filePath, $response->file_original_name);
     }
 }
