@@ -17,11 +17,14 @@ class ExternalDocumentService
      */
     public function storeDocument(array $data, UploadedFile $file): ExternalDocument
     {
-        // Check deadline
+        // Check deadline (if configured)
         $deadline = ExternalDocumentDeadline::getActive();
-        if (!$deadline || !$deadline->canUploadDocuments()) {
+
+        // If deadline exists but upload period has ended or not started, reject
+        if ($deadline && !$deadline->canUploadDocuments()) {
             throw new \Exception('Document upload period has ended or not yet started');
         }
+        // If no deadline is configured, allow the upload (admin can upload anytime)
 
         // Store file
         $filePath = $file->store('external_documents', 'public');

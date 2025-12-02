@@ -164,6 +164,106 @@
                                         </div>
                                     </div>
                                 </div>
+                            @elseif($team->externalProject)
+                                <!-- External Project Information -->
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-external-link-alt text-primary me-2"></i>
+                                            {{ __('app.external_project') }}
+                                        </h5>
+                                        <span class="badge bg-{{ $team->externalProject->status === 'approved' ? 'success' : ($team->externalProject->status === 'submitted' ? 'warning' : ($team->externalProject->status === 'rejected' ? 'danger' : 'info')) }}">
+                                            {{ ucfirst($team->externalProject->status) }}
+                                        </span>
+                                    </div>
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <h6 class="card-title fw-bold mb-3">{{ __('app.project_details') }}</h6>
+                                                    <div class="mb-3">
+                                                        <label class="text-muted small">{{ __('app.description') }}</label>
+                                                        <p class="mb-0">{{ $team->externalProject->project_description }}</p>
+                                                    </div>
+
+                                                    @if($team->externalProject->technologies)
+                                                    <div class="mb-3">
+                                                        <label class="text-muted small">{{ __('app.technologies') }}</label>
+                                                        <div>
+                                                            @foreach(explode(',', $team->externalProject->technologies) as $tech)
+                                                                <span class="badge bg-secondary me-1">{{ trim($tech) }}</span>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                    @endif
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card bg-light mb-3">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title small fw-bold">{{ __('app.company_info') }}</h6>
+                                                            <div class="mb-2">
+                                                                <small class="text-muted">{{ __('app.company') }}:</small>
+                                                                <div>{{ $team->externalProject->company }}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="card bg-light">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title small fw-bold">{{ __('app.company_supervisor') }}</h6>
+                                                            <div class="mb-2">
+                                                                <small class="text-muted">{{ __('app.name') }}:</small>
+                                                                <div>{{ $team->externalProject->contact_person }}</div>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <small class="text-muted">{{ __('app.email') }}:</small>
+                                                                <div><a href="mailto:{{ $team->externalProject->contact_email }}">{{ $team->externalProject->contact_email }}</a></div>
+                                                            </div>
+                                                            @if($team->externalProject->contact_phone)
+                                                            <div class="mb-0">
+                                                                <small class="text-muted">{{ __('app.phone') }}:</small>
+                                                                <div>{{ $team->externalProject->contact_phone }}</div>
+                                                            </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    @if($team->externalProject->assignedSupervisor)
+                                                    <div class="card bg-light mt-3">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title small fw-bold">{{ __('app.academic_supervisor') }}</h6>
+                                                            <div class="mb-0">
+                                                                <div class="fw-semibold">{{ $team->externalProject->assignedSupervisor->name }}</div>
+                                                                <small class="text-muted">{{ $team->externalProject->assignedSupervisor->email }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    @else
+                                                    <div class="alert alert-info mt-3 small">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        {{ __('app.waiting_supervisor_assignment') }}
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            @if($team->externalProject->status === 'submitted' || $team->externalProject->status === 'under_review')
+                                            <div class="alert alert-warning mt-3 mb-0">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <strong>{{ __('app.pending_approval') }}</strong>
+                                                <p class="mb-0 small">{{ __('app.external_project_under_review') }}</p>
+                                            </div>
+                                            @elseif($team->externalProject->status === 'rejected')
+                                            <div class="alert alert-danger mt-3 mb-0">
+                                                <i class="fas fa-times-circle me-2"></i>
+                                                <strong>{{ __('app.project_rejected') }}</strong>
+                                                <p class="mb-0 small">{{ __('app.contact_admin_for_details') }}</p>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             @else
                                 <div class="mb-4">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -262,9 +362,11 @@
                                                             <i class="fas fa-paper-plane"></i> {{ __('app.request_subject') }}
                                                         </button>
                                                     @endif
-                                                    <a href="{{ route('teams.external-project-form', $team) }}" class="btn btn-outline-secondary">
-                                                        <i class="fas fa-external-link-alt"></i> Submit External Project
-                                                    </a>
+                                                    @if(!$team->externalProject)
+                                                        <a href="{{ route('teams.external-project-form', $team) }}" class="btn btn-outline-secondary">
+                                                            <i class="fas fa-external-link-alt"></i> Submit External Project
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>

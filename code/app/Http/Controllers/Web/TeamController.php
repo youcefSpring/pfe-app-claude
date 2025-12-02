@@ -187,7 +187,12 @@ class TeamController extends Controller
      */
     public function show(Team $team): View
     {
-        $team->load(['members.user', 'project.subject.teacher', 'project.subject.externalSupervisor']);
+        $team->load([
+            'members.user',
+            'project.subject.teacher',
+            'project.subject.externalSupervisor',
+            'externalProject.assignedSupervisor'
+        ]);
 
         $user = Auth::user();
         $isMember = $team->members->contains('student_id', $user->id);
@@ -698,14 +703,28 @@ class TeamController extends Controller
                 ->with('error', __('app.team_already_has_project'));
         }
 
+        // Check if external project already exists
+        if ($team->externalProject) {
+            return redirect()->back()
+                ->with('error', __('app.team_already_has_external_project'));
+        }
+
         try {
             // Use transaction to ensure data consistency
             \DB::transaction(function () use ($team, $validated) {
+                // Map form fields to database columns
+                $projectData = [
+                    'company' => $validated['company_name'],
+                    'contact_person' => $validated['supervisor_name'],
+                    'contact_email' => $validated['supervisor_email'],
+                    'contact_phone' => $validated['supervisor_phone'] ?? null,
+                    'project_description' => $validated['title'] . "\n\n" . $validated['description'] . "\n\nObjectives:\n" . $validated['objectives'] . "\n\nDuration: " . $validated['project_duration'] . " month(s)",
+                    'technologies' => $validated['technologies'],
+                    'status' => 'submitted',
+                ];
+
                 // Create external project
-                $team->externalProject()->create($validated + [
-                    'status' => 'pending_approval',
-                    'submitted_at' => now()
-                ]);
+                $team->externalProject()->create($projectData);
             });
 
             return redirect()->route('teams.show', $team)

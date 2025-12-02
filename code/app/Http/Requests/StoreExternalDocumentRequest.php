@@ -55,11 +55,12 @@ class StoreExternalDocumentRequest extends FormRequest
             // Check if upload is allowed based on deadline
             $deadline = ExternalDocumentDeadline::getActive();
 
+            // If no deadline is configured, allow the upload (admin can upload anytime)
             if (!$deadline) {
-                $validator->errors()->add('deadline', 'No active deadline configured for external documents');
                 return;
             }
 
+            // If deadline exists but upload period has ended or not started, reject
             if (!$deadline->canUploadDocuments()) {
                 $validator->errors()->add('deadline', 'Document upload period has ended or not yet started');
             }
