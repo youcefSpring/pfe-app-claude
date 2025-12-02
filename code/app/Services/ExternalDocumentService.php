@@ -26,24 +26,35 @@ class ExternalDocumentService
         }
         // If no deadline is configured, allow the upload (admin can upload anytime)
 
-        // Store file in public disk
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->move(public_path('uploads/external_documents'), $fileName);
+        try {
+            // Ensure directory exists and is writable
+            $uploadPath = public_path('uploads/external_documents');
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0775, true);
+            }
 
-        // Create document record
-        $document = ExternalDocument::create([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'file_path' => 'uploads/external_documents/' . $fileName,
-            'file_original_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
-            'file_type' => $file->getClientOriginalExtension(),
-            'uploaded_by' => $data['uploaded_by'],
-            'academic_year_id' => $data['academic_year_id'] ?? null,
-            'is_active' => true,
-        ]);
+            // Store file in public disk
+            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            $file->move($uploadPath, $fileName);
 
-        return $document;
+            // Create document record
+            $document = ExternalDocument::create([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'file_path' => 'uploads/external_documents/' . $fileName,
+                'file_original_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+                'file_type' => $file->getClientOriginalExtension(),
+                'uploaded_by' => $data['uploaded_by'],
+                'academic_year_id' => $data['academic_year_id'] ?? null,
+                'is_active' => true,
+            ]);
+
+            return $document;
+        } catch (\Exception $e) {
+            \Log::error('File upload failed: ' . $e->getMessage());
+            throw new \Exception('Failed to upload file: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -59,22 +70,33 @@ class ExternalDocumentService
 
         // Update file if provided
         if ($file) {
-            // Delete old file
-            $oldFilePath = public_path($document->file_path);
-            if (file_exists($oldFilePath)) {
-                unlink($oldFilePath);
+            try {
+                // Delete old file
+                $oldFilePath = public_path($document->file_path);
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+
+                // Ensure directory exists
+                $uploadPath = public_path('uploads/external_documents');
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0775, true);
+                }
+
+                // Store new file
+                $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                $file->move($uploadPath, $fileName);
+
+                $document->update([
+                    'file_path' => 'uploads/external_documents/' . $fileName,
+                    'file_original_name' => $file->getClientOriginalName(),
+                    'file_size' => $file->getSize(),
+                    'file_type' => $file->getClientOriginalExtension(),
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('File update failed: ' . $e->getMessage());
+                throw new \Exception('Failed to update file: ' . $e->getMessage());
             }
-
-            // Store new file
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->move(public_path('uploads/external_documents'), $fileName);
-
-            $document->update([
-                'file_path' => 'uploads/external_documents/' . $fileName,
-                'file_original_name' => $file->getClientOriginalName(),
-                'file_size' => $file->getSize(),
-                'file_type' => $file->getClientOriginalExtension(),
-            ]);
         }
 
         return $document->fresh();
@@ -120,22 +142,33 @@ class ExternalDocumentService
             throw new \Exception('Your team has already submitted a response to this document');
         }
 
-        // Store file in public disk
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->move(public_path('uploads/external_document_responses'), $fileName);
+        try {
+            // Ensure directory exists and is writable
+            $uploadPath = public_path('uploads/external_document_responses');
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0775, true);
+            }
 
-        // Create response record
-        $response = ExternalDocumentResponse::create([
-            'external_document_id' => $document->id,
-            'team_id' => $data['team_id'],
-            'file_path' => 'uploads/external_document_responses/' . $fileName,
-            'file_original_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
-            'file_type' => $file->getClientOriginalExtension(),
-            'uploaded_by' => $data['uploaded_by'],
-        ]);
+            // Store file in public disk
+            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            $file->move($uploadPath, $fileName);
 
-        return $response;
+            // Create response record
+            $response = ExternalDocumentResponse::create([
+                'external_document_id' => $document->id,
+                'team_id' => $data['team_id'],
+                'file_path' => 'uploads/external_document_responses/' . $fileName,
+                'file_original_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+                'file_type' => $file->getClientOriginalExtension(),
+                'uploaded_by' => $data['uploaded_by'],
+            ]);
+
+            return $response;
+        } catch (\Exception $e) {
+            \Log::error('Response upload failed: ' . $e->getMessage());
+            throw new \Exception('Failed to upload response: ' . $e->getMessage());
+        }
     }
 
     /**

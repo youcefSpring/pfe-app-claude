@@ -36,13 +36,13 @@ class StoreExternalDocumentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Document name is required',
-            'name.max' => 'Document name cannot exceed 255 characters',
-            'file.required' => 'File upload is required',
-            'file.file' => 'Please upload a valid file',
-            'file.mimes' => 'Only PDF, DOC, and DOCX files are allowed',
-            'file.max' => 'File size cannot exceed 10MB',
-            'academic_year_id.exists' => 'Invalid academic year selected',
+            'name.required' => __('validation.required', ['attribute' => __('Document Name')]),
+            'name.max' => __('validation.max.string', ['attribute' => __('Document Name'), 'max' => 255]),
+            'file.required' => __('validation.required', ['attribute' => __('Document File')]),
+            'file.file' => __('validation.file', ['attribute' => __('Document File')]),
+            'file.mimes' => __('validation.mimes', ['attribute' => __('Document File'), 'values' => 'PDF, DOC, DOCX']),
+            'file.max' => __('validation.max.file', ['attribute' => __('Document File'), 'max' => 10240]),
+            'academic_year_id.exists' => __('validation.exists', ['attribute' => __('Academic Year')]),
         ];
     }
 
