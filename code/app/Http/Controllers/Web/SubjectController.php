@@ -24,7 +24,7 @@ class SubjectController extends Controller
     {
         $user = Auth::user();
 
-        $query = Subject::with(['teacher', 'project.team', 'teams'])
+        $query = Subject::with(['teacher', 'student', 'team.members', 'project.team', 'teams'])
             ->withCount(['preferences as preferences_count']);
 
         // Apply search filter
@@ -58,13 +58,19 @@ class SubjectController extends Controller
                 });
                 break;
             case 'student':
-                // Students see validated subjects and their own external subjects
-                $query->where(function($q) use ($user) {
-                    $q->where('status', 'validated')
-                      ->orWhere(function($subq) use ($user) {
-                          $subq->where('is_external', true)
-                               ->where('student_id', $user->id);
-                      });
+                // Students see validated subjects and their team's external subjects
+                $activeTeam = $user->activeTeam();
+
+                $query->where(function($q) use ($activeTeam) {
+                    $q->where('status', 'validated');
+
+                    // If student is in a team, also show their team's external subjects
+                    if ($activeTeam) {
+                        $q->orWhere(function($subq) use ($activeTeam) {
+                            $subq->where('is_external', true)
+                                 ->where('team_id', $activeTeam->id);
+                        });
+                    }
                 });
 
                 // Apply speciality filter only if speciality relationships exist
@@ -167,6 +173,12 @@ class SubjectController extends Controller
             $validated['is_external'] = $request->boolean('is_external', true);
             $validated['teacher_id'] = null; // External subjects don't have teachers initially
 
+            // Get student's team and associate external subject with the team
+            $activeTeam = $user->activeTeam();
+            if ($activeTeam) {
+                $validated['team_id'] = $activeTeam->id;
+            }
+
             // Handle external supervisor creation if this is an external subject
             if ($validated['is_external'] && $request->filled('external_supervisor_email')) {
                 $externalSupervisor = $this->createOrFindExternalSupervisor($request);
@@ -263,7 +275,40 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject): View
     {
-        //$this->authorize('update', $subject);
+        $user = Auth::user();
+
+        // Authorization check for external subjects
+        if ($subject->is_external) {
+            // Check if user can edit: only team leader or admin
+            $canEdit = false;
+
+            if ($user->role === 'admin') {
+                $canEdit = true;
+            } elseif ($subject->team_id) {
+                // Check if user is the team leader of the team that owns this subject
+                $userTeamMember = \App\Models\TeamMember::where('team_id', $subject->team_id)
+                    ->where('student_id', $user->id)
+                    ->first();
+
+                if ($userTeamMember && $userTeamMember->role === 'leader') {
+                    // Only team leaders can edit
+                    $canEdit = true;
+                }
+            }
+
+            if (!$canEdit) {
+                abort(403, __('app.only_team_leader_can_edit_external_subject'));
+            }
+        } else {
+            // For internal subjects, only the teacher who created it or admin can edit
+            if ($user->role !== 'admin' && $subject->teacher_id !== $user->id) {
+                // Department heads can also edit subjects from their department
+                if ($user->role !== 'department_head' || $subject->teacher->department !== $user->department) {
+                    abort(403, __('app.cannot_edit_subject_of_another_teacher'));
+                }
+            }
+        }
+
         $specialities = \App\Models\Speciality::active()->get();
         $subject->load('specialities');
         return view('subjects.edit', compact('subject', 'specialities'));
@@ -274,7 +319,41 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject): RedirectResponse
     {
-        //$this->authorize('update', $subject);
+        $user = Auth::user();
+
+        // Authorization check for external subjects
+        if ($subject->is_external) {
+            // Check if user can edit: only team leader or admin
+            $canEdit = false;
+
+            if ($user->role === 'admin') {
+                $canEdit = true;
+            } elseif ($subject->team_id) {
+                // Check if user is the team leader of the team that owns this subject
+                $userTeamMember = \App\Models\TeamMember::where('team_id', $subject->team_id)
+                    ->where('student_id', $user->id)
+                    ->first();
+
+                if ($userTeamMember && $userTeamMember->role === 'leader') {
+                    // Only team leaders can edit
+                    $canEdit = true;
+                }
+            }
+
+            if (!$canEdit) {
+                return redirect()->back()
+                    ->with('error', __('app.only_team_leader_can_edit_external_subject'));
+            }
+        } else {
+            // For internal subjects, only the teacher who created it or admin can edit
+            if ($user->role !== 'admin' && $subject->teacher_id !== $user->id) {
+                // Department heads can also edit subjects from their department
+                if ($user->role !== 'department_head' || $subject->teacher->department !== $user->department) {
+                    return redirect()->back()
+                        ->with('error', __('app.cannot_edit_subject_of_another_teacher'));
+                }
+            }
+        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -305,17 +384,52 @@ class SubjectController extends Controller
     }
 
     /**
-     * Remove the specified subject
+     * Remove the specified subject (soft delete)
      */
     public function destroy(Subject $subject): RedirectResponse
     {
-        //$this->authorize('delete', $subject);
+        $user = Auth::user();
+
+        // Authorization check for external subjects
+        if ($subject->is_external) {
+            // Check if user can delete: team leader or admin
+            $canDelete = false;
+
+            if ($user->role === 'admin') {
+                $canDelete = true;
+            } elseif ($subject->team_id) {
+                // Check if user is team leader of the team that owns this subject
+                $userTeamMember = \App\Models\TeamMember::where('team_id', $subject->team_id)
+                    ->where('student_id', $user->id)
+                    ->first();
+
+                if ($userTeamMember && $userTeamMember->role === 'leader') {
+                    // Only team leaders can delete
+                    $canDelete = true;
+                }
+            }
+
+            if (!$canDelete) {
+                return redirect()->back()
+                    ->with('error', __('app.cannot_delete_external_subject_of_another_team'));
+            }
+        } else {
+            // For internal subjects, only the teacher who created it or admin can delete
+            if ($user->role !== 'admin' && $subject->teacher_id !== $user->id) {
+                // Department heads can also delete subjects from their department
+                if ($user->role !== 'department_head' || $subject->teacher->department !== $user->department) {
+                    return redirect()->back()
+                        ->with('error', __('app.cannot_delete_subject_of_another_teacher'));
+                }
+            }
+        }
 
         if ($subject->projects()->exists()) {
             return redirect()->back()
                 ->with('error', __('app.cannot_delete_subject_with_projects'));
         }
 
+        // Soft delete the subject
         $subject->delete();
 
         return redirect()->route('subjects.index')
@@ -634,5 +748,69 @@ class SubjectController extends Controller
             return redirect()->back()
                 ->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Display a list of all external subjects proposed by teams
+     */
+    public function externalList(Request $request): View
+    {
+        $user = Auth::user();
+
+        // Build base query for external subjects
+        $query = Subject::with(['team.members.user', 'student', 'externalSupervisor', 'specialities', 'projects.team'])
+            ->where('is_external', true);
+
+        // Apply role-based filtering
+        switch ($user->role) {
+            case 'student':
+                // Students see only their team's external subjects
+                $activeTeam = $user->activeTeam();
+
+                if ($activeTeam) {
+                    $query->where('team_id', $activeTeam->id);
+                } else {
+                    // If not in a team, don't show any external subjects
+                    $query->whereRaw('1 = 0'); // No results
+                }
+                break;
+
+            case 'teacher':
+                // Teachers see external subjects they supervise
+                $query->where(function($q) use ($user) {
+                    $q->whereHas('projects', function($subq) use ($user) {
+                        $subq->where('supervisor_id', $user->id);
+                    });
+                });
+                break;
+
+            case 'department_head':
+                // Department heads see all external subjects
+                // No additional filtering needed
+                break;
+
+            // Admin sees all external subjects (no filter)
+        }
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%')
+                  ->orWhere('company_name', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('student', function($subq) use ($request) {
+                      $subq->where('name', 'like', '%' . $request->search . '%');
+                  });
+            });
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $externalSubjects = $query->latest()->paginate(15)->appends($request->query());
+
+        return view('subjects.external-list', compact('externalSubjects'));
     }
 }

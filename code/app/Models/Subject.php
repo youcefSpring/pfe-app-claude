@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subject extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -34,6 +35,7 @@ class Subject extends Model
         'company_name',
         'dataset_resources_link',
         'student_id',
+        'team_id',
         'external_supervisor_id',
         'academic_year',
     ];
@@ -82,6 +84,14 @@ class Subject extends Model
     public function externalSupervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'external_supervisor_id');
+    }
+
+    /**
+     * Get the team that owns this external subject.
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'team_id');
     }
 
     /**

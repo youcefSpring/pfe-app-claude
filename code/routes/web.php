@@ -115,6 +115,7 @@ Route::middleware(['auth'])->group(function () {
         // Static routes first
         Route::get('/', [SubjectController::class, 'index'])->name('index');
         Route::get('/available/{grade?}', [SubjectController::class, 'available'])->name('available');
+        Route::get('/external-list', [SubjectController::class, 'externalList'])->name('external-list');
 
         // Teachers can always create subjects
         Route::middleware('role:teacher')->group(function () {
@@ -210,6 +211,19 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{team}/transfer-leadership', [TeamController::class, 'transferLeadership'])->name('transfer-leadership');
             Route::post('/{team}/assign-leader', [TeamController::class, 'assignLeader'])->name('assign-leader');
             Route::post('/{team}/remove-leader', [TeamController::class, 'removeLeader'])->name('remove-leader');
+
+            // Join request actions
+            Route::post('/{team}/request-join', [TeamController::class, 'requestToJoin'])->name('request-join');
+            Route::get('/{team}/join-requests', [TeamController::class, 'pendingJoinRequests'])->name('join-requests');
+        });
+
+        // Join request management (accessible to students for canceling and team leaders/admins for approving)
+        Route::post('/join-requests/{joinRequest}/approve', [TeamController::class, 'approveJoinRequest'])->name('join-requests.approve');
+        Route::post('/join-requests/{joinRequest}/reject', [TeamController::class, 'rejectJoinRequest'])->name('join-requests.reject');
+        Route::delete('/join-requests/{joinRequest}', [TeamController::class, 'cancelJoinRequest'])->name('join-requests.cancel');
+
+        // Continue with team invitations (move these after join requests)
+        Route::middleware(['role:student', 'check.team.formation'])->group(function () {
 
             // Team invitations
             Route::get('/my-invitations', [TeamController::class, 'myInvitations'])->name('my-invitations');

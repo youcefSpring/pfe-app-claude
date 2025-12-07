@@ -131,6 +131,14 @@ class Team extends Model
     }
 
     /**
+     * Get the join requests for this team.
+     */
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(TeamJoinRequest::class);
+    }
+
+    /**
      * Get the team's external document responses.
      */
     public function externalDocumentResponses(): HasMany

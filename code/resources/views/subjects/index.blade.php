@@ -105,7 +105,14 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-nowrap">{{ $subject->teacher->name ?? __('app.tbd') }}</span>
+                                            @if($subject->is_external)
+                                                <span class="text-nowrap">
+                                                    {{ $subject->student->name ?? __('app.unknown') }}
+                                                    <small class="text-muted d-block">({{ __('app.student') }})</small>
+                                                </span>
+                                            @else
+                                                <span class="text-nowrap">{{ $subject->teacher?->name ?? __('app.tbd') }}</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-info">{{ strtoupper($subject->target_grade ?? __('app.na')) }}</span>
@@ -187,12 +194,46 @@
                                                         title="{{ __('app.view_details') }}">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
-                                                @if(auth()->user()?->id === $subject->teacher_id)
+                                                @php
+                                                    $canEdit = false;
+                                                    $canDelete = false;
+                                                    $user = auth()->user();
+
+                                                    if ($user) {
+                                                        // Admins can always edit and delete
+                                                        if ($user->role === 'admin') {
+                                                            $canEdit = true;
+                                                            $canDelete = true;
+                                                        } elseif (!$subject->is_external && $user->id === $subject->teacher_id) {
+                                                            // Internal subjects: teacher can edit and delete their own
+                                                            $canEdit = true;
+                                                            $canDelete = true;
+                                                        } elseif ($subject->is_external && $subject->team) {
+                                                            // External subjects: check team membership
+                                                            $userTeamMember = $subject->team->members->where('student_id', $user->id)->first();
+
+                                                            if ($userTeamMember) {
+                                                                // All team members can edit
+                                                                $canEdit = true;
+
+                                                                // Only team leaders can delete
+                                                                if ($userTeamMember->role === 'leader') {
+                                                                    $canDelete = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if($canEdit)
                                                     <a href="{{ route('subjects.edit', $subject) }}"
                                                        class="btn btn-outline-warning btn-sm"
                                                        title="{{ __('app.edit') }}">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
+                                                @endif
+
+                                                @if($canDelete)
                                                     <form method="POST" action="{{ route('subjects.destroy', $subject) }}" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')

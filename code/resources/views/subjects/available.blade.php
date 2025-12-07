@@ -51,10 +51,20 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div>
-                                                    <strong>{{ $subject->teacher->name }}</strong>
-                                                    <br><small class="text-muted">{{ $subject->teacher->department }}</small>
-                                                </div>
+                                                @if($subject->is_external)
+                                                    <div>
+                                                        <strong>{{ $subject->student?->name ?? __('app.unknown') }}</strong>
+                                                        <br><small class="text-muted">{{ __('app.student') }}</small>
+                                                        @if($subject->team)
+                                                            <br><small class="text-muted"><i class="bi bi-people"></i> {{ $subject->team->name }}</small>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <div>
+                                                        <strong>{{ $subject->teacher?->name ?? __('app.not_assigned') }}</strong>
+                                                        <br><small class="text-muted">{{ $subject->teacher?->department ?? '' }}</small>
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 <span title="{{ $subject->description }}">

@@ -202,6 +202,20 @@ class TeamController extends Controller
         $subjectsQuery = Subject::where('status', 'validated')
             ->whereDoesntHave('projects');
 
+        // Filter external subjects: only show team's own external subjects
+        $subjectsQuery->where(function($q) use ($team) {
+            // Show all internal subjects (is_external = false or null)
+            $q->where(function($subq) {
+                $subq->where('is_external', false)
+                     ->orWhereNull('is_external');
+            })
+            // OR show external subjects owned by this team
+            ->orWhere(function($subq) use ($team) {
+                $subq->where('is_external', true)
+                     ->where('team_id', $team->id);
+            });
+        });
+
         // Apply speciality filter only if speciality relationships exist
         $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
 
@@ -446,6 +460,20 @@ class TeamController extends Controller
         $subjectsQuery = Subject::where('status', 'validated')
             ->where('target_grade', $targetGrade);
 
+        // Filter external subjects: only show team's own external subjects
+        $subjectsQuery->where(function($q) use ($team) {
+            // Show all internal subjects (is_external = false or null)
+            $q->where(function($subq) {
+                $subq->where('is_external', false)
+                     ->orWhereNull('is_external');
+            })
+            // OR show external subjects owned by this team
+            ->orWhere(function($subq) use ($team) {
+                $subq->where('is_external', true)
+                     ->where('team_id', $team->id);
+            });
+        });
+
         // Apply speciality filter only if speciality relationships exist
         $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
 
@@ -467,7 +495,7 @@ class TeamController extends Controller
         }
         // If no speciality relationships exist, show all validated subjects with matching grade
 
-        $availableSubjects = $subjectsQuery->with('teacher')->get();
+        $availableSubjects = $subjectsQuery->with(['teacher', 'student'])->get();
 
         // Load team with preferences and order by submission date
         $team->load(['subjectPreferences.subject.teacher']);
@@ -513,6 +541,20 @@ class TeamController extends Controller
         $subjectsQuery = Subject::where('status', 'validated')
             ->whereNotIn('id', $currentPreferences->pluck('subject_id'));
 
+        // Filter external subjects: only show team's own external subjects
+        $subjectsQuery->where(function($q) use ($team) {
+            // Show all internal subjects (is_external = false or null)
+            $q->where(function($subq) {
+                $subq->where('is_external', false)
+                     ->orWhereNull('is_external');
+            })
+            // OR show external subjects owned by this team
+            ->orWhere(function($subq) use ($team) {
+                $subq->where('is_external', true)
+                     ->where('team_id', $team->id);
+            });
+        });
+
         // Apply speciality filter only if speciality relationships exist
         $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
 
@@ -534,7 +576,7 @@ class TeamController extends Controller
         }
         // If no speciality relationships exist, show all validated subjects
 
-        $availableSubjects = $subjectsQuery->with('teacher')->get();
+        $availableSubjects = $subjectsQuery->with(['teacher', 'student'])->get();
 
         $canManage = $team->canManagePreferences();
 
@@ -818,6 +860,208 @@ class TeamController extends Controller
             return redirect()->back()
                 ->with('error', __('app.leave_team_failed', ['message' => $e->getMessage()]));
         }
+    }
+
+    /**
+     * Send a request to join a team
+     */
+    public function requestToJoin(Request $request, Team $team): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'student') {
+            return redirect()->back()
+                ->with('error', __('app.only_students_join_teams'));
+        }
+
+        if ($user->teamMember) {
+            return redirect()->back()
+                ->with('error', __('app.already_member_of_team'));
+        }
+
+        // Check if student already has a pending request for this team
+        $existingRequest = \App\Models\TeamJoinRequest::where('team_id', $team->id)
+            ->where('student_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return redirect()->back()
+                ->with('error', __('app.join_request_already_sent'));
+        }
+
+        // Validate optional message
+        $request->validate([
+            'message' => 'nullable|string|max:500'
+        ]);
+
+        // Create join request
+        \App\Models\TeamJoinRequest::create([
+            'team_id' => $team->id,
+            'student_id' => $user->id,
+            'status' => 'pending',
+            'message' => $request->input('message'),
+        ]);
+
+        return redirect()->back()
+            ->with('success', __('app.join_request_sent'));
+    }
+
+    /**
+     * Cancel a join request
+     */
+    public function cancelJoinRequest(\App\Models\TeamJoinRequest $joinRequest): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Only the student who made the request can cancel it
+        if ($joinRequest->student_id !== $user->id) {
+            return redirect()->back()
+                ->with('error', __('app.unauthorized_action'));
+        }
+
+        if ($joinRequest->status !== 'pending') {
+            return redirect()->back()
+                ->with('error', __('app.can_only_cancel_pending_request'));
+        }
+
+        $joinRequest->delete();
+
+        return redirect()->back()
+            ->with('success', __('app.join_request_cancelled'));
+    }
+
+    /**
+     * View pending join requests for a team (team leader or admin)
+     */
+    public function pendingJoinRequests(Team $team): View
+    {
+        $user = Auth::user();
+
+        // Check authorization: team leader or admin
+        $isTeamLeader = $team->members()->where('student_id', $user->id)->where('role', 'leader')->exists();
+
+        if (!$isTeamLeader && $user->role !== 'admin') {
+            abort(403, __('app.only_team_leader_or_admin'));
+        }
+
+        $pendingRequests = $team->joinRequests()
+            ->with('student')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return view('teams.join-requests', compact('team', 'pendingRequests'));
+    }
+
+    /**
+     * Approve a join request (team leader or admin)
+     */
+    public function approveJoinRequest(\App\Models\TeamJoinRequest $joinRequest): RedirectResponse
+    {
+        $user = Auth::user();
+        $team = $joinRequest->team;
+
+        // Check authorization: team leader or admin
+        $isTeamLeader = $team->members()->where('student_id', $user->id)->where('role', 'leader')->exists();
+
+        if (!$isTeamLeader && $user->role !== 'admin') {
+            return redirect()->back()
+                ->with('error', __('app.only_team_leader_or_admin_can_approve'));
+        }
+
+        if ($joinRequest->status !== 'pending') {
+            return redirect()->back()
+                ->with('error', __('app.request_already_processed'));
+        }
+
+        // Check if student is already in a team
+        $student = $joinRequest->student;
+        if ($student->teamMember) {
+            $joinRequest->update([
+                'status' => 'rejected',
+                'processed_by' => $user->id,
+                'processed_at' => now(),
+                'rejection_reason' => __('app.student_already_in_team')
+            ]);
+
+            return redirect()->back()
+                ->with('error', __('app.student_already_in_team'));
+        }
+
+        // Check team capacity
+        $leader = $team->leader;
+        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+        $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
+
+        if ($team->members->count() >= $maxSize) {
+            return redirect()->back()
+                ->with('error', __('app.team_full'));
+        }
+
+        DB::beginTransaction();
+        try {
+            // Add student to team
+            \App\Models\TeamMember::create([
+                'team_id' => $team->id,
+                'student_id' => $student->id,
+                'role' => 'member',
+                'joined_at' => now()
+            ]);
+
+            // Update join request status
+            $joinRequest->update([
+                'status' => 'approved',
+                'processed_by' => $user->id,
+                'processed_at' => now()
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', __('app.join_request_approved', ['name' => $student->name]));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', __('app.join_request_approval_failed', ['message' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * Reject a join request (team leader or admin)
+     */
+    public function rejectJoinRequest(Request $request, \App\Models\TeamJoinRequest $joinRequest): RedirectResponse
+    {
+        $user = Auth::user();
+        $team = $joinRequest->team;
+
+        // Check authorization: team leader or admin
+        $isTeamLeader = $team->members()->where('student_id', $user->id)->where('role', 'leader')->exists();
+
+        if (!$isTeamLeader && $user->role !== 'admin') {
+            return redirect()->back()
+                ->with('error', __('app.only_team_leader_or_admin_can_reject'));
+        }
+
+        if ($joinRequest->status !== 'pending') {
+            return redirect()->back()
+                ->with('error', __('app.request_already_processed'));
+        }
+
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:500'
+        ]);
+
+        $joinRequest->update([
+            'status' => 'rejected',
+            'processed_by' => $user->id,
+            'processed_at' => now(),
+            'rejection_reason' => $request->input('rejection_reason')
+        ]);
+
+        return redirect()->back()
+            ->with('success', __('app.join_request_rejected'));
     }
 
     /**

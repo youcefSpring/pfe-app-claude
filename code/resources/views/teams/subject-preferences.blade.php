@@ -221,10 +221,24 @@
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
-                                                <h6 class="mb-1 subject-title">{{ $subject->title }}</h6>
+                                                <h6 class="mb-1 subject-title">
+                                                    {{ $subject->title }}
+                                                    @if($subject->is_external)
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="bi bi-building"></i> {{ __('app.external') }}
+                                                        </span>
+                                                    @endif
+                                                </h6>
                                                 <small class="text-muted d-block">
                                                     <i class="fas fa-chalkboard-teacher"></i>
-                                                    {{ __('app.teacher') }}: {{ $subject->teacher->name ?? __('app.not_assigned') }}
+                                                    @if($subject->is_external)
+                                                        {{ __('app.created_by') }}: {{ $subject->student->name ?? __('app.unknown') }}
+                                                        @if($subject->company_name)
+                                                            ({{ $subject->company_name }})
+                                                        @endif
+                                                    @else
+                                                        {{ __('app.teacher') }}: {{ $subject->teacher->name ?? __('app.not_assigned') }}
+                                                    @endif
                                                 </small>
                                                 @if($subject->description)
                                                     <small class="text-muted d-block mt-1 subject-description">{{ Str::limit($subject->description, 120) }}</small>

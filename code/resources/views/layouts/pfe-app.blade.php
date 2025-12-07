@@ -466,8 +466,11 @@
                                         <i class="bi bi-mortarboard me-1"></i> {{ __('app.academic_management') }}
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item {{ request()->routeIs('subjects*') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects*') && !request()->routeIs('subjects.external-list') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
                                             <i class="bi bi-journal-text me-2"></i> {{ __('app.subjects') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.external-list') ? 'active' : '' }}" href="{{ route('subjects.external-list') }}">
+                                            <i class="bi bi-building me-2"></i> {{ __('app.external_subjects') }}
                                         </a></li>
                                         <li><a class="dropdown-item {{ request()->routeIs('admin.teams*', 'teams*') ? 'active' : '' }}" href="{{ route('admin.teams') }}">
                                             <i class="bi bi-people me-2"></i> {{ __('app.teams') }}
@@ -542,6 +545,9 @@
                                         <li><a class="dropdown-item {{ request()->routeIs('subjects.index') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
                                             <i class="bi bi-list-ul me-2"></i> {{ __('app.subject_list') }}
                                         </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.external-list') ? 'active' : '' }}" href="{{ route('subjects.external-list') }}">
+                                            <i class="bi bi-building me-2"></i> {{ __('app.external_subjects') }}
+                                        </a></li>
                                         <li><a class="dropdown-item {{ request()->routeIs('subjects.create') ? 'active' : '' }}" href="{{ route('subjects.create') }}">
                                             <i class="bi bi-plus-circle me-2"></i> {{ __('app.create_subject') }}
                                         </a></li>
@@ -572,6 +578,9 @@
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item {{ request()->routeIs('subjects.index') ? 'active' : '' }}" href="{{ route('subjects.index') }}">
                                             <i class="bi bi-list-ul me-2"></i> {{ __('app.subject_list') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.external-list') ? 'active' : '' }}" href="{{ route('subjects.external-list') }}">
+                                            <i class="bi bi-building me-2"></i> {{ __('app.external_subjects') }}
                                         </a></li>
                                         <li><a class="dropdown-item {{ request()->routeIs('subjects.create') ? 'active' : '' }}" href="{{ route('subjects.create') }}">
                                             <i class="bi bi-plus-circle me-2"></i> {{ __('app.create_subject') }}
@@ -607,15 +616,22 @@
                                     </ul>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('teams*') && !request()->routeIs('teams.subject-preferences*') ? 'active' : '' }}" href="{{ route('teams.index') }}">
+                                    @php
+                                        $userTeam = auth()->user()->activeTeam();
+                                        $myTeamRoute = $userTeam ? route('teams.show', $userTeam) : route('teams.index');
+                                    @endphp
+                                    <a class="nav-link {{ request()->routeIs('teams*') && !request()->routeIs('teams.subject-preferences*') ? 'active' : '' }}" href="{{ $myTeamRoute }}">
                                         <i class="bi bi-people me-1"></i> {{ __('app.my_team') }}
                                     </a>
                                 </li>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->routeIs('external-documents*', 'subjects.create') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                                    <a class="nav-link dropdown-toggle {{ request()->routeIs('external-documents*', 'subjects.create', 'subjects.external-list') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                                         <i class="bi bi-building me-1"></i> {{ __('External Subject') }}
                                     </a>
                                     <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item {{ request()->routeIs('subjects.external-list') ? 'active' : '' }}" href="{{ route('subjects.external-list') }}">
+                                            <i class="bi bi-building me-2"></i> {{ __('app.external_subjects') }}
+                                        </a></li>
                                         <li><a class="dropdown-item {{ request()->routeIs('subjects.create') ? 'active' : '' }}" href="{{ route('subjects.create') }}">
                                             <i class="bi bi-plus-circle me-2"></i> {{ __('Propose External Subject') }}
                                         </a></li>

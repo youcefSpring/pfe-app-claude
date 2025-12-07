@@ -326,8 +326,18 @@
                             <div class="alert alert-info">
                                 <h6><i class="fas fa-info-circle"></i> Subject Details</h6>
                                 <p><strong>Title:</strong> {{ $subject->title }}</p>
-                                <p><strong>Teacher:</strong> {{ $subject->teacher->name }}</p>
-                                <p class="mb-0"><strong>Team:</strong> {{ $userTeam->name }}</p>
+                                @if($subject->is_external)
+                                    <p><strong>Type:</strong> <span class="badge bg-warning text-dark">{{ __('app.external') }}</span></p>
+                                    @if($subject->team)
+                                        <p><strong>Proposed by Team:</strong> {{ $subject->team->name }}</p>
+                                    @endif
+                                    @if($subject->company_name)
+                                        <p><strong>Company:</strong> {{ $subject->company_name }}</p>
+                                    @endif
+                                @else
+                                    <p><strong>Teacher:</strong> {{ $subject->teacher?->name ?? __('app.not_assigned') }}</p>
+                                @endif
+                                <p class="mb-0"><strong>Your Team:</strong> {{ $userTeam->name }}</p>
                             </div>
 
                             <div class="mb-3">
