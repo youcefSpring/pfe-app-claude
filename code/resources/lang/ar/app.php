@@ -143,7 +143,7 @@ return [
     'validation_feedback' => 'ملاحظات التحقق',
 
     'bibliograhy' =>'المراجع',
-    'bibliograhy_list'=>'',
+    'bibliograhy_list'=>'قائمة المراجع',
 
     // Teams Management
     'create_team' => 'إنشاء فريق',

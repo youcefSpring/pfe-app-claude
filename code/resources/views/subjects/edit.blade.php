@@ -92,7 +92,7 @@
                               name="bibliograhy"
                               rows="5"
                               required
-                              placeholder="{{ __('app.describe_bibliograhy') }}">>{{ old('bibliograhy', $subject->bibliograhy) }}</textarea>
+                              placeholder="{{ __('app.bibliograhy_list') }}">>{{ old('bibliograhy', $subject->bibliograhy) }}</textarea>
                     @error('plan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
