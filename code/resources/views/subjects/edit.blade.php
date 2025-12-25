@@ -80,7 +80,23 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
+ <!-- Project bibliograhy -->
+                <div class="mb-0">
+                    <label for="plan" class="form-label fw-semibold">
+                        <i class="bi bi-diagram-3 text-primary me-2"></i>
+                        {{ __('app.bibliograhy') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control @error('bibliograhy') is-invalid @enderror"
+                              id="bibliograhy"
+                              name="bibliograhy"
+                              rows="5"
+                              required
+                              placeholder="{{ __('app.describe_bibliograhy') }}">>{{ old('bibliograhy', $subject->bibliograhy) }}</textarea>
+                    @error('plan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
                                 <!-- Co-supervisor -->
                                 <div class="mb-3">
                                     <label for="co_supervisor_name" class="form-label">{{ __('app.co_supervisor') }} ({{ __('app.optional') }})</label>

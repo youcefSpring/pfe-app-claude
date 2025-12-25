@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->text('keywords');
             $table->text('tools')->nullable();
+            $table->text('bibliograhy')->nullable();
             $table->text('plan')->nullable();
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
             $table->enum('status', ['draft', 'pending_validation', 'validated', 'rejected', 'needs_correction'])->default('draft');

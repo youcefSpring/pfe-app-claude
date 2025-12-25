@@ -24,6 +24,7 @@ class Subject extends Model
         'description',
         'keywords',
         'tools',
+        'bibliography',
         'plan',
         'teacher_id',
         'co_supervisor_name',

@@ -142,6 +142,9 @@ return [
     'target_grade' => 'الدرجة المستهدفة',
     'validation_feedback' => 'ملاحظات التحقق',
 
+    'bibliograhy' =>'المراجع',
+    'bibliograhy_list'=>'',
+
     // Teams Management
     'create_team' => 'إنشاء فريق',
     'edit_team' => 'تعديل الفريق',

@@ -1619,6 +1619,8 @@ return [
     'subject_plan' => 'Subject Plan',
     'validation_feedback' => 'Validation Feedback',
 
+    'bibliograhy' => 'Bibliography',
+    'bibliograhy_list'=>'Bibliography List',
     // Teams Management
     'team_details' => 'Team Details',
 

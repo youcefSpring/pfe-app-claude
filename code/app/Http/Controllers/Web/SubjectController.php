@@ -149,6 +149,7 @@ class SubjectController extends Controller
             'description' => 'required|string',
             'keywords' => 'required|string|max:500',
             'tools' => 'nullable|string|max:500',
+            'bibliography' => 'nullable|string|max:500',
             'plan' => 'required|string',
             'specialities' => 'required|array|min:1',
             'specialities.*' => 'exists:specialities,id',
@@ -208,6 +209,11 @@ class SubjectController extends Controller
         // Ensure tools has a default value if not provided
         if (empty($validated['tools'])) {
             $validated['tools'] = '';
+        }
+
+        // Ensure bibliography has a default value if not provided
+        if (empty($validated['bibliography'])) {
+            $validated['bibliography'] = '';
         }
 
         // Remove specialities from validated data as it's handled separately

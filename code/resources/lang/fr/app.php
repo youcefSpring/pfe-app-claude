@@ -91,6 +91,8 @@ return [
     // Subject Requests
     'subject_requests' => 'Demandes de Sujets',
     
+    'bibliograhy' => 'Bibliographie',
+    'bibliograhy_list'=>'Liste du Bibliographie',
     // Student Alerts
     'student_alerts' => 'Alertes Étudiants',
     
