@@ -115,7 +115,7 @@
                                 </div>
 
                                 <!-- Specialities Selection -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="specialities" class="form-label">{{ __('app.target_specialities') }} <span class="text-danger">*</span></label>
                                     <select class="form-select @error('specialities') is-invalid @enderror"
                                             id="specialities"
@@ -133,7 +133,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <small class="form-text text-muted">{{ __('app.select_specialities_can_work_on_subject') }}</small>
-                                </div>
+                                </div> -->
                             </div>
 
                             <div class="col-md-4">

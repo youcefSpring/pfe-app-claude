@@ -78,9 +78,9 @@
                                             required
                                             autocomplete="current-password"
                                             placeholder="{{ __('app.enter_password') }}">
-                                     <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
-                                         <i class="bi bi-eye" id="passwordToggleIcon"></i>
-                                     </button>
+                                      <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                          <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                                      </button>
                                 </div>
                                 @error('password')
                                     <div class="invalid-feedback">
@@ -327,6 +327,9 @@
 
 @section('scripts')
 <script>
+
+
+
     // Define user credentials for each role
     const userCredentials = {
         admin: {
@@ -401,7 +404,7 @@
         emailInput.focus();
         emailInput.blur();
 
-        setTimeout(function() {
+        setTimeout(() => {
             emailInput.classList.remove('is-valid');
             passwordInput.classList.remove('is-valid');
         }, 1500);
@@ -424,7 +427,7 @@
             },
             credentials: 'same-origin'
         })
-        .then(function(response) {
+        .then(response => {
             console.log('Language change response:', response.status);
             if (response.ok) {
                 console.log('Language change successful, reloading page');
@@ -434,30 +437,12 @@
                 console.error('Language change failed:', response.status);
             }
         })
-        .catch(function(error) {
+        .catch(error => {
             console.error('Error changing language:', error);
         });
     }
 
     console.log('Login page script starting...');
-
-    // Password toggle function
-    window.togglePassword = function() {
-        const passwordInput = document.getElementById('password');
-        const toggleIcon = document.getElementById('passwordToggleIcon');
-        
-        if (passwordInput && toggleIcon) {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bi-eye');
-                toggleIcon.classList.add('bi-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bi-eye-slash');
-                toggleIcon.classList.add('bi-eye');
-            }
-        }
-    };
 
     // DOM ready check for login page features
     if (document.readyState === 'loading') {
@@ -488,15 +473,81 @@
         } else {
             console.log('No language links found with selector #languageDropdownMenu a[data-locale]');
         }
+        console.log('DOM content loaded for login page');
         
+        // Initialize password visibility toggle using class selectors to avoid ID conflicts
+        console.log('Setting up password toggle initialization...');
+        
+        // Use a more robust approach with delegation and class selectors
+        setTimeout(function() {
+            console.log('Checking for password toggle elements...');
+            
+            // Find the password input and toggle button using the classes we set
+            const passwordInput = document.querySelector('#loginPassword');
+            const toggleButton = document.querySelector('button[data-password-toggle]');
+            const toggleIcon = toggleButton ? toggleButton.querySelector('.password-toggle-icon') : null;
+
+            console.log('Elements found:', {
+                passwordInput: !!passwordInput,
+                toggleButton: !!toggleButton,
+                toggleIcon: !!toggleIcon
+            });
+
+            if (passwordInput && toggleButton) {
+                console.log('Password toggle elements found, adding event listener');
+                
+                // Use event delegation approach with dataset attribute
+                toggleButton.addEventListener('click', function(e) {
+                    console.log('PASSWORD TOGGLE CLICKED - DETAILED LOGGING');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentType = passwordInput.getAttribute('type');
+                    console.log('Current password input type:', currentType);
+                    
+                    const newType = currentType === 'password' ? 'text' : 'password';
+                    console.log('Setting new type:', newType);
+                    
+                    passwordInput.setAttribute('type', newType);
+                    console.log('Password input type changed to:', passwordInput.getAttribute('type'));
+
+                    if (toggleIcon) {
+                        if (newType === 'text') {
+                            console.log('Switching to text mode');
+                            toggleIcon.classList.remove('bi-eye');
+                            toggleIcon.classList.add('bi-eye-slash');
+                            this.setAttribute('title', 'Hide password');
+                            console.log('Password is now visible');
+                        } else {
+                            console.log('Switching to password mode');
+                            toggleIcon.classList.remove('bi-eye-slash');
+                            toggleIcon.classList.add('bi-eye');
+                            this.setAttribute('title', 'Show password');
+                            console.log('Password is now hidden');
+                        }
+                    }
+                    
+                    // Focus back on the password field to ensure proper UX
+                    passwordInput.focus();
+                });
+                
+                console.log('Password toggle event listener added successfully');
+            } else {
+                console.error('ERROR: Could not find required password toggle elements');
+                console.log('Looking for #loginPassword input and button[data-password-toggle]');
+            }
+        }, 100); // Small delay to ensure elements are rendered
+
+        // Translation text
+        const signingInText = {{ json_encode(__('app.signing_in')) }};
+
         // Form validation feedback
         const form = document.querySelector('form');
         if (form) {
             form.addEventListener('submit', function() {
                 const submitBtn = form.querySelector('button[type="submit"]');
                 if (submitBtn) {
-                    // Use static text to avoid Blade syntax issues
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Signing in...';
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>' + signingInText;
                     submitBtn.disabled = true;
                 }
             });
@@ -517,7 +568,25 @@
         }, 100); // Small delay to ensure main layout script runs first
         
         console.log('DOM Content Loaded function completed');
-    }
+    });
+    
+    // Password toggle function
+    window.togglePassword = function() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('passwordToggleIcon');
+        
+        if (passwordInput && toggleIcon) {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+    };
     
     console.log('Main script setup completed');
 </script>

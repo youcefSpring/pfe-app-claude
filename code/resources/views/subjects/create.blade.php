@@ -214,19 +214,18 @@
                     </div>
                 </div>
 
-                <!-- Specialities -->
-                <div class="mb-4">
+                 <!-- Specialities -->
+                <!-- <div class="mb-4">
                     <label for="specialities" class="form-label fw-semibold">
                         <i class="bi bi-diagram-2 text-info me-2"></i>
                         {{ __('app.target_specialities') }}
                         <span class="text-danger">*</span>
                     </label>
-                    <select class="form-select @error('specialities') is-invalid @enderror"
+                    <select class="form-select enhanced-multiselect @error('specialities') is-invalid @enderror"
                             id="specialities"
                             name="specialities[]"
                             multiple
-                            required
-                            size="4">
+                            required>
                         @foreach($specialities as $speciality)
                             <option value="{{ $speciality->id }}"
                                 {{ in_array($speciality->id, old('specialities', [])) ? 'selected' : '' }}>
@@ -234,14 +233,19 @@
                             </option>
                         @endforeach
                     </select>
-                    <small class="form-text text-muted">
-                        <i class="bi bi-info-circle me-1"></i>
-                        {{ __('app.hold_ctrl_to_select_multiple') }}
-                    </small>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            {{ __('app.hold_ctrl_to_select_multiple') }}
+                        </small>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleSpecialitySelection()">
+                            <i class="bi bi-check-all me-1"></i>{{ __('app.select_all') }}
+                        </button>
+                    </div>
                     @error('specialities')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
 
                 <!-- Subject Type -->
                 <div class="mb-0">
@@ -397,19 +401,18 @@
                     </div>
                 </div>
 
-                <!-- Specialities for Students -->
+                 <!-- Specialities for Students -->
                 <div class="mb-0">
                     <label for="specialities_student" class="form-label fw-semibold">
                         <i class="bi bi-diagram-2 text-success me-2"></i>
                         {{ __('app.target_specialities') }}
                         <span class="text-danger">*</span>
                     </label>
-                    <select class="form-select @error('specialities') is-invalid @enderror"
+                    <select class="form-select enhanced-multiselect @error('specialities') is-invalid @enderror"
                             id="specialities_student"
                             name="specialities[]"
                             multiple
-                            required
-                            size="4">
+                            required>
                         @foreach($specialities as $speciality)
                             <option value="{{ $speciality->id }}"
                                 {{ in_array($speciality->id, old('specialities', [])) ? 'selected' : '' }}>
@@ -417,12 +420,17 @@
                             </option>
                         @endforeach
                     </select>
-                    <small class="form-text text-muted">
-                        <i class="bi bi-info-circle me-1"></i>
-                        {{ __('app.hold_ctrl_to_select_multiple') }}
-                    </small>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            {{ __('app.hold_ctrl_to_select_multiple') }}
+                        </small>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleSpecialitySelectionStudent()">
+                            <i class="bi bi-check-all me-1"></i>{{ __('app.select_all') }}
+                        </button>
+                    </div>
                     @error('specialities')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -472,17 +480,44 @@
         margin-bottom: 0.5rem;
     }
 
-    .form-select[multiple] {
-        border-radius: 0.375rem;
-    }
-
-    .form-select[multiple] option {
+    /* Enhanced multi-select styling */
+    .enhanced-multiselect {
+        height: auto !important;
+        min-height: 120px !important;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        border: 2px solid #e9ecef;
+        border-radius: 0.5rem;
         padding: 0.5rem;
-        margin: 0.2rem 0;
+        transition: all 0.3s ease;
     }
 
-    .form-select[multiple] option:hover {
-        background-color: #f0f0f0;
+    .enhanced-multiselect:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .enhanced-multiselect option {
+        padding: 0.75rem 0.5rem !important;
+        margin: 0.25rem 0 !important;
+        border-radius: 0.375rem !important;
+        border: 1px solid transparent !important;
+        background-color: #f8f9fa !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .enhanced-multiselect option:hover {
+        background-color: #e9ecef !important;
+        border-color: #dee2e6 !important;
+        transform: translateX(2px);
+    }
+
+    .enhanced-multiselect option:checked {
+        background-color: #0d6efd !important;
+        color: white !important;
+        border-color: #0d6efd !important;
+        font-weight: 600;
     }
 
     .card {
@@ -517,6 +552,19 @@
     .form-check-lg .form-check-label {
         font-size: 1rem;
         padding-left: 0.5rem;
+    }
+
+    /* Validation feedback for multi-select */
+    .enhanced-multiselect.is-invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .invalid-feedback.d-block {
+        display: block !important;
     }
 </style>
 @endpush
@@ -573,6 +621,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/multiselect.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('createSubjectForm');
@@ -584,14 +633,14 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.classList.add('btn-loading-compact');
 
         // Re-enable after 5 seconds in case of validation errors
-        setTimeout(() => {
+        setTimeout(function() {
             submitButton.disabled = false;
             submitButton.classList.remove('btn-loading-compact');
         }, 5000);
     });
 
     // Auto-resize textareas
-    document.querySelectorAll('textarea').forEach(textarea => {
+    document.querySelectorAll('textarea').forEach(function(textarea) {
         textarea.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
