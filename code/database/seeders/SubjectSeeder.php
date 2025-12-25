@@ -21,7 +21,7 @@ class SubjectSeeder extends Seeder
                 'keywords' => 'machine learning, recommendation systems, e-commerce, data analysis, Python, TensorFlow',
                 'tools' => 'Python, TensorFlow/PyTorch, web frameworks, databases, APIs',
                 'plan' => 'Phase 1: Data collection and analysis. Phase 2: Model development. Phase 3: Web application creation.',
-                'status' => 'draft',
+                'status' => 'pending_validation',
                 'teacher_id' => $csTeachers->random()->id,
             ],
             [
@@ -30,7 +30,7 @@ class SubjectSeeder extends Seeder
                 'keywords' => 'apprentissage automatique, systèmes de recommandation, commerce électronique, analyse de données, Python, TensorFlow',
                 'tools' => 'Python, TensorFlow/PyTorch, frameworks web, bases de données, APIs',
                 'plan' => 'Phase 1: Collecte et analyse des données. Phase 2: Développement du modèle. Phase 3: Création de l\'application web.',
-                'status' => 'draft',
+                'status' => 'pending_validation',
                 'teacher_id' => $csTeachers->random()->id,
             ],[
                 'title' => 'Système de Recommandation E-commerce ',
