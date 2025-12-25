@@ -2,6 +2,10 @@
 
 @section('title', __('app.login'))
 
+@section('styles')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('content')
 <section class="py-5 bg-light min-vh-100 d-flex align-items-center">
     <div class="container">
@@ -9,9 +13,50 @@
             <div class="col-md-6 col-lg-5">
                 <div class="card shadow-sm">
                     <div class="card-body p-5">
+                        <!-- Top Navigation Bar -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <i class="bi bi-mortarboard text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                            
+                            <div class="d-flex align-items-center" style="gap: 0.25rem;">
+                                <!-- Custom Language Switcher for Login Page -->
+                                @php
+                                    $currentLocale = app()->getLocale();
+                                    $availableLocales = config('app.available_locales', []);
+                                    $currentLanguage = $availableLocales[$currentLocale] ?? $availableLocales['en'];
+                                @endphp
+
+                                <!-- <div class="dropdown">
+                                    <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center justify-content-center" type="button"
+                                            id="loginLanguageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span>{{ $currentLanguage['flag'] }}</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loginLanguageDropdown" id="languageDropdownMenu">
+                                        @foreach($availableLocales as $locale => $info)
+                                            <li>
+                                                <a class="dropdown-item d-flex align-items-center {{ $locale === $currentLocale ? 'active' : '' }}"
+                                                   href="#" data-locale="{{ $locale }}">
+                                                    <span class="me-2">{{ $info['flag'] }}</span>
+                                                    <span>{{ $info['name'] }}</span>
+                                                    @if($locale === $currentLocale)
+                                                        <i class="bi bi-check-lg ms-auto text-success"></i>
+                                                    @endif
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div> -->
+
+                                <!-- Dark Mode Toggle -->
+                                <button class="btn btn-outline-secondary dark-mode-toggle" type="button" id="darkModeToggle" title="Toggle Dark Mode">
+                                    <i class="bi bi-moon-stars" id="darkModeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Header -->
                         <div class="text-center mb-4">
-                            <i class="bi bi-mortarboard text-primary mb-3" style="font-size: 3rem;"></i>
                             <h2 class="h3 mb-3">{{ __('app.welcome_back') }}</h2>
                             <p class="text-muted">{{ __('app.sign_in_message') }}</p>
                         </div>
@@ -51,16 +96,20 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-lock"></i>
                                     </span>
-                                    <input id="password"
-                                           type="password"
-                                           class="form-control @error('password') is-invalid @enderror"
-                                           name="password"
-                                           required
-                                           autocomplete="current-password"
-                                           placeholder="{{ __('app.enter_password') }}">
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                                    </button>
+                                     <input id="password"
+                                            type="password"
+                                            class="form-control @error('password') is-invalid @enderror"
+                                            name="password"
+                                            required
+                                            autocomplete="current-password"
+                                            placeholder="{{ __('app.enter_password') }}">
+                                     <button class="btn btn-outline-secondary" type="button" 
+                                     onclick="
+            const p = document.getElementById('password');
+            p.type = (p.type === 'password') ? 'text' : 'password';
+        ">
+                                         <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                                     </button>
                                 </div>
                                 @error('password')
                                     <div class="invalid-feedback">
@@ -279,11 +328,37 @@
         background: rgba(255, 255, 255, 0.8);
         font-weight: 500;
     }
+
+    /* Dark mode toggle button styling */
+    .dark-mode-toggle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        background: transparent;
+        padding: 0;
+    }
+
+    .dark-mode-toggle:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    [data-bs-theme="dark"] .dark-mode-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
 </style>
 @endsection
 
 @section('scripts')
 <script>
+
+
+
     // Define user credentials for each role
     const userCredentials = {
         admin: {
@@ -366,34 +441,161 @@
         console.log('Form filled successfully');
     };
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        const toggleIcon = document.getElementById('togglePasswordIcon');
+    // Function to change language via AJAX - in global scope to avoid conflicts
+    function changeLanguage(locale) {
+        console.log('changeLanguage function called with locale:', locale);
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        const tokenValue = csrfToken ? csrfToken.getAttribute('content') : null;
+        
+        fetch(`/language/${locale}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': tokenValue,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            console.log('Language change response:', response.status);
+            if (response.ok) {
+                console.log('Language change successful, reloading page');
+                // Reload the page to apply new language translations
+                location.reload();
+            } else {
+                console.error('Language change failed:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('Error changing language:', error);
+        });
+    }
 
-        if (togglePassword) {
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
+    console.log('Login page script starting...');
 
-                if (type === 'text') {
-                    toggleIcon.classList.remove('bi-eye');
-                    toggleIcon.classList.add('bi-eye-slash');
-                } else {
-                    toggleIcon.classList.remove('bi-eye-slash');
-                    toggleIcon.classList.add('bi-eye');
+    // DOM ready check for login page features
+    if (document.readyState === 'loading') {
+        // Loading hasn't finished yet
+        document.addEventListener('DOMContentLoaded', initializeLoginPageFeatures);
+    } else {
+        // DOM is already loaded
+        initializeLoginPageFeatures();
+    }
+
+    function initializeLoginPageFeatures() {
+        console.log('Initializing login page features...');
+        
+        // Add event listeners to language dropdown items
+        const languageLinks = document.querySelectorAll('#languageDropdownMenu a[data-locale]');
+        console.log('Found', languageLinks.length, 'language links');
+        
+        if (languageLinks.length > 0) {
+            languageLinks.forEach(function(link, index) {
+                console.log('Adding event listener to language link', index, link.getAttribute('data-locale'));
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Language link clicked, locale:', this.getAttribute('data-locale'));
+                    const locale = this.getAttribute('data-locale');
+                    changeLanguage(locale);
+                });
+            });
+        } else {
+            console.log('No language links found with selector #languageDropdownMenu a[data-locale]');
+        }
+        console.log('DOM content loaded for login page');
+        
+        // Initialize password visibility toggle using class selectors to avoid ID conflicts
+        console.log('Setting up password toggle initialization...');
+        
+        // Use a more robust approach with delegation and class selectors
+        setTimeout(function() {
+            console.log('Checking for password toggle elements...');
+            
+            // Find the password input and toggle button using the classes we set
+            const passwordInput = document.querySelector('#loginPassword');
+            const toggleButton = document.querySelector('button[data-password-toggle]');
+            const toggleIcon = toggleButton ? toggleButton.querySelector('.password-toggle-icon') : null;
+
+            console.log('Elements found:', {
+                passwordInput: !!passwordInput,
+                toggleButton: !!toggleButton,
+                toggleIcon: !!toggleIcon
+            });
+
+            if (passwordInput && toggleButton) {
+                console.log('Password toggle elements found, adding event listener');
+                
+                // Use event delegation approach with dataset attribute
+                toggleButton.addEventListener('click', function(e) {
+                    console.log('PASSWORD TOGGLE CLICKED - DETAILED LOGGING');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentType = passwordInput.getAttribute('type');
+                    console.log('Current password input type:', currentType);
+                    
+                    const newType = currentType === 'password' ? 'text' : 'password';
+                    console.log('Setting new type:', newType);
+                    
+                    passwordInput.setAttribute('type', newType);
+                    console.log('Password input type changed to:', passwordInput.getAttribute('type'));
+
+                    if (toggleIcon) {
+                        if (newType === 'text') {
+                            console.log('Switching to text mode');
+                            toggleIcon.classList.remove('bi-eye');
+                            toggleIcon.classList.add('bi-eye-slash');
+                            this.setAttribute('title', 'Hide password');
+                            console.log('Password is now visible');
+                        } else {
+                            console.log('Switching to password mode');
+                            toggleIcon.classList.remove('bi-eye-slash');
+                            toggleIcon.classList.add('bi-eye');
+                            this.setAttribute('title', 'Show password');
+                            console.log('Password is now hidden');
+                        }
+                    }
+                    
+                    // Focus back on the password field to ensure proper UX
+                    passwordInput.focus();
+                });
+                
+                console.log('Password toggle event listener added successfully');
+            } else {
+                console.error('ERROR: Could not find required password toggle elements');
+                console.log('Looking for #loginPassword input and button[data-password-toggle]');
+            }
+        }, 100); // Small delay to ensure elements are rendered
+
+        // Form validation feedback
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>{{ __('app.signing_in') }}';
+                    submitBtn.disabled = true;
                 }
             });
         }
 
-        // Form validation feedback
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function() {
-            const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>{{ __('app.signing_in') }}';
-            submitBtn.disabled = true;
-        });
+        // Update dark mode icon after the main layout scripts have run
+        setTimeout(function() {
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            const htmlElement = document.documentElement;
+            if (darkModeIcon) {
+                const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                if (currentTheme === 'dark') {
+                    darkModeIcon.className = 'bi bi-sun-fill';
+                } else {
+                    darkModeIcon.className = 'bi bi-moon-stars';
+                }
+            }
+        }, 100); // Small delay to ensure main layout script runs first
+        
+        console.log('DOM Content Loaded function completed');
     });
+    
+    console.log('Main script setup completed');
 </script>
 @endsection

@@ -124,10 +124,10 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Students can create subjects only if enabled in settings
-        Route::middleware(['role:student', 'check.student.subject'])->group(function () {
+        // Route::middleware(['role:student,teacher', 'check.student.subject'])->group(function () {
             Route::get('/create', [SubjectController::class, 'create'])->name('create');
             Route::post('/', [SubjectController::class, 'store'])->name('store');
-        });
+        // });
 
         // Dynamic route for modal content
         Route::get('/{subject}/modal', [SubjectController::class, 'modal'])->name('modal');
