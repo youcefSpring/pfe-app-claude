@@ -257,6 +257,8 @@ return [
     'complete_profile_setup_description' => 'Please complete your profile setup to access all features of the system.',
     'fill_all_required_fields' => 'Please fill all required fields',
     'submission_error' => 'An error occurred during submission. Please try again.',
+    'date_too_early' => 'Date cannot be more than 20 years ago',
+    'date_cannot_be_future' => 'Date cannot be in the future',
     'setup_will_collect' => 'This setup will collect:',
     'birth_date_and_place' => 'Birth date and place of birth',
     'birth_certificate_upload' => 'Birth certificate (PDF or image)',

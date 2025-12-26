@@ -65,19 +65,7 @@
                                     @enderror
 
 
-<script>
-  const input = document.getElementById("date_naissance");
 
-  const today = new Date();
-  const maxDate = today.toISOString().split("T")[0];
-
-  const minDate = new Date();
-  minDate.setFullYear(today.getFullYear() - 20);
-  const minDateStr = minDate.toISOString().split("T")[0];
-
-  input.min = minDateStr;
-  input.max = maxDate;
-</script>
 
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -268,6 +256,19 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+  const input = document.getElementById("date_naissance");
+   
+  const today = new Date();
+  const maxDate = today.toISOString().split("T")[0];
+
+  const minDate = new Date();
+  minDate.setFullYear(today.getFullYear() - 20);
+  const minDateStr = minDate.toISOString().split("T")[0];
+
+  input.min = minDateStr;
+  input.max = maxDate;
+
     const form = document.getElementById('setup-form');
     const currentStepSpan = document.getElementById('current-step');
     const progressBar = document.getElementById('progress-bar');

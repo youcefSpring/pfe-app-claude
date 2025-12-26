@@ -563,6 +563,8 @@ return [
     'complete_profile_setup' => 'Compléter le Profil',
     'fill_all_required_fields' => 'Veuillez remplir tous les champs obligatoires',
     'submission_error' => 'Une erreur est survenue lors de la soumission. Veuillez réessayer.',
+    'date_too_early' => 'La date ne peut pas remonter à plus de 20 ans',
+    'date_cannot_be_future' => 'La date ne peut pas être dans le futur',
     'welcome_to_setup' => 'Bienvenue dans la Configuration',
     'welcome_to_profile_setup' => 'Bienvenue dans la Configuration du Profil',
     'complete_profile_setup_description' => 'Veuillez compléter la configuration de votre profil pour accéder à toutes les fonctionnalités du système.',

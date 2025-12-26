@@ -2189,6 +2189,8 @@ return [
     'complete_profile_setup' => 'إكمال الملف الشخصي',
     'fill_all_required_fields' => 'يرجى ملء جميع الحقول المطلوبة',
     'submission_error' => 'حدث خطأ أثناء التقديم. يرجى المحاولة مرة أخرى.',
+    'date_too_early' => 'لا يمكن أن يكون التاريخ قبل 20 عاماً',
+    'date_cannot_be_future' => 'لا يمكن أن يكون التاريخ في المستقبل',
     'welcome_to_setup' => 'مرحباً بك في الإعداد',
     'welcome_to_profile_setup' => 'مرحباً بك في إعداد الملف الشخصي',
     'complete_profile_setup_description' => 'يرجى إكمال إعداد ملفك الشخصي للوصول إلى جميع ميزات النظام.',

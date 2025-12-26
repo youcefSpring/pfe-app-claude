@@ -16,6 +16,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TeamController extends Controller
 {
@@ -217,7 +218,7 @@ class TeamController extends Controller
         });
 
         // Apply speciality filter only if speciality relationships exist
-        $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+        $hasSpecialityRelationships = DB::table('subject_specialities')->exists();
 
         if ($hasSpecialityRelationships) {
             // Get all team members' speciality IDs
@@ -402,7 +403,7 @@ class TeamController extends Controller
     /**
      * Show the form for managing subject preferences for the team
      */
-    public function selectSubjectForm(Team $team): View
+    public function selectSubjectForm(Team $team): View|RedirectResponse
     {
         $user = Auth::user();
 
@@ -475,7 +476,7 @@ class TeamController extends Controller
         });
 
         // Apply speciality filter only if speciality relationships exist
-        $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+        $hasSpecialityRelationships = DB::table('subject_specialities')->exists();
 
         if ($hasSpecialityRelationships) {
             // Get all team members' speciality IDs
@@ -556,7 +557,7 @@ class TeamController extends Controller
         });
 
         // Apply speciality filter only if speciality relationships exist
-        $hasSpecialityRelationships = \DB::table('subject_specialities')->exists();
+        $hasSpecialityRelationships = DB::table('subject_specialities')->exists();
 
         if ($hasSpecialityRelationships) {
             // Get all team members' speciality IDs
@@ -691,7 +692,7 @@ class TeamController extends Controller
             'subject_ids.*' => 'exists:subjects,id'
         ]);
 
-        \Log::info('Updating preference order', [
+        Log::info('Updating preference order', [
             'team_id' => $team->id,
             'user_id' => $user->id,
             'subject_ids' => $request->subject_ids
@@ -753,7 +754,7 @@ class TeamController extends Controller
 
         try {
             // Use transaction to ensure data consistency
-            \DB::transaction(function () use ($team, $validated) {
+            DB::transaction(function () use ($team, $validated) {
                 // Map form fields to database columns
                 $projectData = [
                     'company' => $validated['company_name'],
@@ -772,7 +773,7 @@ class TeamController extends Controller
             return redirect()->route('teams.show', $team)
                 ->with('success', __('app.external_project_submitted'));
         } catch (\Exception $e) {
-            \Log::error('Failed to submit external project: ' . $e->getMessage());
+            Log::error('Failed to submit external project: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', __('app.external_project_submission_failed'));
@@ -798,7 +799,7 @@ class TeamController extends Controller
 
         // ✅ FIXED: Use SettingsService instead of hardcoded value
         $leader = $team->leader;
-        $studentLevel = $leader ? $leader->student_level : 'licence_3';
+        $studentLevel = $leader ? ($leader->student_level ?? 'licence_3') : 'licence_3';
         $maxSize = \App\Services\SettingsService::getMaxTeamSize($studentLevel);
 
         if ($team->members->count() >= $maxSize) {
