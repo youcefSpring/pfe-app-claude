@@ -58,6 +58,7 @@
                                            class="form-control form-control-lg @error('date_naissance') is-invalid @enderror"
                                            id="date_naissance"
                                            name="date_naissance"
+                                           max="{{ now()->subYears(20)->toDateString() }}"
                                            value="{{ old('date_naissance', $user->date_naissance) }}"
                                            required>
                                     @error('date_naissance')
@@ -257,17 +258,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-  const input = document.getElementById("date_naissance");
-   
-  const today = new Date();
-  const maxDate = today.toISOString().split("T")[0];
-
-  const minDate = new Date();
-  minDate.setFullYear(today.getFullYear() - 20);
-  const minDateStr = minDate.toISOString().split("T")[0];
-
-  input.min = minDateStr;
-  input.max = maxDate;
+  
 
     const form = document.getElementById('setup-form');
     const currentStepSpan = document.getElementById('current-step');
