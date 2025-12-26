@@ -2200,7 +2200,7 @@ return [
     'licence_3_students' => 'طلاب الليسانس 3',
     'licence_3_requirements' => 'توفير 4 درجات من الفصول الدراسية السابقة (S1, S2, S3, S4)',
     'master_students' => 'طلاب الماستر',
-    'master_requirements' => 'توفير 2 درجات من السنوات السابقة (S1, S2)',
+    'master_requirements' => 'توفير 2 درجات من السنوات السابقة',
     'start_setup' => 'بدء الإعداد',
     'setup_takes_5_minutes' => 'هذا الإعداد يستغرق حوالي 5 دقائق',
     'step' => 'خطوة',

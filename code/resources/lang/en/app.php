@@ -265,7 +265,7 @@ return [
     'licence_3_students' => 'Licence 3 Students',
     'licence_3_requirements' => 'Need to provide 4 previous semester marks (S1, S2, S3, S4)',
     'master_students' => 'Master Students',
-    'master_requirements' => 'Need to provide 2 previous year marks (S1, S2)',
+    'master_requirements' => 'Need to provide 2 previous year marks',
     'start_setup' => 'Start Setup',
     'setup_takes_5_minutes' => 'This setup takes approximately 5 minutes',
     'step' => 'Step',

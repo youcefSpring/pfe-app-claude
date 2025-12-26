@@ -64,7 +64,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
 
-                                    <input type="date" id="dateInput" class="form-control">
 
 <script>
   const input = document.getElementById("date_naissance");
@@ -378,11 +377,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const marksContent = document.getElementById('marks-content');
         
         // Get required marks based on level
-        let requiredMarks = 2; // Default
+        let requiredMarks = 2; // Default for Master
         if (studentLevel === 'licence_3') {
-            requiredMarks = 2;
+            requiredMarks = 4; // Licence 3 needs 4 marks (S1, S2, S3, S4)
         } else if (studentLevel === 'master_1' || studentLevel === 'master_2') {
-            requiredMarks = 4;
+            requiredMarks = 2; // Master needs 2 marks (previous year)
         }
         
         let marksHtml = `

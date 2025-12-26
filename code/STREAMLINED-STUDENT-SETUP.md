@@ -59,6 +59,8 @@ public function streamlined(): View
 ### 2. Streamlined Flow
 - **Step 1**: Welcome message + Personal Information + Birth Certificate
 - **Step 2**: Dynamic marks entry based on student level
+  - Licence 3: 4 marks (S1, S2, S3, S4)
+  - Master 1 & 2: 2 marks (previous year)
 - **Step 3**: Completion summary with next steps
 
 ### 3. Smart Interactions

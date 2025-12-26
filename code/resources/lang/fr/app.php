@@ -574,7 +574,7 @@ return [
     'licence_3_students' => 'Étudiants Licence 3',
     'licence_3_requirements' => 'Besoin de fournir 4 notes des semestres précédents (S1, S2, S3, S4)',
     'master_students' => 'Étudiants Master',
-    'master_requirements' => 'Besoin de fournir 2 notes des années précédentes (S1, S2)',
+    'master_requirements' => 'Besoin de fournir 2 notes des années précédentes',
     'start_setup' => 'Commencer la Configuration',
     'setup_takes_5_minutes' => 'Cette configuration prend environ 5 minutes',
     'step' => 'Étape',
