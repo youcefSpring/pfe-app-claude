@@ -76,7 +76,7 @@ class SettingsService
             default => 'team_max_size_licence'
         };
 
-        return (int) self::get($key, $level === 'licence_3' ? 3 : 2);
+        return (int) self::get($key, $level === 'licence_3' ? 4 : 3);
     }
 
     // ============================================================================

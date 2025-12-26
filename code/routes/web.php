@@ -75,13 +75,16 @@ Route::middleware(['auth'])->group(function () {
     // =====================================================================
 
     Route::prefix('student/setup')->name('student.setup.')->middleware('check.registration')->group(function () {
-        Route::get('/welcome', [StudentSetupController::class, 'welcome'])->name('welcome');
-        Route::get('/personal-info', [StudentSetupController::class, 'personalInfo'])->name('personal-info');
+        Route::get('/streamlined', [StudentSetupController::class, 'streamlined'])->name('streamlined');
         Route::post('/personal-info', [StudentSetupController::class, 'storePersonalInfo'])->name('store-personal-info');
-        Route::get('/marks', [StudentSetupController::class, 'marks'])->name('marks');
         Route::post('/marks', [StudentSetupController::class, 'storeMarks'])->name('store-marks');
         Route::get('/complete', [StudentSetupController::class, 'complete'])->name('complete');
         Route::post('/finish', [StudentSetupController::class, 'finish'])->name('finish');
+        
+        // Legacy routes redirected to streamlined
+        Route::get('/welcome', [StudentSetupController::class, 'streamlined'])->name('welcome');
+        Route::get('/personal-info', [StudentSetupController::class, 'streamlined'])->name('personal-info');
+        Route::get('/marks', [StudentSetupController::class, 'streamlined'])->name('marks');
     });
 
     // =====================================================================

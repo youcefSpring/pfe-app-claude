@@ -5,13 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\StudentMark;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class StudentSetupController extends Controller
 {
+    /**
+     * Show streamlined setup page.
+     */
+    public function streamlined(): View
+    {
+        $user = Auth::user();
+        return view('student.setup.streamlined', compact('user'));
+    }
+
     /**
      * Show welcome page for first-time setup.
      */
