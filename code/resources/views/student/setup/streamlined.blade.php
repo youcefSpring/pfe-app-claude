@@ -63,6 +63,23 @@
                                     @error('date_naissance')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+
+                                    <input type="date" id="dateInput" class="form-control">
+
+<script>
+  const input = document.getElementById("date_naissance");
+
+  const today = new Date();
+  const maxDate = today.toISOString().split("T")[0];
+
+  const minDate = new Date();
+  minDate.setFullYear(today.getFullYear() - 20);
+  const minDateStr = minDate.toISOString().split("T")[0];
+
+  input.min = minDateStr;
+  input.max = maxDate;
+</script>
+
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="lieu_naissance" class="form-label fw-semibold">
