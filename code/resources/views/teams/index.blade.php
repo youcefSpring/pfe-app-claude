@@ -110,7 +110,7 @@
                                         <div class="d-flex flex-wrap gap-1">
                                             @foreach($team->members->take(3) as $member)
                                                 <span class="badge bg-light text-dark small">
-                                                    {{ $member->user->name }}
+                                                    {{ $member->user?->name ?? '' }}
                                                 </span>
                                             @endforeach
                                             @if($team->members->count() > 3)

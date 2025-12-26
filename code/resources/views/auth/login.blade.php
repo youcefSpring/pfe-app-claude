@@ -78,7 +78,11 @@
                                             required
                                             autocomplete="current-password"
                                             placeholder="{{ __('app.enter_password') }}">
-                                     <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                     <button class="btn btn-outline-secondary" type="button" 
+                                     onclick="  const p = document.getElementById('password');
+                                     p.type = (p.type === 'password') ? 'text' : 'password';
+                                     "
+                                     >
                                          <i class="bi bi-eye" id="passwordToggleIcon"></i>
                                      </button>
                                 </div>

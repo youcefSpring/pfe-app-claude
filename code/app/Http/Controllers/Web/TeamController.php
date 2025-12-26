@@ -45,6 +45,11 @@ class TeamController extends Controller
         switch ($user->role) {
             case 'student':
                 // Students see all teams (for joining)
+                 $user = Auth::user();
+                 $team = $user->getTeam();
+                 if($team){
+                 $query->where('id', $team->id);
+                }
                 break;
             case 'teacher':
                 // Teachers see only teams that have chosen their subjects or external projects they supervise
