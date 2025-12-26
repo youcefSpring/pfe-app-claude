@@ -630,4 +630,9 @@ return [
     'marks_entry' => 'Saisie des Notes',
     'mark' => 'Note',
     'enter_overall_average' => 'Entrez la moyenne générale',
+    'saving' => 'Enregistrement',
+    'personal_info_error' => 'Échec de l\'enregistrement des informations personnelles. Vérifiez votre saisie.',
+    'marks_submission_error' => 'Échec de l\'enregistrement des notes. Vérifiez votre saisie.',
+    'profile_completion_error' => 'Échec de la finalisation du profil.',
+    'this_field_is_required' => 'Ce champ est obligatoire',
 ];

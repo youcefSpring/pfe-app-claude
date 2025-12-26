@@ -2256,4 +2256,9 @@ return [
     'marks_entry' => 'إدخال الدرجات',
     'mark' => 'درجة',
     'enter_overall_average' => 'أدخل المعدل العام',
+    'saving' => 'حفظ',
+    'personal_info_error' => 'فشل في حفظ المعلومات الشخصية. تحقق من إدخالك.',
+    'marks_submission_error' => 'فشل في حفظ الدرجات. تحقق من إدخالك.',
+    'profile_completion_error' => 'فشل في إكمال إعداد الملف الشخصي.',
+    'this_field_is_required' => 'هذا الحقل مطلوب',
 ];

@@ -2691,4 +2691,9 @@ return [
     'validate_external_subjects_help' => 'Review and approve external subject proposals.',
     'monitor_external_progress_help' => 'Track the progress of external projects.',
     'no_team' => 'No Team',
+    'saving' => 'Saving',
+    'personal_info_error' => 'Failed to save personal information. Please check your input.',
+    'marks_submission_error' => 'Failed to save marks. Please check your input.',
+    'profile_completion_error' => 'Failed to complete profile setup.',
+    'this_field_is_required' => 'This field is required',
 ];

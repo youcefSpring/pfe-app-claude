@@ -471,39 +471,170 @@ document.addEventListener('DOMContentLoaded', function() {
     function submitData() {
         const formData = new FormData(form);
         
-        // Submit personal info first
-        fetch('{{ route("student.setup.store-personal-info") }}', {
+        // Show loading state
+        showLoading();
+        
+        // Step 1: Submit personal info
+        submitPersonalInfo(formData)
+            .then(() => submitMarks(formData))
+            .then(() => completeProfile())
+            .then(() => {
+                hideLoading();
+                showSuccessMessage();
+            })
+            .catch(error => {
+                hideLoading();
+                showErrorMessage(error);
+            });
+    }
+
+    function submitPersonalInfo(formData) {
+        return fetch('{{ route("student.setup.store-personal-info") }}', {
             method: 'POST',
             body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || '{{ __("app.personal_info_error") }}');
+                });
+            }
+            return response.json();
+        }).then(data => {
+            console.log('Personal info submitted:', data);
+            return true;
+        });
+    }
+
+    function submitMarks(formData) {
+        return fetch('{{ route("student.setup.store-marks") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || '{{ __("app.marks_submission_error") }}');
+                });
+            }
+            return response.json();
+        }).then(data => {
+            console.log('Marks submitted:', data);
+            return true;
+        });
+    }
+
+    function completeProfile() {
+        return fetch('{{ route("student.setup.complete") }}', {
+            method: 'GET',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
         }).then(response => {
-            if (response.ok) {
-                // Submit marks
-                return fetch('{{ route("student.setup.store-marks") }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
+            if (!response.ok) {
+                throw new Error('{{ __("app.profile_completion_error") }}');
             }
-            throw new Error('Personal info submission failed');
-        }).then(response => {
-            if (response.ok) {
-                // Mark profile as complete
-                return fetch('{{ route("student.setup.complete") }}', {
-                    method: 'GET',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
+            return true;
+        });
+    }
+
+    function showLoading() {
+        const finishBtn = document.getElementById('finish-btn');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("app.saving") }}...';
+        }
+    }
+
+    function hideLoading() {
+        const finishBtn = document.getElementById('finish-btn');
+        if (finishBtn) {
+            finishBtn.disabled = false;
+            finishBtn.innerHTML = '<i class="fas fa-home me-2"></i>{{ __("app.go_to_dashboard") }}';
+        }
+    }
+
+    function showSuccessMessage() {
+        // Show success notification
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            {{ __("app.profile_setup_success_message") }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
             }
-            throw new Error('Marks submission failed');
-        }).catch(error => {
-            console.error('Submission error:', error);
-            alert('{{ __("app.submission_error") }}');
+        }, 3000);
+    }
+
+    function showErrorMessage(error) {
+        console.error('Submission error:', error);
+        
+        // Show error notification
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>{{ __("app.error") }}:</strong> ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+        
+        // Also show validation errors on form if any
+        highlightFormErrors();
+    }
+
+    function highlightFormErrors() {
+        // Remove previous error highlights
+        document.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+        
+        // Add error highlights to required fields that are empty
+        const requiredFields = ['date_naissance', 'lieu_naissance', 'student_level', 'birth_certificate'];
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && !field.value) {
+                field.classList.add('is-invalid');
+                
+                // Add error message if not exists
+                const existingFeedback = field.parentNode.querySelector('.invalid-feedback');
+                if (!existingFeedback) {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = '{{ __("app.this_field_is_required") }}';
+                    field.parentNode.appendChild(feedback);
+                }
+            }
+        });
+        
+        // Check marks fields if on step 2 or 3
+        const markInputs = document.querySelectorAll('input[name*="_mark"]');
+        markInputs.forEach(input => {
+            if (!input.value || parseFloat(input.value) < 0 || parseFloat(input.value) > 20) {
+                input.classList.add('is-invalid');
+            }
         });
     }
 
